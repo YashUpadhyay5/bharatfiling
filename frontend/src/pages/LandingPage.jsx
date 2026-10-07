@@ -121,24 +121,24 @@ export default function LandingPage() {
 
   const faqs = [
     {
-      q: 'Is GST Registration completely online through BharatFiling?',
-      a: 'Yes, 100% online. You do not need to visit any government office or tax department. You simply complete our streamlined wizard, upload your identity proofs, and our AI pre-checks the documents while our licensed Chartered Accountant reviews, prepares Form REG-01, and submits it directly to the GST Common Portal.',
+      q: 'What services does BharatFiling provide for Indian businesses?',
+      a: 'BharatFiling is a full-stack corporate and legal compliance platform. We support Company Incorporation (Private Limited, LLP, OPC), GST Registration & Monthly Return Filing, Trademark & IP Protection, Income Tax (ITR) Filings, MCA ROC Annual Compliance, Accounting, and dedicated Chartered Accountant advisory.',
     },
     {
-      q: 'Who mandatorily needs to register for GST in India?',
-      a: 'Any business with an aggregate annual turnover exceeding ₹40 Lakhs for goods (₹20 Lakhs in special category states) or ₹20 Lakhs for services (₹10 Lakhs in special states) must register. In addition, all e-commerce sellers (Amazon, Flipkart, Meesho), interstate suppliers, and export businesses require compulsory GST registration regardless of turnover.',
+      q: 'Is the entire filing and registration process 100% online?',
+      a: 'Yes, 100% online and paperless. You do not need to visit any government office, tax department, or registrar. Complete your application through our intuitive online flow, upload scanned documents, and our team handles all portal filings and acknowledgments digitally.',
     },
     {
       q: 'How does BharatFiling’s AI + CA model work?',
-      a: 'Unlike generic automated tools or slow traditional consultancies, BharatFiling uses AI to instantly classify documents, extract text (via OCR), and verify that names and numbers match across your PAN, Aadhaar, and electricity bills. A dedicated human Chartered Accountant then reviews the entire dossier, verifies statutory eligibility, and handles all government filing and officer clarifications.',
+      a: 'Unlike automated template tools or slow traditional agencies, BharatFiling combines AI document OCR (which pre-screens files for legibility and name mismatches) with licensed Chartered Accountants and Corporate Lawyers who personally review, authenticate, and submit every statutory filing.',
     },
     {
-      q: 'What happens if the GST officer issues a query or clarification notice (REG-03)?',
-      a: 'Clarification notices are included in our service at no extra cost. If the jurisdictional GST officer requests additional proof of premises or identity, our assigned CA drafts the legal response (Form REG-04), attaches any required affidavits, and submits it to secure your final approval.',
+      q: 'How does the Master Customer Profile benefit my business over time?',
+      a: 'Your master KYC and company documents are verified once and safely stored in your encrypted compliance vault. When you later need additional services—such as adding a director, filing monthly GST returns, submitting annual ITR, or registering trademarks—all details pre-fill automatically with zero redundant paperwork.',
     },
     {
-      q: 'What is the Master Customer Profile, and how does it save me time?',
-      a: 'BharatFiling creates a single Master Profile for your identity. Once your PAN, Aadhaar, and business details are verified for GST, they are securely saved. When you later need Income Tax Returns (ITR), Trademark filing, or MCA compliance, your verified details are pre-filled automatically without having to re-upload documents.',
+      q: 'What happens if government authorities issue queries or clarification notices?',
+      a: 'Clarification notice support is built right into our services. If MCA, the GST department, Income Tax authorities, or the Trademark registry issue queries, our assigned CAs draft the legal clarification responses and represent your application until completion.',
     },
   ];
 
@@ -159,28 +159,28 @@ export default function LandingPage() {
 
               {/* Main Headline with Premium Navy Styling */}
               <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-slate-900 tracking-tight leading-[1.2]">
-                Register for GST & Comply <br className="hidden sm:inline" />
-                <span className="text-[#111827]">Online in India</span>
+                Incorporate, File & Comply <br className="hidden sm:inline" />
+                <span className="text-[#111827]">All in One Platform</span>
               </h1>
 
               {/* Subheading */}
               <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Secure your 15-digit GSTIN, incorporate your company, and file tax returns with India's intelligent compliance platform backed by licensed Chartered Accountants.
+                Incorporate companies, register GST & trademarks, file tax returns, and manage ROC compliance with AI-powered speed backed by licensed Chartered Accountants.
               </p>
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-1">
                 <Link
-                  to="/apply/gst"
+                  to="/services"
                   className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
-                  Start GST Registration
+                  Explore All 40+ Services
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
                 </Link>
 
                 <a
-                  href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20assistance%20with%20GST%20Registration."
+                  href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20assistance%20with%20business%20registration%20and%20compliance."
                   target="_blank"
                   rel="noreferrer"
                   className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs transition flex items-center justify-center gap-2"
@@ -193,13 +193,13 @@ export default function LandingPage() {
               {/* Pricing & Guarantee Strip */}
               <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-5 text-xs text-slate-500">
                 <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Starting from ₹1,499
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 40+ Legal & Tax Services
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Online & Paperless
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 3–7 Days Govt TAT
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Licensed CA Verification
                 </div>
               </div>
             </div>
@@ -273,7 +273,7 @@ export default function LandingPage() {
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-extrabold text-[#111827]">3–7 Days</div>
-              <div className="text-xs text-slate-500 mt-0.5">Avg GST Approval Time</div>
+              <div className="text-xs text-slate-500 mt-0.5">Fast-Track Govt Filings</div>
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">99.4%</div>
@@ -377,7 +377,7 @@ export default function LandingPage() {
                 One Profile. All Indian Compliances.
               </h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Never upload your PAN card or electricity bill twice. Once your master profile is verified during GST registration, your identity is saved securely. Future services like Income Tax returns, Trademark registration, and MCA filings pre-fill instantly.
+                Never upload your PAN card or electricity bill twice. Once your master profile is verified on BharatFiling, your entity credentials and documents are saved securely in your private vault. Future filings like Company Incorporation, GST, Income Tax returns, Trademark registration, and MCA annual compliance pre-fill instantly.
               </p>
 
               <div className="space-y-3 pt-2 text-xs text-slate-700">
@@ -456,10 +456,10 @@ export default function LandingPage() {
               Simple 3-Step Process
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-              How GST Registration Works
+              How BharatFiling Works
             </h2>
             <p className="text-sm text-slate-600">
-              No government office queues. No confusing tax jargon. Clear visibility at every stage.
+              Whether incorporating a startup, registering for GST, protecting a trademark, or filing taxes—done seamlessly in 3 steps.
             </p>
           </div>
 
@@ -468,9 +468,9 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-[#111827] text-white font-black text-sm flex items-center justify-center shadow-xs">
                 1
               </div>
-              <h3 className="font-bold text-base text-slate-900">Enter Details & Upload Proofs</h3>
+              <h3 className="font-bold text-base text-slate-900">Select Service & Share Details</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Fill in basic business details. Upload PAN, Aadhaar, and electricity bill. Our AI instantly checks file legibility and name spelling.
+                Pick your requirement—Company Incorporation, GST, Trademark, or ITR. Share basic details and upload IDs. Our intelligent AI pre-checks document clarity instantly.
               </p>
             </div>
 
@@ -478,9 +478,9 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-amber-500 text-white font-black text-sm flex items-center justify-center shadow-xs">
                 2
               </div>
-              <h3 className="font-bold text-base text-slate-900">CA Audit & Portal Filing</h3>
+              <h3 className="font-bold text-base text-slate-900">Expert CA & Legal Audit</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Your assigned Chartered Accountant audits the dossier, verifies business activity codes, files Form REG-01, and issues your ARN.
+                A dedicated Chartered Accountant or Corporate Lawyer audits your dossier, prepares statutory filings (MCA SPICe+, GST REG-01, TM-A, or ITR), and submits directly to government portals.
               </p>
             </div>
 
@@ -488,9 +488,9 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white font-black text-sm flex items-center justify-center shadow-xs">
                 3
               </div>
-              <h3 className="font-bold text-base text-slate-900">Download GST Certificate</h3>
+              <h3 className="font-bold text-base text-slate-900">Get Approved & Manage in Vault</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Upon government approval, your official 15-digit GSTIN and Form REG-06 Certificate are delivered straight to your dashboard.
+                Receive your official government certificates, GSTIN, CIN, or Trademark receipt directly in your Master Dashboard vault with lifetime compliance tracking.
               </p>
             </div>
           </div>
@@ -541,21 +541,27 @@ export default function LandingPage() {
       <section className="py-14 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            Ready to Start Your Business Registration?
+            Ready to Incorporate & Comply with Confidence?
           </h2>
           <p className="text-sm text-slate-600 max-w-xl mx-auto">
-            Get your GST registration done right the first time with AI verification and dedicated Chartered Accountant filing.
+            Join 10,000+ Indian founders and businesses managing registrations, legal protection, and statutory tax filings with BharatFiling.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
-              to="/apply/gst"
+              to="/services"
               className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md transition"
             >
-              Start GST Registration Now
+              Explore All 40+ Services
+            </Link>
+            <Link
+              to="/apply/gst"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition"
+            >
+              Start GST Registration
             </Link>
             <Link
               to="/pricing"
-              className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition"
             >
               View Transparent Pricing
             </Link>
