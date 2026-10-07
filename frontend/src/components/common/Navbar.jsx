@@ -9,7 +9,9 @@ import {
   User,
   LogOut,
   Sparkles,
+  Search,
 } from 'lucide-react';
+import NavbarSearch from './NavbarSearch.jsx';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -180,29 +182,33 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] font-sans">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[70px] flex items-center justify-between">
-        {/* Brand Logo with explicit Home clickability */}
+        {/* Brand Logo with single-l vector typography and explicit Home clickability */}
         <Link
           to="/"
           title="Return to BharatFiling Homepage"
-          className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform"
+          className="flex items-center gap-2.5 shrink-0 group active:scale-95 transition-transform"
         >
           <img
-            src="/bharatfiling-horizontal-transparent.png"
+            src="/bharatfiling-brand-icon.png"
             alt="BharatFiling"
-            className="h-10 sm:h-11 w-auto max-w-[210px] object-contain group-hover:opacity-95 transition"
+            className="h-9 sm:h-10 w-auto object-contain shrink-0"
             onError={(e) => {
               e.currentTarget.onerror = null;
-              e.currentTarget.src = '/bharatfiling-logo.jpg';
+              e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
             }}
           />
+          <div className="flex items-baseline font-black tracking-tight text-xl sm:text-2xl leading-none select-none">
+            <span className="text-[#0B1E36]">Bharat</span>
+            <span className="text-[#F26522]">Filing</span>
+          </div>
         </Link>
 
         {/* Desktop Category Navigation with Hover Mega-Menus */}
-        <div className="hidden lg:flex items-center gap-4 xl:gap-5">
+        <div className="hidden lg:flex items-center gap-2 xl:gap-3.5 2xl:gap-5">
           {/* Explicit Home Anchor Link */}
           <Link
             to="/"
-            className={`flex items-center gap-1 text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
+            className={`flex items-center gap-1 text-[12.5px] xl:text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
               location.pathname === '/' ? 'text-[#0B1E36] font-bold' : 'text-slate-700'
             }`}
             title="Go to Homepage"
@@ -220,7 +226,7 @@ export default function Navbar() {
             >
               <button
                 type="button"
-                className={`flex items-center gap-1 text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
+                className={`flex items-center gap-1 text-[12.5px] xl:text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
                   activeDropdown === cat.key ? 'text-[#0B1E36] font-semibold' : 'text-slate-700'
                 }`}
               >
@@ -283,7 +289,7 @@ export default function Navbar() {
           {/* Direct Pricing Link */}
           <Link
             to="/pricing"
-            className={`text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
+            className={`text-[12.5px] xl:text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
               location.pathname === '/pricing' ? 'text-[#0B1E36] font-bold' : 'text-slate-700'
             }`}
           >
@@ -291,8 +297,11 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Right CTA / Auth Controls */}
-        <div className="hidden lg:flex items-center gap-3">
+        {/* Right CTA / Search Tab / Auth Controls */}
+        <div className="hidden lg:flex items-center gap-2.5 xl:gap-3.5">
+          {/* Instant Search Tab */}
+          <NavbarSearch />
+
           {isAuthenticated ? (
             <div className="relative">
               <button
@@ -394,6 +403,11 @@ export default function Navbar() {
       {/* Mobile Drawer with Accordion Sub-options */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-100 bg-white px-4 py-4 space-y-3 shadow-lg max-h-[80vh] overflow-y-auto">
+          {/* Mobile Instant Search Tab */}
+          <div className="pb-1">
+            <NavbarSearch isMobile onCloseMobile={() => setMobileMenuOpen(false)} />
+          </div>
+
           <div className="space-y-1">
             {/* Top Home link for mobile */}
             <Link
