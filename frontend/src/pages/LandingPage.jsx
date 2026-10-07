@@ -24,58 +24,6 @@ import {
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(0);
 
-  const heroRailServices = [
-    {
-      title: 'Company Incorporation',
-      subtitle: 'Pvt Ltd, LLP, OPC & Startup Setup',
-      path: '/services/company-registration',
-      icon: Building2,
-      iconBg: 'bg-indigo-50',
-      iconColor: 'text-indigo-600',
-    },
-    {
-      title: 'Income Tax & Corporate Audit',
-      subtitle: 'ITR-1 to 7, TDS Returns & Tax Planning',
-      path: '/services/income-tax',
-      icon: Receipt,
-      iconBg: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-      badge: 'Tax Season',
-    },
-    {
-      title: 'GST Registration & Returns',
-      subtitle: 'Online GSTIN & GSTR-1/3B Compliance',
-      path: '/services/gst-registration',
-      icon: FileCheck2,
-      iconBg: 'bg-emerald-50',
-      iconColor: 'text-emerald-700',
-      badge: 'Fast-Track',
-    },
-    {
-      title: 'Virtual CFO & Accounting',
-      subtitle: 'Monthly Bookkeeping, P&L & Payroll',
-      path: '/services/legal',
-      icon: Calculator,
-      iconBg: 'bg-cyan-50',
-      iconColor: 'text-cyan-600',
-    },
-    {
-      title: 'MCA ROC Compliance',
-      subtitle: 'Annual Filings, Director KYC & Secretarial',
-      path: '/services/llp-registration',
-      icon: Scale,
-      iconBg: 'bg-purple-50',
-      iconColor: 'text-purple-600',
-    },
-    {
-      title: 'Trademark & IP Legal',
-      subtitle: 'Brand Search & IP Attorney Filing',
-      path: '/services/trademark',
-      icon: Award,
-      iconBg: 'bg-rose-50',
-      iconColor: 'text-rose-600',
-    },
-  ];
 
   const popularServices = [
     {
@@ -153,122 +101,72 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans">
-      {/* 1. HERO SECTION (Premium Navy + Clean IndiaFilings Layout) */}
-      <section className="relative overflow-hidden pt-10 pb-16 md:pt-16 md:pb-24 bg-gradient-to-b from-white via-slate-50/40 to-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-            
-            {/* Left Column: Headline, Value Proposition & Actions */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              {/* Trust Kicker */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-xs font-semibold">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>India's Premier CA, Finance & Legal Advisory Platform</span>
-              </div>
-
-              {/* Main Headline with Premium Charcoal Styling */}
-              <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-slate-900 tracking-tight leading-[1.2]">
-                Complete CA, Finance & Legal Advisory <br className="hidden sm:inline" />
-                <span className="text-[#111827]">All in One Platform</span>
-              </h1>
-
-              {/* Subheading */}
-              <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Incorporate companies, manage corporate tax advisory, file GST & ITR returns, streamline bookkeeping, and maintain MCA compliance with AI-powered speed backed by licensed Chartered Accountants.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-1">
-                <Link
-                  to="/services"
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  Explore All 40+ CA & Tax Services
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-                </Link>
-
-                <a
-                  href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20professional%20CA%20and%20business%20compliance%20advisory."
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs transition flex items-center justify-center gap-2"
-                >
-                  <MessageCircle className="w-4 h-4 text-emerald-600" />
-                  Talk to CA on WhatsApp
-                </a>
-              </div>
-
-              {/* Pricing & Guarantee Strip */}
-              <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-5 text-xs text-slate-500">
-                <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 40+ CA & Legal Services
-                </div>
-                <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Online & Paperless
-                </div>
-                <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Licensed CA & Advocate Verification
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Signature IndiaFilings "Service Rail" */}
-            <div className="lg:col-span-5">
-              <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-[0_12px_36px_rgba(17,24,39,0.06)] border border-slate-200/80 space-y-2.5">
-                <div className="px-3 py-1.5 flex items-center justify-between border-b border-slate-100">
-                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Popular Services</span>
-                  <span className="text-[11px] font-semibold text-[#111827]">Fast-Track Filing</span>
-                </div>
-
-                <div className="space-y-2">
-                  {heroRailServices.map((service) => {
-                    const IconComp = service.icon;
-                    return (
-                      <Link
-                        key={service.title}
-                        to={service.path}
-                        className="group flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:border-slate-300 hover:bg-slate-50/70 hover:-translate-y-1 hover:shadow-md active:scale-[0.98] active:translate-y-0 transition-all duration-200 cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl ${service.iconBg} ${service.iconColor} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200`}>
-                            <IconComp className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#111827] transition-colors flex items-center gap-2">
-                              {service.title}
-                              {service.badge && (
-                                <span className="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-emerald-200">
-                                  {service.badge}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-[11px] text-slate-500 leading-tight">
-                              {service.subtitle}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="text-slate-300 group-hover:text-[#111827] group-hover:translate-x-1.5 transition-all duration-200 pr-1">
-                          <ArrowRight className="w-4 h-4" />
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-
-                <div className="pt-2 px-1">
-                  <Link
-                    to="/services"
-                    className="block text-center py-2 text-xs font-semibold text-[#111827] hover:text-black bg-slate-100/70 hover:bg-slate-100 rounded-xl transition"
-                  >
-                    Explore All 40+ Corporate & Tax Services &rarr;
-                  </Link>
-                </div>
-              </div>
-            </div>
-
+      {/* 1. HERO SECTION (Clean, Centered, High-Converting Hero) */}
+      <section className="relative overflow-hidden pt-14 pb-16 md:pt-20 md:pb-24 bg-gradient-to-b from-slate-50/60 via-white to-white border-b border-slate-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-7">
+          
+          {/* Trust Kicker */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-xs font-semibold shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>India's Premier CA, Finance & Legal Advisory Platform</span>
           </div>
+
+          {/* Main Headline */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
+            Complete CA, Finance & Legal Advisory <br />
+            <span className="text-[#111827]">All in One Platform</span>
+          </h1>
+
+          {/* Subheading */}
+          <p className="text-sm sm:text-base md:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">
+            Incorporate companies, manage corporate tax advisory, file GST & ITR returns, streamline bookkeeping, and maintain MCA compliance with AI-powered speed backed by licensed Chartered Accountants.
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+            <Link
+              to="/services"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              Explore All 40+ CA & Tax Services
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+            </Link>
+
+            <a
+              href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20professional%20CA%20and%20business%20compliance%20advisory."
+              target="_blank"
+              rel="noreferrer"
+              className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs hover:border-slate-300 transition flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4 text-emerald-600" />
+              Talk to CA on WhatsApp
+            </a>
+
+            <Link
+              to="/pricing"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition"
+            >
+              View Transparent Pricing
+            </Link>
+          </div>
+
+          {/* Trust Guarantees */}
+          <div className="pt-6 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 border-t border-slate-100 max-w-2xl mx-auto">
+            <div className="flex items-center gap-1.5 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 40+ CA & Legal Services
+            </div>
+            <div className="flex items-center gap-1.5 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Online & Paperless
+            </div>
+            <div className="flex items-center gap-1.5 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Licensed CA & Advocate Verification
+            </div>
+            <div className="flex items-center gap-1.5 font-medium">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" /> Bank-Grade 256-Bit Security
+            </div>
+          </div>
+
         </div>
       </section>
 
