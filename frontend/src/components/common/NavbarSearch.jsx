@@ -214,9 +214,9 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
             if (hasQuery) setIsOpen(true);
           }}
           onKeyDown={handleKeyDown}
-          placeholder={isMobile ? "Search services..." : "Search services (GST, ITR, Company)..."}
-          className={`w-full pl-8 pr-12 py-1.5 text-xs md:text-[13px] bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-slate-800 placeholder:text-slate-400 rounded-full border border-slate-200 focus:border-[#0B1E36] focus:outline-none focus:ring-2 focus:ring-[#0B1E36]/15 transition-all duration-150 font-medium ${
-            !isMobile ? 'w-48 lg:w-56 xl:w-64 focus:w-72' : 'w-full'
+          placeholder="Search services..."
+          className={`w-full pl-8 pr-10 py-1.5 text-xs md:text-[13px] bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-slate-800 placeholder:text-slate-400 rounded-full border border-slate-200 focus:border-[#0B1E36] focus:outline-none focus:ring-2 focus:ring-[#0B1E36]/15 transition-all duration-200 font-medium ${
+            !isMobile ? 'w-32 lg:w-36 xl:w-44 focus:w-60' : 'w-full'
           }`}
           aria-label="Search services"
         />
