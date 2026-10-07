@@ -41,136 +41,79 @@ export default function Navbar() {
 
   const menuCategories = [
     {
-      key: 'startup',
-      label: 'Startup',
+      key: 'business-setup',
+      label: 'Business Setup',
+      col1Title: 'Company Incorporation',
       col1: [
-        { name: 'Proprietorship', path: '/apply/gst' },
-        { name: 'Partnership', path: '/services/company-registration' },
-        { name: 'One Person Company', path: '/services/company-registration' },
-        { name: 'Limited Liability Partnership', path: '/services/llp-registration' },
         { name: 'Private Limited Company', path: '/services/company-registration' },
+        { name: 'Limited Liability Partnership (LLP)', path: '/services/llp-registration' },
+        { name: 'One Person Company (OPC)', path: '/services/company-registration' },
+        { name: 'Sole Proprietorship', path: '/apply/gst' },
+        { name: 'Partnership Firm', path: '/services/company-registration' },
+        { name: 'Section 8 NGO Company', path: '/services/company-registration' },
       ],
+      col2Title: 'Registrations & Licenses',
       col2: [
-        { name: 'Section 8 Company', path: '/services/company-registration' },
-        { name: 'Trust Registration', path: '/services/company-registration' },
-        { name: 'Public Limited Company', path: '/services/company-registration' },
-        { name: 'Producer Company', path: '/services/company-registration' },
-        { name: 'Indian Subsidiary', path: '/services/company-registration' },
-      ],
-    },
-    {
-      key: 'registrations',
-      label: 'Registrations',
-      col1: [
-        { name: 'GST Registration', path: '/services/gst-registration', isLive: true },
         { name: 'MSME / Udyam Registration', path: '/services' },
-        { name: 'Import Export Code (IEC)', path: '/services' },
         { name: 'FSSAI Food License', path: '/services' },
+        { name: 'Import Export Code (IEC)', path: '/services' },
+        { name: 'Digital Signature (DSC)', path: '/services' },
+        { name: 'Shop & Establishment', path: '/services' },
         { name: 'Professional Tax (PT)', path: '/services' },
       ],
-      col2: [
-        { name: 'Shop & Establishment', path: '/services' },
-        { name: 'Digital Signature (DSC)', path: '/services' },
-        { name: 'PF & ESI Registration', path: '/services' },
-        { name: 'PAN & TAN Registration', path: '/services' },
-        { name: 'APEDA Registration', path: '/services' },
-      ],
     },
     {
-      key: 'trademark',
-      label: 'Trademark',
+      key: 'tax-gst',
+      label: 'Tax & GST',
+      col1Title: 'Goods & Services Tax',
       col1: [
-        { name: 'Trademark Registration', path: '/services/trademark' },
-        { name: 'Trademark Search', path: '/services/trademark' },
-        { name: 'Trademark Objection Reply', path: '/services/trademark' },
-        { name: 'Trademark Opposition', path: '/services/trademark' },
-        { name: 'Trademark Renewal', path: '/services/trademark' },
-      ],
-      col2: [
-        { name: 'Copyright Registration', path: '/services/trademark' },
-        { name: 'Patent Registration', path: '/services/trademark' },
-        { name: 'Logo Design & IP Protection', path: '/services/trademark' },
-        { name: 'Provisional Patent', path: '/services/trademark' },
-        { name: 'Trademark Assignment', path: '/services/trademark' },
-      ],
-    },
-    {
-      key: 'gst',
-      label: 'GST',
-      col1: [
-        { name: 'GST Registration', path: '/services/gst-registration', isLive: true },
+        { name: 'GST Registration', path: '/apply/gst', isLive: true },
         { name: 'GST Return Filing (GSTR-1 & 3B)', path: '/services/gst-return' },
         { name: 'GSTR-9 Annual Return', path: '/services/gst-return' },
         { name: 'GSTR-2B ITC Reconciliation', path: '/services/gst-return' },
         { name: 'GST LUT for Exporters', path: '/services/gst-registration' },
+        { name: 'Notice Clarification (REG-03)', path: '/services/gst-registration' },
       ],
+      col2Title: 'Direct Tax & ITR',
       col2: [
-        { name: 'Clarification (Notice REG-03)', path: '/services/gst-registration' },
-        { name: 'GST Invoicing & E-Way Bill', path: '/services/gst-registration' },
-        { name: 'Composition Scheme Opt-in', path: '/services/gst-registration' },
-        { name: 'GST Assessment Advisory', path: '/services/gst-registration' },
-        { name: 'GST Cancellation & Revocation', path: '/services/gst-registration' },
-      ],
-    },
-    {
-      key: 'income-tax',
-      label: 'Income Tax',
-      col1: [
         { name: 'Income Tax Return (ITR 1–4)', path: '/services/income-tax' },
         { name: 'Business Tax Return (ITR 5–7)', path: '/services/income-tax' },
         { name: 'TDS Return Filing (24Q / 26Q)', path: '/services/income-tax' },
-        { name: 'Tax Planning Consultation', path: '/services/income-tax' },
-      ],
-      col2: [
-        { name: '15CA / 15CB Certification', path: '/services/income-tax' },
-        { name: 'Income Tax Notice Response', path: '/services/income-tax' },
-        { name: 'Capital Gains Advisory', path: '/services/income-tax' },
-        { name: 'Advance Tax Computation', path: '/services/income-tax' },
-        { name: 'Form 16 Generation', path: '/services/income-tax' },
+        { name: 'Income Tax Notice Scrutiny', path: '/services/income-tax' },
+        { name: '15CA / 15CB Foreign Remittance', path: '/services/income-tax' },
+        { name: 'Advance Tax Advisory', path: '/services/income-tax' },
       ],
     },
     {
-      key: 'mca',
-      label: 'MCA',
+      key: 'legal-mca',
+      label: 'Legal & MCA',
+      col1Title: 'Trademark & IP',
       col1: [
+        { name: 'Trademark Registration', path: '/services/trademark' },
+        { name: 'Trademark Search & Class', path: '/services/trademark' },
+        { name: 'Trademark Objection Reply', path: '/services/trademark' },
+        { name: 'Copyright & Patent Filing', path: '/services/trademark' },
+        { name: 'Trademark Opposition', path: '/services/trademark' },
+      ],
+      col2Title: 'Corporate Compliance & ROC',
+      col2: [
         { name: 'Company Annual ROC Filing', path: '/services/llp-registration' },
-        { name: 'LLP Form 11 & Form 8', path: '/services/llp-registration' },
         { name: 'Director KYC (DIR-3 KYC)', path: '/services/llp-registration' },
         { name: 'Add / Remove Director', path: '/services/llp-registration' },
-        { name: 'Increase Authorized Capital', path: '/services/llp-registration' },
-      ],
-      col2: [
-        { name: 'Change Registered Office', path: '/services/llp-registration' },
-        { name: 'MOA / AOA Amendment', path: '/services/llp-registration' },
-        { name: 'Strike Off Company', path: '/services/llp-registration' },
-        { name: 'Strike Off LLP', path: '/services/llp-registration' },
-        { name: 'Charge Satisfaction (CHG-1)', path: '/services/llp-registration' },
-      ],
-    },
-    {
-      key: 'compliance',
-      label: 'Compliance',
-      col1: [
+        { name: 'Strike Off Company / LLP', path: '/services/llp-registration' },
         { name: 'Monthly Payroll Management', path: '/services/legal' },
-        { name: 'PF & ESI Monthly Returns', path: '/services/legal' },
-        { name: 'Statutory TDS Compliance', path: '/services/legal' },
-        { name: 'Secretarial Audit & Registers', path: '/services/legal' },
-      ],
-      col2: [
-        { name: 'Shop Act Renewal', path: '/services/legal' },
-        { name: 'Factory License Compliance', path: '/services/legal' },
-        { name: 'Environmental Consent (PCB)', path: '/services/legal' },
-        { name: 'Contract Drafting & NDAs', path: '/services/legal' },
       ],
     },
     {
       key: 'consultation',
       label: 'Consultation',
+      col1Title: 'Expert Advisory',
       col1: [
         { name: 'Talk to Chartered Accountant', path: '/contact' },
         { name: 'Legal Consultation with Advocate', path: '/contact' },
         { name: 'Startup Structuring Advisory', path: '/contact' },
       ],
+      col2Title: 'Disputes & Hearings',
       col2: [
         { name: 'GST Notice Hearing Representation', path: '/contact' },
         { name: 'Income Tax Dispute & Appeals', path: '/contact' },
@@ -182,123 +125,126 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] font-sans">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[70px] flex items-center justify-between">
-        {/* Brand Logo with single-l vector typography and explicit Home clickability */}
-        <Link
-          to="/"
-          title="Return to BharatFiling Homepage"
-          className="flex items-center gap-2.5 shrink-0 group active:scale-95 transition-transform"
-        >
-          <img
-            src="/bharatfiling-brand-icon.png"
-            alt="BharatFiling"
-            className="h-9 sm:h-10 w-auto object-contain shrink-0"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
-            }}
-          />
-          <div className="flex items-baseline font-black tracking-tight text-xl sm:text-2xl leading-none select-none">
-            <span className="text-[#0B1E36]">Bharat</span>
-            <span className="text-[#F26522]">Filing</span>
-          </div>
-        </Link>
-
-        {/* Desktop Category Navigation with Hover Mega-Menus */}
-        <div className="hidden lg:flex items-center gap-2 xl:gap-3.5 2xl:gap-5">
-          {/* Explicit Home Anchor Link */}
+        {/* Left Section: Brand Logo & Consolidated Mega-Menu Navigation */}
+        <div className="flex items-center">
+          {/* Brand Logo with generous right margin */}
           <Link
             to="/"
-            className={`flex items-center gap-1 text-[12.5px] xl:text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
-              location.pathname === '/' ? 'text-[#0B1E36] font-bold' : 'text-slate-700'
-            }`}
-            title="Go to Homepage"
+            title="Return to BharatFiling Homepage"
+            className="flex items-center gap-2.5 shrink-0 group active:scale-95 transition-transform mr-7 xl:mr-10"
           >
-            <Home className="w-3.5 h-3.5 text-slate-400" />
-            <span>Home</span>
+            <img
+              src="/bharatfiling-brand-icon.png"
+              alt="BharatFiling"
+              className="h-9 sm:h-10 w-auto object-contain shrink-0"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
+              }}
+            />
+            <div className="flex items-baseline font-black tracking-tight text-xl sm:text-2xl leading-none select-none">
+              <span className="text-[#0B1E36]">Bharat</span>
+              <span className="text-[#F26522]">Filing</span>
+            </div>
           </Link>
 
-          {menuCategories.map((cat) => (
-            <div
-              key={cat.key}
-              className="relative py-5"
-              onMouseEnter={() => handleMouseEnter(cat.key)}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                type="button"
-                className={`flex items-center gap-1 text-[12.5px] xl:text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
-                  activeDropdown === cat.key ? 'text-[#0B1E36] font-semibold' : 'text-slate-700'
-                }`}
+          {/* Desktop Consolidated Mega-Menus (Zero-Wrap & Spacious) */}
+          <div className="hidden lg:flex items-center gap-5 xl:gap-7 whitespace-nowrap">
+            {menuCategories.map((cat) => (
+              <div
+                key={cat.key}
+                className="relative py-5"
+                onMouseEnter={() => handleMouseEnter(cat.key)}
+                onMouseLeave={handleMouseLeave}
               >
-                <span>{cat.label}</span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                    activeDropdown === cat.key ? 'rotate-180 text-[#0B1E36]' : ''
+                <button
+                  type="button"
+                  className={`flex items-center gap-1.5 text-[13px] font-semibold transition-colors hover:text-[#0B1E36] py-1 whitespace-nowrap ${
+                    activeDropdown === cat.key ? 'text-[#0B1E36]' : 'text-slate-700'
                   }`}
-                />
-              </button>
-
-              {/* 2-Column Hover Mega-Dropdown */}
-              {activeDropdown === cat.key && (
-                <div
-                  className="absolute top-[62px] left-0 bg-white rounded-2xl shadow-[0_16px_42px_rgba(11,30,54,0.12)] border border-slate-100 p-6 min-w-[460px] max-w-[540px] z-50 animate-fade-in"
-                  onMouseEnter={() => handleMouseEnter(cat.key)}
-                  onMouseLeave={handleMouseLeave}
                 >
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                    {/* Left Column */}
-                    <div className="space-y-2">
-                      {cat.col1.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.path}
-                          onClick={() => setActiveDropdown(null)}
-                          className="block text-[13px] text-slate-700 hover:text-[#0B1E36] hover:translate-x-0.5 font-normal transition-all py-0.5"
-                        >
-                          <span className="flex items-center gap-1.5">
-                            {item.name}
-                            {item.isLive && (
-                              <span className="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-1.5 py-0.2 rounded">
-                                Live
-                              </span>
-                            )}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
+                  <span>{cat.label}</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                      activeDropdown === cat.key ? 'rotate-180 text-[#0B1E36]' : ''
+                    }`}
+                  />
+                </button>
 
-                    {/* Right Column */}
-                    <div className="space-y-2">
-                      {cat.col2.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.path}
-                          onClick={() => setActiveDropdown(null)}
-                          className="block text-[13px] text-slate-700 hover:text-[#0B1E36] hover:translate-x-0.5 font-normal transition-all py-0.5"
-                        >
-                          {item.name}
-                        </Link>
-                      ))}
+                {/* 2-Column Hover Mega-Dropdown */}
+                {activeDropdown === cat.key && (
+                  <div
+                    className="absolute top-[62px] left-0 bg-white rounded-2xl shadow-[0_20px_50px_rgba(11,30,54,0.14)] border border-slate-100 p-6 min-w-[500px] max-w-[560px] z-50 animate-fade-in"
+                    onMouseEnter={() => handleMouseEnter(cat.key)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                      {/* Left Column */}
+                      <div>
+                        {cat.col1Title && (
+                          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5 px-1">
+                            {cat.col1Title}
+                          </div>
+                        )}
+                        <div className="space-y-1">
+                          {cat.col1.map((item) => (
+                            <Link
+                              key={item.name}
+                              to={item.path}
+                              onClick={() => setActiveDropdown(null)}
+                              className="flex items-center justify-between text-[13px] text-slate-700 hover:text-[#0B1E36] hover:bg-slate-50 px-2.5 py-1.5 rounded-lg font-medium transition-all group"
+                            >
+                              <span>{item.name}</span>
+                              {item.isLive && (
+                                <span className="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-200">
+                                  Live
+                                </span>
+                              )}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right Column */}
+                      <div>
+                        {cat.col2Title && (
+                          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5 px-1">
+                            {cat.col2Title}
+                          </div>
+                        )}
+                        <div className="space-y-1">
+                          {cat.col2.map((item) => (
+                            <Link
+                              key={item.name}
+                              to={item.path}
+                              onClick={() => setActiveDropdown(null)}
+                              className="block text-[13px] text-slate-700 hover:text-[#0B1E36] hover:bg-slate-50 px-2.5 py-1.5 rounded-lg font-medium transition-all"
+                            >
+                              {item.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            ))}
 
-          {/* Direct Pricing Link */}
-          <Link
-            to="/pricing"
-            className={`text-[12.5px] xl:text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
-              location.pathname === '/pricing' ? 'text-[#0B1E36] font-bold' : 'text-slate-700'
-            }`}
-          >
-            Pricing
-          </Link>
+            {/* Direct Pricing Link */}
+            <Link
+              to="/pricing"
+              className={`text-[13px] font-semibold transition-colors hover:text-[#0B1E36] py-1 whitespace-nowrap ${
+                location.pathname === '/pricing' ? 'text-[#0B1E36]' : 'text-slate-700'
+              }`}
+            >
+              Pricing
+            </Link>
+          </div>
         </div>
 
-        {/* Right CTA / Search Tab / Auth Controls */}
-        <div className="hidden lg:flex items-center gap-2.5 xl:gap-3.5">
+        {/* Right Section: Dedicated Search Tab + Auth Controls */}
+        <div className="hidden lg:flex items-center gap-3.5 xl:gap-5 shrink-0">
           {/* Instant Search Tab */}
           <NavbarSearch />
 
@@ -439,7 +385,28 @@ export default function Navbar() {
 
                 {mobileExpandedCat === cat.key && (
                   <div className="px-4 py-2 space-y-1.5 bg-slate-50/70 rounded-xl mt-1">
-                    {[...cat.col1, ...cat.col2].map((item) => (
+                    {cat.col1Title && (
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-1">
+                        {cat.col1Title}
+                      </div>
+                    )}
+                    {cat.col1.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block text-xs text-slate-600 hover:text-[#0B1E36] py-1"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+
+                    {cat.col2Title && (
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-2 border-t border-slate-200/50">
+                        {cat.col2Title}
+                      </div>
+                    )}
+                    {cat.col2.map((item) => (
                       <Link
                         key={item.name}
                         to={item.path}
