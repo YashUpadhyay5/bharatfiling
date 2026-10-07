@@ -365,91 +365,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. MASTER PROFILE ADVANTAGE */}
-      <section className="py-16 bg-slate-50/60 border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-6 space-y-4">
-              <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
-                Master Customer Architecture
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                One Profile. All Indian Compliances.
-              </h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Never upload your PAN card or electricity bill twice. Once your master profile is verified on BharatFiling, your entity credentials and documents are saved securely in your private vault. Future filings like Company Incorporation, GST, Income Tax returns, Trademark registration, and MCA annual compliance pre-fill instantly.
-              </p>
-
-              <div className="space-y-3 pt-2 text-xs text-slate-700">
-                <div className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-slate-900">Zero Redundant Typing:</strong> Pre-fills personal, business, and banking details automatically across all compliance forms.
-                  </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-slate-900">Multi-Entity Management:</strong> Manage multiple proprietorships, companies, or LLPs under a single founder account.
-                  </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-slate-900">Bank-Grade Privacy:</strong> AES-256 encrypted storage compliant with Indian data localization norms.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-6">
-              <div className="bg-white rounded-3xl p-6 shadow-md border border-slate-200 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <span className="text-xs font-bold text-slate-800">Master Customer Profile</span>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    ✓ Verified
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <div className="text-[10px] text-slate-400 font-medium">Full Name</div>
-                    <div className="font-bold text-slate-800 mt-0.5">Rahul Verma</div>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <div className="text-[10px] text-slate-400 font-medium">PAN Number</div>
-                    <div className="font-bold text-slate-800 mt-0.5">ABCDE1234F</div>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <div className="text-[10px] text-slate-400 font-medium">Aadhaar (Last 4)</div>
-                    <div className="font-bold text-slate-800 mt-0.5">•••• •••• 9012</div>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <div className="text-[10px] text-slate-400 font-medium">Registered State</div>
-                    <div className="font-bold text-slate-800 mt-0.5">Karnataka (KA)</div>
-                  </div>
-                </div>
-
-                <div className="p-3.5 bg-slate-100/70 border border-slate-200 rounded-2xl flex items-center justify-between text-xs">
-                  <div>
-                    <div className="font-bold text-slate-900">Reusable across all services</div>
-                    <div className="text-[11px] text-slate-600">GST · Income Tax · MCA · Trademark</div>
-                  </div>
-                  <Link
-                    to="/dashboard"
-                    className="px-3 py-1.5 rounded-lg bg-[#111827] text-white font-bold text-[11px] hover:bg-[#1F2937] transition"
-                  >
-                    View Profile
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. HOW IT WORKS */}
-      <section className="py-16 md:py-20 bg-white border-b border-slate-200/80">
+      {/* 4. HOW IT WORKS */}
+      <section className="py-16 md:py-20 bg-slate-50/60 border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
             <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
@@ -464,7 +381,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 sm:p-7 rounded-3xl bg-slate-50/70 border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:bg-white hover:border-slate-300 active:scale-[0.99] cursor-default">
+            <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:border-slate-300 active:scale-[0.99] cursor-default">
               <div className="w-10 h-10 rounded-xl bg-[#111827] text-white font-black text-sm flex items-center justify-center shadow-xs">
                 1
               </div>
@@ -474,7 +391,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="p-6 sm:p-7 rounded-3xl bg-slate-50/70 border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:bg-white hover:border-slate-300 active:scale-[0.99] cursor-default">
+            <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:border-slate-300 active:scale-[0.99] cursor-default">
               <div className="w-10 h-10 rounded-xl bg-amber-500 text-white font-black text-sm flex items-center justify-center shadow-xs">
                 2
               </div>
@@ -484,7 +401,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="p-6 sm:p-7 rounded-3xl bg-slate-50/70 border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:bg-white hover:border-slate-300 active:scale-[0.99] cursor-default">
+            <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:border-slate-300 active:scale-[0.99] cursor-default">
               <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white font-black text-sm flex items-center justify-center shadow-xs">
                 3
               </div>
@@ -497,8 +414,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 6. FAQS */}
-      <section className="py-16 md:py-20 bg-slate-50/60 border-b border-slate-200/80">
+      {/* 5. FAQS */}
+      <section className="py-16 md:py-20 bg-white border-b border-slate-200/80">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 space-y-2">
             <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
@@ -513,7 +430,7 @@ export default function LandingPage() {
             {faqs.map((faq, idx) => (
               <div
                 key={faq.q}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs transition"
+                className="bg-slate-50/50 rounded-2xl border border-slate-200 overflow-hidden shadow-xs transition"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
@@ -537,8 +454,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. BOTTOM CTA */}
-      <section className="py-14 bg-white">
+      {/* 6. BOTTOM CTA */}
+      <section className="py-14 bg-slate-50/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
             Ready to Incorporate & Comply with Confidence?
