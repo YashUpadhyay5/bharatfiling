@@ -8,7 +8,6 @@ import {
   X,
   User,
   LogOut,
-  Sparkles,
   Search,
 } from 'lucide-react';
 import NavbarSearch from './NavbarSearch.jsx';
@@ -361,19 +360,18 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="rounded-full bg-white px-5 py-2 text-[13px] font-semibold text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs transition"
+                className="rounded-full bg-white px-4 py-1.5 text-[12.5px] font-semibold text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs transition"
               >
                 Log In
               </Link>
               <Link
-                to="/apply/gst"
-                className="rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white px-5 py-2 text-[13px] font-bold shadow-xs hover:shadow transition flex items-center gap-1.5"
+                to="/register"
+                className="rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white px-4 py-1.5 text-[12.5px] font-bold shadow-xs hover:shadow transition"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                Start GST
+                Register
               </Link>
             </div>
           )}
@@ -488,11 +486,11 @@ export default function Navbar() {
                   Log In
                 </Link>
                 <Link
-                  to="/apply/gst"
+                  to="/register"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex-1 text-center py-2.5 rounded-full bg-[#0B1E36] text-white font-bold text-sm"
                 >
-                  Start GST
+                  Register
                 </Link>
               </div>
             )}
