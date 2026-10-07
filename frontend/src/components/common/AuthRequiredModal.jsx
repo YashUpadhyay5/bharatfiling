@@ -16,7 +16,8 @@ import {
   Building2,
   Receipt,
   FileCheck2,
-  Zap,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 export default function AuthRequiredModal({
@@ -31,6 +32,7 @@ export default function AuthRequiredModal({
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
 
@@ -64,7 +66,7 @@ export default function AuthRequiredModal({
   if (!isOpen) return null;
 
   const handleAuthSuccess = (authenticatedUser) => {
-    showSuccess(`Welcome ${authenticatedUser?.full_name || 'back'}! Starting your filing...`);
+    showSuccess(`Welcome ${authenticatedUser?.full_name || 'back'}! Continuing your filing...`);
     onClose();
 
     if (onSuccess) {
@@ -144,12 +146,11 @@ export default function AuthRequiredModal({
       if (res?.success) {
         handleAuthSuccess(res.user);
       } else {
-        // Fallback demo client
         const loginRes = await login('rahul.verma@example.com', 'Password@123');
         if (loginRes.success) {
           handleAuthSuccess(loginRes.user);
         } else {
-          setAuthError('Demo login unavailable.');
+          setAuthError('Demo account currently unavailable.');
         }
       }
     } catch (err) {
@@ -160,65 +161,86 @@ export default function AuthRequiredModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/65 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
       {/* Click outside backdrop */}
       <div className="fixed inset-0" onClick={onClose} />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
-        {/* Modal Top Header with Selected Service Context */}
-        <div className="bg-[#111827] text-white p-5 sm:p-6 relative">
+      <div className="relative w-full max-w-[450px] bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(17,24,39,0.25)] border border-slate-200/90 overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+        
+        {/* Top Header Bar */}
+        <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <img
+              src="/bharatfiling-icon-transparent.png"
+              alt="BharatFiling"
+              className="h-6 w-auto object-contain"
+            />
+            <span className="font-black text-base text-slate-900 tracking-tight">
+              Bharat<span className="text-[#F26522]">Filing</span>
+            </span>
+          </div>
+
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition flex items-center justify-center"
             aria-label="Close dialog"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
-
-          <div className="space-y-2 text-left pr-6">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-500/30">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>CA Protected Filing</span>
-            </div>
-
-            {service ? (
-              <div>
-                <h3 className="text-lg sm:text-xl font-black text-white">
-                  {service.title}
-                </h3>
-                <div className="flex items-center gap-2 text-xs text-slate-300 mt-0.5">
-                  <span className="font-bold text-amber-400">{service.price}</span>
-                  {service.period && <span>• {service.period}</span>}
-                  <span>• Professional CA Audit</span>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <h3 className="text-lg font-black text-white">
-                  BharatFiling Client Access
-                </h3>
-                <p className="text-xs text-slate-300">
-                  Sign in or create an account to start your filing.
-                </p>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Segmented Control: Sign In vs Create Account */}
-        <div className="p-4 sm:p-6 pb-2">
-          <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl text-xs font-bold border border-slate-200">
+        {/* Scrollable Content */}
+        <div className="p-6 overflow-y-auto space-y-4">
+          
+          {/* Selected Service Card */}
+          {service && (
+            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    {service.category || 'Selected Service'}
+                  </div>
+                  <h4 className="font-extrabold text-sm text-slate-900">
+                    {service.title}
+                  </h4>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-sm font-black text-slate-900">
+                    {service.price}
+                  </div>
+                  {service.period && (
+                    <div className="text-[10px] text-slate-500 font-medium">
+                      {service.period}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  CA Audited Filing
+                </span>
+                <span className="text-slate-500 font-medium">
+                  100% Online & Paperless
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Segmented Control Tabs */}
+          <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl text-xs font-bold border border-slate-200/80">
             <button
               type="button"
               onClick={() => {
                 setMode('login');
                 setAuthError('');
               }}
-              className={`py-2 rounded-xl transition ${
+              className={`py-2 rounded-xl transition duration-150 ${
                 mode === 'login'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? 'bg-[#111827] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Sign In
@@ -229,19 +251,29 @@ export default function AuthRequiredModal({
                 setMode('register');
                 setAuthError('');
               }}
-              className={`py-2 rounded-xl transition ${
+              className={`py-2 rounded-xl transition duration-150 ${
                 mode === 'register'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? 'bg-[#111827] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Create Account
             </button>
           </div>
-        </div>
 
-        {/* Scrollable Form Body */}
-        <div className="px-4 sm:px-6 pb-6 overflow-y-auto space-y-4">
+          {/* Title & Help Text */}
+          <div className="text-left space-y-0.5">
+            <h3 className="text-sm font-bold text-slate-900">
+              {mode === 'login' ? 'Sign In to Your Account' : 'Create Free Client Account'}
+            </h3>
+            <p className="text-xs text-slate-500">
+              {mode === 'login'
+                ? 'Enter your credentials to continue to filing setup.'
+                : 'Set up your Master Profile to initialize your filing vault.'}
+            </p>
+          </div>
+
+          {/* Error Message */}
           {authError && (
             <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
               {authError}
@@ -253,16 +285,16 @@ export default function AuthRequiredModal({
             <form onSubmit={handleLoginSubmit} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Email Address or Mobile Number
+                  Email Address or Mobile
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="text"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="name@business.com or 10-digit mobile"
-                    className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#111827] focus:border-transparent transition"
+                    placeholder="name@company.com or 10-digit mobile"
+                    className="w-full pl-10 pr-3.5 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                     required
                   />
                 </div>
@@ -273,24 +305,31 @@ export default function AuthRequiredModal({
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter account password"
-                    className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#111827] focus:border-transparent transition"
+                    className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="w-full py-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 active:scale-[0.99] cursor-pointer"
               >
-                {loading ? 'Authenticating...' : 'Sign In & Continue Filing'}
+                {loading ? 'Authenticating...' : 'Sign In & Continue'}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
@@ -302,13 +341,13 @@ export default function AuthRequiredModal({
                   Full Name (as per PAN)
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Rahul Sharma"
-                    className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#111827] focus:border-transparent transition"
+                    className="w-full pl-10 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                     required
                   />
                 </div>
@@ -317,7 +356,7 @@ export default function AuthRequiredModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Email
+                    Email Address
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -326,7 +365,7 @@ export default function AuthRequiredModal({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@domain.com"
-                      className="w-full pl-9 pr-2.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#111827] focus:border-transparent transition"
+                      className="w-full pl-9 pr-2.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                       required
                     />
                   </div>
@@ -334,7 +373,7 @@ export default function AuthRequiredModal({
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Mobile
+                    Mobile Number
                   </label>
                   <div className="relative">
                     <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -344,7 +383,7 @@ export default function AuthRequiredModal({
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="10-digit number"
                       maxLength={10}
-                      className="w-full pl-9 pr-2.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#111827] focus:border-transparent transition"
+                      className="w-full pl-9 pr-2.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                       required
                     />
                   </div>
@@ -356,24 +395,31 @@ export default function AuthRequiredModal({
                   Create Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Minimum 6 characters"
-                    className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#111827] focus:border-transparent transition"
+                    className="w-full pl-10 pr-10 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 transition"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="w-full py-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 active:scale-[0.99] cursor-pointer"
               >
-                {loading ? 'Creating Profile...' : 'Register & Start Service'}
+                {loading ? 'Creating Profile...' : 'Register & Start Filing'}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
@@ -385,16 +431,18 @@ export default function AuthRequiredModal({
               type="button"
               onClick={handleDemoLogin}
               disabled={loading}
-              className="w-full py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-[11px] flex items-center justify-center gap-1.5 transition"
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer"
             >
-              <Zap className="w-3.5 h-3.5 text-amber-600" />
-              <span>Instant Test: Continue as Demo Client (Rahul Verma)</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#F26522]" />
+              <span>1-Click Test: Continue as Demo Client (Rahul Verma)</span>
             </button>
           </div>
 
-          <p className="text-[10px] text-center text-slate-400">
-            Your data is 256-bit encrypted. Certified by Institute of Chartered Accountants of India (ICAI) member CAs.
-          </p>
+          {/* Footer Security Badges */}
+          <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 pt-1">
+            <Lock className="w-3 h-3 text-emerald-600" />
+            <span>256-Bit SSL Encryption • Licensed ICAI Chartered Accountants</span>
+          </div>
         </div>
       </div>
     </div>
