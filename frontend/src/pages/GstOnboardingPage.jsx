@@ -16,6 +16,7 @@ import {
   Building2,
   Check,
   AlertCircle,
+  XCircle,
   HelpCircle,
   ExternalLink,
 } from 'lucide-react';
@@ -374,10 +375,10 @@ export default function GstOnboardingPage() {
                     {formData.pan.length > 0 && (
                       <div className="pt-1 transition-all">
                         {formData.pan.length === 10 && !panAuth.isValid ? (
-                          /* Small red mismatch / invalid alert */
-                          <div className="flex items-center gap-1.5 text-xs text-rose-600 font-semibold animate-in fade-in duration-150">
-                            <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                            <span>{panAuth.message}</span>
+                          /* Clean Red X Sign Invalid (matching user request) */
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-rose-600 animate-in fade-in duration-150" title={panAuth.message}>
+                            <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                            <span>Invalid</span>
                           </div>
                         ) : formData.pan.length === 10 && panAuth.isValid ? (
                           /* Clean Green Tick Verified (matching user request) */
