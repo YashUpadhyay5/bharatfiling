@@ -159,10 +159,10 @@ export default function LandingPage() {
             </a>
 
             <Link
-              to="/pricing"
+              to="/contact"
               className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition"
             >
-              View Transparent Pricing
+              Book Free CA Consultation
             </Link>
           </div>
 
