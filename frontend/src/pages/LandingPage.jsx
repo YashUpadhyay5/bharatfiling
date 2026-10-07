@@ -152,7 +152,7 @@ export default function LandingPage() {
             {/* Left Column: Headline, Value Proposition & Actions */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
               {/* Trust Kicker */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#0B1E36] text-xs font-semibold">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-xs font-semibold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 <span>India's AI + CA Business Compliance Platform</span>
               </div>
@@ -160,7 +160,7 @@ export default function LandingPage() {
               {/* Main Headline with Premium Navy Styling */}
               <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-slate-900 tracking-tight leading-[1.2]">
                 Register for GST & Comply <br className="hidden sm:inline" />
-                <span className="text-[#0B1E36]">Online in India</span>
+                <span className="text-[#111827]">Online in India</span>
               </h1>
 
               {/* Subheading */}
@@ -172,7 +172,7 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-1">
                 <Link
                   to="/apply/gst"
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
                   Start GST Registration
@@ -206,10 +206,10 @@ export default function LandingPage() {
 
             {/* Right Column: Signature IndiaFilings "Service Rail" */}
             <div className="lg:col-span-5">
-              <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-[0_12px_36px_rgba(11,30,54,0.06)] border border-slate-200/80 space-y-2.5">
+              <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-[0_12px_36px_rgba(17,24,39,0.06)] border border-slate-200/80 space-y-2.5">
                 <div className="px-3 py-1.5 flex items-center justify-between border-b border-slate-100">
                   <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Popular Services</span>
-                  <span className="text-[11px] font-semibold text-[#0B1E36]">Fast-Track Filing</span>
+                  <span className="text-[11px] font-semibold text-[#111827]">Fast-Track Filing</span>
                 </div>
 
                 <div className="space-y-2">
@@ -226,7 +226,7 @@ export default function LandingPage() {
                             <IconComp className="w-5 h-5" />
                           </div>
                           <div>
-                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#0B1E36] transition-colors flex items-center gap-2">
+                            <div className="text-xs font-bold text-slate-900 group-hover:text-[#111827] transition-colors flex items-center gap-2">
                               {service.title}
                               {service.badge && (
                                 <span className="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-emerald-200">
@@ -240,7 +240,7 @@ export default function LandingPage() {
                           </div>
                         </div>
 
-                        <div className="text-slate-300 group-hover:text-[#0B1E36] group-hover:translate-x-1.5 transition-all duration-200 pr-1">
+                        <div className="text-slate-300 group-hover:text-[#111827] group-hover:translate-x-1.5 transition-all duration-200 pr-1">
                           <ArrowRight className="w-4 h-4" />
                         </div>
                       </Link>
@@ -251,7 +251,7 @@ export default function LandingPage() {
                 <div className="pt-2 px-1">
                   <Link
                     to="/services"
-                    className="block text-center py-2 text-xs font-semibold text-[#0B1E36] hover:text-black bg-slate-100/70 hover:bg-slate-100 rounded-xl transition"
+                    className="block text-center py-2 text-xs font-semibold text-[#111827] hover:text-black bg-slate-100/70 hover:bg-slate-100 rounded-xl transition"
                   >
                     Explore All 40+ Corporate & Tax Services &rarr;
                   </Link>
@@ -272,7 +272,7 @@ export default function LandingPage() {
               <div className="text-xs text-slate-500 mt-0.5">Indian Businesses Served</div>
             </div>
             <div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-[#0B1E36]">3–7 Days</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-[#111827]">3–7 Days</div>
               <div className="text-xs text-slate-500 mt-0.5">Avg GST Approval Time</div>
             </div>
             <div>
@@ -291,7 +291,7 @@ export default function LandingPage() {
       <section className="py-16 md:py-20 bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
-            <span className="text-xs font-bold text-[#0B1E36] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Comprehensive Coverage
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
@@ -308,19 +308,19 @@ export default function LandingPage() {
                 key={service.title}
                 to={service.path}
                 className={`group relative p-6 sm:p-7 rounded-3xl border transition-all duration-300 ease-out transform-gpu flex flex-col justify-between cursor-pointer
-                  hover:-translate-y-2 hover:shadow-[0_22px_48px_rgba(11,30,54,0.12)] hover:border-[#0B1E36]/40
+                  hover:-translate-y-2 hover:shadow-[0_22px_48px_rgba(17,24,39,0.12)] hover:border-[#111827]/40
                   active:scale-[0.98] active:translate-y-0 active:shadow-md ${
                   service.isLive
-                    ? 'border-[#0B1E36]/30 bg-slate-50/50 shadow-sm'
+                    ? 'border-[#111827]/30 bg-slate-50/50 shadow-sm'
                     : 'border-slate-200/90 bg-white shadow-xs'
                 }`}
               >
                 {/* Top Subtle Hairline Glow */}
-                <div className="absolute inset-x-8 top-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#0B1E36] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-full"></div>
+                <div className="absolute inset-x-8 top-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#111827] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-full"></div>
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-[#0B1E36] bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200 group-hover:bg-[#0B1E36]/10 transition-colors">
+                    <span className="text-[11px] font-bold text-[#111827] bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200 group-hover:bg-[#111827]/10 transition-colors">
                       {service.tag}
                     </span>
                     <span className="text-lg font-black text-slate-900 group-hover:scale-105 transition-transform duration-200 origin-right">
@@ -329,7 +329,7 @@ export default function LandingPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-base text-slate-900 group-hover:text-[#0B1E36] transition-colors duration-200">
+                    <h3 className="font-bold text-base text-slate-900 group-hover:text-[#111827] transition-colors duration-200">
                       {service.title}
                     </h3>
                     <p className="text-xs text-slate-500 mt-1 leading-relaxed">
@@ -351,8 +351,8 @@ export default function LandingPage() {
                   <div
                     className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 ${
                       service.isLive
-                        ? 'bg-[#0B1E36] group-hover:bg-[#142C4F] text-white shadow-xs group-hover:shadow-md'
-                        : 'bg-slate-100 text-slate-800 group-hover:bg-[#0B1E36] group-hover:text-white group-hover:shadow-sm'
+                        ? 'bg-[#111827] group-hover:bg-[#1F2937] text-white shadow-xs group-hover:shadow-md'
+                        : 'bg-slate-100 text-slate-800 group-hover:bg-[#111827] group-hover:text-white group-hover:shadow-sm'
                     }`}
                   >
                     {service.isLive ? 'Start Registration' : 'View Service Details'}
@@ -370,7 +370,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-6 space-y-4">
-              <span className="text-xs font-bold text-[#0B1E36] uppercase tracking-wider">
+              <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
                 Master Customer Architecture
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
@@ -437,7 +437,7 @@ export default function LandingPage() {
                   </div>
                   <Link
                     to="/dashboard"
-                    className="px-3 py-1.5 rounded-lg bg-[#0B1E36] text-white font-bold text-[11px] hover:bg-[#142C4F] transition"
+                    className="px-3 py-1.5 rounded-lg bg-[#111827] text-white font-bold text-[11px] hover:bg-[#1F2937] transition"
                   >
                     View Profile
                   </Link>
@@ -452,7 +452,7 @@ export default function LandingPage() {
       <section className="py-16 md:py-20 bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
-            <span className="text-xs font-bold text-[#0B1E36] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Simple 3-Step Process
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
@@ -465,7 +465,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 sm:p-7 rounded-3xl bg-slate-50/70 border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:bg-white hover:border-slate-300 active:scale-[0.99] cursor-default">
-              <div className="w-10 h-10 rounded-xl bg-[#0B1E36] text-white font-black text-sm flex items-center justify-center shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-[#111827] text-white font-black text-sm flex items-center justify-center shadow-xs">
                 1
               </div>
               <h3 className="font-bold text-base text-slate-900">Enter Details & Upload Proofs</h3>
@@ -501,7 +501,7 @@ export default function LandingPage() {
       <section className="py-16 md:py-20 bg-slate-50/60 border-b border-slate-200/80">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 space-y-2">
-            <span className="text-xs font-bold text-[#0B1E36] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Common Questions
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
@@ -517,7 +517,7 @@ export default function LandingPage() {
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
-                  className="w-full px-5 py-4 text-left flex items-center justify-between text-sm font-bold text-slate-900 hover:text-[#0B1E36] transition"
+                  className="w-full px-5 py-4 text-left flex items-center justify-between text-sm font-bold text-slate-900 hover:text-[#111827] transition"
                 >
                   <span>{faq.q}</span>
                   {openFaq === idx ? (
@@ -549,7 +549,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
               to="/apply/gst"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white font-bold text-sm shadow-md transition"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md transition"
             >
               Start GST Registration Now
             </Link>

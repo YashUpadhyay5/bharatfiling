@@ -43,7 +43,7 @@ export async function generateUpiQrDataUrl(upiUri, size = 260) {
       width: size,
       margin: 1,
       color: {
-        dark: '#0B1E36', // BharatFiling Imperial Navy dots
+        dark: '#111827', // BharatFiling Slate Charcoal dots
         light: '#FFFFFF', // Pure white background
       },
       errorCorrectionLevel: 'M',

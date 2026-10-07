@@ -90,14 +90,14 @@ export default function GstLandingPage() {
             
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-5 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#0B1E36] text-xs font-semibold">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-xs font-semibold">
                 <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Form REG-01 Filing · Govt Portal Ready</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 tracking-tight leading-[1.2]">
                 Apply for GST Number <br className="hidden sm:inline" />
-                <span className="text-[#0B1E36]">Online in India</span>
+                <span className="text-[#111827]">Online in India</span>
               </h1>
 
               <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
@@ -108,7 +108,7 @@ export default function GstLandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-1">
                 <Link
                   to="/apply/gst"
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
                   Start GST Registration Now
@@ -142,7 +142,7 @@ export default function GstLandingPage() {
 
             {/* Right: Transparent Pricing & Summary Card */}
             <div className="lg:col-span-5">
-              <div className="bg-white rounded-3xl p-6 shadow-[0_12px_36px_rgba(11,30,54,0.06)] border border-slate-200/80 space-y-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_22px_45px_rgba(11,30,54,0.12)] hover:border-[#0B1E36]/30">
+              <div className="bg-white rounded-3xl p-6 shadow-[0_12px_36px_rgba(17,24,39,0.06)] border border-slate-200/80 space-y-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_22px_45px_rgba(17,24,39,0.12)] hover:border-[#111827]/30">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div>
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">All-Inclusive Package</span>
@@ -186,7 +186,7 @@ export default function GstLandingPage() {
                 <div className="pt-2">
                   <Link
                     to="/apply/gst"
-                    className="w-full py-3 rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] transition-all"
+                    className="w-full py-3 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] transition-all"
                   >
                     Start 5-Minute Application
                     <ArrowRight className="w-4 h-4" />
@@ -203,7 +203,7 @@ export default function GstLandingPage() {
       <section className="py-14 md:py-18 bg-slate-50/60 border-b border-slate-200/80">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 space-y-2">
-            <span className="text-xs font-bold text-[#0B1E36] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Document Checklist
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
@@ -222,7 +222,7 @@ export default function GstLandingPage() {
                 onClick={() => setSelectedEntity(entity)}
                 className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.95] cursor-pointer ${
                   selectedEntity === entity
-                    ? 'bg-[#0B1E36] text-white shadow-xs'
+                    ? 'bg-[#111827] text-white shadow-xs'
                     : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs'
                 }`}
               >
@@ -237,7 +237,7 @@ export default function GstLandingPage() {
               <h3 className="font-extrabold text-base text-slate-900">
                 Checklist for {selectedEntity}
               </h3>
-              <span className="text-xs text-[#0B1E36] font-semibold">
+              <span className="text-xs text-[#111827] font-semibold">
                 {entityDocs[selectedEntity].length} Documents Required
               </span>
             </div>
@@ -248,7 +248,7 @@ export default function GstLandingPage() {
                   key={doc}
                   className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3 transition-all duration-200 hover:bg-white hover:border-slate-200 hover:shadow-xs"
                 >
-                  <div className="w-5 h-5 rounded-full bg-[#0B1E36] text-white flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-[#111827] text-white flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">
                     {idx + 1}
                   </div>
                   <span className="text-xs font-medium text-slate-700 leading-snug">{doc}</span>
@@ -262,7 +262,7 @@ export default function GstLandingPage() {
               </span>
               <Link
                 to="/apply/gst"
-                className="px-6 py-2.5 rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white font-bold text-xs shrink-0 shadow-xs transition"
+                className="px-6 py-2.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shrink-0 shadow-xs transition"
               >
                 Begin Application &rarr;
               </Link>
@@ -275,7 +275,7 @@ export default function GstLandingPage() {
       <section className="py-14 bg-white border-b border-slate-200/80">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 space-y-2">
-            <span className="text-xs font-bold text-[#0B1E36] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Answers & Guidance
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
@@ -291,7 +291,7 @@ export default function GstLandingPage() {
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
-                  className="w-full px-5 py-4 text-left flex items-center justify-between text-sm font-bold text-slate-900 hover:text-[#0B1E36] transition"
+                  className="w-full px-5 py-4 text-left flex items-center justify-between text-sm font-bold text-slate-900 hover:text-[#111827] transition"
                 >
                   <span>{faq.q}</span>
                   {openFaq === idx ? (
@@ -323,7 +323,7 @@ export default function GstLandingPage() {
           <div className="pt-2">
             <Link
               to="/apply/gst"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white font-bold text-sm shadow-md transition"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md transition"
             >
               Start GST Registration Now
               <ArrowRight className="w-4 h-4" />

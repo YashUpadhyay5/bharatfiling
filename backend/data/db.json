@@ -693,6 +693,29 @@
       "payment_completed": false,
       "created_at": "2026-10-07T08:00:21.224Z",
       "updated_at": "2026-10-07T08:00:21.224Z"
+    },
+    {
+      "id": "app_gst_bdf14611",
+      "application_number": "GST-2026-000013",
+      "user_id": "usr_guest_lead",
+      "business_id": "biz_8fee1126",
+      "business_type": "Other Commercial Services",
+      "state": "Bihar",
+      "current_step": 1,
+      "customer_status": "Quote Generated",
+      "internal_status": "DRAFT",
+      "fields_data": {
+        "applicant_name": "yash upadhyay",
+        "mobile_number": "7668976193",
+        "pan_number": "AOOPU9849P",
+        "email": "yashupadhyay@gmail.com",
+        "state": "Bihar",
+        "business_type": "Other Commercial Services"
+      },
+      "assigned_ca_id": null,
+      "payment_completed": false,
+      "created_at": "2026-10-07T10:16:37.409Z",
+      "updated_at": "2026-10-07T10:16:37.410Z"
     }
   ],
   "documents": [
@@ -1026,6 +1049,28 @@
       "business_type": "Other Commercial Services",
       "created_at": "2026-10-07T08:00:21.227Z",
       "updated_at": "2026-10-07T08:00:21.227Z"
+    },
+    {
+      "id": "est17913681974064586d",
+      "order_number": "#est17913681974064586d",
+      "application_id": "app_gst_bdf14611",
+      "application_number": "GST-2026-000013",
+      "user_id": "usr_guest_lead",
+      "service_name": "GST Registration (GST Registration + Monthly Filing)",
+      "amount": 1769,
+      "subtotal": 1499,
+      "gst_amount": 270,
+      "currency": "INR",
+      "status": "CREATED",
+      "billing_cycle": "Monthly",
+      "customer_name": "yash upadhyay",
+      "customer_phone": "7668976193",
+      "customer_pan": "AOOPU9849P",
+      "customer_email": "yashupadhyay@gmail.com",
+      "state": "Bihar",
+      "business_type": "Other Commercial Services",
+      "created_at": "2026-10-07T10:16:37.414Z",
+      "updated_at": "2026-10-07T10:16:37.414Z"
     }
   ],
   "case_events": [

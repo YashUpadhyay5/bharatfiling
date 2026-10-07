@@ -98,7 +98,7 @@ export default function CustomerDashboard() {
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Account Portal</span>
-            <Link to="/" className="text-[11px] font-bold text-[#0B1E36] hover:underline flex items-center gap-1">
+            <Link to="/" className="text-[11px] font-bold text-[#111827] hover:underline flex items-center gap-1">
               ← Home
             </Link>
           </div>

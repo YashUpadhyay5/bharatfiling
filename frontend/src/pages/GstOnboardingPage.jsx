@@ -203,7 +203,7 @@ export default function GstOnboardingPage() {
       {/* 1. TOP AUTOPAY PROMO BANNER (Matches Image 1) */}
       <div className="bg-[#EBF3FF] border-b border-blue-100 py-3 px-4 text-center">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs text-slate-700">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-blue-200 text-[#0B1E36] font-bold text-[11px] shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-blue-200 text-[#111827] font-bold text-[11px] shadow-2xs">
             <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
             UPI AUTOPAY
           </span>
@@ -222,7 +222,7 @@ export default function GstOnboardingPage() {
 
       {/* 2. MAIN ONBOARDING CONTAINER */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12">
-        <div className="bg-white rounded-3xl shadow-[0_16px_50px_rgba(11,30,54,0.07)] border border-slate-200/90 overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-[0_16px_50px_rgba(17,24,39,0.07)] border border-slate-200/90 overflow-hidden">
           
           <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[520px]">
             
@@ -231,7 +231,7 @@ export default function GstOnboardingPage() {
               
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#0B1E36] text-[11px] font-bold">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-[11px] font-bold">
                     <Sparkles className="w-3 h-3 text-[#F26522]" />
                     Fast-Track 2026 Portal Filing
                   </div>
@@ -246,35 +246,35 @@ export default function GstOnboardingPage() {
                 {/* 5 Distinctive Bullet Items (Matching Image 1) */}
                 <div className="space-y-3.5 pt-1 text-xs text-slate-700 font-medium">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#0B1E36] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#111827] flex items-center justify-center shrink-0">
                       <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     </div>
                     <span>Complete application preparation</span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#0B1E36] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#111827] flex items-center justify-center shrink-0">
                       <FileCheck2 className="w-4 h-4 text-blue-600" />
                     </div>
                     <span>Instant TRN generation</span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#0B1E36] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#111827] flex items-center justify-center shrink-0">
                       <Activity className="w-4 h-4 text-amber-600" />
                     </div>
                     <span>ARN generation & fast-track desk</span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#0B1E36] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#111827] flex items-center justify-center shrink-0">
                       <Award className="w-4 h-4 text-purple-600" />
                     </div>
                     <span>Official GST Certificate (Form REG-06)</span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#0B1E36] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-[#111827] flex items-center justify-center shrink-0">
                       <Sparkles className="w-4 h-4 text-[#F26522]" />
                     </div>
                     <span>BharatFiling compliance software access</span>
@@ -288,8 +288,8 @@ export default function GstOnboardingPage() {
                   Step {currentStep} of 2: {currentStep === 1 ? 'Applicant & PAN' : 'Jurisdiction & Business'}
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className={`w-6 h-1.5 rounded-full ${currentStep >= 1 ? 'bg-[#0B1E36]' : 'bg-slate-200'}`} />
-                  <span className={`w-6 h-1.5 rounded-full ${currentStep === 2 ? 'bg-[#0B1E36]' : 'bg-slate-200'}`} />
+                  <span className={`w-6 h-1.5 rounded-full ${currentStep >= 1 ? 'bg-[#111827]' : 'bg-slate-200'}`} />
+                  <span className={`w-6 h-1.5 rounded-full ${currentStep === 2 ? 'bg-[#111827]' : 'bg-slate-200'}`} />
                 </div>
               </div>
 
@@ -312,7 +312,7 @@ export default function GstOnboardingPage() {
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       placeholder="e.g. Yash Updhyay"
-                      className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B1E36]/30 focus:border-[#0B1E36] transition"
+                      className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827] transition"
                     />
                   </div>
 
@@ -321,7 +321,7 @@ export default function GstOnboardingPage() {
                     <label className="block text-xs font-bold text-slate-700">
                       Phone Number <span className="text-rose-500">*</span>
                     </label>
-                    <div className="flex rounded-2xl border border-slate-300 focus-within:ring-2 focus-within:ring-[#0B1E36]/30 focus-within:border-[#0B1E36] overflow-hidden transition bg-white">
+                    <div className="flex rounded-2xl border border-slate-300 focus-within:ring-2 focus-within:ring-[#111827]/30 focus-within:border-[#111827] overflow-hidden transition bg-white">
                       <div className="px-3 py-3 bg-slate-50 border-r border-slate-200 flex items-center gap-1.5 text-xs font-bold text-slate-700 shrink-0">
                         <span>🇮🇳</span>
                         <span>+91</span>
@@ -367,7 +367,7 @@ export default function GstOnboardingPage() {
                           ? panAuth.isValid
                             ? 'border-2 border-emerald-500 text-emerald-950 focus:ring-2 focus:ring-emerald-200'
                             : 'border-2 border-rose-500 text-rose-950 bg-rose-50/20 focus:ring-2 focus:ring-rose-200'
-                          : 'border border-slate-300 text-slate-900 focus:ring-2 focus:ring-[#0B1E36]/30 focus:border-[#0B1E36]'
+                          : 'border border-slate-300 text-slate-900 focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827]'
                       }`}
                     />
 
@@ -421,7 +421,7 @@ export default function GstOnboardingPage() {
                       <select
                         value={formData.state}
                         onChange={(e) => handleInputChange('state', e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B1E36]/30 focus:border-[#0B1E36] transition appearance-none cursor-pointer"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827] transition appearance-none cursor-pointer"
                       >
                         {INDIAN_STATES.map((st) => (
                           <option key={st} value={st}>
@@ -444,7 +444,7 @@ export default function GstOnboardingPage() {
                       <select
                         value={formData.businessType}
                         onChange={(e) => handleInputChange('businessType', e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B1E36]/30 focus:border-[#0B1E36] transition appearance-none cursor-pointer"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827] transition appearance-none cursor-pointer"
                       >
                         {BUSINESS_NATURES.map((bn) => (
                           <option key={bn} value={bn}>
@@ -506,7 +506,7 @@ export default function GstOnboardingPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 text-[#0B1E36] flex items-center justify-center shadow-2xs shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 text-[#111827] flex items-center justify-center shadow-2xs shrink-0">
                   <Award className="w-4 h-4 text-amber-600" />
                 </div>
                 <div>

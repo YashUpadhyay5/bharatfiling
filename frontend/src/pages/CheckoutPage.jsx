@@ -132,7 +132,7 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-[#0B1E36] border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-3 border-[#111827] border-t-transparent rounded-full animate-spin" />
           <p className="text-xs text-slate-500 font-semibold">Loading BharatFiling Order Quotation...</p>
         </div>
       </div>
@@ -160,7 +160,7 @@ export default function CheckoutPage() {
                 e.target.style.display = 'none';
               }}
             />
-            <span className="font-extrabold text-lg text-[#0B1E36] tracking-tight">
+            <span className="font-extrabold text-lg text-[#111827] tracking-tight">
               BharatFiling<span className="text-[#F26522]">.com</span>
             </span>
           </Link>
@@ -208,7 +208,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Service Package Card */}
-            <div className="bg-white rounded-3xl p-6 shadow-[0_8px_25px_rgba(11,30,54,0.04)] border border-slate-200/90 space-y-4">
+            <div className="bg-white rounded-3xl p-6 shadow-[0_8px_25px_rgba(17,24,39,0.04)] border border-slate-200/90 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-slate-100 pb-3">
                 <h2 className="text-base font-extrabold text-slate-900 leading-snug">
                   GST Registration (GST Registration + Monthly Filing)
@@ -277,7 +277,7 @@ export default function CheckoutPage() {
               <div className="font-bold text-slate-700">Support:</div>
               <a
                 href="mailto:billing@bharatfilings.in"
-                className="text-[#0B1E36] hover:underline font-semibold flex items-center gap-1.5"
+                className="text-[#111827] hover:underline font-semibold flex items-center gap-1.5"
               >
                 <Mail className="w-3.5 h-3.5 text-slate-400" />
                 billing@bharatfilings.in
@@ -288,7 +288,7 @@ export default function CheckoutPage() {
             <div className="pt-2">
               <Link
                 to="/apply/gst?step=2"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#0B1E36] transition"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#111827] transition"
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Back to Jurisdiction & Business selection
               </Link>
@@ -297,7 +297,7 @@ export default function CheckoutPage() {
 
           {/* RIGHT COLUMN: Customer, Subscription & Billing Card */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-[0_12px_36px_rgba(11,30,54,0.06)] border border-slate-200/90 space-y-6">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-[0_12px_36px_rgba(17,24,39,0.06)] border border-slate-200/90 space-y-6">
               
               {/* Customer Profile Section */}
               <div className="space-y-3 border-b border-slate-100 pb-5">
@@ -337,7 +337,7 @@ export default function CheckoutPage() {
                     value={businessNameInput}
                     onChange={(e) => setBusinessNameInput(e.target.value)}
                     placeholder="GSTIN or Business Name (Optional)"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#0B1E36] focus:border-[#0B1E36]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#111827] focus:border-[#111827]"
                   />
                 </div>
               </div>

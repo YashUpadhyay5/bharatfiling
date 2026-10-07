@@ -277,7 +277,7 @@ export default function GstWizardPage() {
             </span>
             <Link
               to="/"
-              className="text-xs font-bold text-slate-700 hover:text-[#0B1E36] px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
+              className="text-xs font-bold text-slate-700 hover:text-[#111827] px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
               title="Return to BharatFiling Homepage"
             >
               Home

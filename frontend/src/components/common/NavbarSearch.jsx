@@ -70,7 +70,7 @@ function HighlightMatch({ text, query }) {
   return (
     <span>
       {before}
-      <span className="font-black text-[#0B1E36] bg-amber-100/80 px-0.5 rounded">
+      <span className="font-black text-[#111827] bg-amber-100/80 px-0.5 rounded">
         {match}
       </span>
       {after}
@@ -215,7 +215,7 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
           }}
           onKeyDown={handleKeyDown}
           placeholder="Search services..."
-          className={`w-full pl-8 pr-10 py-1.5 text-xs md:text-[13px] bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-slate-800 placeholder:text-slate-400 rounded-full border border-slate-200 focus:border-[#0B1E36] focus:outline-none focus:ring-2 focus:ring-[#0B1E36]/15 transition-all duration-200 font-medium ${
+          className={`w-full pl-8 pr-10 py-1.5 text-xs md:text-[13px] bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-slate-800 placeholder:text-slate-400 rounded-full border border-slate-200 focus:border-[#111827] focus:outline-none focus:ring-2 focus:ring-[#111827]/15 transition-all duration-200 font-medium ${
             !isMobile ? 'w-32 lg:w-36 xl:w-44 focus:w-60' : 'w-full'
           }`}
           aria-label="Search services"
@@ -267,7 +267,7 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
                     onMouseEnter={() => setActiveIndex(index)}
                     className={`w-full px-3.5 py-2.5 flex items-center justify-between text-left transition-colors cursor-pointer group ${
                       isSelected
-                        ? 'bg-slate-100/90 text-[#0B1E36]'
+                        ? 'bg-slate-100/90 text-[#111827]'
                         : 'text-slate-700 hover:bg-slate-50'
                     }`}
                   >
@@ -275,7 +275,7 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
                     <div className="flex items-center gap-2.5 min-w-0 pr-2">
                       <Search
                         className={`w-3.5 h-3.5 shrink-0 transition-colors ${
-                          isSelected ? 'text-[#0B1E36]' : 'text-slate-400'
+                          isSelected ? 'text-[#111827]' : 'text-slate-400'
                         }`}
                       />
                       <span className="text-xs sm:text-[13px] font-medium text-slate-800 truncate">
@@ -319,7 +319,7 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
                   navigate('/services');
                   if (onCloseMobile) onCloseMobile();
                 }}
-                className="text-xs font-bold text-[#0B1E36] hover:text-[#F26522] transition"
+                className="text-xs font-bold text-[#111827] hover:text-[#F26522] transition"
               >
                 Browse All Services Directory →
               </button>
