@@ -1,9 +1,24 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Sparkles, Building2, Receipt, FileCheck2, Calculator, Scale, Award } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 
 export default function ServicesDirectory() {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [selectedServiceForAuth, setSelectedServiceForAuth] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const handleSelectService = (item) => {
+    if (isAuthenticated) {
+      navigate(item.path);
+    } else {
+      setSelectedServiceForAuth(item);
+      setIsAuthModalOpen(true);
+    }
+  };
   const serviceCategories = [
     {
       category: 'Company & Business Incorporation',
@@ -217,13 +232,14 @@ export default function ServicesDirectory() {
                       </div>
 
                       <div className="pt-5 mt-4 border-t border-slate-100">
-                        <Link
-                          to={item.path}
-                          className="text-xs font-bold text-[#111827] hover:text-[#1F2937] flex items-center justify-between group"
+                        <button
+                          type="button"
+                          onClick={() => handleSelectService(item)}
+                          className="w-full text-xs font-bold text-[#111827] hover:text-[#1F2937] flex items-center justify-between group cursor-pointer"
                         >
                           <span>View Service & Consult CA</span>
                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-                        </Link>
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -233,6 +249,18 @@ export default function ServicesDirectory() {
           })}
         </div>
       </div>
+
+      {/* Authentication Popup Modal */}
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        service={selectedServiceForAuth}
+        onSuccess={() => {
+          if (selectedServiceForAuth?.path) {
+            navigate(selectedServiceForAuth.path);
+          }
+        }}
+      />
     </div>
   );
 }

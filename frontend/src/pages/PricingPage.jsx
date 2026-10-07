@@ -1,9 +1,24 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { CheckCircle2, ArrowRight, ShieldCheck, Sparkles, Building2, Receipt, FileCheck2, Calculator, Scale, Award, MessageCircle } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 
 export default function PricingPage() {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [selectedPlanForAuth, setSelectedPlanForAuth] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const handleSelectPlan = (plan) => {
+    if (isAuthenticated) {
+      navigate(plan.ctaPath);
+    } else {
+      setSelectedPlanForAuth(plan);
+      setIsAuthModalOpen(true);
+    }
+  };
   const pricingPlans = [
     {
       title: 'Company Incorporation',
@@ -245,9 +260,10 @@ export default function PricingPage() {
                 </div>
 
                 <div className="pt-6 mt-6 border-t border-slate-100">
-                  <Link
-                    to={plan.ctaPath}
-                    className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 ${
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPlan(plan)}
+                    className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer ${
                       plan.popular
                         ? 'bg-[#111827] hover:bg-[#1F2937] text-white shadow-md'
                         : 'bg-slate-100 hover:bg-[#111827] text-slate-800 hover:text-white'
@@ -255,7 +271,7 @@ export default function PricingPage() {
                   >
                     <span>{plan.ctaText}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                  </button>
                 </div>
               </div>
             );
@@ -292,6 +308,18 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
+
+      {/* Authentication Popup Modal */}
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        service={selectedPlanForAuth}
+        onSuccess={() => {
+          if (selectedPlanForAuth?.ctaPath) {
+            navigate(selectedPlanForAuth.ctaPath);
+          }
+        }}
+      />
     </div>
   );
 }

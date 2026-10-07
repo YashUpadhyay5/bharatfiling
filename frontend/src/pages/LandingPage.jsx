@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck,
   Sparkles,
@@ -20,9 +20,24 @@ import {
   Check,
   Calculator,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext.jsx';
+import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(0);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [selectedServiceForAuth, setSelectedServiceForAuth] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const handleSelectService = (service) => {
+    if (isAuthenticated) {
+      navigate(service.path);
+    } else {
+      setSelectedServiceForAuth(service);
+      setIsAuthModalOpen(true);
+    }
+  };
 
 
   const popularServices = [
@@ -211,9 +226,12 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {popularServices.map((service) => (
-              <Link
+              <div
                 key={service.title}
-                to={service.path}
+                onClick={() => handleSelectService(service)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleSelectService(service)}
                 className="group relative p-6 sm:p-7 rounded-3xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 ease-out transform-gpu flex flex-col justify-between cursor-pointer hover:-translate-y-2 hover:shadow-[0_22px_48px_rgba(17,24,39,0.12)] hover:border-[#111827]/40 active:scale-[0.98] active:translate-y-0 active:shadow-md"
               >
                 {/* Top Subtle Hairline Glow */}
@@ -254,7 +272,7 @@ export default function LandingPage() {
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-200" />
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
@@ -380,6 +398,18 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Authentication Popup Modal */}
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        service={selectedServiceForAuth}
+        onSuccess={() => {
+          if (selectedServiceForAuth?.path) {
+            navigate(selectedServiceForAuth.path);
+          }
+        }}
+      />
     </div>
   );
 }
