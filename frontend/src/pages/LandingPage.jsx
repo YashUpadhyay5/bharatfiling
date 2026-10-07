@@ -18,6 +18,7 @@ import {
   MessageCircle,
   PhoneCall,
   Check,
+  Calculator,
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -25,40 +26,49 @@ export default function LandingPage() {
 
   const heroRailServices = [
     {
-      title: 'Business Registration',
-      subtitle: 'Private Limited, LLP & OPC Incorporation',
+      title: 'Company Incorporation',
+      subtitle: 'Pvt Ltd, LLP, OPC & Startup Setup',
       path: '/services/company-registration',
       icon: Building2,
       iconBg: 'bg-indigo-50',
       iconColor: 'text-indigo-600',
     },
     {
-      title: 'GST Compliance',
-      subtitle: 'Online Registration & GSTR-1/3B Returns',
+      title: 'Income Tax & Corporate Audit',
+      subtitle: 'ITR-1 to 7, TDS Returns & Tax Planning',
+      path: '/services/income-tax',
+      icon: Receipt,
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-amber-600',
+      badge: 'Tax Season',
+    },
+    {
+      title: 'GST Registration & Returns',
+      subtitle: 'Online GSTIN & GSTR-1/3B Compliance',
       path: '/services/gst-registration',
       icon: FileCheck2,
       iconBg: 'bg-emerald-50',
       iconColor: 'text-emerald-700',
-      badge: 'Live Service',
+      badge: 'Fast-Track',
     },
     {
-      title: 'MCA Compliance',
-      subtitle: 'ROC Annual Filings & Director KYC',
+      title: 'Virtual CFO & Accounting',
+      subtitle: 'Monthly Bookkeeping, P&L & Payroll',
+      path: '/services/legal',
+      icon: Calculator,
+      iconBg: 'bg-cyan-50',
+      iconColor: 'text-cyan-600',
+    },
+    {
+      title: 'MCA ROC Compliance',
+      subtitle: 'Annual Filings, Director KYC & Secretarial',
       path: '/services/llp-registration',
       icon: Scale,
       iconBg: 'bg-purple-50',
       iconColor: 'text-purple-600',
     },
     {
-      title: 'Income Tax Filing',
-      subtitle: 'ITR Filing, TDS & Tax Planning',
-      path: '/services/income-tax',
-      icon: Receipt,
-      iconBg: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-    },
-    {
-      title: 'Trademark Protection',
+      title: 'Trademark & IP Legal',
       subtitle: 'Brand Search & IP Attorney Filing',
       path: '/services/trademark',
       icon: Award,
@@ -69,51 +79,50 @@ export default function LandingPage() {
 
   const popularServices = [
     {
-      title: 'GST Registration Online',
-      desc: 'Complete end-to-end GSTIN registration with AI OCR document verification and licensed CA filing.',
-      price: '₹1,499',
-      tag: 'Live MVP',
-      isLive: true,
-      path: '/services/gst-registration',
-      features: ['Free Document AI Check', 'Form REG-01 Filing', 'Notice Clarifications Included', 'REG-06 Certificate'],
-    },
-    {
-      title: 'Company Registration',
-      desc: 'Incorporate your Private Limited Company with MCA SPICe+ filing, DIN, MOA, AOA & PAN/TAN.',
+      title: 'Private Limited Company Incorporation',
+      desc: 'Complete MCA SPICe+ filing, DIN, MOA, AOA, PAN/TAN, and digital signatures with dedicated CA assistance.',
       price: '₹4,999',
-      tag: 'Popular',
+      tag: 'Startup Favorite',
       path: '/services/company-registration',
       features: ['Name Approval (RUN)', 'Digital Signature (DSC)', 'Articles of Association', 'Current Account Setup'],
     },
     {
-      title: 'GST Return Filing',
-      desc: 'Monthly and quarterly GSTR-1 & GSTR-3B filings with automated GSTR-2B input tax credit reconciliation.',
-      price: '₹799/mo',
-      tag: 'Tax Season',
-      path: '/services/gst-return',
-      features: ['GSTR-2B ITC Matching', 'E-Way Bill Integration', 'Zero Late-Fee Guarantee', 'Ledger Reconciliation'],
-    },
-    {
-      title: 'Income Tax Return (ITR)',
-      desc: 'File individual and business tax returns with maximum deductions calculated under Old vs New tax regimes.',
+      title: 'Income Tax Return (ITR) & Corporate Audit',
+      desc: 'File individual, business, and corporate tax returns with maximum deductions and AIS/26AS tax credit reconciliation.',
       price: '₹999',
-      tag: 'ITR-1 to 4',
+      tag: 'CA Tax Advisory',
       path: '/services/income-tax',
       features: ['AIS & TIS Reconciliation', 'Capital Gains Computations', 'Deductions (80C/80D)', 'Refund Tracking'],
     },
     {
-      title: 'LLP Registration',
-      desc: 'Limited Liability Partnership incorporation for professionals and partners with low statutory compliance.',
-      price: '₹3,999',
-      tag: 'Partners',
-      path: '/services/llp-registration',
-      features: ['Partnership Deed Drafting', 'Designated Partner PIN', 'MCA FiLLiP Submission', 'Stamp Duty Guidance'],
+      title: 'GST Registration & Compliance',
+      desc: 'Complete end-to-end GSTIN registration with AI OCR document verification and licensed Chartered Accountant filing.',
+      price: '₹1,499',
+      tag: 'Fast-Track Filing',
+      path: '/services/gst-registration',
+      features: ['Free Document AI Check', 'Form REG-01 Preparation', 'Notice Clarifications Included', 'REG-06 Certificate'],
     },
     {
-      title: 'Trademark Registration',
-      desc: 'Protect your brand name, logo, and slogan nationwide with IP attorney representation.',
+      title: 'Virtual CFO & Monthly Accounting',
+      desc: 'Full-stack bookkeeping, monthly P&L and Balance Sheet preparation, vendor invoicing, and payroll compliance.',
+      price: '₹2,999/mo',
+      tag: 'Finance & Accounts',
+      path: '/services/legal',
+      features: ['Tally & Zoho Books Setup', 'Monthly Financial Reports', 'TDS & Payroll Compliance', 'Periodic CA Review'],
+    },
+    {
+      title: 'MCA Annual ROC Compliance',
+      desc: 'Statutory annual compliance filing for Private Limited and LLP companies to maintain active legal standing.',
+      price: '₹3,499',
+      tag: 'Corporate Secretarial',
+      path: '/services/llp-registration',
+      features: ['Form AOC-4 & MGT-7', 'Director KYC (DIR-3 KYC)', 'Annual General Meeting Docs', 'Zero Late-Fee Tracking'],
+    },
+    {
+      title: 'Trademark Registration & Brand Legal',
+      desc: 'Protect your brand name, logo, and slogan nationwide with IP attorney representation and class classification.',
       price: '₹1,999',
-      tag: 'Brand',
+      tag: 'Brand Protection',
       path: '/services/trademark',
       features: ['Free TM Search Report', 'Class Classification', 'Form TM-A Filing', 'Hearing Support'],
     },
@@ -122,23 +131,23 @@ export default function LandingPage() {
   const faqs = [
     {
       q: 'What services does BharatFiling provide for Indian businesses?',
-      a: 'BharatFiling is a full-stack corporate and legal compliance platform. We support Company Incorporation (Private Limited, LLP, OPC), GST Registration & Monthly Return Filing, Trademark & IP Protection, Income Tax (ITR) Filings, MCA ROC Annual Compliance, Accounting, and dedicated Chartered Accountant advisory.',
+      a: 'BharatFiling is a comprehensive corporate, tax, and legal advisory platform. We support Company Incorporation (Private Limited, LLP, OPC), Corporate Tax Advisory & ITR Filing, Monthly Accounting & Virtual CFO, GST Registration & Returns, MCA ROC Annual Compliance, and Trademark Protection.',
     },
     {
-      q: 'Is the entire filing and registration process 100% online?',
-      a: 'Yes, 100% online and paperless. You do not need to visit any government office, tax department, or registrar. Complete your application through our intuitive online flow, upload scanned documents, and our team handles all portal filings and acknowledgments digitally.',
+      q: 'Who prepares and audits my filings and financial statements?',
+      a: 'Every statutory filing, tax computation, and corporate return is personally audited and verified by licensed Indian Chartered Accountants (ICAI members), Company Secretaries (ICSI), and Corporate Advocates.',
     },
     {
-      q: 'How does BharatFiling’s AI + CA model work?',
-      a: 'Unlike automated template tools or slow traditional agencies, BharatFiling combines AI document OCR (which pre-screens files for legibility and name mismatches) with licensed Chartered Accountants and Corporate Lawyers who personally review, authenticate, and submit every statutory filing.',
+      q: 'Is the entire filing and advisory process 100% online?',
+      a: 'Yes, 100% online and paperless. You do not need to visit any government office, tax department, or registrar. Upload documents via our encrypted client portal, and our CA team manages all portal submissions and delivers certificates digitally.',
     },
     {
-      q: 'How does the Master Customer Profile benefit my business over time?',
-      a: 'Your master KYC and company documents are verified once and safely stored in your encrypted compliance vault. When you later need additional services—such as adding a director, filing monthly GST returns, submitting annual ITR, or registering trademarks—all details pre-fill automatically with zero redundant paperwork.',
+      q: 'Can BharatFiling manage ongoing monthly bookkeeping and payroll?',
+      a: 'Yes. Beyond one-time registrations, we provide end-to-end financial operations: monthly bookkeeping on Tally/Zoho, payroll TDS deduction, GSTR-1/3B filing, advance tax planning, and year-end statutory audit preparation.',
     },
     {
-      q: 'What happens if government authorities issue queries or clarification notices?',
-      a: 'Clarification notice support is built right into our services. If MCA, the GST department, Income Tax authorities, or the Trademark registry issue queries, our assigned CAs draft the legal clarification responses and represent your application until completion.',
+      q: 'What happens if tax or corporate authorities issue queries or notices?',
+      a: 'Statutory query response support is built directly into our services. If MCA, the Income Tax Department, the GST department, or the Trademark registry issues notices, our assigned Chartered Accountants and Advocates prepare formal legal replies and represent your case.',
     },
   ];
 
@@ -154,18 +163,18 @@ export default function LandingPage() {
               {/* Trust Kicker */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-xs font-semibold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>India's AI + CA Business Compliance Platform</span>
+                <span>India's Premier CA, Finance & Legal Advisory Platform</span>
               </div>
 
-              {/* Main Headline with Premium Navy Styling */}
+              {/* Main Headline with Premium Charcoal Styling */}
               <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-slate-900 tracking-tight leading-[1.2]">
-                Incorporate, File & Comply <br className="hidden sm:inline" />
+                Complete CA, Finance & Legal Advisory <br className="hidden sm:inline" />
                 <span className="text-[#111827]">All in One Platform</span>
               </h1>
 
               {/* Subheading */}
               <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Incorporate companies, register GST & trademarks, file tax returns, and manage ROC compliance with AI-powered speed backed by licensed Chartered Accountants.
+                Incorporate companies, manage corporate tax advisory, file GST & ITR returns, streamline bookkeeping, and maintain MCA compliance with AI-powered speed backed by licensed Chartered Accountants.
               </p>
 
               {/* Action Buttons */}
@@ -175,12 +184,12 @@ export default function LandingPage() {
                   className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
-                  Explore All 40+ Services
+                  Explore All 40+ CA & Tax Services
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
                 </Link>
 
                 <a
-                  href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20assistance%20with%20business%20registration%20and%20compliance."
+                  href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20professional%20CA%20and%20business%20compliance%20advisory."
                   target="_blank"
                   rel="noreferrer"
                   className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs transition flex items-center justify-center gap-2"
@@ -193,13 +202,13 @@ export default function LandingPage() {
               {/* Pricing & Guarantee Strip */}
               <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-5 text-xs text-slate-500">
                 <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 40+ Legal & Tax Services
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 40+ CA & Legal Services
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Online & Paperless
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Licensed CA Verification
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Licensed CA & Advocate Verification
                 </div>
               </div>
             </div>
@@ -292,13 +301,13 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
             <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
-              Comprehensive Coverage
+              Comprehensive CA & Legal Coverage
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-              Popular Compliance & Legal Services
+              Popular Chartered Accountant & Corporate Services
             </h2>
             <p className="text-sm text-slate-600">
-              Transparent fixed pricing. No hidden surprises. Professional CA consultation included.
+              Transparent fixed pricing. No hidden surprises. Professional CA consultation included with every service.
             </p>
           </div>
 
@@ -307,13 +316,7 @@ export default function LandingPage() {
               <Link
                 key={service.title}
                 to={service.path}
-                className={`group relative p-6 sm:p-7 rounded-3xl border transition-all duration-300 ease-out transform-gpu flex flex-col justify-between cursor-pointer
-                  hover:-translate-y-2 hover:shadow-[0_22px_48px_rgba(17,24,39,0.12)] hover:border-[#111827]/40
-                  active:scale-[0.98] active:translate-y-0 active:shadow-md ${
-                  service.isLive
-                    ? 'border-[#111827]/30 bg-slate-50/50 shadow-sm'
-                    : 'border-slate-200/90 bg-white shadow-xs'
-                }`}
+                className="group relative p-6 sm:p-7 rounded-3xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 ease-out transform-gpu flex flex-col justify-between cursor-pointer hover:-translate-y-2 hover:shadow-[0_22px_48px_rgba(17,24,39,0.12)] hover:border-[#111827]/40 active:scale-[0.98] active:translate-y-0 active:shadow-md"
               >
                 {/* Top Subtle Hairline Glow */}
                 <div className="absolute inset-x-8 top-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#111827] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-full"></div>
@@ -348,14 +351,8 @@ export default function LandingPage() {
                 </div>
 
                 <div className="pt-5 mt-5 border-t border-slate-100">
-                  <div
-                    className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 ${
-                      service.isLive
-                        ? 'bg-[#111827] group-hover:bg-[#1F2937] text-white shadow-xs group-hover:shadow-md'
-                        : 'bg-slate-100 text-slate-800 group-hover:bg-[#111827] group-hover:text-white group-hover:shadow-sm'
-                    }`}
-                  >
-                    {service.isLive ? 'Start Registration' : 'View Service Details'}
+                  <div className="w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-[#111827] group-hover:bg-[#1F2937] text-white shadow-xs group-hover:shadow-md">
+                    View Service Details & Pricing
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-200" />
                   </div>
                 </div>
@@ -376,7 +373,7 @@ export default function LandingPage() {
               How BharatFiling Works
             </h2>
             <p className="text-sm text-slate-600">
-              Whether incorporating a startup, registering for GST, protecting a trademark, or filing taxes—done seamlessly in 3 steps.
+              Whether incorporating a business, filing corporate taxes, managing monthly books, or securing trademarks—done seamlessly in 3 steps.
             </p>
           </div>
 
@@ -387,7 +384,7 @@ export default function LandingPage() {
               </div>
               <h3 className="font-bold text-base text-slate-900">Select Service & Share Details</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Pick your requirement—Company Incorporation, GST, Trademark, or ITR. Share basic details and upload IDs. Our intelligent AI pre-checks document clarity instantly.
+                Pick your requirement—Company Incorporation, Corporate Tax, Accounting, GST, or MCA Filings. Share basic details and upload IDs. Our intelligent AI pre-checks document clarity instantly.
               </p>
             </div>
 
@@ -395,9 +392,9 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-amber-500 text-white font-black text-sm flex items-center justify-center shadow-xs">
                 2
               </div>
-              <h3 className="font-bold text-base text-slate-900">Expert CA & Legal Audit</h3>
+              <h3 className="font-bold text-base text-slate-900">Expert CA & Financial Audit</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                A dedicated Chartered Accountant or Corporate Lawyer audits your dossier, prepares statutory filings (MCA SPICe+, GST REG-01, TM-A, or ITR), and submits directly to government portals.
+                A dedicated Chartered Accountant or Corporate Lawyer audits your dossier, prepares statutory filings (MCA SPICe+, Income Tax ITR, Form REG-01, or TM-A), and optimizes your tax liabilities.
               </p>
             </div>
 
@@ -407,7 +404,7 @@ export default function LandingPage() {
               </div>
               <h3 className="font-bold text-base text-slate-900">Get Approved & Manage in Vault</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Receive your official government certificates, GSTIN, CIN, or Trademark receipt directly in your Master Dashboard vault with lifetime compliance tracking.
+                Receive your official government certificates, CIN, GSTIN, ITR acknowledgments, or audit reports directly in your Master Dashboard vault with lifetime compliance tracking.
               </p>
             </div>
           </div>
@@ -458,23 +455,23 @@ export default function LandingPage() {
       <section className="py-14 bg-slate-50/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            Ready to Incorporate & Comply with Confidence?
+            Complete CA, Finance & Legal Advisory for Your Business
           </h2>
           <p className="text-sm text-slate-600 max-w-xl mx-auto">
-            Join 10,000+ Indian founders and businesses managing registrations, legal protection, and statutory tax filings with BharatFiling.
+            Join 10,000+ Indian founders and businesses managing corporate registrations, accounting, tax filings, audits, and statutory compliance with BharatFiling.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
               to="/services"
               className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md transition"
             >
-              Explore All 40+ Services
+              Explore All 40+ CA & Tax Services
             </Link>
             <Link
-              to="/apply/gst"
+              to="/contact"
               className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition"
             >
-              Start GST Registration
+              Book Free CA Consultation
             </Link>
             <Link
               to="/pricing"

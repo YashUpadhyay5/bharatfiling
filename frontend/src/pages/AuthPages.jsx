@@ -61,7 +61,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
       if (res.success) {
         showSuccess('Account created! Your Master Profile is initialized.');
-        navigate('/apply/gst');
+        navigate(from);
       }
     } catch (err) {
       showError(err.message || 'Registration failed.');
