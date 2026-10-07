@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
+import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 import {
   FileCheck2,
   CheckCircle2,
@@ -20,8 +22,20 @@ import {
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
 
 export default function GstLandingPage() {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [selectedEntity, setSelectedEntity] = useState('Proprietorship');
   const [openFaq, setOpenFaq] = useState(0);
+
+  const handleStartApplication = (e) => {
+    if (e) e.preventDefault();
+    if (isAuthenticated) {
+      navigate('/apply/gst');
+    } else {
+      setAuthModalOpen(true);
+    }
+  };
 
   const entityDocs = {
     Proprietorship: [
@@ -106,14 +120,15 @@ export default function GstLandingPage() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-1">
-                <Link
-                  to="/apply/gst"
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
+                <button
+                  type="button"
+                  onClick={handleStartApplication}
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
                   Start GST Registration Now
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-                </Link>
+                </button>
 
                 <a
                   href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20help%20with%20GST%20Registration."
@@ -184,13 +199,14 @@ export default function GstLandingPage() {
                 </div>
 
                 <div className="pt-2">
-                  <Link
-                    to="/apply/gst"
-                    className="w-full py-3 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] transition-all"
+                  <button
+                    type="button"
+                    onClick={handleStartApplication}
+                    className="w-full py-3 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] transition-all cursor-pointer"
                   >
                     Start 5-Minute Application
                     <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  </button>
                 </div>
               </div>
             </div>
@@ -321,16 +337,33 @@ export default function GstLandingPage() {
             Submit your details in 5 minutes. Our team will verify your documents and initiate portal submission today.
           </p>
           <div className="pt-2">
-            <Link
-              to="/apply/gst"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md transition"
+            <button
+              type="button"
+              onClick={handleStartApplication}
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md transition cursor-pointer"
             >
               Start GST Registration Now
               <ArrowRight className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </section>
+
+      {/* Authentication Required Modal */}
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        service={{
+          title: 'GST Registration Service',
+          path: '/apply/gst',
+          category: 'GST & TAX',
+          price: '₹1,499',
+          period: '+ 18% GST',
+        }}
+        onSuccess={() => {
+          navigate('/apply/gst');
+        }}
+      />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext.jsx';
+import AuthRequiredModal from './AuthRequiredModal.jsx';
 import {
   Search,
   X,
@@ -365,7 +367,10 @@ function HighlightMatch({ text, query }) {
 }
 
 export default function NavbarSearch({ className = '', isMobile = false, onCloseMobile }) {
+  const { isAuthenticated } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [selectedServiceForAuth, setSelectedServiceForAuth] = useState(null);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef(null);
@@ -448,13 +453,26 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
-  // Select service and navigate
+  // Select service and navigate (requires login/register for services)
   const handleSelect = (item) => {
     if (!item) return;
     setIsModalOpen(false);
     setQuery('');
     if (onCloseMobile) onCloseMobile();
-    navigate(item.path);
+
+    const isInfoPage = ['/about', '/faq', '/pricing', '/contact', '/services'].includes(item.path);
+    if (isAuthenticated || isInfoPage) {
+      navigate(item.path);
+    } else {
+      setSelectedServiceForAuth({
+        title: item.title,
+        path: item.path,
+        category: item.category,
+        price: 'Transparent Pricing',
+        period: 'CA Audited Filing',
+      });
+      setAuthModalOpen(true);
+    }
   };
 
   // Keyboard navigation within modal: ArrowUp, ArrowDown, Enter, Escape
@@ -839,6 +857,18 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
           </div>,
           document.body
         )}
+
+      {/* Authentication Required Modal */}
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        service={selectedServiceForAuth}
+        onSuccess={() => {
+          if (selectedServiceForAuth?.path) {
+            navigate(selectedServiceForAuth.path);
+          }
+        }}
+      />
     </>
   );
 }

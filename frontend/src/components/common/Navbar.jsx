@@ -11,6 +11,7 @@ import {
   Search,
 } from 'lucide-react';
 import NavbarSearch from './NavbarSearch.jsx';
+import AuthRequiredModal from './AuthRequiredModal.jsx';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -18,9 +19,44 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileExpandedCat, setMobileExpandedCat] = useState(null);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [selectedServiceForAuth, setSelectedServiceForAuth] = useState(null);
   const timerRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleServiceClick = (e, item, categoryLabel) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setActiveDropdown(null);
+
+    if (!isAuthenticated) {
+      e.preventDefault();
+      setSelectedServiceForAuth({
+        title: item.name,
+        path: item.path,
+        category: categoryLabel || 'Service',
+        price: 'Transparent Pricing',
+        period: 'CA Audited Filing',
+      });
+      setAuthModalOpen(true);
+    }
+  };
+
+  const handleMobileServiceClick = (e, item, categoryLabel) => {
+    setMobileMenuOpen(false);
+
+    if (!isAuthenticated) {
+      e.preventDefault();
+      setSelectedServiceForAuth({
+        title: item.name,
+        path: item.path,
+        category: categoryLabel || 'Service',
+        price: 'Transparent Pricing',
+        period: 'CA Audited Filing',
+      });
+      setAuthModalOpen(true);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -241,7 +277,7 @@ export default function Navbar() {
                           <Link
                             key={item.name}
                             to={item.path}
-                            onClick={() => setActiveDropdown(null)}
+                            onClick={(e) => handleServiceClick(e, item, cat.label)}
                             className="flex items-center justify-between text-[12.5px] text-slate-700 hover:text-[#111827] hover:bg-slate-50 px-2 py-1.5 rounded-lg font-medium transition-all group"
                           >
                             <span>{item.name}</span>
@@ -260,7 +296,7 @@ export default function Navbar() {
                           <Link
                             key={item.name}
                             to={item.path}
-                            onClick={() => setActiveDropdown(null)}
+                            onClick={(e) => handleServiceClick(e, item, cat.label)}
                             className="block text-[12.5px] text-slate-700 hover:text-[#111827] hover:bg-slate-50 px-2 py-1.5 rounded-lg font-medium transition-all"
                           >
                             {item.name}
@@ -430,7 +466,7 @@ export default function Navbar() {
                       <Link
                         key={item.name}
                         to={item.path}
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={(e) => handleMobileServiceClick(e, item, cat.label)}
                         className="block text-xs text-slate-600 hover:text-[#111827] py-1"
                       >
                         {item.name}
@@ -497,6 +533,18 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Authentication Required Popup Modal */}
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        service={selectedServiceForAuth}
+        onSuccess={() => {
+          if (selectedServiceForAuth?.path) {
+            navigate(selectedServiceForAuth.path);
+          }
+        }}
+      />
     </header>
   );
 }

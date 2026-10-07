@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 import { Sparkles, ArrowRight, ShieldCheck, CheckCircle2, Clock } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
 
@@ -45,8 +47,10 @@ const serviceMeta = {
 
 export default function PlaceholderServicePage() {
   const location = useLocation();
+  const { isAuthenticated, user } = useAuth();
   const { showSuccess } = useToast();
   const [email, setEmail] = useState('');
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const meta = serviceMeta[location.pathname] || {
     title: 'Business Compliance Service',
@@ -57,8 +61,12 @@ export default function PlaceholderServicePage() {
 
   const handleNotifyMe = (e) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
     if (email) {
-      showSuccess(`Thank you! We will notify ${email} as soon as this service launches.`);
+      showSuccess(`Thank you! We have assigned a Chartered Accountant to contact ${email}.`);
       setEmail('');
     }
   };
@@ -143,6 +151,23 @@ export default function PlaceholderServicePage() {
         </div>
       </div>
       </div>
+
+      {/* Authentication Required Modal */}
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        service={{
+          title: meta.title,
+          category: meta.category,
+          path: location.pathname,
+          price: 'Transparent Pricing',
+          period: 'CA Audited Filing',
+        }}
+        onSuccess={() => {
+          setAuthModalOpen(false);
+          showSuccess(`Welcome! A dedicated Chartered Accountant has been assigned to your ${meta.title} request.`);
+        }}
+      />
     </div>
   );
 }

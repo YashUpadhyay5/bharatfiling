@@ -18,7 +18,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/dashboard';
+  const redirectParam = new URLSearchParams(location.search).get('redirect');
+  const from = redirectParam || location.state?.from?.pathname || '/dashboard';
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -77,7 +78,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
       showSuccess(`Signed in as ${role} for live preview!`);
       if (role === 'CA') navigate('/ca/dashboard');
       else if (role === 'ADMIN') navigate('/admin');
-      else navigate('/dashboard');
+      else navigate(from);
     } catch (err) {
       showError('Failed to switch demo account.');
     } finally {

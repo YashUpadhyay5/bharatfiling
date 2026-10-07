@@ -19,9 +19,12 @@ import {
   XCircle,
   HelpCircle,
   ExternalLink,
+  Lock,
 } from 'lucide-react';
 import { api } from '../services/api.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 import { validateIndianPAN } from '../utils/panValidator.js';
 
 const INDIAN_STATES = [
@@ -81,7 +84,16 @@ const BUSINESS_NATURES = [
 export default function GstOnboardingPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { showError, showSuccess } = useToast();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  // Automatically prompt auth modal if user visits without login/register
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setAuthModalOpen(true);
+    }
+  }, [authLoading, isAuthenticated]);
 
   // Route-driven step: 1 or 2
   const stepParam = parseInt(searchParams.get('step') || '1', 10);
@@ -109,6 +121,17 @@ export default function GstOnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState({ name: false, phone: false, pan: false });
 
+  // Pre-fill form from user account once authenticated
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || user.full_name || '',
+        phone: prev.phone || user.phone || '',
+      }));
+    }
+  }, [user]);
+
   // Update PAN authentication whenever PAN or Name changes
   useEffect(() => {
     if (formData.pan) {
@@ -134,6 +157,10 @@ export default function GstOnboardingPage() {
 
   const handleStep1Continue = (e) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
     setTouched({ name: true, phone: true, pan: true });
 
     if (!formData.name.trim()) {
@@ -302,6 +329,25 @@ export default function GstOnboardingPage() {
                 /* SCREEN 1: Name, Phone, PAN (Matches Image 1) */
                 <form onSubmit={handleStep1Continue} className="space-y-5">
                   
+                  {/* Account authentication prompt if not logged in */}
+                  {!isAuthenticated && (
+                    <div className="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+                        <span className="text-xs font-semibold truncate">
+                          Sign in or register required to file application
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setAuthModalOpen(true)}
+                        className="px-3 py-1.5 rounded-xl bg-[#111827] text-white text-xs font-bold hover:bg-[#1F2937] shrink-0 cursor-pointer shadow-xs transition"
+                      >
+                        Sign In / Register
+                      </button>
+                    </div>
+                  )}
+
                   {/* Name Input */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-bold text-slate-700">
@@ -541,6 +587,28 @@ export default function GstOnboardingPage() {
         </div>
       </div>
 
+      {/* Authentication Required Modal */}
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        service={{
+          title: 'GST Registration Service',
+          path: '/apply/gst',
+          category: 'GST & TAX',
+          price: '₹1,499',
+          period: '+ 18% GST',
+        }}
+        onSuccess={(authedUser) => {
+          setAuthModalOpen(false);
+          if (authedUser) {
+            setFormData((prev) => ({
+              ...prev,
+              name: prev.name || authedUser.full_name || '',
+              phone: prev.phone || authedUser.phone || '',
+            }));
+          }
+        }}
+      />
     </div>
   );
 }
