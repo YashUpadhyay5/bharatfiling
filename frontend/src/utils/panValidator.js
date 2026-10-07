@@ -38,7 +38,7 @@ export function validateIndianPAN(rawPan, applicantFullName = '') {
       isValid: false,
       isComplete: false,
       status: 'EMPTY',
-      message: 'Enter 10-character PAN number',
+      message: '',
       entityCode: '',
       entityType: '',
       surnameMatch: false,
@@ -46,7 +46,7 @@ export function validateIndianPAN(rawPan, applicantFullName = '') {
     };
   }
 
-  // Check partial typing
+  // Check partial typing (< 10 chars)
   if (pan.length < 10) {
     return {
       isValid: false,
@@ -54,13 +54,13 @@ export function validateIndianPAN(rawPan, applicantFullName = '') {
       status: 'INCOMPLETE',
       message: `${10 - pan.length} character${10 - pan.length > 1 ? 's' : ''} remaining`,
       entityCode: pan.length >= 4 ? pan[3] : '',
-      entityType: pan.length >= 4 ? (PAN_ENTITY_MAP[pan[3]] || 'Unknown Entity') : '',
+      entityType: pan.length >= 4 ? (PAN_ENTITY_MAP[pan[3]] || '') : '',
       surnameMatch: false,
       details: null,
     };
   }
 
-  // Regex format validation
+  // 1. Strict Regex format validation: 5 letters, 4 digits, 1 letter
   const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
   const isFormatValid = panRegex.test(pan);
 
@@ -69,7 +69,7 @@ export function validateIndianPAN(rawPan, applicantFullName = '') {
       isValid: false,
       isComplete: true,
       status: 'INVALID_FORMAT',
-      message: 'Invalid PAN format. Must be 5 letters, 4 digits, 1 letter (e.g. ABCDE1234F)',
+      message: 'Invalid PAN: Must be 5 letters, 4 numbers, and 1 letter (e.g. ABCDE1234F)',
       entityCode: '',
       entityType: '',
       surnameMatch: false,
@@ -77,31 +77,48 @@ export function validateIndianPAN(rawPan, applicantFullName = '') {
     };
   }
 
+  // 2. 4th Character Taxpayer Entity Validation
   const entityCode = pan[3];
-  const entityType = PAN_ENTITY_MAP[entityCode] || 'Unregistered Category';
+  const entityType = PAN_ENTITY_MAP[entityCode];
+
+  if (!entityType) {
+    return {
+      isValid: false,
+      isComplete: true,
+      status: 'INVALID_ENTITY',
+      message: `Invalid PAN: 4th character '${entityCode}' is not a valid tax entity code`,
+      entityCode,
+      entityType: 'Unknown Entity',
+      surnameMatch: false,
+      details: null,
+    };
+  }
+
   const fifthChar = pan[4];
 
-  // Surname cross-check for Individual / Proprietor ('P')
-  let surnameMatch = true;
-  let surnameWarning = '';
-
-  if (applicantFullName && applicantFullName.trim().length > 0) {
+  // 3. Surname Cross-Check for Individual / Proprietor ('P')
+  if (entityCode === 'P' && applicantFullName && applicantFullName.trim().length > 0) {
     const nameParts = applicantFullName.trim().split(/\s+/).filter(Boolean);
     if (nameParts.length > 0) {
-      // Last part is the surname
       const surname = nameParts[nameParts.length - 1];
       const expectedSurnameChar = surname[0].toUpperCase();
 
-      if (entityCode === 'P') {
-        if (fifthChar !== expectedSurnameChar) {
-          surnameMatch = false;
-          surnameWarning = `5th letter ('${fifthChar}') does not match surname '${surname}' (Expected '${expectedSurnameChar}')`;
-        }
+      if (fifthChar !== expectedSurnameChar) {
+        return {
+          isValid: false,
+          isComplete: true,
+          status: 'SURNAME_MISMATCH',
+          message: `Invalid PAN: 5th letter '${fifthChar}' does not match your surname '${surname}' (Expected '${expectedSurnameChar}')`,
+          entityCode,
+          entityType,
+          surnameMatch: false,
+          details: null,
+        };
       }
     }
   }
 
-  // Simulated ITD database sanity check
+  // 4. All checks passed: Simulated ITD Database Sanity
   const itdStatus = {
     verified: true,
     active: true,
@@ -116,13 +133,11 @@ export function validateIndianPAN(rawPan, applicantFullName = '') {
   return {
     isValid: true,
     isComplete: true,
-    status: surnameMatch ? 'VALID' : 'SURNAME_MISMATCH',
-    message: surnameMatch
-      ? `✓ Active ${entityType} PAN verified with Income Tax Dept`
-      : surnameWarning,
+    status: 'VALID',
+    message: `✓ Active ${entityType} PAN verified with Income Tax Dept`,
     entityCode,
     entityType,
-    surnameMatch,
+    surnameMatch: true,
     details: itdStatus,
   };
 }

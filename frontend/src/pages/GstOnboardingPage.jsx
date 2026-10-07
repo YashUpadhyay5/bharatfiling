@@ -343,7 +343,13 @@ export default function GstOnboardingPage() {
                         PAN <span className="text-rose-500">*</span>
                       </label>
                       {formData.pan.length > 0 && (
-                        <span className="text-[10px] font-mono text-slate-400">
+                        <span className={`text-[10px] font-mono ${
+                          formData.pan.length === 10
+                            ? panAuth.isValid
+                              ? 'text-emerald-600 font-bold'
+                              : 'text-rose-500 font-bold'
+                            : 'text-slate-400'
+                        }`}>
                           {formData.pan.length}/10
                         </span>
                       )}
@@ -355,19 +361,32 @@ export default function GstOnboardingPage() {
                       value={formData.pan}
                       onChange={(e) => handleInputChange('pan', e.target.value.toUpperCase())}
                       placeholder="ABCDE1234F"
-                      className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-mono font-bold tracking-wider focus:outline-none focus:ring-2 focus:ring-[#0B1E36]/30 focus:border-[#0B1E36] transition uppercase"
+                      className={`w-full px-4 py-3 rounded-2xl bg-white text-sm font-mono font-bold tracking-wider transition uppercase focus:outline-none ${
+                        formData.pan.length === 10
+                          ? panAuth.isValid
+                            ? 'border-2 border-emerald-500 text-emerald-950 focus:ring-2 focus:ring-emerald-200'
+                            : 'border-2 border-rose-500 text-rose-950 bg-rose-50/20 focus:ring-2 focus:ring-rose-200'
+                          : 'border border-slate-300 text-slate-900 focus:ring-2 focus:ring-[#0B1E36]/30 focus:border-[#0B1E36]'
+                      }`}
                     />
 
-                    {/* Real-Time PAN Authentication Badge */}
+                    {/* Real-Time PAN Authentication Feedback */}
                     {formData.pan.length > 0 && (
-                      <div className="pt-1 transition-all">
-                        {panAuth.isValid ? (
-                          <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-1 animate-in fade-in duration-200">
+                      <div className="pt-0.5 transition-all">
+                        {formData.pan.length === 10 && !panAuth.isValid ? (
+                          /* Small red mismatch / invalid alert (matching user request) */
+                          <div className="flex items-center gap-1.5 text-xs text-rose-600 font-semibold animate-in fade-in duration-150">
+                            <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                            <span>{panAuth.message}</span>
+                          </div>
+                        ) : formData.pan.length === 10 && panAuth.isValid ? (
+                          /* Valid Green ITD Badge */
+                          <div className="p-2.5 bg-emerald-50/90 border border-emerald-200 rounded-xl space-y-0.5 animate-in fade-in duration-200">
                             <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
-                              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                               <span>{panAuth.message}</span>
                             </div>
-                            <div className="text-[11px] text-emerald-700 flex flex-wrap items-center gap-x-3 gap-y-1 pl-5">
+                            <div className="text-[11px] text-emerald-700 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 pl-5">
                               <span>Entity: <strong>{panAuth.entityType}</strong></span>
                               <span>•</span>
                               <span>ITD Status: <strong>ACTIVE</strong></span>
@@ -375,12 +394,8 @@ export default function GstOnboardingPage() {
                               <span>Aadhaar: <strong>LINKED</strong></span>
                             </div>
                           </div>
-                        ) : panAuth.isComplete ? (
-                          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-2 text-xs text-amber-800 animate-in fade-in duration-200">
-                            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                            <span>{panAuth.message}</span>
-                          </div>
                         ) : (
+                          /* Incomplete helper text */
                           <div className="text-[11px] text-slate-400 pl-1">
                             {panAuth.message}
                           </div>
