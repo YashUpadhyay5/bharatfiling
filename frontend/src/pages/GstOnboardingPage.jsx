@@ -372,27 +372,18 @@ export default function GstOnboardingPage() {
 
                     {/* Real-Time PAN Authentication Feedback */}
                     {formData.pan.length > 0 && (
-                      <div className="pt-0.5 transition-all">
+                      <div className="pt-1 transition-all">
                         {formData.pan.length === 10 && !panAuth.isValid ? (
-                          /* Small red mismatch / invalid alert (matching user request) */
+                          /* Small red mismatch / invalid alert */
                           <div className="flex items-center gap-1.5 text-xs text-rose-600 font-semibold animate-in fade-in duration-150">
                             <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
                             <span>{panAuth.message}</span>
                           </div>
                         ) : formData.pan.length === 10 && panAuth.isValid ? (
-                          /* Valid Green ITD Badge */
-                          <div className="p-2.5 bg-emerald-50/90 border border-emerald-200 rounded-xl space-y-0.5 animate-in fade-in duration-200">
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                              <span>{panAuth.message}</span>
-                            </div>
-                            <div className="text-[11px] text-emerald-700 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 pl-5">
-                              <span>Entity: <strong>{panAuth.entityType}</strong></span>
-                              <span>•</span>
-                              <span>ITD Status: <strong>ACTIVE</strong></span>
-                              <span>•</span>
-                              <span>Aadhaar: <strong>LINKED</strong></span>
-                            </div>
+                          /* Clean Green Tick Verified (matching user request) */
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 animate-in fade-in duration-150">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>Verified</span>
                           </div>
                         ) : (
                           /* Incomplete helper text */
