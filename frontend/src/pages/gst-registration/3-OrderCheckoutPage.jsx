@@ -96,10 +96,8 @@ export default function OrderCheckoutPage() {
       spread: 70,
       origin: { y: 0.6 },
     });
-    showSuccess('Payment verified! Redirecting to Document Desk...');
-
-    const targetAppId = paymentResult?.application?.id || order?.application_id || 'app_gst_lead';
-    navigate(`/apply/gst/dossier/${targetAppId}`);
+    showSuccess('Payment verified & GST order confirmed! Redirecting to Dashboard...');
+    navigate('/dashboard');
   };
 
   if (loading) {

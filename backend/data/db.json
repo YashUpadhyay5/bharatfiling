@@ -817,6 +817,50 @@
       "payment_completed": true,
       "created_at": "2026-10-08T07:18:14.368Z",
       "updated_at": "2026-10-08T07:18:22.899Z"
+    },
+    {
+      "id": "app_gst_1d1e3b95",
+      "application_number": "GST-2026-000018",
+      "user_id": "usr_cust_001",
+      "business_id": "biz_37fdcbfd",
+      "business_type": "Retail Trade",
+      "state": "Karnataka",
+      "customer_status": "Filing Dossier Active",
+      "internal_status": "PAID",
+      "fields_data": {
+        "applicant_name": "yash upadhyay",
+        "mobile_number": "9876501234",
+        "pan_number": "AOOPU9849P",
+        "email": "yashupadhyay@gmail.com",
+        "state": "Karnataka",
+        "business_type": "Retail Trade"
+      },
+      "assigned_ca_id": null,
+      "payment_completed": true,
+      "created_at": "2026-10-08T07:25:33.500Z",
+      "updated_at": "2026-10-08T07:25:48.428Z"
+    },
+    {
+      "id": "app_gst_0ed11c2e",
+      "application_number": "GST-2026-000019",
+      "user_id": "usr_guest_lead",
+      "business_id": "biz_819355b5",
+      "business_type": "Retail Trade",
+      "state": "Karnataka",
+      "customer_status": "CA Processing",
+      "internal_status": "CA_REVIEW",
+      "fields_data": {
+        "applicant_name": "Yash Upadhyay",
+        "mobile_number": "7668976193",
+        "pan_number": "ABCDE1234F",
+        "email": "yashupadhyay@gmail.com",
+        "state": "Karnataka",
+        "business_type": "Retail Trade"
+      },
+      "assigned_ca_id": null,
+      "payment_completed": true,
+      "created_at": "2026-10-08T07:31:49.553Z",
+      "updated_at": "2026-10-08T07:31:49.593Z"
     }
   ],
   "documents": [
@@ -1274,6 +1318,59 @@
       "mandate_id": "man_test_456",
       "vpa": "7668976193@okaxis",
       "paid_at": "2026-10-08T07:18:22.895Z"
+    },
+    {
+      "id": "est17914443335002475d",
+      "order_number": "#est17914443335002475d",
+      "application_id": "app_gst_1d1e3b95",
+      "application_number": "GST-2026-000018",
+      "user_id": "usr_cust_001",
+      "service_name": "GST Registration (GST Registration + Monthly Filing)",
+      "amount": 1769,
+      "subtotal": 1499,
+      "gst_amount": 270,
+      "currency": "INR",
+      "status": "ACTIVE_AUTOPAY",
+      "billing_cycle": "Monthly",
+      "customer_name": "yash upadhyay",
+      "customer_phone": "9876501234",
+      "customer_pan": "AOOPU9849P",
+      "customer_email": "yashupadhyay@gmail.com",
+      "state": "Karnataka",
+      "business_type": "Retail Trade",
+      "created_at": "2026-10-08T07:25:33.505Z",
+      "updated_at": "2026-10-08T07:25:48.427Z",
+      "payment_mode": "AUTOPAY",
+      "upi_id": "9876501234@ybl",
+      "transaction_id": "upi_1791444348427_8407",
+      "paid_amount": 1769,
+      "paid_at": "2026-10-08T07:25:48.427Z"
+    },
+    {
+      "id": "est17914447095534328d",
+      "order_number": "#est17914447095534328d",
+      "application_id": "app_gst_0ed11c2e",
+      "application_number": "GST-2026-000019",
+      "user_id": "usr_guest_lead",
+      "service_name": "GST Registration (GST Registration + Monthly Filing)",
+      "amount": 1769,
+      "subtotal": 1499,
+      "gst_amount": 270,
+      "currency": "INR",
+      "status": "PAID",
+      "billing_cycle": "Monthly",
+      "customer_name": "Yash Upadhyay",
+      "customer_phone": "7668976193",
+      "customer_pan": "ABCDE1234F",
+      "customer_email": "yashupadhyay@gmail.com",
+      "state": "Karnataka",
+      "business_type": "Retail Trade",
+      "created_at": "2026-10-08T07:31:49.555Z",
+      "updated_at": "2026-10-08T07:31:49.555Z",
+      "payment_id": "pay_final_999",
+      "mandate_id": "man_final_888",
+      "vpa": "7668976193@upi",
+      "paid_at": "2026-10-08T07:31:49.591Z"
     }
   ],
   "case_events": [
@@ -1564,6 +1661,22 @@
       "description": "Mandate authorized for GST Registration (GST Registration + Monthly Filing). Ready for document upload.",
       "actor_role": "SYSTEM",
       "created_at": "2026-10-08T07:18:22.903Z"
+    },
+    {
+      "id": "evt_de35575c",
+      "application_id": "app_gst_1d1e3b95",
+      "title": "UPI AutoPay Mandate Active (₹1,769/mo)",
+      "description": "Successfully verified ₹1769 via AUTOPAY (Ref: upi_1791444348427_8407, UPI ID: 9876501234@ybl). Application unlocked.",
+      "actor_role": "CUSTOMER",
+      "created_at": "2026-10-08T07:25:48.430Z"
+    },
+    {
+      "id": "evt_ee3ef4e1",
+      "application_id": "app_gst_0ed11c2e",
+      "title": "Payment Confirmed & AutoPay Activated",
+      "description": "Mandate authorized for GST Registration (GST Registration + Monthly Filing). Ready for document upload.",
+      "actor_role": "SYSTEM",
+      "created_at": "2026-10-08T07:31:49.594Z"
     }
   ],
   "support_tickets": [],

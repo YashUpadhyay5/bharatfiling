@@ -45,8 +45,8 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
         apps[appIndex] = {
           ...apps[appIndex],
           payment_completed: true,
-          internal_status: 'PAYMENT_CONFIRMED',
-          customer_status: 'Awaiting Documents',
+          internal_status: 'CA_REVIEW',
+          customer_status: 'CA Processing',
           updated_at: new Date().toISOString(),
         };
         updatedApp = apps[appIndex];

@@ -17,10 +17,9 @@ import ContactPage from './pages/ContactPage.jsx';
 import FaqPage from './pages/FaqPage.jsx';
 import AuthPages from './pages/AuthPages.jsx';
 import CustomerDashboard from './pages/CustomerDashboard.jsx';
-// Modular GST Registration Flow (Isolated 3-Screen Pipeline & Dossier Desk)
+// Modular GST Registration Flow (Isolated 3-Screen Pipeline)
 import GstRegistrationModule, {
   OrderCheckoutPage as GstCheckoutPage,
-  DossierUploadPage as GstDossierPage,
 } from './pages/gst-registration/index.jsx';
 import CaDashboardPage from './pages/CaDashboardPage.jsx';
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
@@ -28,14 +27,13 @@ import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
 function AppLayout({ children }) {
   const location = useLocation();
   const isCheckout = location.pathname.startsWith('/checkout');
-  const isDossierWizard = location.pathname.startsWith('/apply/gst/') && location.pathname !== '/apply/gst';
   const isCaOrAdmin = location.pathname.startsWith('/ca') || location.pathname.startsWith('/admin');
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isCheckout && !isDossierWizard && !isCaOrAdmin && <Navbar />}
+      {!isCheckout && !isCaOrAdmin && <Navbar />}
       <main className="flex-1">{children}</main>
-      {!isCheckout && !isDossierWizard && !isCaOrAdmin && <Footer />}
+      {!isCheckout && !isCaOrAdmin && <Footer />}
       <SupportWidget />
     </div>
   );
@@ -67,12 +65,9 @@ export default function App() {
               <Route path="/login" element={<AuthPages defaultMode="login" />} />
               <Route path="/register" element={<AuthPages defaultMode="register" />} />
 
-              {/* Customer Portal & Modular GST Registration Flow */}
+              {/* Customer Portal & Modular 3-Screen GST Registration Flow */}
               <Route path="/dashboard" element={<CustomerDashboard />} />
               <Route path="/apply/gst" element={<GstRegistrationModule />} />
-              <Route path="/apply/gst/dossier" element={<GstDossierPage />} />
-              <Route path="/apply/gst/dossier/:id" element={<GstDossierPage />} />
-              <Route path="/apply/gst/:id" element={<GstDossierPage />} />
               <Route path="/checkout" element={<GstCheckoutPage />} />
               <Route path="/checkout/:orderId" element={<GstCheckoutPage />} />
 

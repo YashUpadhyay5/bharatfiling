@@ -223,12 +223,9 @@ export default function CustomerDashboard() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Link
-                      to={`/apply/gst/dossier/${activeApp.id}`}
-                      className="px-4 py-2 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-sm transition"
-                    >
-                      Open Document Desk & Dossier &rarr;
-                    </Link>
+                    <span className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-xs border border-emerald-200">
+                      Filing Managed by Assigned CA
+                    </span>
                   </div>
                 </div>
 

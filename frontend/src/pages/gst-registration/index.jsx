@@ -16,7 +16,6 @@ import BusinessJurisdictionPage from './2-BusinessJurisdictionPage.jsx';
 export { default as ApplicantPanPage } from './1-ApplicantPanPage.jsx';
 export { default as BusinessJurisdictionPage } from './2-BusinessJurisdictionPage.jsx';
 export { default as OrderCheckoutPage } from './3-OrderCheckoutPage.jsx';
-export { default as DossierUploadPage } from './4-DossierUploadPage.jsx';
 
 export default function GstRegistrationModule() {
   const [searchParams, setSearchParams] = useSearchParams();
