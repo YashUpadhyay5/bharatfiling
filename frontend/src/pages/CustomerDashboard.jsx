@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -22,6 +22,7 @@ import {
   FileText,
   PhoneCall,
   Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 
 export default function CustomerDashboard() {
@@ -73,9 +74,23 @@ export default function CustomerDashboard() {
     fetchDashboardData();
   }, [isAuthenticated, user]);
 
+  const [searchParams] = useSearchParams();
   const [selectedAppIndex, setSelectedAppIndex] = useState(0);
   const activeApp = applications[selectedAppIndex] || applications[0]; // Primary active application
   const moduleType = activeApp?.module_type || 'GST';
+
+  useEffect(() => {
+    const queryApp = searchParams.get('app') || searchParams.get('appId');
+    if (queryApp && applications.length > 0) {
+      const idx = applications.findIndex(
+        (a) => a.id === queryApp || a.application_number === queryApp
+      );
+      if (idx !== -1) {
+        setSelectedAppIndex(idx);
+        setActiveTab('overview');
+      }
+    }
+  }, [searchParams, applications]);
 
   // Real-Time Socket.IO Synchronization with CA Desk
   useEffect(() => {
@@ -860,28 +875,70 @@ export default function CustomerDashboard() {
         {/* APPLICATIONS TAB */}
         {activeTab === 'applications' && (
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md space-y-6 animate-fade-in">
-            <h2 className="text-lg font-extrabold text-slate-900">All GST Applications</h2>
-            <div className="space-y-3">
-              {applications.map((app) => (
-                <div key={app.id} className="p-4 rounded-2xl border border-slate-200 flex items-center justify-between text-xs">
-                  <div>
-                    <div className="font-bold text-slate-900 font-mono">{app.application_number}</div>
-                    <div className="text-slate-500 mt-0.5">{app.business_type} · {app.state}</div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                      {app.customer_status}
-                    </span>
-                    <Link
-                      to={`/apply/gst/${app.id}`}
-                      className="px-3 py-1.5 rounded-xl bg-slate-900 text-white font-bold"
-                    >
-                      Open &rarr;
-                    </Link>
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-lg font-extrabold text-slate-900">All Statutory Filings</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Complete audit ledger of all corporate, tax, and registration applications.
+                </p>
+              </div>
+              <Link
+                to="/services"
+                className="px-4 py-2 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" /> Start New Filing
+              </Link>
             </div>
+
+            {applications.length > 0 ? (
+              <div className="space-y-3">
+                {applications.map((app, idx) => (
+                  <div
+                    key={app.id || idx}
+                    className="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white hover:border-[#111827] hover:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition group"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 font-mono text-sm">{app.application_number}</span>
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                          {app.module_type || 'GST'}
+                        </span>
+                      </div>
+                      <div className="text-slate-500 mt-1">
+                        {app.service_name || app.business_type} · {app.state || 'India'}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                        {app.customer_status || 'In Progress'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedAppIndex(idx);
+                          setActiveTab('overview');
+                        }}
+                        className="px-4 py-2 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span>Open & Track</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 text-center text-xs text-slate-400 space-y-3">
+                <div>No statutory filings recorded yet.</div>
+                <Link
+                  to="/services"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Start Your First Filing
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </main>

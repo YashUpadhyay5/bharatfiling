@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import { SocketProvider } from './context/SocketContext.jsx';
@@ -44,6 +44,11 @@ function AppLayout({ children }) {
   );
 }
 
+function ApplicationRedirect() {
+  const { appId } = useParams();
+  return <Navigate to={`/dashboard${appId ? `?app=${appId}` : ''}`} replace />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -75,6 +80,7 @@ export default function App() {
               <Route path="/dashboard" element={<CustomerDashboard />} />
               <Route path="/apply/gst" element={<GstRegistrationModule />} />
               <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
+              <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
               <Route path="/checkout" element={<GstCheckoutPage />} />
               <Route path="/checkout/:orderId" element={<GstCheckoutPage />} />
 
