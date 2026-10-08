@@ -67,9 +67,10 @@ export default function App() {
               <Route path="/login" element={<AuthPages defaultMode="login" />} />
               <Route path="/register" element={<AuthPages defaultMode="register" />} />
 
-              {/* Customer Portal & Modular 3-Screen GST Registration Flow */}
+              {/* Customer Portal & Modular 3-Screen Statutory Registration Flow */}
               <Route path="/dashboard" element={<CustomerDashboard />} />
               <Route path="/apply/gst" element={<GstRegistrationModule />} />
+              <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
               <Route path="/checkout" element={<GstCheckoutPage />} />
               <Route path="/checkout/:orderId" element={<GstCheckoutPage />} />
 

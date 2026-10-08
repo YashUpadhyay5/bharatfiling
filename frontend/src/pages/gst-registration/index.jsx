@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link, useParams } from 'react-router-dom';
 import { CreditCard } from 'lucide-react';
 import { api } from '../../services/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -17,12 +17,96 @@ export { default as ApplicantPanPage } from './1-ApplicantPanPage.jsx';
 export { default as BusinessJurisdictionPage } from './2-BusinessJurisdictionPage.jsx';
 export { default as OrderCheckoutPage } from './3-OrderCheckoutPage.jsx';
 
+const SERVICE_CONFIGS = {
+  gst: {
+    type: 'GST',
+    slug: 'gst',
+    badge: 'Fast-Track 2026 Portal Filing',
+    title: 'Start Your GST Registration Instantly',
+    desc: 'Get your business GST-ready quickly with BharatFiling. Certified Chartered Accountants prepare and submit your statutory filing with complete accuracy.',
+    priceLabel: '₹1,769 All-Inclusive',
+    bullets: [
+      'Complete Form REG-01 preparation & CA review',
+      'Instant TRN generation & identity check',
+      '15-Digit statutory ARN filing desk',
+      'Official Form REG-06 GST Certificate delivery',
+      'Lifetime compliance & filing dashboard access',
+    ],
+  },
+  'company-registration': {
+    type: 'COMPANY',
+    slug: 'company-registration',
+    badge: 'MCA SPICe+ Fast Track',
+    title: 'Incorporate Private Limited Company',
+    desc: 'Fast-track corporate incorporation on Ministry of Corporate Affairs portal. Includes RUN name approval, DIN, PAN, TAN, and Certificate of Incorporation.',
+    priceLabel: '₹4,999 All-Inclusive',
+    bullets: [
+      'RUN Company name reservation check',
+      'Director DSC & DIN allotment',
+      'MOA & AOA charter drafting by Corporate CA',
+      'MCA SPICe+ filing & COI issuance',
+      'Corporate Bank Account setup assistance',
+    ],
+  },
+  'income-tax': {
+    type: 'ITR',
+    slug: 'income-tax',
+    badge: 'AY 2026-27 Direct Tax Desk',
+    title: 'Income Tax Return (ITR) Filing',
+    desc: 'Expert CA-assisted ITR-1 to ITR-4 filing. We compute capital gains, business profits, reconcile AIS & 26AS, and claim all eligible legal tax deductions.',
+    priceLabel: '₹999 All-Inclusive',
+    bullets: [
+      'Form 16 & AIS/26AS tax credit reconciliation',
+      'Profit & Loss and balance sheet review',
+      'Maximized Section 80C/80D legal deductions',
+      'Instant ITD Acknowledgement Number issuance',
+      'ITR-V Verification & CPC Bangalore intimation',
+    ],
+  },
+  trademark: {
+    type: 'TRADEMARK',
+    slug: 'trademark',
+    badge: 'Brand Intellectual Property (IPR)',
+    title: 'Trademark Registration & Protection',
+    desc: 'Protect your brand name, logo, or slogan across 45 trademark classes with certified IP Attorneys and comprehensive search reports.',
+    priceLabel: '₹1,999 All-Inclusive',
+    bullets: [
+      'Comprehensive IP India public search report',
+      'Nice Class determination & Form TM-A drafting',
+      'Statutory Trademark Application Number allotment',
+      'Legal examination & attorney reply assistance',
+      'Official Trademark Registration Certificate',
+    ],
+  },
+  'llp-registration': {
+    type: 'LLP',
+    slug: 'llp-registration',
+    badge: 'MCA FiLLiP Fast Track',
+    title: 'Limited Liability Partnership (LLP)',
+    desc: 'Incorporate an LLP with limited liability protection and zero statutory audit requirements up to ₹40 Lakhs turnover.',
+    priceLabel: '₹3,999 All-Inclusive',
+    bullets: [
+      'Designated Partner DPIN & DSC allotment',
+      'RUN-LLP Name approval & reservation',
+      'Customized LLP Agreement deed drafting',
+      'MCA Form FiLLiP statutory submission',
+      'ROC Certificate of Incorporation with LLPIN',
+    ],
+  },
+};
+
 export default function GstRegistrationModule() {
+  const { serviceSlug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { showError, showSuccess } = useToast();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  // Determine active service configuration
+  const rawKey = (serviceSlug || searchParams.get('service') || 'gst').toLowerCase();
+  const configKey = Object.keys(SERVICE_CONFIGS).find((k) => rawKey.includes(k) || k.includes(rawKey)) || 'gst';
+  const serviceMeta = SERVICE_CONFIGS[configKey];
 
   // Automatically prompt auth modal if user visits without login/register
   useEffect(() => {
@@ -38,7 +122,7 @@ export default function GstRegistrationModule() {
   // Retrieve cached draft from localStorage for refresh recovery
   const getInitialState = () => {
     try {
-      const saved = localStorage.getItem('bharatfiling_gst_draft');
+      const saved = localStorage.getItem(`bharatfiling_${serviceMeta.slug}_draft`);
       if (saved) return JSON.parse(saved);
     } catch {
       // Ignore parse error
@@ -48,7 +132,7 @@ export default function GstRegistrationModule() {
       phone: '',
       pan: '',
       state: 'Karnataka',
-      businessType: 'Retail Trade',
+      businessType: serviceMeta.type === 'COMPANY' ? 'Private Limited Company' : 'Proprietorship',
     };
   };
 
@@ -142,6 +226,8 @@ export default function GstRegistrationModule() {
         pan: formData.pan.trim().toUpperCase(),
         state: formData.state,
         businessType: formData.businessType,
+        serviceSlug: serviceMeta.slug,
+        serviceType: serviceMeta.type,
       });
 
       if (res.success && res.orderId) {
@@ -168,8 +254,8 @@ export default function GstRegistrationModule() {
             UPI AUTOPAY
           </span>
           <span className="font-medium">
-            Get GST Registration and Monthly Return Filing from{' '}
-            <strong className="text-slate-900 font-bold">₹1,499 /month</strong>
+            Professional Filing Package for {serviceMeta.title} from{' '}
+            <strong className="text-slate-900 font-bold">{serviceMeta.priceLabel}</strong>
           </span>
           <Link
             to="/pricing"
@@ -185,7 +271,7 @@ export default function GstRegistrationModule() {
         <div className="bg-white rounded-3xl shadow-[0_16px_50px_rgba(17,24,39,0.07)] border border-slate-200/90 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[520px]">
             {/* Left Hero */}
-            <OnboardingHero currentStep={currentStep} />
+            <OnboardingHero currentStep={currentStep} serviceMeta={serviceMeta} />
 
             {/* Right Interactive Form: Screen 1 or Screen 2 */}
             <div className="lg:col-span-6 p-6 sm:p-10 flex flex-col justify-center">

@@ -357,42 +357,6 @@
   ],
   "gst_applications": [
     {
-      "id": "app_gst_yash_live",
-      "application_number": "GST-2026-YASH01",
-      "user_id": "usr_yash_live",
-      "business_id": "biz_yash_live",
-      "business_type": "Proprietorship",
-      "state": "Karnataka",
-      "current_step": 1,
-      "customer_status": "Payment Confirmed",
-      "internal_status": "PAYMENT_CONFIRMED",
-      "payment_completed": true,
-      "fields_data": {
-        "legal_name": "Yash Tech Solutions",
-        "trade_name": "Yash Cloud Services",
-        "business_type": "Proprietorship",
-        "pan_number": "ABCDE9876F",
-        "aadhaar_number": "987654321099",
-        "applicant_name": "Yash Upadhyay",
-        "father_name": "S. Upadhyay",
-        "dob": "1995-08-15",
-        "mobile_number": "9876543299",
-        "email": "yash@gmail.com",
-        "state": "Karnataka",
-        "address_line_1": "Tech Innovation Park, Sector 4",
-        "city": "Bengaluru",
-        "pincode": "560102",
-        "business_activity": "Information Technology & Consulting",
-        "hsn_sac_codes": [
-          "998313",
-          "998314"
-        ]
-      },
-      "assigned_ca_id": "usr_ca_001",
-      "created_at": "2026-10-08T09:52:37.975Z",
-      "updated_at": "2026-10-08T09:52:37.975Z"
-    },
-    {
       "id": "app_gst_001",
       "application_number": "GST-2026-000001",
       "user_id": "usr_cust_001",
@@ -1162,24 +1126,6 @@
   ],
   "orders": [
     {
-      "id": "ord_yash_live",
-      "order_number": "#GST-YASH-2026",
-      "application_id": "app_gst_yash_live",
-      "user_id": "usr_yash_live",
-      "customer_name": "Yash Upadhyay",
-      "customer_email": "yash@gmail.com",
-      "customer_phone": "9876543299",
-      "customer_pan": "ABCDE9876F",
-      "service_name": "GST Registration (New Normal)",
-      "amount": 1769,
-      "currency": "INR",
-      "status": "PAID",
-      "payment_method": "UPI_AUTOPAY",
-      "payment_id": "pay_upi_yash_live",
-      "created_at": "2026-10-08T09:52:37.975Z",
-      "paid_at": "2026-10-08T09:52:37.975Z"
-    },
-    {
       "id": "ord_001",
       "application_id": "app_gst_001",
       "user_id": "usr_cust_001",
@@ -1910,6 +1856,14 @@
       "description": "Successfully verified ₹1769 via AUTOPAY (Ref: upi_1791450384402_8165, UPI ID: 7668976193@ybl). Application unlocked.",
       "actor_role": "CUSTOMER",
       "created_at": "2026-10-08T09:06:24.407Z"
+    },
+    {
+      "id": "evt_a996ce24",
+      "application_id": "app_company_adf944e6",
+      "title": "Payment Confirmed & AutoPay Activated",
+      "description": "Mandate authorized for Private Limited Company Incorporation (MCA SPICe+). Ready for document upload.",
+      "actor_role": "SYSTEM",
+      "created_at": "2026-10-08T10:33:28.287Z"
     }
   ],
   "support_tickets": [],

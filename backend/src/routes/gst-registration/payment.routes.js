@@ -45,6 +45,7 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
       if (appIndex !== -1) {
         apps[appIndex] = {
           ...apps[appIndex],
+          user_id: req.user?.id || (apps[appIndex].user_id !== 'usr_guest_lead' ? apps[appIndex].user_id : req.user?.id || apps[appIndex].user_id),
           payment_completed: true,
           internal_status: 'CA_REVIEW',
           customer_status: 'CA Processing',
@@ -69,7 +70,9 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
         emitToCADesk('ca:new_case', {
           application_id: appId,
           order_id: updatedOrder?.id,
-          customer_name: updatedOrder?.customer_name || 'New GST Applicant',
+          module_type: updatedApp?.module_type || updatedOrder?.module_type || 'GST',
+          service_name: updatedOrder?.service_name || updatedApp?.service_name || 'Statutory Registration',
+          customer_name: updatedOrder?.customer_name || 'New Compliance Applicant',
           customer_phone: updatedOrder?.customer_phone || '9876543210',
           amount: updatedOrder?.amount || 1769,
           state: updatedApp?.state || 'Karnataka',
