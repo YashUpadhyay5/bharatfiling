@@ -11,6 +11,7 @@ import {
   Award,
   CheckCircle2,
   Zap,
+  ShieldCheck,
 } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -291,29 +292,30 @@ export default function ServicesDirectory() {
       <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
         {/* Top Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#111827] bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-            Full-Stack Directory
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-xs font-bold shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Full-Stack Statutory & Compliance Directory</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
             All CA, Finance & Legal Services
           </h1>
-          <p className="text-sm text-slate-600">
-            Explore our end-to-end corporate, tax, and accounting catalog. All services are reviewed and certified by licensed Chartered Accountants.
+          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">
+            Explore our end-to-end corporate, direct tax, and secretarial catalog. Every statutory filing is reviewed and certified by licensed Chartered Accountants.
           </p>
         </div>
 
-        {/* Highlight Section: Fast-Track 3-Screen Statutory Filings */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white border border-slate-800 shadow-xl space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        {/* Professional Light-Themed Highlight Section: Fast-Track Statutory Filings */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30 mb-2">
-                <Zap className="w-3.5 h-3.5" /> Direct CA Fast-Track Pipeline
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 mb-2">
+                <Zap className="w-3.5 h-3.5 text-emerald-600" /> Fast-Track Statutory Registrations
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
                 Start a New Statutory Filing (3-Minute Setup)
               </h2>
-              <p className="text-xs text-slate-300 mt-1">
-                Choose a core statutory service to start the isolated 3-screen registration pipeline with real-time CA filing and live status tracking.
+              <p className="text-xs text-slate-500 mt-1">
+                Choose a core statutory service to start the isolated 3-screen registration pipeline with dedicated CA review and live portal tracking.
               </p>
             </div>
           </div>
@@ -321,46 +323,57 @@ export default function ServicesDirectory() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {fastTrackFilings.map((filing, fIdx) => {
               const IconComp = filing.icon;
+              const isAccentBadge =
+                filing.badge === 'Most Popular' || filing.badge === 'Startup Favorite';
               return (
                 <div
                   key={fIdx}
-                  className="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all group"
+                  className="bg-white hover:bg-slate-50/50 border border-slate-200/90 hover:border-[#111827] rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-lg group shadow-xs relative"
                 >
+                  {/* Subtle Hairline Top Accent on Hover */}
+                  <div className="absolute inset-x-6 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#111827] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-full"></div>
+
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-[#111827] text-[#111827] group-hover:text-white flex items-center justify-center border border-slate-200 transition-colors duration-200">
                         <IconComp className="w-4 h-4" />
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700 text-emerald-300 border border-slate-600">
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          isAccentBadge
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : 'bg-slate-100 text-slate-700 border-slate-200'
+                        }`}
+                      >
                         {filing.badge}
                       </span>
                     </div>
 
                     <div>
-                      <h3 className="font-extrabold text-sm text-white group-hover:text-emerald-400 transition-colors">
+                      <h3 className="font-extrabold text-sm text-slate-900 group-hover:text-[#111827] transition-colors leading-snug">
                         {filing.title}
                       </h3>
-                      <p className="text-[11px] font-medium text-slate-400 mt-0.5">
+                      <p className="text-[11px] font-medium text-slate-500 mt-0.5">
                         {filing.subtitle}
                       </p>
                     </div>
 
-                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       {filing.desc}
                     </p>
                   </div>
 
-                  <div className="pt-4 mt-4 border-t border-slate-700/60 space-y-2">
-                    <div className="text-xs font-black text-emerald-400">
+                  <div className="pt-4 mt-4 border-t border-slate-100 space-y-2.5">
+                    <div className="text-xs font-black text-slate-900">
                       {filing.price}
                     </div>
                     <button
                       type="button"
                       onClick={() => handleSelectService({ ...filing, path: filing.applyPath }, true)}
-                      className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 px-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <span>Apply Now</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <span>Apply Online</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -388,16 +401,19 @@ export default function ServicesDirectory() {
                   {cat.items.map((item, itemIdx) => (
                     <div
                       key={itemIdx}
-                      className="p-6 rounded-2xl bg-white border border-slate-200/90 hover:border-[#111827] hover:shadow-lg transition-all duration-200 flex flex-col justify-between"
+                      className="p-6 rounded-2xl bg-white border border-slate-200/90 hover:border-[#111827] hover:shadow-lg transition-all duration-200 flex flex-col justify-between relative group shadow-xs"
                     >
+                      {/* Subtle Hairline Top Accent on Hover */}
+                      <div className="absolute inset-x-6 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#111827] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-full"></div>
+
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-[#111827] border border-slate-200">
+                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-[#111827] border border-slate-200">
                             {item.badge}
                           </span>
                           <span className="text-xs font-black text-slate-900">{item.price}</span>
                         </div>
-                        <h3 className="font-extrabold text-base text-slate-900">{item.title}</h3>
+                        <h3 className="font-extrabold text-base text-slate-900 group-hover:text-[#111827] transition-colors">{item.title}</h3>
                         <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
                       </div>
 
@@ -407,7 +423,7 @@ export default function ServicesDirectory() {
                             <button
                               type="button"
                               onClick={() => handleSelectService(item, true)}
-                              className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                              className="flex-1 py-2 px-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs hover:shadow-md"
                             >
                               <span>Apply Online (3 Steps)</span>
                               <ArrowRight className="w-3.5 h-3.5" />
@@ -425,7 +441,7 @@ export default function ServicesDirectory() {
                           <button
                             type="button"
                             onClick={() => handleSelectService(item, false)}
-                            className="w-full text-xs font-bold text-[#111827] hover:text-[#1F2937] flex items-center justify-between group cursor-pointer py-1"
+                            className="w-full text-xs font-bold text-[#111827] hover:text-slate-900 flex items-center justify-between group cursor-pointer py-1.5 px-1 transition"
                           >
                             <span>View Service & Consult CA</span>
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
@@ -438,6 +454,22 @@ export default function ServicesDirectory() {
               </div>
             );
           })}
+        </div>
+
+        {/* Trust Guarantees Strip */}
+        <div className="pt-8 pb-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 border-t border-slate-200 max-w-3xl mx-auto">
+          <div className="flex items-center gap-1.5 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 40+ CA & Legal Services
+          </div>
+          <div className="flex items-center gap-1.5 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Online & Paperless
+          </div>
+          <div className="flex items-center gap-1.5 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Licensed CA & Advocate Oversight
+          </div>
+          <div className="flex items-center gap-1.5 font-medium">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" /> Bank-Grade 256-Bit Security
+          </div>
         </div>
       </div>
 
