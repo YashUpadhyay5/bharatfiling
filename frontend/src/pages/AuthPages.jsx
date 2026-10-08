@@ -143,7 +143,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     type="text"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="e.g. rahul.verma@example.com or 9876501234"
+                    placeholder="e.g. customer@bharatfiling.com or 9876501234"
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -158,7 +158,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
+                    placeholder="•••••••••••• (e.g. Test@123)"
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -249,27 +249,36 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
           {/* Quick Demo Test Logins */}
           <div className="mt-6 pt-5 border-t border-slate-200 text-center">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2.5">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
               Quick 1-Click Demo Accounts
             </span>
+            <p className="text-[10px] text-slate-400 mb-3">
+              Standard Password: <span className="font-mono font-semibold text-emerald-600">Test@123</span>
+            </p>
             <div className="grid grid-cols-3 gap-2">
               <button
+                type="button"
                 onClick={() => handleDemoLogin('CUSTOMER')}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-700 border border-slate-200 text-[11px] font-bold transition text-center"
+                className="p-2.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-700 border border-slate-200 text-[11px] font-bold transition text-center shadow-xs"
               >
-                👤 Customer
+                <div>👤 Customer</div>
+                <div className="text-[9px] font-normal text-slate-500 truncate mt-0.5">customer@...</div>
               </button>
               <button
+                type="button"
                 onClick={() => handleDemoLogin('CA')}
-                className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-bold transition text-center"
+                className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-bold transition text-center shadow-xs"
               >
-                ⚖️ CA Desk
+                <div>⚖️ CA Desk</div>
+                <div className="text-[9px] font-normal text-amber-700 truncate mt-0.5">ca.sharma@...</div>
               </button>
               <button
+                type="button"
                 onClick={() => handleDemoLogin('ADMIN')}
-                className="p-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[11px] font-bold transition text-center"
+                className="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[11px] font-bold transition text-center shadow-xs"
               >
-                🛡️ Admin
+                <div>🛡️ Admin</div>
+                <div className="text-[9px] font-normal text-blue-700 truncate mt-0.5">admin@...</div>
               </button>
             </div>
           </div>

@@ -65,11 +65,11 @@ export const AuthProvider = ({ children }) => {
   const quickSwitchAccount = async (targetRole) => {
     try {
       if (targetRole === 'CA') {
-        return await login('ca.sharma@taxveda.com', 'Password@123');
+        return await login('ca.sharma@taxveda.com', 'Test@123');
       } else if (targetRole === 'ADMIN') {
-        return await login('admin@taxveda.com', 'Password@123');
+        return await login('admin@taxveda.com', 'Test@123');
       } else {
-        return await login('rahul.verma@example.com', 'Password@123');
+        return await login('customer@bharatfiling.com', 'Test@123');
       }
     } catch (err) {
       console.error('Quick switch failed:', err);

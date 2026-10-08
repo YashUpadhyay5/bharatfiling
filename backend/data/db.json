@@ -49,6 +49,16 @@
       "full_name": "Test Customer India",
       "created_at": "2026-10-08T06:19:34.996Z",
       "updated_at": "2026-10-08T06:19:34.996Z"
+    },
+    {
+      "id": "usr_cust_demo_bf",
+      "email": "customer@bharatfiling.com",
+      "phone": "9876501235",
+      "password_hash": ".CXReT5hcTe5X4oz/srCeJ0KSghdscX1JCO6",
+      "role": "CUSTOMER",
+      "full_name": "Rahul Verma (BharatFiling Demo)",
+      "created_at": "2026-10-08T08:58:57.039Z",
+      "updated_at": "2026-10-08T08:58:57.039Z"
     }
   ],
   "customer_profiles": [

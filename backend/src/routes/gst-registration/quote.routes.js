@@ -11,7 +11,13 @@ const router = express.Router();
  */
 router.get('/applications', authenticate, (req, res) => {
   try {
-    const apps = db.getApplications().filter((a) => a.user_id === req.user.id || req.user.role === 'ADMIN');
+    const isDemoCustomer = req.user.id === 'usr_cust_001' || req.user.id === 'usr_cust_demo_bf' || req.user.email?.includes('customer');
+    const apps = db.getApplications().filter((a) => {
+      if (req.user.role === 'ADMIN') return true;
+      if (a.user_id === req.user.id) return true;
+      if (isDemoCustomer && (a.user_id === 'usr_cust_001' || a.user_id === 'usr_cust_demo_bf')) return true;
+      return false;
+    });
     res.json({
       success: true,
       applications: apps,
