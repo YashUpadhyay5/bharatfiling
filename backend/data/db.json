@@ -954,6 +954,39 @@
       "payment_completed": true,
       "created_at": "2026-10-08T09:06:02.355Z",
       "updated_at": "2026-10-08T09:06:24.404Z"
+    },
+    {
+      "id": "app_gst_f46fd843",
+      "application_number": "GST-2026-000022",
+      "module_type": "GST",
+      "service_name": "GST Registration (Form REG-01 + Monthly Filing)",
+      "user_id": "usr_yash_live",
+      "business_id": "biz_776a95d2",
+      "business_type": "Export / Import (IEC)",
+      "state": "Uttar Pradesh",
+      "customer_status": "Completed",
+      "internal_status": "COMPLETED",
+      "fields_data": {
+        "applicant_name": "yash tpadhyay",
+        "mobile_number": "9876501234",
+        "pan_number": "AOOPT9849P",
+        "email": "yashtpadhyay@gmail.com",
+        "state": "Uttar Pradesh",
+        "business_type": "Export / Import (IEC)"
+      },
+      "assigned_ca_id": null,
+      "payment_completed": true,
+      "created_at": "2026-10-08T10:42:19.233Z",
+      "updated_at": "2026-10-08T10:44:35.440Z",
+      "docs_verified_at": "2026-10-08T10:43:35.711Z",
+      "docs_verified_by": "CA Rajesh Sharma (FCA)",
+      "arn": "AA2908264827027",
+      "arn_generated_at": "2026-10-08T10:43:43.259Z",
+      "gstin": "UYGEG23RL8RGO2ROI",
+      "approved_at": "2026-10-08T10:44:30.775Z",
+      "certificate_url": "/sample_gst_certificate.pdf",
+      "certificate_dispatched_at": "2026-10-08T10:44:35.440Z",
+      "certificate_dispatched_by": "CA Rajesh Sharma (FCA)"
     }
   ],
   "documents": [
@@ -1518,6 +1551,34 @@
       "transaction_id": "upi_1791450384402_8165",
       "paid_amount": 1769,
       "paid_at": "2026-10-08T09:06:24.403Z"
+    },
+    {
+      "id": "est17914561392303892d",
+      "order_number": "#est17914561392303892d",
+      "application_id": "app_gst_f46fd843",
+      "application_number": "GST-2026-000022",
+      "module_type": "GST",
+      "user_id": "usr_yash_live",
+      "service_name": "GST Registration (Form REG-01 + Monthly Filing)",
+      "amount": 1769,
+      "subtotal": 1499,
+      "gst_amount": 270,
+      "currency": "INR",
+      "status": "ACTIVE_AUTOPAY",
+      "billing_cycle": "One-Time Filing",
+      "customer_name": "yash tpadhyay",
+      "customer_phone": "9876501234",
+      "customer_pan": "AOOPT9849P",
+      "customer_email": "yashtpadhyay@gmail.com",
+      "state": "Uttar Pradesh",
+      "business_type": "Export / Import (IEC)",
+      "created_at": "2026-10-08T10:42:19.235Z",
+      "updated_at": "2026-10-08T10:42:25.037Z",
+      "payment_mode": "AUTOPAY",
+      "upi_id": "9876501234@ybl",
+      "transaction_id": "upi_1791456145035_2355",
+      "paid_amount": 1769,
+      "paid_at": "2026-10-08T10:42:25.037Z"
     }
   ],
   "case_events": [
@@ -1864,6 +1925,46 @@
       "description": "Mandate authorized for Private Limited Company Incorporation (MCA SPICe+). Ready for document upload.",
       "actor_role": "SYSTEM",
       "created_at": "2026-10-08T10:33:28.287Z"
+    },
+    {
+      "id": "evt_29ffc6c0",
+      "application_id": "app_gst_f46fd843",
+      "title": "UPI AutoPay Mandate Active (₹1,769/mo)",
+      "description": "Successfully verified ₹1769 via AUTOPAY (Ref: upi_1791456145035_2355, UPI ID: 9876501234@ybl). Application unlocked.",
+      "actor_role": "CUSTOMER",
+      "created_at": "2026-10-08T10:42:25.043Z"
+    },
+    {
+      "id": "evt_b9007ff6",
+      "application_id": "app_gst_f46fd843",
+      "title": "Step 1: CA Verified Documents & Business Identity",
+      "description": "All statutory documents verified by CA Rajesh Sharma (FCA). Data integrity confirmed for filing dossier.",
+      "actor_role": "CA",
+      "created_at": "2026-10-08T10:43:35.711Z"
+    },
+    {
+      "id": "evt_1e287d3a",
+      "application_id": "app_gst_f46fd843",
+      "title": "Step 2: Form REG-01 Filed on GST Portal (ARN: AA2908264827027)",
+      "description": "Application officially transmitted to GST Portal. 15-digit statutory ARN generated. Transferred to Jurisdictional Tax Officer.",
+      "actor_role": "CA",
+      "created_at": "2026-10-08T10:43:43.259Z"
+    },
+    {
+      "id": "evt_bf992da0",
+      "application_id": "app_gst_f46fd843",
+      "title": "Step 3: Government Approval Granted (GSTIN: UYGEG23RL8RGO2ROI)",
+      "description": "Application approved by Jurisdictional Tax Officer. Unique 15-digit GSTIN allotted.",
+      "actor_role": "GOVERNMENT",
+      "created_at": "2026-10-08T10:44:30.775Z"
+    },
+    {
+      "id": "evt_540f540b",
+      "application_id": "app_gst_f46fd843",
+      "title": "Step 4: Form REG-06 Certificate Dispatched to Customer",
+      "description": "Official Government GST Registration Certificate (Form REG-06) dispatched directly to customer dashboard.",
+      "actor_role": "CA",
+      "created_at": "2026-10-08T10:44:35.440Z"
     }
   ],
   "support_tickets": [],
@@ -1915,6 +2016,59 @@
         "gstin": "29AABCB1234F1Z9"
       },
       "created_at": "2026-10-08T07:58:53.731Z"
+    },
+    {
+      "id": "aud_724dea50",
+      "actor_id": "usr_ca_001",
+      "actor_role": "CA",
+      "action": "CA_ACTION_VERIFY_DOCS",
+      "resource_type": "GST_APPLICATION",
+      "resource_id": "app_gst_f46fd843",
+      "details": {
+        "note": ""
+      },
+      "created_at": "2026-10-08T10:43:35.715Z"
+    },
+    {
+      "id": "aud_f5efa8ab",
+      "actor_id": "usr_ca_001",
+      "actor_role": "CA",
+      "action": "CA_ACTION_SUBMIT_TO_PORTAL",
+      "resource_type": "GST_APPLICATION",
+      "resource_id": "app_gst_f46fd843",
+      "details": {
+        "note": "",
+        "arn": "AA2908264827027"
+      },
+      "created_at": "2026-10-08T10:43:43.264Z"
+    },
+    {
+      "id": "aud_edf077f8",
+      "actor_id": "usr_ca_001",
+      "actor_role": "CA",
+      "action": "CA_ACTION_RECORD_GOVT_APPROVAL",
+      "resource_type": "GST_APPLICATION",
+      "resource_id": "app_gst_f46fd843",
+      "details": {
+        "note": "",
+        "arn": "AA2908264827027",
+        "gstin": "UYGEG23RL8RGO2ROI"
+      },
+      "created_at": "2026-10-08T10:44:30.781Z"
+    },
+    {
+      "id": "aud_2da3bf1f",
+      "actor_id": "usr_ca_001",
+      "actor_role": "CA",
+      "action": "CA_ACTION_DISPATCH_CERTIFICATE",
+      "resource_type": "GST_APPLICATION",
+      "resource_id": "app_gst_f46fd843",
+      "details": {
+        "note": "",
+        "arn": "AA2908264827027",
+        "gstin": "UYGEG23RL8RGO2ROI"
+      },
+      "created_at": "2026-10-08T10:44:35.445Z"
     }
   ]
 }

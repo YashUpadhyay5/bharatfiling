@@ -25,6 +25,8 @@ import GstRegistrationModule, {
 import CaDashboardPage from './pages/CaDashboardPage.jsx';
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
 
+import ErrorBoundary from './components/common/ErrorBoundary.jsx';
+
 function AppLayout({ children }) {
   const location = useLocation();
   const isCheckout = location.pathname.startsWith('/checkout');
@@ -33,7 +35,9 @@ function AppLayout({ children }) {
   return (
     <div className="flex flex-col min-h-screen">
       {!isCheckout && !isCaOrAdmin && <Navbar />}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </main>
       {!isCheckout && !isCaOrAdmin && <Footer />}
       <SupportWidget />
     </div>
