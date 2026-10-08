@@ -361,11 +361,11 @@
       "assigned_ca_id": "usr_ca_001",
       "payment_completed": true,
       "created_at": "2026-10-04T07:35:50.629Z",
-      "updated_at": "2026-10-06T10:15:02.516Z",
-      "arn": "AA2702260012345",
-      "arn_generated_at": "2026-10-06T08:03:43.345Z",
-      "gstin": "29ABCDE1234F1Z5",
-      "certificate_url": "/uploads/gst_certificate_sample.pdf"
+      "updated_at": "2026-10-08T07:58:53.727Z",
+      "arn": "AA2908260098765",
+      "arn_generated_at": "2026-10-08T07:58:53.712Z",
+      "gstin": "29AABCB1234F1Z9",
+      "certificate_url": "/sample_gst_certificate.pdf"
     },
     {
       "id": "app_gst_410de0fe",
@@ -861,6 +861,28 @@
       "payment_completed": true,
       "created_at": "2026-10-08T07:31:49.553Z",
       "updated_at": "2026-10-08T07:31:49.593Z"
+    },
+    {
+      "id": "app_gst_e2779e28",
+      "application_number": "GST-2026-000020",
+      "user_id": "usr_cust_001",
+      "business_id": "biz_9db9142d",
+      "business_type": "Retail Trade",
+      "state": "Karnataka",
+      "customer_status": "Filing Dossier Active",
+      "internal_status": "PAID",
+      "fields_data": {
+        "applicant_name": "yash upadhyay",
+        "mobile_number": "9876501234",
+        "pan_number": "AOOPU9849P",
+        "email": "yashupadhyay@gmail.com",
+        "state": "Karnataka",
+        "business_type": "Retail Trade"
+      },
+      "assigned_ca_id": null,
+      "payment_completed": true,
+      "created_at": "2026-10-08T07:39:47.149Z",
+      "updated_at": "2026-10-08T07:39:51.440Z"
     }
   ],
   "documents": [
@@ -1371,6 +1393,33 @@
       "mandate_id": "man_final_888",
       "vpa": "7668976193@upi",
       "paid_at": "2026-10-08T07:31:49.591Z"
+    },
+    {
+      "id": "est17914451871481409d",
+      "order_number": "#est17914451871481409d",
+      "application_id": "app_gst_e2779e28",
+      "application_number": "GST-2026-000020",
+      "user_id": "usr_cust_001",
+      "service_name": "GST Registration (GST Registration + Monthly Filing)",
+      "amount": 1769,
+      "subtotal": 1499,
+      "gst_amount": 270,
+      "currency": "INR",
+      "status": "ACTIVE_AUTOPAY",
+      "billing_cycle": "Monthly",
+      "customer_name": "yash upadhyay",
+      "customer_phone": "9876501234",
+      "customer_pan": "AOOPU9849P",
+      "customer_email": "yashupadhyay@gmail.com",
+      "state": "Karnataka",
+      "business_type": "Retail Trade",
+      "created_at": "2026-10-08T07:39:47.152Z",
+      "updated_at": "2026-10-08T07:39:51.438Z",
+      "payment_mode": "AUTOPAY",
+      "upi_id": "9876501234@ybl",
+      "transaction_id": "upi_1791445191438_4772",
+      "paid_amount": 1769,
+      "paid_at": "2026-10-08T07:39:51.438Z"
     }
   ],
   "case_events": [
@@ -1677,6 +1726,30 @@
       "description": "Mandate authorized for GST Registration (GST Registration + Monthly Filing). Ready for document upload.",
       "actor_role": "SYSTEM",
       "created_at": "2026-10-08T07:31:49.594Z"
+    },
+    {
+      "id": "evt_3e9d9e98",
+      "application_id": "app_gst_e2779e28",
+      "title": "UPI AutoPay Mandate Active (₹1,769/mo)",
+      "description": "Successfully verified ₹1769 via AUTOPAY (Ref: upi_1791445191438_4772, UPI ID: 9876501234@ybl). Application unlocked.",
+      "actor_role": "CUSTOMER",
+      "created_at": "2026-10-08T07:39:51.444Z"
+    },
+    {
+      "id": "evt_f7c8dc3d",
+      "application_id": "app_gst_001",
+      "title": "Application Filed on GST Portal (ARN: AA2908260098765)",
+      "description": "Form REG-01 submitted to the GST Common Portal. ARN generated. Application is under statutory verification by GST Jurisdictional Officer.",
+      "actor_role": "CA",
+      "created_at": "2026-10-08T07:58:53.713Z"
+    },
+    {
+      "id": "evt_2eff713a",
+      "application_id": "app_gst_001",
+      "title": "GST Registration Approved! GSTIN: 29AABCB1234F1Z9",
+      "description": "GSTIN 29AABCB1234F1Z9 allotted by Government of India. Form REG-06 Registration Certificate issued and delivered to customer dashboard.",
+      "actor_role": "GOVERNMENT",
+      "created_at": "2026-10-08T07:58:53.727Z"
     }
   ],
   "support_tickets": [],
@@ -1704,6 +1777,30 @@
         "gstin": "29ABCDE1234F1Z5"
       },
       "created_at": "2026-10-06T08:03:43.360Z"
+    },
+    {
+      "id": "aud_36a06f9c",
+      "actor_id": "usr_ca_001",
+      "actor_role": "CA",
+      "action": "CA_ACTION_SUBMIT_TO_PORTAL",
+      "resource_type": "GST_APPLICATION",
+      "resource_id": "app_gst_001",
+      "details": {
+        "arn": "AA2908260098765"
+      },
+      "created_at": "2026-10-08T07:58:53.716Z"
+    },
+    {
+      "id": "aud_f54c30f0",
+      "actor_id": "usr_ca_001",
+      "actor_role": "CA",
+      "action": "CA_ACTION_ISSUE_CERTIFICATE_AND_COMPLETE",
+      "resource_type": "GST_APPLICATION",
+      "resource_id": "app_gst_001",
+      "details": {
+        "gstin": "29AABCB1234F1Z9"
+      },
+      "created_at": "2026-10-08T07:58:53.731Z"
     }
   ]
 }

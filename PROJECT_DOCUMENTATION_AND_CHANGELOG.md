@@ -249,6 +249,41 @@ Every feature, enhancement, and architectural change is documented below with **
 
 ---
 
+### Feature 10: Automatic Role Guarding, Full CA Customer Context & End-to-End Certificate Dispatch
+
+- **WHAT**:
+  1. **Automatic Role Guarding**: Prevented CA users (`role === 'CA'`) from ever seeing the customer dashboard. Visiting `/dashboard` or logging in immediately redirects them to `/ca/dashboard` (the CA Workbench).
+  2. **Comprehensive Customer Visibility in CA Workbench**:
+     - Customer Name, Phone (+91), Email
+     - Jurisdiction ("from where"): State / UT, City, Business Nature
+     - Submission Timestamp ("time"): Formatted filing date & time
+     - Order Fee & Payment Status: ₹1,769 INR (Paid via UPI AutoPay)
+  3. **Progressive 4-Stage Statutory Workflow**:
+     - Stage 1: Application & Payment Confirmed (✓ Auto-detected)
+     - Stage 2: Work in Progress with CA (Drafting Form REG-01)
+     - Stage 3: Submitted to Government Portal (ARN Generated & Filed with Tax Officer)
+     - Stage 4: Registration Certificate Delivered (Allot GSTIN, upload/generate Form REG-06, send to customer)
+  4. **Customer Dashboard Sync & One-Click Download**:
+     - On the specific customer's dashboard, the 4-stage tracker updates in real time.
+     - As soon as the CA sends the certificate, an active green **"Download GST Certificate (REG-06)"** button appears, allowing the customer to download their official government certificate directly!
+- **WHY**:
+  1. Previously, logging in as CA Rajesh Sharma (`ca.sharma@taxveda.com`) loaded `/dashboard` which mistakenly rendered the customer view ("No Active GST Application"), confusing the CA.
+  2. The CA workbench previously lacked complete customer contact, location, and submission time data.
+  3. Customers need an instant, reliable way to track statutory stages and download their official registration certificate once issued.
+- **HOW IT WORKS**:
+  1. `CustomerDashboard.jsx` checks `user?.role === 'CA'` on mount and redirects to `/ca/dashboard`.
+  2. `backend/src/routes/ca.routes.js` aggregates user identity, application fields, and order transactions into complete case cards.
+  3. `CaDashboardPage.jsx` provides the 3-step action console (`APPROVE_CA_REVIEW`, `SUBMIT_TO_PORTAL`, `ISSUE_CERTIFICATE_AND_COMPLETE`) that dispatches the certificate URL and allotting GSTIN.
+  4. `backend/src/routes/gst-registration/quote.routes.js` provides `GET /api/v1/gst/applications` so customer dashboards immediately reflect status and certificate URLs.
+- **WHERE IT IS LOCATED**:
+  - `frontend/src/pages/CaDashboardPage.jsx` *(CA Workbench, metrics, customer table, 4-stage action console)*
+  - `frontend/src/pages/CustomerDashboard.jsx` *(Role guard, 4-stage statutory milestones, certificate download)*
+  - `backend/src/routes/ca.routes.js` *(Enriched cases with customer details, order fees, certificate dispatch)*
+  - `backend/src/routes/gst-registration/quote.routes.js` *(GET /applications endpoint)*
+  - `frontend/public/sample_gst_certificate.pdf` *(Official Form REG-06 Certificate template)*
+
+---
+
 ## 3. Complete Database Schema & Table Structure
 
 The production database comprises **11 relational PostgreSQL tables** on Supabase:

@@ -8,27 +8,49 @@ const router = express.Router();
 // Enforce CA or Admin access
 router.use(authenticate, requireRole(['CA', 'ADMIN']));
 
-// GET list of CA cases with metrics
+// GET list of CA cases with full customer context and metrics
 router.get('/cases', (req, res) => {
   try {
     const apps = db.getApplications();
     const docs = db.getDocuments();
+    const orders = db.getOrders();
+    const users = db.getUsers();
 
     const cases = apps.map((app) => {
-      const user = db.getUsers().find((u) => u.id === app.user_id);
+      const user = users.find((u) => u.id === app.user_id);
       const appDocs = docs.filter((d) => d.application_id === app.id);
+      const appOrder = orders.find((o) => o.application_id === app.id || o.id === app.id);
+
+      const customerName = user?.full_name || app.fields_data?.applicant_name || appOrder?.customer_name || 'GST Applicant';
+      const customerEmail = user?.email || app.fields_data?.email || appOrder?.customer_email || 'client@example.com';
+      const customerPhone = user?.phone || app.fields_data?.mobile_number || appOrder?.customer_phone || '9876543210';
+      const state = app.state || app.fields_data?.state || appOrder?.state || 'Karnataka';
+      const businessType = app.business_type || app.fields_data?.business_type || appOrder?.business_type || 'Proprietorship';
+      const legalName = app.fields_data?.legal_name || app.fields_data?.trade_name || `${customerName} Enterprise`;
+      const panNumber = app.fields_data?.pan_number || appOrder?.customer_pan || 'ABCDE1234F';
+      const amountPaid = appOrder?.amount || 1769;
+      const orderNumber = appOrder?.order_number || appOrder?.id || '#est2026';
+      const submittedAt = app.created_at || appOrder?.created_at || new Date().toISOString();
+
       return {
         ...app,
-        customer_name: user?.full_name || 'Customer',
-        customer_email: user?.email || '',
-        customer_phone: user?.phone || '',
+        customer_name: customerName,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        state,
+        business_type: businessType,
+        legal_name: legalName,
+        pan_number: panNumber,
+        amount_paid: amountPaid,
+        order_number: orderNumber,
+        submitted_at: submittedAt,
         uploaded_doc_count: appDocs.length,
       };
     });
 
     const metrics = {
       total_cases: cases.length,
-      pending_review: cases.filter((c) => c.internal_status === 'CA_REVIEW' || c.internal_status === 'AI_PRECHECK').length,
+      pending_review: cases.filter((c) => c.internal_status === 'CA_REVIEW' || c.internal_status === 'AI_PRECHECK' || c.internal_status === 'PAYMENT_CONFIRMED').length,
       processing: cases.filter((c) => c.internal_status === 'APPLICATION_PREPARATION' || c.internal_status === 'APPLICATION_SUBMITTED' || c.internal_status === 'GOVERNMENT_PROCESSING').length,
       clarifications: cases.filter((c) => c.internal_status === 'CLARIFICATION_REQUIRED').length,
       completed: cases.filter((c) => c.internal_status === 'COMPLETED').length,

@@ -1,9 +1,45 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../../database/db.js';
-import { optionalAuth } from '../../middleware/auth.js';
+import { authenticate, optionalAuth } from '../../middleware/auth.js';
 
 const router = express.Router();
+
+/**
+ * GET /applications
+ * Retrieves GST applications for the authenticated customer.
+ */
+router.get('/applications', authenticate, (req, res) => {
+  try {
+    const apps = db.getApplications().filter((a) => a.user_id === req.user.id || req.user.role === 'ADMIN');
+    res.json({
+      success: true,
+      applications: apps,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve applications.', error: err.message });
+  }
+});
+
+/**
+ * GET /applications/:id
+ * Retrieves a single GST application.
+ */
+router.get('/applications/:id', optionalAuth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const app = db.getApplications().find((a) => a.id === id || a.application_number === id);
+    if (!app) {
+      return res.status(404).json({ success: false, message: 'Application not found.' });
+    }
+    res.json({
+      success: true,
+      application: app,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve application.', error: err.message });
+  }
+});
 
 /**
  * POST /onboarding-quote & POST /quote

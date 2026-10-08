@@ -57,27 +57,70 @@ export default function CustomerDashboard() {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
-    } else {
-      fetchDashboardData();
+      return;
     }
-  }, [isAuthenticated]);
+    // Automatically route Chartered Accountants to their specialized workbench
+    if (user?.role === 'CA') {
+      navigate('/ca/dashboard', { replace: true });
+      return;
+    }
+    if (user?.role === 'ADMIN') {
+      navigate('/admin', { replace: true });
+      return;
+    }
+    fetchDashboardData();
+  }, [isAuthenticated, user]);
 
   const activeApp = applications[0]; // Primary active application
 
-  // Customer-facing 7-step tracker definition
+  // Clean 4-Stage Statutory Progression
   const customerSteps = [
-    { title: 'Profile & Details', status: 'done' },
-    { title: 'Documents AI Checked', status: 'done' },
-    { title: 'CA Statutory Review', status: activeApp?.internal_status === 'CA_REVIEW' ? 'active' : 'done' },
-    { title: 'Payment Completed', status: activeApp?.payment_completed ? 'done' : 'pending' },
-    { title: 'Application Processing', status: activeApp?.internal_status === 'APPLICATION_PREPARATION' || activeApp?.internal_status === 'APPLICATION_SUBMITTED' ? 'active' : activeApp?.internal_status === 'GOVERNMENT_PROCESSING' || activeApp?.internal_status === 'COMPLETED' ? 'done' : 'pending' },
-    { title: 'Government Processing', status: activeApp?.internal_status === 'GOVERNMENT_PROCESSING' ? 'active' : activeApp?.internal_status === 'COMPLETED' ? 'done' : 'pending' },
-    { title: 'GST Certificate Issued', status: activeApp?.internal_status === 'COMPLETED' ? 'done' : 'pending' },
+    {
+      title: '1. Application & Payment',
+      desc: 'Order Paid & Confirmed',
+      status: 'done',
+    },
+    {
+      title: '2. Work in Progress with CA',
+      desc: 'Form REG-01 Preparation',
+      status:
+        activeApp?.internal_status === 'CA_REVIEW' ||
+        activeApp?.internal_status === 'APPLICATION_PREPARATION' ||
+        activeApp?.internal_status === 'PAYMENT_CONFIRMED'
+          ? 'active'
+          : activeApp?.internal_status === 'GOVERNMENT_PROCESSING' || activeApp?.internal_status === 'COMPLETED'
+          ? 'done'
+          : 'pending',
+    },
+    {
+      title: '3. Submitted to Govt (ARN)',
+      desc: 'Tax Officer Verification',
+      status:
+        activeApp?.internal_status === 'GOVERNMENT_PROCESSING'
+          ? 'active'
+          : activeApp?.internal_status === 'COMPLETED'
+          ? 'done'
+          : 'pending',
+    },
+    {
+      title: '4. Certificate Ready',
+      desc: 'Form REG-06 Allotted',
+      status: activeApp?.internal_status === 'COMPLETED' ? 'done' : 'pending',
+    },
   ];
 
   const handleDownloadCertificate = () => {
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     showSuccess('Downloading official Form REG-06 GST Registration Certificate...');
+
+    const certUrl = activeApp?.certificate_url || '/sample_gst_certificate.pdf';
+    const link = document.createElement('a');
+    link.href = certUrl;
+    link.target = '_blank';
+    link.download = `GST_REG06_${activeApp?.gstin || activeApp?.application_number || 'Certificate'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading) {
@@ -229,63 +272,83 @@ export default function CustomerDashboard() {
                   </div>
                 </div>
 
-                {/* Simplified Customer 7-Stage Tracker */}
+                {/* Modern 4-Stage Statutory Progress Tracker */}
                 <div>
                   <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-3">
-                    <span>Application Progress Milestones</span>
-                    <span className="text-emerald-600">
-                      {Math.min(100, Math.round(((activeApp.current_step || 1) / 10) * 100))}% Completed
+                    <span>Statutory Filing Milestones</span>
+                    <span className="text-emerald-600 font-extrabold">
+                      {activeApp.internal_status === 'COMPLETED'
+                        ? '100% Completed'
+                        : activeApp.internal_status === 'GOVERNMENT_PROCESSING'
+                        ? '75% In Progress'
+                        : activeApp.internal_status === 'APPLICATION_PREPARATION' || activeApp.internal_status === 'CA_REVIEW'
+                        ? '50% In Progress'
+                        : '25% Initiated'}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {customerSteps.map((step, idx) => {
-                      let bg = 'bg-slate-100 text-slate-500 border-slate-200';
+                      let bg = 'bg-slate-50 text-slate-500 border-slate-200';
                       let icon = idx + 1;
 
                       if (step.status === 'done') {
-                        bg = 'bg-emerald-50 text-emerald-900 border-emerald-300 font-bold';
+                        bg = 'bg-emerald-50/80 text-emerald-950 border-emerald-300 font-bold';
                         icon = '✓';
                       } else if (step.status === 'active') {
-                        bg = 'bg-amber-50 text-amber-900 border-amber-300 font-bold animate-subtle-pulse';
-                        icon = '●';
+                        bg = 'bg-amber-50 text-amber-950 border-amber-300 font-bold animate-pulse';
+                        icon = '⏳';
                       }
 
                       return (
-                        <div key={idx} className={`p-3 rounded-2xl border text-center space-y-1.5 ${bg}`}>
-                          <div className="w-5 h-5 rounded-full bg-white/80 mx-auto flex items-center justify-center text-[10px] font-black shadow-2xs">
+                        <div key={idx} className={`p-3.5 rounded-2xl border text-center space-y-1.5 transition ${bg}`}>
+                          <div className="w-6 h-6 rounded-full bg-white mx-auto flex items-center justify-center text-xs font-black shadow-xs">
                             {icon}
                           </div>
-                          <div className="text-[11px] leading-tight">{step.title}</div>
+                          <div className="text-xs font-bold leading-tight">{step.title}</div>
+                          <div className="text-[10px] opacity-75">{step.desc}</div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* ARN & Allotment Box */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                {/* ARN & Official Registration Allotment Card */}
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-emerald-50/30 border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs items-center">
                   <div>
-                    <div className="text-slate-400 font-bold uppercase text-[10px]">Government ARN</div>
+                    <div className="text-slate-400 font-bold uppercase text-[10px] tracking-wider">Government ARN</div>
                     <div className="font-mono font-bold text-slate-900 text-sm mt-0.5">
-                      {activeApp.arn || 'AA2702260012345 (Active)'}
+                      {activeApp.arn ? (
+                        <span className="text-emerald-700">{activeApp.arn}</span>
+                      ) : (
+                        <span className="text-slate-400 italic">Generated upon submission</span>
+                      )}
                     </div>
                   </div>
 
                   <div>
-                    <div className="text-slate-400 font-bold uppercase text-[10px]">Allotted GSTIN</div>
-                    <div className="font-mono font-bold text-emerald-700 text-sm mt-0.5">
-                      {activeApp.gstin || '29ABCDE1234F1Z5 (Approved)'}
+                    <div className="text-slate-400 font-bold uppercase text-[10px] tracking-wider">Allotted GSTIN</div>
+                    <div className="font-mono font-bold text-sm mt-0.5">
+                      {activeApp.gstin ? (
+                        <span className="text-emerald-700 font-black">{activeApp.gstin}</span>
+                      ) : (
+                        <span className="text-slate-400 italic">Issued upon final approval</span>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center sm:justify-end">
                     <button
                       onClick={handleDownloadCertificate}
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition"
+                      disabled={activeApp.internal_status !== 'COMPLETED' && !activeApp.certificate_url && !activeApp.gstin}
+                      className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition ${
+                        activeApp.internal_status === 'COMPLETED' || activeApp.certificate_url || activeApp.gstin
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer active:scale-95 shadow-md'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                      }`}
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      Download GST Certificate (REG-06)
+                      <Download className="w-4 h-4" />
+                      <span>Download GST Certificate (REG-06)</span>
                     </button>
                   </div>
                 </div>
