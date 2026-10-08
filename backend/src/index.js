@@ -1,7 +1,9 @@
 import express from 'express';
+import http from 'http';
 import cors from 'cors';
 import path from 'path';
 import { ENV } from './config/env.js';
+import { initSocketServer } from './services/socket.service.js';
 import authRoutes from './routes/auth.routes.js';
 import profileRoutes from './routes/profile.routes.js';
 import businessRoutes from './routes/business.routes.js';
@@ -70,10 +72,14 @@ app.use((req, res) => {
 });
 
 const PORT = ENV.PORT || 5000;
-app.listen(PORT, () => {
+const httpServer = http.createServer(app);
+initSocketServer(httpServer);
+
+httpServer.listen(PORT, () => {
   console.log(`====================================================`);
   console.log(`🚀 BharatFiling Compliance Platform API Online`);
   console.log(`📡 URL: http://localhost:${PORT}`);
+  console.log(`⚡ WebSocket: ws://localhost:${PORT}`);
   console.log(`🛡️  Mode: ${ENV.NODE_ENV}`);
   console.log(`📁 Uploads: ${ENV.STORAGE_DIR}`);
   console.log(`====================================================`);

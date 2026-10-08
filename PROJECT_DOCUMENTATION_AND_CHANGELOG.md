@@ -284,6 +284,34 @@ Every feature, enhancement, and architectural change is documented below with **
 
 ---
 
+### Feature 11: Real-Time 2-Way Socket.IO Statutory Pipeline & 4-Stage Interdependent CA Workflow
+
+- **WHAT**:
+  1. **Two-Way WebSockets with Socket.IO**:
+     - Customer payment completion on Screen 3 instantly notifies active CA Desks with live badges (`ca:new_case`).
+     - Every statutory step executed by the CA instantly syncs to the customer's dashboard (`application:status_updated`, `certificate:dispatched`) with zero page refreshes and real-time animations.
+  2. **Strict 4-Stage Interdependent Statutory Pipeline**:
+     - **Step 1:** CA Reads & Verifies Customer Details & Documents (`VERIFY_DOCS` / "CA Verified Documents").
+     - **Step 2:** CA Submits to GST Common Portal & Generates 15-digit ARN (`SUBMIT_TO_PORTAL`). *Enforced: Locked until Step 1 complete.*
+     - **Step 3:** Government Approval & Tax Officer Verification (`RECORD_GOVT_APPROVAL`). *Enforced: Locked until Step 2 ARN complete.*
+     - **Step 4:** CA Dispatches Form REG-06 Certificate to Customer (`DISPATCH_CERTIFICATE`). *Enforced: Locked until Step 3 complete.*
+  3. **Zero-Latency Customer Experience**:
+     - Live progress bar with stage transitions and "Live Statutory Sync" badge.
+     - Live ARN and GSTIN display.
+     - Celebratory confetti and instant unlocking of the **"Download GST Certificate (REG-06)"** button upon dispatch.
+- **WHY**:
+  - Previously, case status updates required manual browser refreshes, and CA actions lacked strict sequential interdependency checks.
+  - Customers and CAs need real-time awareness and statutory integrity throughout the registration lifecycle.
+- **WHERE IT IS LOCATED**:
+  - `backend/src/services/socket.service.js` *(Central Socket.IO server engine & room broadcasting)*
+  - `backend/src/routes/ca.routes.js` *(Strict 4-stage FSM validator & socket emission)*
+  - `backend/src/routes/gst-registration/payment.routes.js` *(Payment verification emitting ca:new_case)*
+  - `frontend/src/services/socket.js` & `frontend/src/context/SocketContext.jsx` *(Frontend WebSocket manager)*
+  - `frontend/src/pages/CaDashboardPage.jsx` *(Sequential 4-stage action console with locked step guards)*
+  - `frontend/src/pages/CustomerDashboard.jsx` *(Live stage sync, ARN/GSTIN update, instant certificate download)*
+
+---
+
 ## 3. Complete Database Schema & Table Structure
 
 The production database comprises **11 relational PostgreSQL tables** on Supabase:

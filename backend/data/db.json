@@ -893,6 +893,28 @@
       "payment_completed": true,
       "created_at": "2026-10-08T07:39:47.149Z",
       "updated_at": "2026-10-08T07:39:51.440Z"
+    },
+    {
+      "id": "app_gst_52526048",
+      "application_number": "GST-2026-000021",
+      "user_id": "usr_cust_demo_bf",
+      "business_id": "biz_dc80d7e9",
+      "business_type": "Hospitality & Restaurants",
+      "state": "Delhi",
+      "customer_status": "Filing Dossier Active",
+      "internal_status": "PAID",
+      "fields_data": {
+        "applicant_name": "yash upadhyay",
+        "mobile_number": "9876501234",
+        "pan_number": "AOOPU9849P",
+        "email": "yashupadhyay@gmail.com",
+        "state": "Delhi",
+        "business_type": "Hospitality & Restaurants"
+      },
+      "assigned_ca_id": null,
+      "payment_completed": true,
+      "created_at": "2026-10-08T09:06:02.355Z",
+      "updated_at": "2026-10-08T09:06:24.404Z"
     }
   ],
   "documents": [
@@ -1430,6 +1452,33 @@
       "transaction_id": "upi_1791445191438_4772",
       "paid_amount": 1769,
       "paid_at": "2026-10-08T07:39:51.438Z"
+    },
+    {
+      "id": "est17914503623533866d",
+      "order_number": "#est17914503623533866d",
+      "application_id": "app_gst_52526048",
+      "application_number": "GST-2026-000021",
+      "user_id": "usr_cust_demo_bf",
+      "service_name": "GST Registration (GST Registration + Monthly Filing)",
+      "amount": 1769,
+      "subtotal": 1499,
+      "gst_amount": 270,
+      "currency": "INR",
+      "status": "ACTIVE_AUTOPAY",
+      "billing_cycle": "Monthly",
+      "customer_name": "yash upadhyay",
+      "customer_phone": "9876501234",
+      "customer_pan": "AOOPU9849P",
+      "customer_email": "yashupadhyay@gmail.com",
+      "state": "Delhi",
+      "business_type": "Hospitality & Restaurants",
+      "created_at": "2026-10-08T09:06:02.357Z",
+      "updated_at": "2026-10-08T09:06:24.403Z",
+      "payment_mode": "AUTOPAY",
+      "upi_id": "7668976193@ybl",
+      "transaction_id": "upi_1791450384402_8165",
+      "paid_amount": 1769,
+      "paid_at": "2026-10-08T09:06:24.403Z"
     }
   ],
   "case_events": [
@@ -1760,6 +1809,14 @@
       "description": "GSTIN 29AABCB1234F1Z9 allotted by Government of India. Form REG-06 Registration Certificate issued and delivered to customer dashboard.",
       "actor_role": "GOVERNMENT",
       "created_at": "2026-10-08T07:58:53.727Z"
+    },
+    {
+      "id": "evt_80e5dfea",
+      "application_id": "app_gst_52526048",
+      "title": "UPI AutoPay Mandate Active (₹1,769/mo)",
+      "description": "Successfully verified ₹1769 via AUTOPAY (Ref: upi_1791450384402_8165, UPI ID: 7668976193@ybl). Application unlocked.",
+      "actor_role": "CUSTOMER",
+      "created_at": "2026-10-08T09:06:24.407Z"
     }
   ],
   "support_tickets": [],

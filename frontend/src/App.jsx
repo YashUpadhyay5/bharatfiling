@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
+import { SocketProvider } from './context/SocketContext.jsx';
 import Navbar from './components/common/Navbar.jsx';
 import Footer from './components/common/Footer.jsx';
 import SupportWidget from './components/common/SupportWidget.jsx';
@@ -43,8 +44,9 @@ export default function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
-          <AppLayout>
+        <SocketProvider>
+          <Router>
+            <AppLayout>
             <Routes>
               {/* Public Website Routes */}
               <Route path="/" element={<LandingPage />} />
@@ -82,6 +84,7 @@ export default function App() {
             </Routes>
           </AppLayout>
         </Router>
+        </SocketProvider>
       </ToastProvider>
     </AuthProvider>
   );

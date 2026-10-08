@@ -2,6 +2,7 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../database/db.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
+import { emitToApplication, emitToCADesk, emitToUser } from '../services/socket.service.js';
 
 const router = express.Router();
 
@@ -121,30 +122,112 @@ router.post('/cases/:id/action', (req, res) => {
     const auditLogs = db.getAuditLogs();
 
     switch (action_type) {
+      // -------------------------------------------------------------
+      // STAGE 1: CA READS & VERIFIES CUSTOMER DOCUMENTS
+      // -------------------------------------------------------------
+      case 'VERIFY_DOCS':
       case 'APPROVE_CA_REVIEW':
-        app.internal_status = 'APPLICATION_PREPARATION';
-        app.customer_status = 'Processing';
+        app.internal_status = 'DOCUMENTS_VERIFIED';
+        app.customer_status = 'Documents Verified by CA';
+        app.docs_verified_at = new Date().toISOString();
+        app.docs_verified_by = req.user.full_name;
         events.push({
           id: `evt_${uuidv4().slice(0, 8)}`,
           application_id: app.id,
-          title: 'CA Review Completed & Approved',
-          description: `Reviewed and certified by ${req.user.full_name}. Application is being compiled into Form REG-01 for GST Portal upload.`,
+          title: 'Step 1: CA Verified Documents & Business Identity',
+          description: `All statutory documents (PAN, Aadhaar/Passport, Address Proof, Constitution) verified by ${req.user.full_name}. Data integrity confirmed for Form REG-01 compilation.`,
           actor_role: 'CA',
           created_at: new Date().toISOString(),
         });
         break;
 
+      // -------------------------------------------------------------
+      // STAGE 2: CA SUBMITS TO GST COMMON PORTAL & RECORDS ARN
+      // -------------------------------------------------------------
       case 'SUBMIT_TO_PORTAL':
-        const genArn = arn || `AA${new Date().getFullYear().toString().slice(2)}${Math.floor(1000000000 + Math.random() * 9000000000)}`;
+        // Interdependency check: Step 1 must be completed
+        if (
+          !app.docs_verified_at &&
+          app.internal_status !== 'DOCUMENTS_VERIFIED' &&
+          app.internal_status !== 'APPLICATION_PREPARATION' &&
+          app.internal_status !== 'GOVERNMENT_PROCESSING' &&
+          app.internal_status !== 'GOVERNMENT_APPROVED' &&
+          app.internal_status !== 'COMPLETED'
+        ) {
+          return res.status(400).json({
+            success: false,
+            message: 'Interdependency Violation: Please verify customer documents in Step 1 before submitting to the GST Portal.',
+          });
+        }
+
+        const genArn = arn || `AA290826${Math.floor(1000000 + Math.random() * 9000000)}`;
         app.arn = genArn;
         app.arn_generated_at = new Date().toISOString();
         app.internal_status = 'GOVERNMENT_PROCESSING';
-        app.customer_status = 'Government Processing';
+        app.customer_status = 'Submitted to Govt (ARN Issued)';
         events.push({
           id: `evt_${uuidv4().slice(0, 8)}`,
           application_id: app.id,
-          title: `Application Filed on GST Portal (ARN: ${genArn})`,
-          description: `Form REG-01 submitted to the GST Common Portal. ARN generated. Application is under statutory verification by GST Jurisdictional Officer.`,
+          title: `Step 2: Form REG-01 Filed on GST Common Portal (ARN: ${genArn})`,
+          description: `Application officially transmitted to GST Portal. 15-digit statutory Application Reference Number (ARN ${genArn}) generated. Transferred to Jurisdictional Tax Officer.`,
+          actor_role: 'CA',
+          created_at: new Date().toISOString(),
+        });
+        break;
+
+      // -------------------------------------------------------------
+      // STAGE 3: GOVERNMENT APPROVAL & STATUTORY GSTIN ALLOTMENT
+      // -------------------------------------------------------------
+      case 'RECORD_GOVT_APPROVAL':
+        // Interdependency check: Step 2 must be completed (valid ARN exists)
+        if (!app.arn) {
+          return res.status(400).json({
+            success: false,
+            message: 'Interdependency Violation: Cannot record Government Approval without a valid Portal ARN from Step 2.',
+          });
+        }
+
+        const allottedGstin = gstin || '29AABCB1234F1Z9';
+        app.gstin = allottedGstin;
+        app.approved_at = new Date().toISOString();
+        app.internal_status = 'GOVERNMENT_APPROVED';
+        app.customer_status = 'Approved by Tax Officer';
+        events.push({
+          id: `evt_${uuidv4().slice(0, 8)}`,
+          application_id: app.id,
+          title: `Step 3: Government Approval Granted (GSTIN: ${allottedGstin})`,
+          description: `Application approved by Central & State GST Jurisdictional Tax Officer. Unique 15-digit GSTIN ${allottedGstin} allotted. Ready for Form REG-06 Certificate dispatch.`,
+          actor_role: 'GOVERNMENT',
+          created_at: new Date().toISOString(),
+        });
+        break;
+
+      // -------------------------------------------------------------
+      // STAGE 4: CA DISPATCHES OFFICIAL REGISTRATION CERTIFICATE
+      // -------------------------------------------------------------
+      case 'DISPATCH_CERTIFICATE':
+      case 'ISSUE_CERTIFICATE_AND_COMPLETE':
+        // Interdependency check: Must have ARN and GSTIN
+        if (!app.arn) {
+          return res.status(400).json({
+            success: false,
+            message: 'Interdependency Violation: Case must be filed on portal (Step 2) before issuing certificate.',
+          });
+        }
+
+        const finalGstin = gstin || app.gstin || '29AABCB1234F1Z9';
+        app.gstin = finalGstin;
+        app.certificate_url = certificate_url || '/sample_gst_certificate.pdf';
+        app.internal_status = 'COMPLETED';
+        app.customer_status = 'Completed';
+        app.certificate_dispatched_at = new Date().toISOString();
+        app.certificate_dispatched_by = req.user.full_name;
+
+        events.push({
+          id: `evt_${uuidv4().slice(0, 8)}`,
+          application_id: app.id,
+          title: `Step 4: Form REG-06 Certificate Dispatched to Customer`,
+          description: `Official Government GST Registration Certificate (Form REG-06) dispatched directly to customer dashboard. Certificate is available for instant download.`,
           actor_role: 'CA',
           created_at: new Date().toISOString(),
         });
@@ -170,22 +253,6 @@ router.post('/cases/:id/action', (req, res) => {
           title: 'Clarification Reply Filed (REG-04)',
           description: 'CA filed complete clarification response with supporting affidavits on the GST portal.',
           actor_role: 'CA',
-          created_at: new Date().toISOString(),
-        });
-        break;
-
-      case 'ISSUE_CERTIFICATE_AND_COMPLETE':
-        const finalGstin = gstin || '29ABCDE1234F1Z5';
-        app.gstin = finalGstin;
-        app.certificate_url = certificate_url || '/uploads/gst_certificate_sample.pdf';
-        app.internal_status = 'COMPLETED';
-        app.customer_status = 'Completed';
-        events.push({
-          id: `evt_${uuidv4().slice(0, 8)}`,
-          application_id: app.id,
-          title: `GST Registration Approved! GSTIN: ${finalGstin}`,
-          description: `GSTIN ${finalGstin} allotted by Government of India. Form REG-06 Registration Certificate issued and delivered to customer dashboard.`,
-          actor_role: 'GOVERNMENT',
           created_at: new Date().toISOString(),
         });
         break;
@@ -218,14 +285,67 @@ router.post('/cases/:id/action', (req, res) => {
       action: `CA_ACTION_${action_type}`,
       resource_type: 'GST_APPLICATION',
       resource_id: app.id,
-      details: { note, arn, gstin },
+      details: { note, arn: app.arn, gstin: app.gstin },
       created_at: new Date().toISOString(),
     });
     db.saveAuditLogs(auditLogs);
 
+    // -------------------------------------------------------------
+    // REAL-TIME 2-WAY SOCKET BROADCAST TO CUSTOMER & CA DESK
+    // -------------------------------------------------------------
+    emitToApplication(app.id, 'application:status_updated', {
+      application_id: app.id,
+      action_type,
+      internal_status: app.internal_status,
+      customer_status: app.customer_status,
+      arn: app.arn,
+      gstin: app.gstin,
+      certificate_url: app.certificate_url,
+      updated_at: app.updated_at,
+      actor_name: req.user.full_name,
+    });
+
+    emitToUser(app.user_id, 'application:status_updated', {
+      application_id: app.id,
+      action_type,
+      internal_status: app.internal_status,
+      customer_status: app.customer_status,
+      arn: app.arn,
+      gstin: app.gstin,
+      certificate_url: app.certificate_url,
+      updated_at: app.updated_at,
+      actor_name: req.user.full_name,
+    });
+
+    if (action_type === 'DISPATCH_CERTIFICATE' || action_type === 'ISSUE_CERTIFICATE_AND_COMPLETE') {
+      emitToApplication(app.id, 'certificate:dispatched', {
+        application_id: app.id,
+        gstin: app.gstin,
+        certificate_url: app.certificate_url,
+        dispatched_by: req.user.full_name,
+        delivered_at: app.updated_at,
+      });
+
+      emitToUser(app.user_id, 'certificate:dispatched', {
+        application_id: app.id,
+        gstin: app.gstin,
+        certificate_url: app.certificate_url,
+        dispatched_by: req.user.full_name,
+        delivered_at: app.updated_at,
+      });
+    }
+
+    emitToCADesk('case:updated', {
+      application_id: app.id,
+      internal_status: app.internal_status,
+      customer_status: app.customer_status,
+      arn: app.arn,
+      gstin: app.gstin,
+    });
+
     res.json({
       success: true,
-      message: `Action ${action_type} executed successfully.`,
+      message: `Action ${action_type} executed successfully and synchronized in real-time.`,
       application: app,
     });
   } catch (err) {

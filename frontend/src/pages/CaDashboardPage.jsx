@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { useSocket } from '../context/SocketContext.jsx';
 import confetti from 'canvas-confetti';
 import {
   ShieldCheck,
@@ -24,11 +25,13 @@ import {
   AlertCircle,
   ExternalLink,
   Download,
+  Lock,
 } from 'lucide-react';
 
 export default function CaDashboardPage() {
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { socket, joinCADesk } = useSocket();
 
   const [cases, setCases] = useState([]);
   const [metrics, setMetrics] = useState(null);
@@ -62,7 +65,27 @@ export default function CaDashboardPage() {
 
   useEffect(() => {
     fetchCases();
-  }, []);
+    joinCADesk();
+
+    if (socket) {
+      const handleNewCase = (newCase) => {
+        showSuccess(`🔔 New GST Application Received: ${newCase.customer_name} (${newCase.state}) - ₹${newCase.amount} Paid!`);
+        fetchCases();
+      };
+
+      const handleCaseUpdated = () => {
+        fetchCases();
+      };
+
+      socket.on('ca:new_case', handleNewCase);
+      socket.on('case:updated', handleCaseUpdated);
+
+      return () => {
+        socket.off('ca:new_case', handleNewCase);
+        socket.off('case:updated', handleCaseUpdated);
+      };
+    }
+  }, [socket]);
 
   const handleOpenCase = async (caseItem) => {
     setSelectedCase(caseItem);
@@ -96,13 +119,15 @@ export default function CaDashboardPage() {
 
       const res = await api.executeCAAction(selectedCase.id, payload);
       if (res.success) {
-        if (actionType === 'ISSUE_CERTIFICATE_AND_COMPLETE') {
+        if (actionType === 'DISPATCH_CERTIFICATE' || actionType === 'ISSUE_CERTIFICATE_AND_COMPLETE') {
           confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-          showSuccess('Registration Certificate delivered to customer dashboard successfully!');
+          showSuccess('Step 4 Complete: Form REG-06 Certificate delivered to customer dashboard in real-time!');
+        } else if (actionType === 'RECORD_GOVT_APPROVAL') {
+          showSuccess(`Step 3 Complete: Government Approval & GSTIN ${res.application?.gstin || gstinInput} recorded! Unlocked Step 4.`);
         } else if (actionType === 'SUBMIT_TO_PORTAL') {
-          showSuccess(`ARN recorded and application marked submitted to GST Portal!`);
-        } else if (actionType === 'APPROVE_CA_REVIEW') {
-          showSuccess('Application marked as In Progress with CA (REG-01 Drafting)!');
+          showSuccess(`Step 2 Complete: ARN ${res.application?.arn || arnInput} recorded! Case filed on GST Portal. Unlocked Step 3.`);
+        } else if (actionType === 'VERIFY_DOCS' || actionType === 'APPROVE_CA_REVIEW') {
+          showSuccess('Step 1 Complete: Customer documents & identity verified! Unlocked Step 2.');
         } else {
           showSuccess(`Action executed successfully.`);
         }
@@ -409,9 +434,10 @@ export default function CaDashboardPage() {
                 {/* 2. Visual 4-Stage Progressive Workflow */}
                 <div>
                   <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3">
-                    Statutory Case Milestones
+                    Statutory Case Milestones (Real-Time 2-Way Sync)
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {/* Milestone 1 */}
                     <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-800 text-center space-y-1">
                       <div className="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold mx-auto flex items-center justify-center text-xs">
                         ✓
@@ -420,42 +446,52 @@ export default function CaDashboardPage() {
                       <div className="text-[10px] text-slate-400">₹1,769 Paid via UPI</div>
                     </div>
 
+                    {/* Milestone 2 */}
                     <div
                       className={`p-3.5 rounded-xl border text-center space-y-1 ${
-                        selectedCase.internal_status === 'APPLICATION_PREPARATION' ||
+                        selectedCase.docs_verified_at ||
+                        selectedCase.internal_status === 'DOCUMENTS_VERIFIED' ||
                         selectedCase.internal_status === 'GOVERNMENT_PROCESSING' ||
+                        selectedCase.internal_status === 'GOVERNMENT_APPROVED' ||
                         selectedCase.internal_status === 'COMPLETED'
                           ? 'bg-emerald-950/40 border-emerald-800 text-emerald-300'
                           : 'bg-amber-950/40 border-amber-800 text-amber-300 animate-pulse'
                       }`}
                     >
                       <div className="w-5 h-5 rounded-full bg-slate-800 font-bold mx-auto flex items-center justify-center text-xs">
-                        {selectedCase.internal_status === 'GOVERNMENT_PROCESSING' ||
+                        {selectedCase.docs_verified_at ||
+                        selectedCase.internal_status === 'DOCUMENTS_VERIFIED' ||
+                        selectedCase.internal_status === 'GOVERNMENT_PROCESSING' ||
+                        selectedCase.internal_status === 'GOVERNMENT_APPROVED' ||
                         selectedCase.internal_status === 'COMPLETED'
                           ? '✓'
                           : '2'}
                       </div>
-                      <div className="font-bold">2. Work in Progress</div>
-                      <div className="text-[10px] text-slate-400">Drafting Form REG-01</div>
+                      <div className="font-bold">2. Docs Verified by CA</div>
+                      <div className="text-[10px] text-slate-400">Form REG-01 Prepared</div>
                     </div>
 
+                    {/* Milestone 3 */}
                     <div
                       className={`p-3.5 rounded-xl border text-center space-y-1 ${
-                        selectedCase.internal_status === 'GOVERNMENT_PROCESSING' ||
-                        selectedCase.internal_status === 'COMPLETED'
+                        selectedCase.arn &&
+                        (selectedCase.internal_status === 'GOVERNMENT_PROCESSING' ||
+                          selectedCase.internal_status === 'GOVERNMENT_APPROVED' ||
+                          selectedCase.internal_status === 'COMPLETED')
                           ? 'bg-emerald-950/40 border-emerald-800 text-emerald-300'
                           : 'bg-slate-800/40 border-slate-700 text-slate-400'
                       }`}
                     >
                       <div className="w-5 h-5 rounded-full bg-slate-800 font-bold mx-auto flex items-center justify-center text-xs">
-                        {selectedCase.internal_status === 'COMPLETED' ? '✓' : '3'}
+                        {selectedCase.arn ? '✓' : '3'}
                       </div>
                       <div className="font-bold">3. Submitted to Govt</div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-[10px] text-slate-400 font-mono">
                         {selectedCase.arn ? `ARN: ${selectedCase.arn}` : 'ARN Pending'}
                       </div>
                     </div>
 
+                    {/* Milestone 4 */}
                     <div
                       className={`p-3.5 rounded-xl border text-center space-y-1 ${
                         selectedCase.internal_status === 'COMPLETED'
@@ -467,77 +503,316 @@ export default function CaDashboardPage() {
                         {selectedCase.internal_status === 'COMPLETED' ? '✓' : '4'}
                       </div>
                       <div className="font-bold">4. Certificate Delivered</div>
-                      <div className="text-[10px] text-slate-400">Form REG-06 Allotted</div>
+                      <div className="text-[10px] text-slate-400">
+                        {selectedCase.gstin ? `GSTIN: ${selectedCase.gstin}` : 'Form REG-06 Allotted'}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* 3. CA Professional Action Console */}
+                {/* 3. CA Professional 4-Stage Action Console */}
                 <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-5">
-                  <h3 className="text-xs font-black uppercase text-amber-400 tracking-wider">
-                    CA Statutory Decision & Dispatch Console
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {/* Stage 2 Action: Work in Progress */}
-                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
-                      <div className="font-bold text-white text-sm">Step A: Start CA Preparation</div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        Verify customer identity against MCA/PAN registries and prepare Form REG-01 XML.
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-black uppercase text-amber-400 tracking-wider">
+                        CA Statutory 4-Stage Decision & Dispatch Console
+                      </h3>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Strict sequential pipeline: Each stage is strictly interdependent and unlocks the next stage.
                       </p>
-                      <button
-                        onClick={() => handleExecuteAction('APPROVE_CA_REVIEW')}
-                        disabled={actionLoading}
-                        className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold transition cursor-pointer"
-                      >
-                        Mark "In Progress with CA"
-                      </button>
                     </div>
+                    <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                      Real-Time Socket Connected
+                    </span>
+                  </div>
 
-                    {/* Stage 3 Action: File on Portal & Set ARN */}
-                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
-                      <div className="font-bold text-white text-sm">Step B: Submit to GST Portal</div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        Submit on GST common portal and record the 15-digit Application Reference Number (ARN).
-                      </p>
-                      <input
-                        type="text"
-                        value={arnInput}
-                        onChange={(e) => setArnInput(e.target.value)}
-                        placeholder="e.g. AA2902260012345"
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none"
-                      />
-                      <button
-                        onClick={() => handleExecuteAction('SUBMIT_TO_PORTAL')}
-                        disabled={actionLoading}
-                        className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition cursor-pointer"
-                      >
-                        Record Portal ARN Filing
-                      </button>
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* STEP 1: CA READS & VERIFIES DOCS */}
+                    {(() => {
+                      const isStep1Done =
+                        selectedCase.docs_verified_at ||
+                        selectedCase.internal_status === 'DOCUMENTS_VERIFIED' ||
+                        selectedCase.internal_status === 'GOVERNMENT_PROCESSING' ||
+                        selectedCase.internal_status === 'GOVERNMENT_APPROVED' ||
+                        selectedCase.internal_status === 'COMPLETED';
 
-                    {/* Stage 4 Action: Complete & Send Certificate to Customer */}
-                    <div className="p-4 rounded-xl bg-emerald-950/30 border border-emerald-800 space-y-3">
-                      <div className="font-bold text-emerald-300 text-sm">Step C: Send Certificate to Customer</div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        Allot final GSTIN and dispatch official Form REG-06 directly to customer's dashboard.
-                      </p>
-                      <input
-                        type="text"
-                        value={gstinInput}
-                        onChange={(e) => setGstinInput(e.target.value.toUpperCase())}
-                        placeholder="GSTIN (e.g. 29ABCDE1234F1Z5)"
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none uppercase"
-                      />
-                      <button
-                        onClick={() => handleExecuteAction('ISSUE_CERTIFICATE_AND_COMPLETE')}
-                        disabled={actionLoading}
-                        className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition cursor-pointer flex items-center justify-center gap-2 shadow-lg"
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                        <span>Send Certificate & Complete</span>
-                      </button>
-                    </div>
+                      return (
+                        <div
+                          className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition ${
+                            isStep1Done
+                              ? 'bg-emerald-950/20 border-emerald-800'
+                              : 'bg-slate-900 border-slate-700 ring-1 ring-emerald-500/30'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">
+                                Step 1 of 4
+                              </span>
+                              {isStep1Done ? (
+                                <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> Verified
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-amber-400 font-bold">Action Needed</span>
+                              )}
+                            </div>
+                            <div className="font-bold text-white text-sm">CA Read & Verify Docs</div>
+                            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                              Inspect applicant PAN, Aadhaar/ID, business premises address, and trade constitution.
+                            </p>
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-800/80">
+                            {isStep1Done ? (
+                              <div className="text-[11px] text-emerald-400 font-medium flex items-center gap-1.5">
+                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                <span>Docs Certified by CA</span>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleExecuteAction('VERIFY_DOCS')}
+                                disabled={actionLoading}
+                                className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition cursor-pointer shadow-md disabled:opacity-50"
+                              >
+                                {actionLoading ? 'Verifying...' : 'Verify & Approve Docs'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* STEP 2: CA SUBMITS TO GST COMMON PORTAL (ARN) */}
+                    {(() => {
+                      const isStep1Done =
+                        selectedCase.docs_verified_at ||
+                        selectedCase.internal_status === 'DOCUMENTS_VERIFIED' ||
+                        selectedCase.internal_status === 'GOVERNMENT_PROCESSING' ||
+                        selectedCase.internal_status === 'GOVERNMENT_APPROVED' ||
+                        selectedCase.internal_status === 'COMPLETED';
+
+                      const isStep2Done =
+                        selectedCase.arn &&
+                        (selectedCase.internal_status === 'GOVERNMENT_PROCESSING' ||
+                          selectedCase.internal_status === 'GOVERNMENT_APPROVED' ||
+                          selectedCase.internal_status === 'COMPLETED');
+
+                      const isLocked = !isStep1Done;
+
+                      return (
+                        <div
+                          className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition ${
+                            isLocked
+                              ? 'bg-slate-900/40 border-slate-800 opacity-60'
+                              : isStep2Done
+                              ? 'bg-emerald-950/20 border-emerald-800'
+                              : 'bg-slate-900 border-slate-700 ring-1 ring-blue-500/30'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
+                                Step 2 of 4
+                              </span>
+                              {isLocked ? (
+                                <span className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                                  <Lock className="w-3 h-3" /> Locked
+                                </span>
+                              ) : isStep2Done ? (
+                                <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> Filed
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-blue-400 font-bold">Ready to File</span>
+                              )}
+                            </div>
+                            <div className="font-bold text-white text-sm">Submit to GST Portal</div>
+                            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                              File Form REG-01 XML on GST Common Portal and generate statutory 15-digit ARN.
+                            </p>
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-800/80 space-y-2">
+                            {isLocked ? (
+                              <p className="text-[10px] text-slate-500 italic">Locked until Step 1 is verified.</p>
+                            ) : isStep2Done ? (
+                              <div className="space-y-1">
+                                <span className="text-[10px] text-slate-400 block">Filing Reference (ARN):</span>
+                                <div className="font-mono text-xs font-bold text-emerald-400 bg-slate-950 px-2 py-1 rounded border border-emerald-800/50">
+                                  {selectedCase.arn}
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <input
+                                  type="text"
+                                  value={arnInput}
+                                  onChange={(e) => setArnInput(e.target.value)}
+                                  placeholder="ARN (e.g. AA2908260012345)"
+                                  className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none"
+                                />
+                                <button
+                                  onClick={() => handleExecuteAction('SUBMIT_TO_PORTAL')}
+                                  disabled={actionLoading}
+                                  className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition cursor-pointer shadow-md disabled:opacity-50"
+                                >
+                                  {actionLoading ? 'Transmitting...' : 'Transmit & Record ARN'}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* STEP 3: GOVERNMENT APPROVAL & GSTIN ALLOTMENT */}
+                    {(() => {
+                      const isStep2Done =
+                        selectedCase.arn &&
+                        (selectedCase.internal_status === 'GOVERNMENT_PROCESSING' ||
+                          selectedCase.internal_status === 'GOVERNMENT_APPROVED' ||
+                          selectedCase.internal_status === 'COMPLETED');
+
+                      const isStep3Done =
+                        selectedCase.gstin &&
+                        (selectedCase.internal_status === 'GOVERNMENT_APPROVED' ||
+                          selectedCase.internal_status === 'COMPLETED');
+
+                      const isLocked = !isStep2Done;
+
+                      return (
+                        <div
+                          className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition ${
+                            isLocked
+                              ? 'bg-slate-900/40 border-slate-800 opacity-60'
+                              : isStep3Done
+                              ? 'bg-emerald-950/20 border-emerald-800'
+                              : 'bg-slate-900 border-slate-700 ring-1 ring-amber-500/30'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                                Step 3 of 4
+                              </span>
+                              {isLocked ? (
+                                <span className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                                  <Lock className="w-3 h-3" /> Locked
+                                </span>
+                              ) : isStep3Done ? (
+                                <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> Approved
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-amber-400 font-bold">Officer Review</span>
+                              )}
+                            </div>
+                            <div className="font-bold text-white text-sm">Government Approval</div>
+                            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                              Tax Officer verifies ARN and approves. Record official approval & statutory GSTIN.
+                            </p>
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-800/80 space-y-2">
+                            {isLocked ? (
+                              <p className="text-[10px] text-slate-500 italic">Locked until Step 2 ARN is filed.</p>
+                            ) : isStep3Done ? (
+                              <div className="space-y-1">
+                                <span className="text-[10px] text-slate-400 block">Allotted GSTIN:</span>
+                                <div className="font-mono text-xs font-bold text-emerald-400 bg-slate-950 px-2 py-1 rounded border border-emerald-800/50">
+                                  {selectedCase.gstin}
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <input
+                                  type="text"
+                                  value={gstinInput}
+                                  onChange={(e) => setGstinInput(e.target.value.toUpperCase())}
+                                  placeholder="GSTIN (e.g. 29AABCB1234F1Z9)"
+                                  className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs focus:outline-none uppercase"
+                                />
+                                <button
+                                  onClick={() => handleExecuteAction('RECORD_GOVT_APPROVAL')}
+                                  disabled={actionLoading}
+                                  className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition cursor-pointer shadow-md disabled:opacity-50"
+                                >
+                                  {actionLoading ? 'Recording...' : 'Record Govt Approval'}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* STEP 4: DISPATCH OFFICIAL REGISTRATION DOCUMENT */}
+                    {(() => {
+                      const isStep3Done =
+                        selectedCase.gstin &&
+                        (selectedCase.internal_status === 'GOVERNMENT_APPROVED' ||
+                          selectedCase.internal_status === 'COMPLETED');
+
+                      const isStep4Done = selectedCase.internal_status === 'COMPLETED';
+                      const isLocked = !isStep3Done;
+
+                      return (
+                        <div
+                          className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition ${
+                            isLocked
+                              ? 'bg-slate-900/40 border-slate-800 opacity-60'
+                              : isStep4Done
+                              ? 'bg-emerald-950/30 border-emerald-700 ring-2 ring-emerald-500/40'
+                              : 'bg-slate-900 border-slate-700 ring-1 ring-emerald-500/30'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                                Step 4 of 4
+                              </span>
+                              {isLocked ? (
+                                <span className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                                  <Lock className="w-3 h-3" /> Locked
+                                </span>
+                              ) : isStep4Done ? (
+                                <span className="text-[10px] text-emerald-300 font-bold flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> Dispatched
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-emerald-400 font-bold">Ready to Dispatch</span>
+                              )}
+                            </div>
+                            <div className="font-bold text-white text-sm">Send Certificate to Customer</div>
+                            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                              Dispatch official Form REG-06 directly to that specific customer's dashboard via socket.
+                            </p>
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-800/80 space-y-2">
+                            {isLocked ? (
+                              <p className="text-[10px] text-slate-500 italic">Locked until Step 3 is approved.</p>
+                            ) : isStep4Done ? (
+                              <div className="text-[11px] text-emerald-300 font-bold flex items-center gap-1.5">
+                                <FileCheck2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                                <span>Certificate Delivered to Customer</span>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleExecuteAction('DISPATCH_CERTIFICATE')}
+                                disabled={actionLoading}
+                                className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer shadow-lg disabled:opacity-50 flex items-center justify-center gap-1.5"
+                              >
+                                <Send className="w-3.5 h-3.5" />
+                                <span>{actionLoading ? 'Dispatching...' : 'Dispatch Certificate'}</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 

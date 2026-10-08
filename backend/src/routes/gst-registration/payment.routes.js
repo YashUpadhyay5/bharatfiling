@@ -2,6 +2,7 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../../database/db.js';
 import { optionalAuth } from '../../middleware/auth.js';
+import { emitToCADesk } from '../../services/socket.service.js';
 
 const router = express.Router();
 
@@ -63,6 +64,17 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
           created_at: new Date().toISOString(),
         });
         db.saveCaseEvents(events);
+
+        // Real-Time Notification to CA Desk
+        emitToCADesk('ca:new_case', {
+          application_id: appId,
+          order_id: updatedOrder?.id,
+          customer_name: updatedOrder?.customer_name || 'New GST Applicant',
+          customer_phone: updatedOrder?.customer_phone || '9876543210',
+          amount: updatedOrder?.amount || 1769,
+          state: updatedApp?.state || 'Karnataka',
+          submitted_at: new Date().toISOString(),
+        });
       }
     }
 

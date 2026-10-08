@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { useSocket } from '../context/SocketContext.jsx';
 import confetti from 'canvas-confetti';
 import {
   FileCheck2,
@@ -26,6 +27,7 @@ import {
 export default function CustomerDashboard() {
   const { user, isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { socket, joinApplication, joinUser } = useSocket();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'profile', 'businesses', 'applications', 'docs'
@@ -73,7 +75,67 @@ export default function CustomerDashboard() {
 
   const activeApp = applications[0]; // Primary active application
 
-  // Clean 4-Stage Statutory Progression
+  // Real-Time Socket.IO Synchronization with CA Desk
+  useEffect(() => {
+    if (user?.id) {
+      joinUser(user.id);
+    }
+    if (activeApp?.id) {
+      joinApplication(activeApp.id);
+    }
+
+    if (socket) {
+      const handleStatusUpdated = (data) => {
+        if (!activeApp || data.application_id === activeApp.id) {
+          showSuccess(`⚡ Live Update from CA: ${data.customer_status || 'Application Updated'}`);
+          setApplications((prev) =>
+            prev.map((app) =>
+              app.id === data.application_id
+                ? {
+                    ...app,
+                    internal_status: data.internal_status,
+                    customer_status: data.customer_status,
+                    arn: data.arn || app.arn,
+                    gstin: data.gstin || app.gstin,
+                    certificate_url: data.certificate_url || app.certificate_url,
+                  }
+                : app
+            )
+          );
+        }
+      };
+
+      const handleCertificateDispatched = (data) => {
+        if (!activeApp || data.application_id === activeApp.id) {
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+          showSuccess('🎉 Congratulations! Your Official Form REG-06 GST Registration Certificate has been issued!');
+          setApplications((prev) =>
+            prev.map((app) =>
+              app.id === data.application_id
+                ? {
+                    ...app,
+                    internal_status: 'COMPLETED',
+                    customer_status: 'Completed',
+                    gstin: data.gstin || app.gstin,
+                    certificate_url: data.certificate_url || '/sample_gst_certificate.pdf',
+                  }
+                : app
+            )
+          );
+        }
+      };
+
+      socket.on('application:status_updated', handleStatusUpdated);
+      socket.on('certificate:dispatched', handleCertificateDispatched);
+
+      return () => {
+        socket.off('application:status_updated', handleStatusUpdated);
+        socket.off('certificate:dispatched', handleCertificateDispatched);
+      };
+    }
+  }, [socket, activeApp?.id, user?.id]);
+
+  // Clean 4-Stage Statutory Progression matching CA Actions
   const customerSteps = [
     {
       title: '1. Application & Payment',
@@ -81,14 +143,17 @@ export default function CustomerDashboard() {
       status: 'done',
     },
     {
-      title: '2. Work in Progress with CA',
-      desc: 'Form REG-01 Preparation',
+      title: '2. Docs Verified by CA',
+      desc: 'Form REG-01 Prepared',
       status:
         activeApp?.internal_status === 'CA_REVIEW' ||
-        activeApp?.internal_status === 'APPLICATION_PREPARATION' ||
         activeApp?.internal_status === 'PAYMENT_CONFIRMED'
           ? 'active'
-          : activeApp?.internal_status === 'GOVERNMENT_PROCESSING' || activeApp?.internal_status === 'COMPLETED'
+          : activeApp?.internal_status === 'DOCUMENTS_VERIFIED' ||
+            activeApp?.internal_status === 'APPLICATION_PREPARATION' ||
+            activeApp?.internal_status === 'GOVERNMENT_PROCESSING' ||
+            activeApp?.internal_status === 'GOVERNMENT_APPROVED' ||
+            activeApp?.internal_status === 'COMPLETED'
           ? 'done'
           : 'pending',
     },
@@ -98,7 +163,8 @@ export default function CustomerDashboard() {
       status:
         activeApp?.internal_status === 'GOVERNMENT_PROCESSING'
           ? 'active'
-          : activeApp?.internal_status === 'COMPLETED'
+          : activeApp?.internal_status === 'GOVERNMENT_APPROVED' ||
+            activeApp?.internal_status === 'COMPLETED'
           ? 'done'
           : 'pending',
     },
@@ -275,14 +341,24 @@ export default function CustomerDashboard() {
                 {/* Modern 4-Stage Statutory Progress Tracker */}
                 <div>
                   <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-3">
-                    <span>Statutory Filing Milestones</span>
+                    <div className="flex items-center gap-2">
+                      <span>Statutory Filing Milestones</span>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        Live Statutory Sync
+                      </span>
+                    </div>
                     <span className="text-emerald-600 font-extrabold">
                       {activeApp.internal_status === 'COMPLETED'
                         ? '100% Completed'
+                        : activeApp.internal_status === 'GOVERNMENT_APPROVED'
+                        ? '85% In Progress'
                         : activeApp.internal_status === 'GOVERNMENT_PROCESSING'
-                        ? '75% In Progress'
-                        : activeApp.internal_status === 'APPLICATION_PREPARATION' || activeApp.internal_status === 'CA_REVIEW'
-                        ? '50% In Progress'
+                        ? '65% In Progress'
+                        : activeApp.internal_status === 'DOCUMENTS_VERIFIED' ||
+                          activeApp.internal_status === 'APPLICATION_PREPARATION' ||
+                          activeApp.internal_status === 'CA_REVIEW'
+                        ? '40% In Progress'
                         : '25% Initiated'}
                     </span>
                   </div>
