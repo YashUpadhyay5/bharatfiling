@@ -70,19 +70,19 @@ const localDistPath = path.resolve(process.cwd(), './dist');
 
 if (fs.existsSync(frontendDistPath)) {
   app.use(express.static(frontendDistPath));
-  app.get('*', (req, res, next) => {
-    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
-      return next();
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.originalUrl.startsWith('/api') && !req.originalUrl.startsWith('/uploads')) {
+      return res.sendFile(path.join(frontendDistPath, 'index.html'));
     }
-    res.sendFile(path.join(frontendDistPath, 'index.html'));
+    next();
   });
 } else if (fs.existsSync(localDistPath)) {
   app.use(express.static(localDistPath));
-  app.get('*', (req, res, next) => {
-    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
-      return next();
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.originalUrl.startsWith('/api') && !req.originalUrl.startsWith('/uploads')) {
+      return res.sendFile(path.join(localDistPath, 'index.html'));
     }
-    res.sendFile(path.join(localDistPath, 'index.html'));
+    next();
   });
 }
 
