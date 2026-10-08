@@ -102,6 +102,18 @@ export const api = {
     return handleResponse(res);
   },
 
+  // Dynamic Services Catalog & Pricing
+  getServices: async (category = '') => {
+    const query = category ? `?category=${encodeURIComponent(category)}` : '';
+    const res = await fetch(`${API_BASE}/services${query}`);
+    return handleResponse(res);
+  },
+
+  getService: async (identifier) => {
+    const res = await fetch(`${API_BASE}/services/${encodeURIComponent(identifier)}`);
+    return handleResponse(res);
+  },
+
   // GST Applications
   getApplications: async () => {
     const res = await fetch(`${API_BASE}/gst/applications`, {

@@ -12,6 +12,7 @@ import paymentRoutes from './routes/payment.routes.js';
 import caRoutes from './routes/ca.routes.js';
 import supportRoutes from './routes/support.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import serviceRoutes from './routes/service.routes.js';
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/ca', caRoutes);
 app.use('/api/v1/support', supportRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/services', serviceRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

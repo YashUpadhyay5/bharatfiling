@@ -10,6 +10,17 @@ export default function ServicesDirectory() {
   const navigate = useNavigate();
   const [selectedServiceForAuth, setSelectedServiceForAuth] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [liveServices, setLiveServices] = React.useState([]);
+
+  React.useEffect(() => {
+    api.getServices().then((res) => {
+      if (res.success && res.services) {
+        setLiveServices(res.services);
+      }
+    }).catch((err) => {
+      console.warn('Dynamic services API fetch note:', err.message);
+    });
+  }, []);
 
   const handleSelectService = (item) => {
     if (isAuthenticated) {

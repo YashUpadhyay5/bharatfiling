@@ -48,11 +48,11 @@ export default function PaymentModal({
   useEffect(() => {
     if (isOpen) {
       const upiUri = buildUpiIntentUri({
-        payeeVpa: 'bharatfilings@hdfcbank',
-        payeeName: 'BharatFiling Pvt Ltd',
+        payeeVpa: import.meta.env.VITE_UPI_VPA || 'bharatfiling@hdfcbank',
+        payeeName: import.meta.env.VITE_MERCHANT_NAME || 'BharatFiling Private Limited',
         amount: order?.amount || 1769,
-        transactionNote: 'GST Registration & Monthly Compliance',
-        referenceId: order?.id || 'EST1791',
+        transactionNote: order?.service_name || 'BharatFiling Compliance Advisory',
+        referenceId: order?.order_number || order?.id || `BF${Date.now()}`,
       });
 
       generateUpiQrDataUrl(upiUri, 280).then((url) => {

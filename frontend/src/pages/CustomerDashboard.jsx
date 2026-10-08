@@ -156,11 +156,11 @@ export default function CustomerDashboard() {
         {/* Assigned CA Mini Card */}
         <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-2 text-xs">
           <div className="text-[10px] font-bold uppercase text-emerald-400">Assigned Professional</div>
-          <div className="font-extrabold text-sm">CA Rajesh Sharma (FCA)</div>
-          <div className="text-[11px] text-slate-400">Senior Compliance Partner</div>
+          <div className="font-extrabold text-sm">{activeApp?.assigned_ca_name || 'Senior CA Review Team'}</div>
+          <div className="text-[11px] text-slate-400">Statutory Compliance Desk</div>
           <div className="pt-2 flex gap-2">
             <a
-              href="https://wa.me/919876543210"
+              href="https://wa.me/9118008908800"
               target="_blank"
               rel="noreferrer"
               className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-center font-bold text-[11px] text-white transition"
@@ -215,10 +215,10 @@ export default function CustomerDashboard() {
                       </span>
                     </div>
                     <h2 className="text-lg font-black text-slate-900 mt-2">
-                      {activeApp.fields_data?.legal_name || 'Verma Tech Solutions'} ({activeApp.business_type})
+                      {activeApp.fields_data?.legal_name || activeApp.business_type || 'Registration Dossier'}
                     </h2>
                     <div className="text-xs text-slate-500 mt-0.5">
-                      Jurisdiction: {activeApp.state} · Principal Activity: {activeApp.fields_data?.business_activity || 'IT & Consulting'}
+                      Jurisdiction: {activeApp.state} · Principal Activity: {activeApp.fields_data?.business_activity || 'Commercial Trade'}
                     </div>
                   </div>
 
@@ -236,7 +236,9 @@ export default function CustomerDashboard() {
                 <div>
                   <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-3">
                     <span>Application Progress Milestones</span>
-                    <span className="text-emerald-600">80% Completed</span>
+                    <span className="text-emerald-600">
+                      {Math.min(100, Math.round(((activeApp.current_step || 1) / 10) * 100))}% Completed
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">

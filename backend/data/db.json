@@ -716,6 +716,29 @@
       "payment_completed": false,
       "created_at": "2026-10-07T10:16:37.409Z",
       "updated_at": "2026-10-07T10:16:37.410Z"
+    },
+    {
+      "id": "app_gst_05059af2",
+      "application_number": "GST-2026-000014",
+      "user_id": "usr_cust_001",
+      "business_id": "biz_0691e636",
+      "business_type": "Professional Services / Freelancer",
+      "state": "Gujarat",
+      "current_step": 1,
+      "customer_status": "Quote Generated",
+      "internal_status": "DRAFT",
+      "fields_data": {
+        "applicant_name": "yash upadhyay",
+        "mobile_number": "9876501234",
+        "pan_number": "AOOPU9849P",
+        "email": "yashupadhyay@gmail.com",
+        "state": "Gujarat",
+        "business_type": "Professional Services / Freelancer"
+      },
+      "assigned_ca_id": null,
+      "payment_completed": false,
+      "created_at": "2026-10-07T17:51:33.596Z",
+      "updated_at": "2026-10-07T17:51:33.597Z"
     }
   ],
   "documents": [
@@ -1071,6 +1094,28 @@
       "business_type": "Other Commercial Services",
       "created_at": "2026-10-07T10:16:37.414Z",
       "updated_at": "2026-10-07T10:16:37.414Z"
+    },
+    {
+      "id": "est17913954935714784d",
+      "order_number": "#est17913954935714784d",
+      "application_id": "app_gst_05059af2",
+      "application_number": "GST-2026-000014",
+      "user_id": "usr_cust_001",
+      "service_name": "GST Registration (GST Registration + Monthly Filing)",
+      "amount": 1769,
+      "subtotal": 1499,
+      "gst_amount": 270,
+      "currency": "INR",
+      "status": "CREATED",
+      "billing_cycle": "Monthly",
+      "customer_name": "yash upadhyay",
+      "customer_phone": "9876501234",
+      "customer_pan": "AOOPU9849P",
+      "customer_email": "yashupadhyay@gmail.com",
+      "state": "Gujarat",
+      "business_type": "Professional Services / Freelancer",
+      "created_at": "2026-10-07T17:51:33.613Z",
+      "updated_at": "2026-10-07T17:51:33.613Z"
     }
   ],
   "case_events": [

@@ -1,6 +1,8 @@
-# TaxVeda — AI + CA-Powered Indian Business Compliance Platform
+# BharatFiling — AI + CA-Powered Indian Business Compliance Platform
 
-TaxVeda is a production-grade Indian professional services and business compliance operating system. Built with an **AI + Human In-The-Loop** architecture, the platform combines machine extraction and validation with licensed Chartered Accountants (CAs) and Advocates.
+BharatFiling is a production-grade Indian professional services and business compliance operating system. Built with an **AI + Human In-The-Loop** architecture, the platform combines machine extraction and validation with licensed Chartered Accountants (CAs) and Advocates.
+
+> 📖 **Comprehensive Architecture & Detailed Changelog**: See [PROJECT_DOCUMENTATION_AND_CHANGELOG.md](./PROJECT_DOCUMENTATION_AND_CHANGELOG.md) for full explanations of all features, why they were built, how they work, table schemas, and exact file locations.
 
 ---
 

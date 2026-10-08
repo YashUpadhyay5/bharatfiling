@@ -11,10 +11,10 @@ import {
 const router = express.Router();
 
 // GET Pricing breakdown
-router.get('/pricing/:businessType', (req, res) => {
+router.get('/pricing/:businessType', async (req, res) => {
   try {
     const { businessType } = req.params;
-    const pricing = getGSTRegistrationPricing(decodeURIComponent(businessType));
+    const pricing = await getGSTRegistrationPricing(decodeURIComponent(businessType));
     res.json({
       success: true,
       pricing,
@@ -37,7 +37,7 @@ router.post('/create-order', authenticate, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Application not found.' });
     }
 
-    const pricing = getGSTRegistrationPricing(app.business_type);
+    const pricing = await getGSTRegistrationPricing(app.business_type);
     const orderData = await createRazorpayOrder({
       amount: pricing.total_amount,
       receipt: `rcpt_${app.application_number}`,
