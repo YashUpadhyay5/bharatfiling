@@ -1,7 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
+import { SocketProvider } from './context/SocketContext.jsx';
 import Navbar from './components/common/Navbar.jsx';
 import Footer from './components/common/Footer.jsx';
 import SupportWidget from './components/common/SupportWidget.jsx';
@@ -17,34 +18,44 @@ import ContactPage from './pages/ContactPage.jsx';
 import FaqPage from './pages/FaqPage.jsx';
 import AuthPages from './pages/AuthPages.jsx';
 import CustomerDashboard from './pages/CustomerDashboard.jsx';
-import GstWizardPage from './pages/GstWizardPage.jsx';
-import GstOnboardingPage from './pages/GstOnboardingPage.jsx';
-import CheckoutPage from './pages/CheckoutPage.jsx';
+// Modular GST Registration Flow (Isolated 3-Screen Pipeline)
+import GstRegistrationModule, {
+  OrderCheckoutPage as GstCheckoutPage,
+} from './pages/gst-registration/index.jsx';
 import CaDashboardPage from './pages/CaDashboardPage.jsx';
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
+
+import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 
 function AppLayout({ children }) {
   const location = useLocation();
   const isCheckout = location.pathname.startsWith('/checkout');
-  const isDossierWizard = location.pathname.startsWith('/apply/gst/') && location.pathname !== '/apply/gst';
   const isCaOrAdmin = location.pathname.startsWith('/ca') || location.pathname.startsWith('/admin');
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isCheckout && !isDossierWizard && !isCaOrAdmin && <Navbar />}
-      <main className="flex-1">{children}</main>
-      {!isCheckout && !isDossierWizard && !isCaOrAdmin && <Footer />}
+      {!isCheckout && !isCaOrAdmin && <Navbar />}
+      <main className="flex-1">
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </main>
+      {!isCheckout && !isCaOrAdmin && <Footer />}
       <SupportWidget />
     </div>
   );
+}
+
+function ApplicationRedirect() {
+  const { appId } = useParams();
+  return <Navigate to={`/dashboard${appId ? `?app=${appId}` : ''}`} replace />;
 }
 
 export default function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
-          <AppLayout>
+        <SocketProvider>
+          <Router>
+            <AppLayout>
             <Routes>
               {/* Public Website Routes */}
               <Route path="/" element={<LandingPage />} />
@@ -65,13 +76,13 @@ export default function App() {
               <Route path="/login" element={<AuthPages defaultMode="login" />} />
               <Route path="/register" element={<AuthPages defaultMode="register" />} />
 
-              {/* Customer Portal & Onboarding Flow */}
+              {/* Customer Portal & Modular 3-Screen Statutory Registration Flow */}
               <Route path="/dashboard" element={<CustomerDashboard />} />
-              <Route path="/apply/gst" element={<GstOnboardingPage />} />
-              <Route path="/apply/gst/dossier" element={<GstWizardPage />} />
-              <Route path="/apply/gst/:id" element={<GstWizardPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/checkout/:orderId" element={<CheckoutPage />} />
+              <Route path="/apply/gst" element={<GstRegistrationModule />} />
+              <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
+              <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
+              <Route path="/checkout" element={<GstCheckoutPage />} />
+              <Route path="/checkout/:orderId" element={<GstCheckoutPage />} />
 
               {/* Professional CA Portal */}
               <Route path="/ca/dashboard" element={<CaDashboardPage />} />
@@ -84,6 +95,7 @@ export default function App() {
             </Routes>
           </AppLayout>
         </Router>
+        </SocketProvider>
       </ToastProvider>
     </AuthProvider>
   );

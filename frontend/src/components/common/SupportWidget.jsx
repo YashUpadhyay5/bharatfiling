@@ -27,7 +27,7 @@ export default function SupportWidget({ currentStep, businessType, applicationId
     {
       id: 'init-1',
       sender: 'bot',
-      text: 'Namaste! I am your AI GST Assistant. You can ask me anything about GST eligibility, required documents, or application steps. How can I help you today?',
+      text: 'Namaste! I am your BharatFiling AI Assistant. Ask me anything about Company Incorporation, Income Tax (ITR), GST, MCA ROC Compliance, Accounting, or documentation. How can I assist your business today?',
     },
   ]);
   const [inputQuery, setInputQuery] = useState('');
@@ -125,7 +125,7 @@ export default function SupportWidget({ currentStep, businessType, applicationId
             </div>
             <div className="text-left hidden sm:block">
               <div className="text-xs font-bold leading-none flex items-center gap-1">
-                GST Assistant <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                CA & Compliance AI <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">AI + CA Support Available</div>
             </div>
@@ -402,7 +402,7 @@ export default function SupportWidget({ currentStep, businessType, applicationId
                   type="text"
                   value={inputQuery}
                   onChange={(e) => setInputQuery(e.target.value)}
-                  placeholder="Ask a question about GST..."
+                  placeholder="Ask a question about Incorporation, ITR, GST, MCA..."
                   className="flex-1 px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
                 />
                 <button

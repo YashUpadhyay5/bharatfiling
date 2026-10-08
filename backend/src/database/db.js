@@ -286,34 +286,46 @@ class DatabaseStore {
     console.log('✅ BharatFiling Database initialized with seed data.');
   }
 
+  reload() {
+    try {
+      if (fs.existsSync(DB_FILE_PATH)) {
+        const raw = fs.readFileSync(DB_FILE_PATH, 'utf-8');
+        const parsed = JSON.parse(raw);
+        this.data = { ...this.data, ...parsed };
+      }
+    } catch (err) {
+      // Keep in-memory cache if file read fails momentarily
+    }
+  }
+
   // --- Getters & Mutators ---
-  getUsers() { return this.data.users; }
+  getUsers() { this.reload(); return this.data.users || []; }
   saveUsers(users) { this.data.users = users; this.persist(); }
 
-  getProfiles() { return this.data.customer_profiles; }
+  getProfiles() { this.reload(); return this.data.customer_profiles || []; }
   saveProfiles(profiles) { this.data.customer_profiles = profiles; this.persist(); }
 
-  getBusinesses() { return this.data.businesses; }
+  getBusinesses() { this.reload(); return this.data.businesses || []; }
   saveBusinesses(businesses) { this.data.businesses = businesses; this.persist(); }
 
-  getFieldDefinitions() { return this.data.field_definitions; }
+  getFieldDefinitions() { return this.data.field_definitions || []; }
 
-  getApplications() { return this.data.gst_applications; }
+  getApplications() { this.reload(); return this.data.gst_applications || []; }
   saveApplications(apps) { this.data.gst_applications = apps; this.persist(); }
 
-  getDocuments() { return this.data.documents; }
+  getDocuments() { this.reload(); return this.data.documents || []; }
   saveDocuments(docs) { this.data.documents = docs; this.persist(); }
 
-  getOrders() { return this.data.orders; }
+  getOrders() { this.reload(); return this.data.orders || []; }
   saveOrders(orders) { this.data.orders = orders; this.persist(); }
 
-  getCaseEvents() { return this.data.case_events; }
+  getCaseEvents() { this.reload(); return this.data.case_events || []; }
   saveCaseEvents(events) { this.data.case_events = events; this.persist(); }
 
-  getSupportTickets() { return this.data.support_tickets; }
+  getSupportTickets() { this.reload(); return this.data.support_tickets || []; }
   saveSupportTickets(tickets) { this.data.support_tickets = tickets; this.persist(); }
 
-  getAuditLogs() { return this.data.audit_logs; }
+  getAuditLogs() { this.reload(); return this.data.audit_logs || []; }
   saveAuditLogs(logs) { this.data.audit_logs = logs; this.persist(); }
 }
 

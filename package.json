@@ -1,0 +1,9 @@
+{
+  "name": "bharatfiling-platform",
+  "version": "1.0.0",
+  "description": "BharatFiling - Complete Indian Business Compliance Platform",
+  "scripts": {
+    "build": "npm --prefix backend install && npm --prefix frontend install && npm --prefix frontend run build",
+    "start": "npm --prefix backend start"
+  }
+}

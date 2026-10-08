@@ -14,9 +14,20 @@ try {
   console.warn('Razorpay SDK initialization notice:', err.message);
 }
 
-export const getGSTRegistrationPricing = (businessType = 'Proprietorship') => {
-  const baseFee = 1499;
-  const gstRate = 0.18;
+import { ServiceModel } from '../models/Service.js';
+
+export const getGSTRegistrationPricing = async (businessType = 'Proprietorship') => {
+  let baseFee = 1499;
+  let gstRate = 0.18;
+  try {
+    const service = await ServiceModel.findById('gst-registration');
+    if (service && service.base_fee) {
+      baseFee = parseFloat(service.base_fee);
+      gstRate = (parseFloat(service.gst_rate) || 18) / 100;
+    }
+  } catch (err) {
+    // Keep standard fallback
+  }
   const gstAmount = Math.round(baseFee * gstRate);
   const totalAmount = baseFee + gstAmount;
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { useSocket } from '../context/SocketContext.jsx';
 import confetti from 'canvas-confetti';
 import {
   FileCheck2,
@@ -21,11 +22,13 @@ import {
   FileText,
   PhoneCall,
   Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 
 export default function CustomerDashboard() {
   const { user, isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { socket, joinApplication, joinUser } = useSocket();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'profile', 'businesses', 'applications', 'docs'
@@ -57,27 +60,239 @@ export default function CustomerDashboard() {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
-    } else {
-      fetchDashboardData();
+      return;
     }
-  }, [isAuthenticated]);
+    // Automatically route Chartered Accountants to their specialized workbench
+    if (user?.role === 'CA') {
+      navigate('/ca/dashboard', { replace: true });
+      return;
+    }
+    if (user?.role === 'ADMIN') {
+      navigate('/admin', { replace: true });
+      return;
+    }
+    fetchDashboardData();
+  }, [isAuthenticated, user]);
 
-  const activeApp = applications[0]; // Primary active application
+  const [searchParams] = useSearchParams();
+  const [selectedAppIndex, setSelectedAppIndex] = useState(0);
+  const activeApp = applications[selectedAppIndex] || applications[0]; // Primary active application
+  const moduleType = activeApp?.module_type || 'GST';
 
-  // Customer-facing 7-step tracker definition
+  useEffect(() => {
+    const queryApp = searchParams.get('app') || searchParams.get('appId');
+    if (queryApp && applications.length > 0) {
+      const idx = applications.findIndex(
+        (a) => a.id === queryApp || a.application_number === queryApp
+      );
+      if (idx !== -1) {
+        setSelectedAppIndex(idx);
+        setActiveTab('overview');
+      }
+    }
+  }, [searchParams, applications]);
+
+  // Real-Time Socket.IO Synchronization with CA Desk
+  useEffect(() => {
+    if (user?.id) {
+      joinUser(user.id);
+    }
+    if (activeApp?.id) {
+      joinApplication(activeApp.id);
+    }
+
+    if (socket) {
+      const handleStatusUpdated = (data) => {
+        if (!activeApp || data.application_id === activeApp.id) {
+          showSuccess(`⚡ Live Update from CA: ${data.customer_status || 'Application Updated'}`);
+          setApplications((prev) =>
+            prev.map((app) =>
+              app.id === data.application_id
+                ? {
+                    ...app,
+                    internal_status: data.internal_status,
+                    customer_status: data.customer_status,
+                    arn: data.arn || app.arn,
+                    gstin: data.gstin || app.gstin,
+                    certificate_url: data.certificate_url || app.certificate_url,
+                  }
+                : app
+            )
+          );
+        }
+      };
+
+      const handleCertificateDispatched = (data) => {
+        if (!activeApp || data.application_id === activeApp.id) {
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+          showSuccess('🎉 Congratulations! Your Official Statutory Registration Certificate has been issued!');
+          setApplications((prev) =>
+            prev.map((app) =>
+              app.id === data.application_id
+                ? {
+                    ...app,
+                    internal_status: 'COMPLETED',
+                    customer_status: 'Completed',
+                    gstin: data.gstin || app.gstin,
+                    certificate_url: data.certificate_url || '/sample_gst_certificate.pdf',
+                  }
+                : app
+            )
+          );
+        }
+      };
+
+      socket.on('application:status_updated', handleStatusUpdated);
+      socket.on('certificate:dispatched', handleCertificateDispatched);
+
+      return () => {
+        socket.off('application:status_updated', handleStatusUpdated);
+        socket.off('certificate:dispatched', handleCertificateDispatched);
+      };
+    }
+  }, [socket, activeApp?.id, user?.id]);
+
+  // Clean 4-Stage Statutory Progression matching CA Actions tailored to Module
+  const getStep2Info = () => {
+    switch (moduleType) {
+      case 'COMPANY':
+        return { title: '2. Docs Verified by CA', desc: 'SPICe+ Dossier Prepared' };
+      case 'ITR':
+        return { title: '2. Financials Verified by CA', desc: 'Tax Computation Prepared' };
+      case 'TRADEMARK':
+        return { title: '2. Search & Draft by Attorney', desc: 'Form TM-A Prepared' };
+      case 'LLP':
+        return { title: '2. Partner KYC Verified', desc: 'FiLLiP Dossier Prepared' };
+      default:
+        return { title: '2. Docs Verified by CA', desc: 'Form REG-01 Prepared' };
+    }
+  };
+
+  const getStep3Info = () => {
+    switch (moduleType) {
+      case 'COMPANY':
+        return {
+          title: '3. Submitted to MCA',
+          desc: activeApp?.arn ? `SRN: ${activeApp.arn}` : 'Registrar of Companies Verification',
+        };
+      case 'ITR':
+        return {
+          title: '3. E-Filed on IT Portal',
+          desc: activeApp?.arn ? `Ack: ${activeApp.arn}` : 'Centralized CPC Verification',
+        };
+      case 'TRADEMARK':
+        return {
+          title: '3. Filed on IP India',
+          desc: activeApp?.arn ? `TM App: ${activeApp.arn}` : 'Trade Marks Registry Verification',
+        };
+      case 'LLP':
+        return {
+          title: '3. Filed on MCA Portal',
+          desc: activeApp?.arn ? `SRN: ${activeApp.arn}` : 'ROC Corporate Verification',
+        };
+      default:
+        return {
+          title: '3. Submitted to Govt (ARN)',
+          desc: activeApp?.arn ? `ARN: ${activeApp.arn}` : 'Tax Officer Verification',
+        };
+    }
+  };
+
+  const getStep4Info = () => {
+    switch (moduleType) {
+      case 'COMPANY':
+        return {
+          title: '4. Certificate Ready',
+          desc: activeApp?.gstin ? `CIN: ${activeApp.gstin}` : 'COI Allotment Pending',
+        };
+      case 'ITR':
+        return {
+          title: '4. Assessment Ready',
+          desc: activeApp?.gstin ? `Order: ${activeApp.gstin}` : 'ITR-V Delivery Pending',
+        };
+      case 'TRADEMARK':
+        return {
+          title: '4. TM Registered',
+          desc: activeApp?.gstin ? `Reg No: ${activeApp.gstin}` : 'TM Certificate Pending',
+        };
+      case 'LLP':
+        return {
+          title: '4. LLPIN Allotted',
+          desc: activeApp?.gstin ? `LLPIN: ${activeApp.gstin}` : 'COI Delivery Pending',
+        };
+      default:
+        return {
+          title: '4. Certificate Ready',
+          desc: activeApp?.gstin ? `GSTIN: ${activeApp.gstin}` : 'Form REG-06 Allotted',
+        };
+    }
+  };
+
+  const step2Info = getStep2Info();
+  const step3Info = getStep3Info();
+  const step4Info = getStep4Info();
+
   const customerSteps = [
-    { title: 'Profile & Details', status: 'done' },
-    { title: 'Documents AI Checked', status: 'done' },
-    { title: 'CA Statutory Review', status: activeApp?.internal_status === 'CA_REVIEW' ? 'active' : 'done' },
-    { title: 'Payment Completed', status: activeApp?.payment_completed ? 'done' : 'pending' },
-    { title: 'Application Processing', status: activeApp?.internal_status === 'APPLICATION_PREPARATION' || activeApp?.internal_status === 'APPLICATION_SUBMITTED' ? 'active' : activeApp?.internal_status === 'GOVERNMENT_PROCESSING' || activeApp?.internal_status === 'COMPLETED' ? 'done' : 'pending' },
-    { title: 'Government Processing', status: activeApp?.internal_status === 'GOVERNMENT_PROCESSING' ? 'active' : activeApp?.internal_status === 'COMPLETED' ? 'done' : 'pending' },
-    { title: 'GST Certificate Issued', status: activeApp?.internal_status === 'COMPLETED' ? 'done' : 'pending' },
+    {
+      title: '1. Application & Payment',
+      desc: 'Order Paid & Confirmed',
+      status: 'done',
+    },
+    {
+      title: step2Info.title,
+      desc: step2Info.desc,
+      status:
+        activeApp?.internal_status === 'CA_REVIEW' ||
+        activeApp?.internal_status === 'PAYMENT_CONFIRMED'
+          ? 'active'
+          : activeApp?.internal_status === 'DOCUMENTS_VERIFIED' ||
+            activeApp?.internal_status === 'APPLICATION_PREPARATION' ||
+            activeApp?.internal_status === 'GOVERNMENT_PROCESSING' ||
+            activeApp?.internal_status === 'GOVERNMENT_APPROVED' ||
+            activeApp?.internal_status === 'COMPLETED'
+          ? 'done'
+          : 'pending',
+    },
+    {
+      title: step3Info.title,
+      desc: step3Info.desc,
+      status:
+        activeApp?.internal_status === 'GOVERNMENT_PROCESSING'
+          ? 'active'
+          : activeApp?.internal_status === 'GOVERNMENT_APPROVED' ||
+            activeApp?.internal_status === 'COMPLETED'
+          ? 'done'
+          : 'pending',
+    },
+    {
+      title: step4Info.title,
+      desc: step4Info.desc,
+      status: activeApp?.internal_status === 'COMPLETED' ? 'done' : 'pending',
+    },
   ];
 
   const handleDownloadCertificate = () => {
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-    showSuccess('Downloading official Form REG-06 GST Registration Certificate...');
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    showSuccess('Downloading official government registration certificate...');
+
+    const certUrl = activeApp?.certificate_url || '/sample_gst_certificate.pdf';
+    const link = document.createElement('a');
+    link.href = certUrl;
+    link.target = '_blank';
+    const prefix =
+      moduleType === 'COMPANY'
+        ? 'MCA_COI'
+        : moduleType === 'ITR'
+        ? 'ITR_V_ACK'
+        : moduleType === 'TRADEMARK'
+        ? 'TM_CERT'
+        : moduleType === 'LLP'
+        ? 'LLP_COI'
+        : 'GST_REG06';
+    link.download = `${prefix}_${activeApp?.gstin || activeApp?.application_number || 'Certificate'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading) {
@@ -98,7 +313,7 @@ export default function CustomerDashboard() {
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Account Portal</span>
-            <Link to="/" className="text-[11px] font-bold text-[#0B1E36] hover:underline flex items-center gap-1">
+            <Link to="/" className="text-[11px] font-bold text-[#111827] hover:underline flex items-center gap-1">
               ← Home
             </Link>
           </div>
@@ -156,11 +371,11 @@ export default function CustomerDashboard() {
         {/* Assigned CA Mini Card */}
         <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-2 text-xs">
           <div className="text-[10px] font-bold uppercase text-emerald-400">Assigned Professional</div>
-          <div className="font-extrabold text-sm">CA Rajesh Sharma (FCA)</div>
-          <div className="text-[11px] text-slate-400">Senior Compliance Partner</div>
+          <div className="font-extrabold text-sm">{activeApp?.assigned_ca_name || 'Senior CA Review Team'}</div>
+          <div className="text-[11px] text-slate-400">Statutory Compliance Desk</div>
           <div className="pt-2 flex gap-2">
             <a
-              href="https://wa.me/919876543210"
+              href="https://wa.me/9118008908800"
               target="_blank"
               rel="noreferrer"
               className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-center font-bold text-[11px] text-white transition"
@@ -194,12 +409,37 @@ export default function CustomerDashboard() {
               </div>
 
               <Link
-                to="/apply/gst"
+                to="/services"
                 className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5"
               >
-                <Plus className="w-4 h-4" /> Start New GST Application
+                <Plus className="w-4 h-4" /> Start New Statutory Filing
               </Link>
             </div>
+
+            {/* Multi-Application Selector Tabs */}
+            {applications.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">
+                  Active Cases ({applications.length}):
+                </span>
+                {applications.map((app, idx) => (
+                  <button
+                    key={app.id || idx}
+                    onClick={() => setSelectedAppIndex(idx)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                      selectedAppIndex === idx
+                        ? 'bg-slate-900 text-white shadow-xs ring-2 ring-emerald-500'
+                        : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">
+                      {app.module_type || 'GST'}
+                    </span>
+                    <span className="font-mono text-[11px]">{app.application_number}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Active Application Card */}
             {activeApp ? (
@@ -210,100 +450,332 @@ export default function CustomerDashboard() {
                       <span className="font-mono text-xs font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
                         {activeApp.application_number}
                       </span>
+                      <span className="text-[10px] uppercase font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                        {activeApp.module_type || 'GST'}
+                      </span>
                       <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                         {activeApp.customer_status}
                       </span>
                     </div>
                     <h2 className="text-lg font-black text-slate-900 mt-2">
-                      {activeApp.fields_data?.legal_name || 'Verma Tech Solutions'} ({activeApp.business_type})
+                      {activeApp.service_name || activeApp.fields_data?.legal_name || activeApp.business_type || 'Statutory Compliance Dossier'}
                     </h2>
                     <div className="text-xs text-slate-500 mt-0.5">
-                      Jurisdiction: {activeApp.state} · Principal Activity: {activeApp.fields_data?.business_activity || 'IT & Consulting'}
+                      Jurisdiction: {activeApp.state} · Principal Activity: {activeApp.fields_data?.business_activity || 'Statutory Enterprise'}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Link
-                      to={`/apply/gst/${activeApp.id}`}
-                      className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition"
-                    >
-                      Open Application Wizard &rarr;
-                    </Link>
+                    <span className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-xs border border-emerald-200">
+                      Filing Managed by Assigned CA
+                    </span>
                   </div>
                 </div>
 
-                {/* Simplified Customer 7-Stage Tracker */}
+                {/* Modern 4-Stage Statutory Progress Tracker */}
                 <div>
                   <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-3">
-                    <span>Application Progress Milestones</span>
-                    <span className="text-emerald-600">80% Completed</span>
+                    <div className="flex items-center gap-2">
+                      <span>Statutory Filing Milestones</span>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        Live Statutory Sync
+                      </span>
+                    </div>
+                    <span className="text-emerald-600 font-extrabold">
+                      {activeApp.internal_status === 'COMPLETED'
+                        ? '100% Completed'
+                        : activeApp.internal_status === 'GOVERNMENT_APPROVED'
+                        ? '85% In Progress'
+                        : activeApp.internal_status === 'GOVERNMENT_PROCESSING'
+                        ? '65% In Progress'
+                        : activeApp.internal_status === 'DOCUMENTS_VERIFIED' ||
+                          activeApp.internal_status === 'APPLICATION_PREPARATION' ||
+                          activeApp.internal_status === 'CA_REVIEW'
+                        ? '40% In Progress'
+                        : '25% Initiated'}
+                    </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {customerSteps.map((step, idx) => {
-                      let bg = 'bg-slate-100 text-slate-500 border-slate-200';
+                      let bg = 'bg-slate-50 text-slate-500 border-slate-200';
                       let icon = idx + 1;
 
                       if (step.status === 'done') {
-                        bg = 'bg-emerald-50 text-emerald-900 border-emerald-300 font-bold';
+                        bg = 'bg-emerald-50/80 text-emerald-950 border-emerald-300 font-bold';
                         icon = '✓';
                       } else if (step.status === 'active') {
-                        bg = 'bg-amber-50 text-amber-900 border-amber-300 font-bold animate-subtle-pulse';
-                        icon = '●';
+                        bg = 'bg-amber-50 text-amber-950 border-amber-300 font-bold animate-pulse';
+                        icon = '⏳';
                       }
 
                       return (
-                        <div key={idx} className={`p-3 rounded-2xl border text-center space-y-1.5 ${bg}`}>
-                          <div className="w-5 h-5 rounded-full bg-white/80 mx-auto flex items-center justify-center text-[10px] font-black shadow-2xs">
+                        <div key={idx} className={`p-3.5 rounded-2xl border text-center space-y-1.5 transition ${bg}`}>
+                          <div className="w-6 h-6 rounded-full bg-white mx-auto flex items-center justify-center text-xs font-black shadow-xs">
                             {icon}
                           </div>
-                          <div className="text-[11px] leading-tight">{step.title}</div>
+                          <div className="text-xs font-bold leading-tight">{step.title}</div>
+                          <div className="text-[10px] opacity-75">{step.desc}</div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* ARN & Allotment Box */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                {/* ARN & Official Registration Allotment Card */}
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-emerald-50/30 border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs items-center">
                   <div>
-                    <div className="text-slate-400 font-bold uppercase text-[10px]">Government ARN</div>
+                    <div className="text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                      {moduleType === 'COMPANY'
+                        ? 'Corporate SRN'
+                        : moduleType === 'ITR'
+                        ? 'ITD Ack No'
+                        : moduleType === 'TRADEMARK'
+                        ? 'TM Application No'
+                        : moduleType === 'LLP'
+                        ? 'FiLLiP SRN'
+                        : 'Government ARN'}
+                    </div>
                     <div className="font-mono font-bold text-slate-900 text-sm mt-0.5">
-                      {activeApp.arn || 'AA2702260012345 (Active)'}
+                      {activeApp.arn ? (
+                        <span className="text-emerald-700">{activeApp.arn}</span>
+                      ) : (
+                        <span className="text-slate-400 italic">Generated upon submission</span>
+                      )}
                     </div>
                   </div>
 
                   <div>
-                    <div className="text-slate-400 font-bold uppercase text-[10px]">Allotted GSTIN</div>
-                    <div className="font-mono font-bold text-emerald-700 text-sm mt-0.5">
-                      {activeApp.gstin || '29ABCDE1234F1Z5 (Approved)'}
+                    <div className="text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                      {moduleType === 'COMPANY'
+                        ? 'Corporate CIN'
+                        : moduleType === 'ITR'
+                        ? 'Assessment Ref'
+                        : moduleType === 'TRADEMARK'
+                        ? 'Registered TM No'
+                        : moduleType === 'LLP'
+                        ? 'Allotted LLPIN'
+                        : 'Allotted GSTIN'}
+                    </div>
+                    <div className="font-mono font-bold text-sm mt-0.5">
+                      {activeApp.gstin ? (
+                        <span className="text-emerald-700 font-black">{activeApp.gstin}</span>
+                      ) : (
+                        <span className="text-slate-400 italic">Issued upon final approval</span>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center sm:justify-end">
                     <button
                       onClick={handleDownloadCertificate}
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition"
+                      disabled={activeApp.internal_status !== 'COMPLETED' && !activeApp.certificate_url && !activeApp.gstin}
+                      className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition ${
+                        activeApp.internal_status === 'COMPLETED' || activeApp.certificate_url || activeApp.gstin
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer active:scale-95 shadow-md'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                      }`}
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      Download GST Certificate (REG-06)
+                      <Download className="w-4 h-4" />
+                      <span>
+                        {moduleType === 'COMPANY'
+                          ? 'Download Certificate (COI)'
+                          : moduleType === 'ITR'
+                          ? 'Download ITR-V Ack'
+                          : moduleType === 'TRADEMARK'
+                          ? 'Download TM Certificate'
+                          : moduleType === 'LLP'
+                          ? 'Download LLP Certificate'
+                          : 'Download GST Certificate (REG-06)'}
+                      </span>
                     </button>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-8 rounded-3xl bg-white border border-slate-200 text-center space-y-3">
-                <FileCheck2 className="w-10 h-10 text-slate-400 mx-auto" />
-                <h3 className="font-bold text-slate-800 text-base">No Active GST Application</h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  You have not initiated any GST registration yet. Start now with our streamlined 5-minute wizard.
-                </p>
-                <Link
-                  to="/apply/gst"
-                  className="inline-flex px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs"
-                >
-                  Start GST Registration &rarr;
-                </Link>
+              <div className="space-y-6 animate-fade-in">
+                {/* Hero Get Started Banner */}
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 sm:p-10 border border-slate-800 shadow-xl">
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                  <div className="relative z-10 max-w-2xl space-y-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-500/30">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Zero Active Filings • Instant 3-Minute Initiation
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      Start Your Business Statutory Registrations
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                      You haven't initiated any filings yet. Get compliant and protect your business today. Every application is personally reviewed, drafted, and filed by our certified Chartered Accountants.
+                    </p>
+                    <div className="pt-2 flex flex-wrap gap-3">
+                      <Link
+                        to="/apply/gst"
+                        className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-900/30 transition flex items-center gap-2"
+                      >
+                        <FileCheck2 className="w-4 h-4" />
+                        <span>Apply for GST Registration (₹1,769 All-Inclusive) &rarr;</span>
+                      </Link>
+                      <Link
+                        to="/services"
+                        className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition"
+                      >
+                        Explore 40+ Other Services
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                {/* All Modules Grid */}
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-emerald-600" />
+                    Available Statutory Compliance Modules
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* GST Module */}
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-emerald-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+                          📜
+                        </div>
+                        <h4 className="font-extrabold text-slate-900 text-sm">GST Registration</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">
+                          Form REG-01 XML filing, 15-digit ARN generation, and official REG-06 Certificate allotment.
+                        </p>
+                      </div>
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span className="font-bold text-emerald-700 text-xs">₹1,769 All-Inclusive</span>
+                        <Link
+                          to="/apply/gst"
+                          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold"
+                        >
+                          Apply Now &rarr;
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Company Registration */}
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+                          🏢
+                        </div>
+                        <h4 className="font-extrabold text-slate-900 text-sm">Private Limited Company</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">
+                          MCA SPICe+ incorporation with RUN name approval, DIN, PAN, TAN & Certificate of Incorporation.
+                        </p>
+                      </div>
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span className="font-bold text-blue-700 text-xs">₹4,999 All-Inclusive</span>
+                        <Link
+                          to="/apply/company-registration"
+                          className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold"
+                        >
+                          Apply Now &rarr;
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Income Tax Return */}
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-amber-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+                          📊
+                        </div>
+                        <h4 className="font-extrabold text-slate-900 text-sm">Income Tax Return (ITR)</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">
+                          Expert CA-assisted ITR-1 to ITR-4 filing with maximum legal deductions and refund tracking.
+                        </p>
+                      </div>
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span className="font-bold text-amber-700 text-xs">₹999 All-Inclusive</span>
+                        <Link
+                          to="/apply/income-tax"
+                          className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold"
+                        >
+                          Apply Now &rarr;
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Trademark */}
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-purple-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
+                          ™️
+                        </div>
+                        <h4 className="font-extrabold text-slate-900 text-sm">Trademark Registration</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">
+                          Brand name search, Form TM-A drafting, legal objection clearance, and registration protection.
+                        </p>
+                      </div>
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span className="font-bold text-purple-700 text-xs">₹1,999 All-Inclusive</span>
+                        <Link
+                          to="/apply/trademark"
+                          className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold"
+                        >
+                          Apply Now &rarr;
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* LLP Registration */}
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-indigo-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold">
+                          🤝
+                        </div>
+                        <h4 className="font-extrabold text-slate-900 text-sm">Limited Liability Partnership</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">
+                          MCA FiLLiP statutory incorporation, DPIN allotment, and custom partnership agreement deed.
+                        </p>
+                      </div>
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span className="font-bold text-indigo-700 text-xs">₹3,999 All-Inclusive</span>
+                        <Link
+                          to="/apply/llp-registration"
+                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold"
+                        >
+                          Apply Now &rarr;
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3 Trust Guarantees */}
+                <div className="p-6 rounded-3xl bg-emerald-50/50 border border-emerald-200/60 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900">Assigned Chartered Accountant</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Every statutory filing is verified by a licensed FCA.</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900">Live WebSockets Tracking</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Stage progression updates live in real-time.</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                      <FileCheck2 className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900">Direct Certificate Delivery</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Download official government certificates directly from your dashboard.</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -403,28 +875,70 @@ export default function CustomerDashboard() {
         {/* APPLICATIONS TAB */}
         {activeTab === 'applications' && (
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md space-y-6 animate-fade-in">
-            <h2 className="text-lg font-extrabold text-slate-900">All GST Applications</h2>
-            <div className="space-y-3">
-              {applications.map((app) => (
-                <div key={app.id} className="p-4 rounded-2xl border border-slate-200 flex items-center justify-between text-xs">
-                  <div>
-                    <div className="font-bold text-slate-900 font-mono">{app.application_number}</div>
-                    <div className="text-slate-500 mt-0.5">{app.business_type} · {app.state}</div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                      {app.customer_status}
-                    </span>
-                    <Link
-                      to={`/apply/gst/${app.id}`}
-                      className="px-3 py-1.5 rounded-xl bg-slate-900 text-white font-bold"
-                    >
-                      Open &rarr;
-                    </Link>
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-lg font-extrabold text-slate-900">All Statutory Filings</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Complete audit ledger of all corporate, tax, and registration applications.
+                </p>
+              </div>
+              <Link
+                to="/services"
+                className="px-4 py-2 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" /> Start New Filing
+              </Link>
             </div>
+
+            {applications.length > 0 ? (
+              <div className="space-y-3">
+                {applications.map((app, idx) => (
+                  <div
+                    key={app.id || idx}
+                    className="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white hover:border-[#111827] hover:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition group"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 font-mono text-sm">{app.application_number}</span>
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                          {app.module_type || 'GST'}
+                        </span>
+                      </div>
+                      <div className="text-slate-500 mt-1">
+                        {app.service_name || app.business_type} · {app.state || 'India'}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                        {app.customer_status || 'In Progress'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedAppIndex(idx);
+                          setActiveTab('overview');
+                        }}
+                        className="px-4 py-2 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span>Open & Track</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 text-center text-xs text-slate-400 space-y-3">
+                <div>No statutory filings recorded yet.</div>
+                <Link
+                  to="/services"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Start Your First Filing
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </main>

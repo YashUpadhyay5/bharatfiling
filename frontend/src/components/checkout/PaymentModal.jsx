@@ -48,11 +48,11 @@ export default function PaymentModal({
   useEffect(() => {
     if (isOpen) {
       const upiUri = buildUpiIntentUri({
-        payeeVpa: 'bharatfilings@hdfcbank',
-        payeeName: 'BharatFiling Pvt Ltd',
+        payeeVpa: import.meta.env.VITE_UPI_VPA || 'bharatfiling@hdfcbank',
+        payeeName: import.meta.env.VITE_MERCHANT_NAME || 'BharatFiling Private Limited',
         amount: order?.amount || 1769,
-        transactionNote: 'GST Registration & Monthly Compliance',
-        referenceId: order?.id || 'EST1791',
+        transactionNote: order?.service_name || 'BharatFiling Compliance Advisory',
+        referenceId: order?.order_number || order?.id || `BF${Date.now()}`,
       });
 
       generateUpiQrDataUrl(upiUri, 280).then((url) => {
@@ -111,7 +111,7 @@ export default function PaymentModal({
           particleCount: 120,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#0B1E36', '#F26522', '#10B981'],
+          colors: ['#111827', '#F26522', '#10B981'],
         });
 
         setTimeout(() => {
@@ -135,7 +135,7 @@ export default function PaymentModal({
         {/* Modal Header */}
         <div className="p-5 sm:p-6 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#0B1E36] text-white flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[#111827] text-white flex items-center justify-center shadow-xs">
               {activeTab === 'autopay' ? (
                 <CreditCard className="w-5 h-5 text-amber-300" />
               ) : (
@@ -174,7 +174,7 @@ export default function PaymentModal({
             }}
             className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'autopay'
-                ? 'bg-white text-[#0B1E36] shadow-xs border border-slate-200'
+                ? 'bg-white text-[#111827] shadow-xs border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -188,7 +188,7 @@ export default function PaymentModal({
             }}
             className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'qr'
-                ? 'bg-white text-[#0B1E36] shadow-xs border border-slate-200'
+                ? 'bg-white text-[#111827] shadow-xs border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -230,7 +230,7 @@ export default function PaymentModal({
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-500 font-medium">Monthly Auto-Debit</span>
-                  <span className="font-extrabold text-[#0B1E36] text-sm">₹{order?.amount || 1769} / month</span>
+                  <span className="font-extrabold text-[#111827] text-sm">₹{order?.amount || 1769} / month</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-500 font-medium">Next Billing Date</span>
@@ -242,7 +242,7 @@ export default function PaymentModal({
                   </span>
                   <button
                     onClick={() => setShowMandateInfo(!showMandateInfo)}
-                    className="text-[#0B1E36] hover:underline flex items-center gap-0.5 font-semibold cursor-pointer"
+                    className="text-[#111827] hover:underline flex items-center gap-0.5 font-semibold cursor-pointer"
                   >
                     AutoPay FAQs {showMandateInfo ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                   </button>
@@ -267,7 +267,7 @@ export default function PaymentModal({
                     value={upiId}
                     onChange={(e) => setUpiId(e.target.value)}
                     placeholder="e.g. yourname@paytm or 9876543210@ybl"
-                    className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B1E36]/30 focus:border-[#0B1E36]"
+                    className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827]"
                   />
                   <div className="absolute right-3 top-3 flex items-center gap-1 text-[11px] text-slate-400 font-medium">
                     <span>@okaxis</span>
@@ -283,7 +283,7 @@ export default function PaymentModal({
                   type="checkbox"
                   checked={termsAgreed}
                   onChange={(e) => setTermsAgreed(e.target.checked)}
-                  className="mt-0.5 rounded border-slate-300 text-[#0B1E36] focus:ring-[#0B1E36]"
+                  className="mt-0.5 rounded border-slate-300 text-[#111827] focus:ring-[#111827]"
                 />
                 <span className="text-[11px] text-slate-600 leading-snug">
                   By ticking this box, you agree that BharatFiling will automatically continue your monthly subscription and charge the monthly fee until you cancel. You may cancel at any time to avoid future charges.
@@ -320,7 +320,7 @@ export default function PaymentModal({
                 <button
                   type="button"
                   onClick={() => handleVerifyPayment('AUTOPAY')}
-                  className="w-full py-2 text-center text-[11px] font-semibold text-slate-500 hover:text-[#0B1E36] transition cursor-pointer"
+                  className="w-full py-2 text-center text-[11px] font-semibold text-slate-500 hover:text-[#111827] transition cursor-pointer"
                 >
                   ⚡ Instant Demo Test (Bypass Bank Authentication)
                 </button>
@@ -354,7 +354,7 @@ export default function PaymentModal({
 
                 {/* BharatFiling Shield in center */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1.5 rounded-full shadow-md border border-slate-200">
-                  <div className="w-7 h-7 rounded-full bg-[#0B1E36] text-[#F26522] flex items-center justify-center font-black text-xs">
+                  <div className="w-7 h-7 rounded-full bg-[#111827] text-[#F26522] flex items-center justify-center font-black text-xs">
                     BF
                   </div>
                 </div>
@@ -388,7 +388,7 @@ export default function PaymentModal({
                 <button
                   onClick={() => handleVerifyPayment('UPI_QR')}
                   disabled={isProcessing}
-                  className="w-full py-3.5 px-6 rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  className="w-full py-3.5 px-6 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                 >
                   {isProcessing ? (
                     <>
@@ -406,7 +406,7 @@ export default function PaymentModal({
                 <button
                   type="button"
                   onClick={() => handleVerifyPayment('UPI_QR')}
-                  className="w-full py-1.5 text-center text-[11px] font-semibold text-slate-500 hover:text-[#0B1E36] transition cursor-pointer"
+                  className="w-full py-1.5 text-center text-[11px] font-semibold text-slate-500 hover:text-[#111827] transition cursor-pointer"
                 >
                   ⚡ Instant Demo Test (Simulate Successful Scan)
                 </button>

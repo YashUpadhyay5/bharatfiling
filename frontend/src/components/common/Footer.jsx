@@ -85,33 +85,29 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Column 1: GST Services */}
+        {/* Column 1: Taxation & GST */}
         <div className="space-y-3">
-          <h4 className="text-white text-xs font-bold uppercase tracking-wider">GST Services</h4>
+          <h4 className="text-white text-xs font-bold uppercase tracking-wider">Taxation & GST</h4>
           <ul className="space-y-2 text-xs">
-            <li>
-              <Link to="/services/gst-registration" className="hover:text-emerald-400 transition flex items-center gap-1.5">
-                GST Registration <span className="text-[9px] bg-emerald-950 text-emerald-300 px-1 py-0.2 rounded border border-emerald-800">Live</span>
-              </Link>
-            </li>
-            <li><Link to="/services/gst-return" className="hover:text-emerald-400 transition">GSTR-1 & GSTR-3B Filing</Link></li>
+            <li><Link to="/services/income-tax" className="hover:text-emerald-400 transition">Income Tax Return (ITR)</Link></li>
+            <li><Link to="/services/income-tax" className="hover:text-emerald-400 transition">Corporate Tax Audit (44AB)</Link></li>
+            <li><Link to="/services/gst-registration" className="hover:text-emerald-400 transition">GST Registration Online</Link></li>
+            <li><Link to="/services/gst-return" className="hover:text-emerald-400 transition">GSTR-1 & GSTR-3B Filings</Link></li>
             <li><Link to="/services/gst-return" className="hover:text-emerald-400 transition">GSTR-2B ITC Reconciliation</Link></li>
-            <li><Link to="/services/gst-registration" className="hover:text-emerald-400 transition">GST LUT for Exporters</Link></li>
-            <li><Link to="/services/gst-registration" className="hover:text-emerald-400 transition">GST Cancellation & Revocation</Link></li>
-            <li><Link to="/services/gst-registration" className="hover:text-emerald-400 transition">E-Invoicing & E-Way Bills</Link></li>
+            <li><Link to="/services/income-tax" className="hover:text-emerald-400 transition">TDS & TCS Quarterly Returns</Link></li>
           </ul>
         </div>
 
-        {/* Column 2: Business & Legal */}
+        {/* Column 2: CA & Corporate Advisory */}
         <div className="space-y-3">
-          <h4 className="text-white text-xs font-bold uppercase tracking-wider">Business & MCA</h4>
+          <h4 className="text-white text-xs font-bold uppercase tracking-wider">CA & Secretarial</h4>
           <ul className="space-y-2 text-xs">
             <li><Link to="/services/company-registration" className="hover:text-emerald-400 transition">Private Limited Company</Link></li>
             <li><Link to="/services/llp-registration" className="hover:text-emerald-400 transition">Limited Liability Partnership</Link></li>
-            <li><Link to="/services/company-registration" className="hover:text-emerald-400 transition">One Person Company (OPC)</Link></li>
-            <li><Link to="/services/gst-registration" className="hover:text-emerald-400 transition">Proprietorship Registration</Link></li>
-            <li><Link to="/services/trademark" className="hover:text-emerald-400 transition">Trademark Registration</Link></li>
+            <li><Link to="/services/legal" className="hover:text-emerald-400 transition">Virtual CFO & Bookkeeping</Link></li>
             <li><Link to="/services/legal" className="hover:text-emerald-400 transition">MCA Annual ROC Compliance</Link></li>
+            <li><Link to="/services/trademark" className="hover:text-emerald-400 transition">Trademark Registration & IP</Link></li>
+            <li><Link to="/services/legal" className="hover:text-emerald-400 transition">Director KYC & Resolutions</Link></li>
           </ul>
         </div>
 
@@ -121,7 +117,7 @@ export default function Footer() {
           <ul className="space-y-2 text-xs">
             <li><Link to="/about" className="hover:text-emerald-400 transition">About BharatFiling</Link></li>
             <li><Link to="/pricing" className="hover:text-emerald-400 transition">Transparent Pricing</Link></li>
-            <li><Link to="/faq" className="hover:text-emerald-400 transition">GST FAQs & Knowledge Base</Link></li>
+            <li><Link to="/faq" className="hover:text-emerald-400 transition">CA & Compliance FAQs</Link></li>
             <li><Link to="/contact" className="hover:text-emerald-400 transition">Contact & Support Desk</Link></li>
             <li><Link to="/login" className="hover:text-emerald-400 transition">Customer Login</Link></li>
             <li><Link to="/login" className="hover:text-emerald-400 transition">CA Partner Portal</Link></li>

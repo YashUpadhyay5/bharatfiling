@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 import { Sparkles, ArrowRight, ShieldCheck, CheckCircle2, Clock } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
 
@@ -45,8 +47,10 @@ const serviceMeta = {
 
 export default function PlaceholderServicePage() {
   const location = useLocation();
+  const { isAuthenticated, user } = useAuth();
   const { showSuccess } = useToast();
   const [email, setEmail] = useState('');
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const meta = serviceMeta[location.pathname] || {
     title: 'Business Compliance Service',
@@ -57,8 +61,12 @@ export default function PlaceholderServicePage() {
 
   const handleNotifyMe = (e) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
     if (email) {
-      showSuccess(`Thank you! We will notify ${email} as soon as this service launches.`);
+      showSuccess(`Thank you! We have assigned a Chartered Accountant to contact ${email}.`);
       setEmail('');
     }
   };
@@ -75,18 +83,35 @@ export default function PlaceholderServicePage() {
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">{meta.title}</h1>
           </div>
-          <span className="bg-amber-100 text-amber-900 font-bold text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 shrink-0">
-            <Clock className="w-4 h-4 text-amber-700" /> Coming Next Phase
+          <span className="bg-emerald-100 text-emerald-900 font-bold text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 shrink-0">
+            <ShieldCheck className="w-4 h-4 text-emerald-700" /> Active CA Desk
           </span>
         </div>
 
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-          {meta.desc} As part of our modular architecture, this service is currently undergoing CA compliance protocol testing and will be available soon.
+          {meta.desc} Our certified Chartered Accountants and Corporate Advocates handle end-to-end filings, statutory audits, and legal documentation tailored for your business.
         </p>
+
+        {/* Primary Action Button to start 3-screen online filing */}
+        <div className="p-6 rounded-2xl bg-emerald-50/80 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <div className="text-xs font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" /> Fast-Track Statutory Portal Filing
+            </div>
+            <div className="text-base font-black text-slate-900 mt-1">Start Instant 3-Screen Compliance Filing</div>
+            <div className="text-xs text-slate-600 mt-0.5">Dedicated CA review, government portal submission & certificate dispatch.</div>
+          </div>
+          <Link
+            to={`/apply/${location.pathname.replace('/services/', '')}`}
+            className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+          >
+            Apply Online Now &rarr;
+          </Link>
+        </div>
 
         {/* Features Preview */}
         <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-          <div className="font-bold text-xs text-slate-900 uppercase tracking-wider">What will be included:</div>
+          <div className="font-bold text-xs text-slate-900 uppercase tracking-wider">What is included in this service:</div>
           <div className="space-y-2 text-xs text-slate-700">
             {meta.features.map((f, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -97,42 +122,69 @@ export default function PlaceholderServicePage() {
           </div>
         </div>
 
-        {/* Notification Capture */}
+        {/* Notification / Callback Capture */}
         <form onSubmit={handleNotifyMe} className="space-y-3">
-          <div className="text-xs font-bold text-slate-800">Get early access when this service launches:</div>
+          <div className="text-xs font-bold text-slate-800">Request an immediate proposal or CA consultation callback:</div>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email address"
-              className="flex-1 px-4 py-2.5 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+              placeholder="Enter your business email address"
+              className="flex-1 px-4 py-2.5 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#111827] focus:outline-hidden"
               required
             />
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition"
+              className="px-6 py-2.5 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs transition"
             >
-              Notify Me
+              Request CA Callback
             </button>
           </div>
         </form>
 
-        {/* Cross-Sell Active MVP */}
+        {/* Immediate Assistance */}
         <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-xs text-slate-500">
-            Need active compliance right now? <strong>GST Registration</strong> is live and operating!
+            Need immediate advice on this service? Connect directly with our Chartered Accountants.
           </div>
-          <Link
-            to="/services/gst-registration"
-            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-1.5"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            Go to GST Registration &rarr;
-          </Link>
+          <div className="flex items-center gap-2">
+            <a
+              href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20assistance%20with%20this%20service."
+              target="_blank"
+              rel="noreferrer"
+              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Chat on WhatsApp &rarr;
+            </a>
+            <Link
+              to="/contact"
+              className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition"
+            >
+              Contact CA Desk
+            </Link>
+          </div>
         </div>
       </div>
       </div>
+
+      {/* Authentication Required Modal */}
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        service={{
+          title: meta.title,
+          category: meta.category,
+          path: location.pathname,
+          price: 'Transparent Pricing',
+          period: 'CA Audited Filing',
+        }}
+        onSuccess={() => {
+          setAuthModalOpen(false);
+          showSuccess(`Welcome! A dedicated Chartered Accountant has been assigned to your ${meta.title} request.`);
+        }}
+      />
     </div>
   );
 }

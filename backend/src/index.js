@@ -1,17 +1,21 @@
 import express from 'express';
+import http from 'http';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { ENV } from './config/env.js';
+import { initSocketServer } from './services/socket.service.js';
 import authRoutes from './routes/auth.routes.js';
 import profileRoutes from './routes/profile.routes.js';
 import businessRoutes from './routes/business.routes.js';
 import fieldRoutes from './routes/field.routes.js';
-import gstRoutes from './routes/gst.routes.js';
+import gstRoutes from './routes/gst-registration/index.js';
 import documentRoutes from './routes/document.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import caRoutes from './routes/ca.routes.js';
 import supportRoutes from './routes/support.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import serviceRoutes from './routes/service.routes.js';
 
 const app = express();
 
@@ -48,6 +52,7 @@ app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/ca', caRoutes);
 app.use('/api/v1/support', supportRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/services', serviceRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
@@ -59,6 +64,28 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Serve Static Frontend Assets (Production & Render Single-Service Deployment)
+const frontendDistPath = path.resolve(process.cwd(), '../frontend/dist');
+const localDistPath = path.resolve(process.cwd(), './dist');
+
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+} else if (fs.existsSync(localDistPath)) {
+  app.use(express.static(localDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(localDistPath, 'index.html'));
+  });
+}
+
 // 404 Route Catch-all
 app.use((req, res) => {
   res.status(404).json({
@@ -68,10 +95,14 @@ app.use((req, res) => {
 });
 
 const PORT = ENV.PORT || 5000;
-app.listen(PORT, () => {
+const httpServer = http.createServer(app);
+initSocketServer(httpServer);
+
+httpServer.listen(PORT, () => {
   console.log(`====================================================`);
   console.log(`🚀 BharatFiling Compliance Platform API Online`);
   console.log(`📡 URL: http://localhost:${PORT}`);
+  console.log(`⚡ WebSocket: ws://localhost:${PORT}`);
   console.log(`🛡️  Mode: ${ENV.NODE_ENV}`);
   console.log(`📁 Uploads: ${ENV.STORAGE_DIR}`);
   console.log(`====================================================`);

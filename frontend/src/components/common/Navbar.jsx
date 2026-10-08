@@ -8,8 +8,10 @@ import {
   X,
   User,
   LogOut,
-  Sparkles,
+  Search,
 } from 'lucide-react';
+import NavbarSearch from './NavbarSearch.jsx';
+import AuthRequiredModal from './AuthRequiredModal.jsx';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -17,9 +19,44 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileExpandedCat, setMobileExpandedCat] = useState(null);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [selectedServiceForAuth, setSelectedServiceForAuth] = useState(null);
   const timerRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleServiceClick = (e, item, categoryLabel) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setActiveDropdown(null);
+
+    if (!isAuthenticated) {
+      e.preventDefault();
+      setSelectedServiceForAuth({
+        title: item.name,
+        path: item.path,
+        category: categoryLabel || 'Service',
+        price: 'Transparent Pricing',
+        period: 'CA Audited Filing',
+      });
+      setAuthModalOpen(true);
+    }
+  };
+
+  const handleMobileServiceClick = (e, item, categoryLabel) => {
+    setMobileMenuOpen(false);
+
+    if (!isAuthenticated) {
+      e.preventDefault();
+      setSelectedServiceForAuth({
+        title: item.name,
+        path: item.path,
+        category: categoryLabel || 'Service',
+        price: 'Transparent Pricing',
+        period: 'CA Audited Filing',
+      });
+      setAuthModalOpen(true);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -60,7 +97,7 @@ export default function Navbar() {
       key: 'registrations',
       label: 'Registrations',
       col1: [
-        { name: 'GST Registration', path: '/services/gst-registration', isLive: true },
+        { name: 'GST Registration', path: '/apply/gst', isLive: true },
         { name: 'MSME / Udyam Registration', path: '/services' },
         { name: 'Import Export Code (IEC)', path: '/services' },
         { name: 'FSSAI Food License', path: '/services' },
@@ -96,7 +133,7 @@ export default function Navbar() {
       key: 'gst',
       label: 'GST',
       col1: [
-        { name: 'GST Registration', path: '/services/gst-registration', isLive: true },
+        { name: 'GST Registration', path: '/apply/gst', isLive: true },
         { name: 'GST Return Filing (GSTR-1 & 3B)', path: '/services/gst-return' },
         { name: 'GSTR-9 Annual Return', path: '/services/gst-return' },
         { name: 'GSTR-2B ITC Reconciliation', path: '/services/gst-return' },
@@ -165,8 +202,8 @@ export default function Navbar() {
       key: 'consultation',
       label: 'Consultation',
       col1: [
-        { name: 'Talk to Chartered Accountant', path: '/contact' },
-        { name: 'Legal Consultation with Advocate', path: '/contact' },
+        { name: 'CA Consultation', path: '/contact' },
+        { name: 'Legal Consultation', path: '/contact' },
         { name: 'Startup Structuring Advisory', path: '/contact' },
       ],
       col2: [
@@ -179,127 +216,123 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] font-sans">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[70px] flex items-center justify-between">
-        {/* Brand Logo with explicit Home clickability */}
-        <Link
-          to="/"
-          title="Return to BharatFiling Homepage"
-          className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform"
-        >
-          <img
-            src="/bharatfiling-horizontal-transparent.png"
-            alt="BharatFiling"
-            className="h-10 sm:h-11 w-auto max-w-[210px] object-contain group-hover:opacity-95 transition"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = '/bharatfiling-logo.jpg';
-            }}
-          />
-        </Link>
-
-        {/* Desktop Category Navigation with Hover Mega-Menus */}
-        <div className="hidden lg:flex items-center gap-4 xl:gap-5">
-          {/* Explicit Home Anchor Link */}
+      <nav className="w-full max-w-[1480px] mx-auto px-3 sm:px-6 lg:px-8 h-[68px] flex items-center justify-between">
+        {/* Left Section: Brand Logo & 8 Main Category Tabs */}
+        <div className="flex items-center min-w-0">
+          {/* Brand Logo with clean spacing */}
           <Link
             to="/"
-            className={`flex items-center gap-1 text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
-              location.pathname === '/' ? 'text-[#0B1E36] font-bold' : 'text-slate-700'
-            }`}
-            title="Go to Homepage"
+            title="Return to BharatFiling Homepage"
+            className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform mr-4 xl:mr-6"
           >
-            <Home className="w-3.5 h-3.5 text-slate-400" />
-            <span>Home</span>
+            <img
+              src="/bharatfiling-brand-icon.png"
+              alt="BharatFiling"
+              className="h-8 sm:h-9 w-auto object-contain shrink-0"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
+              }}
+            />
+            <div className="flex items-baseline font-black tracking-tight text-lg sm:text-xl leading-none select-none">
+              <span className="text-[#111827]">Bharat</span>
+              <span className="text-[#F26522]">Filing</span>
+            </div>
           </Link>
 
-          {menuCategories.map((cat) => (
-            <div
-              key={cat.key}
-              className="relative py-5"
-              onMouseEnter={() => handleMouseEnter(cat.key)}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                type="button"
-                className={`flex items-center gap-1 text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
-                  activeDropdown === cat.key ? 'text-[#0B1E36] font-semibold' : 'text-slate-700'
-                }`}
+          {/* Desktop 8 Navigation Tabs (Exact IndiaFilings Tabs - Zero-Wrap) */}
+          <div className="hidden lg:flex items-center gap-1.5 xl:gap-3 2xl:gap-4.5 whitespace-nowrap">
+            {menuCategories.map((cat) => (
+              <div
+                key={cat.key}
+                className="relative py-5"
+                onMouseEnter={() => handleMouseEnter(cat.key)}
+                onMouseLeave={handleMouseLeave}
               >
-                <span>{cat.label}</span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                    activeDropdown === cat.key ? 'rotate-180 text-[#0B1E36]' : ''
+                <button
+                  type="button"
+                  className={`flex items-center gap-0.5 xl:gap-1 text-[12px] xl:text-[13px] font-medium transition-colors hover:text-[#111827] py-1 whitespace-nowrap ${
+                    activeDropdown === cat.key ? 'text-[#111827] font-semibold' : 'text-slate-700'
                   }`}
-                />
-              </button>
-
-              {/* 2-Column Hover Mega-Dropdown */}
-              {activeDropdown === cat.key && (
-                <div
-                  className="absolute top-[62px] left-0 bg-white rounded-2xl shadow-[0_16px_42px_rgba(11,30,54,0.12)] border border-slate-100 p-6 min-w-[460px] max-w-[540px] z-50 animate-fade-in"
-                  onMouseEnter={() => handleMouseEnter(cat.key)}
-                  onMouseLeave={handleMouseLeave}
                 >
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                    {/* Left Column */}
-                    <div className="space-y-2">
-                      {cat.col1.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.path}
-                          onClick={() => setActiveDropdown(null)}
-                          className="block text-[13px] text-slate-700 hover:text-[#0B1E36] hover:translate-x-0.5 font-normal transition-all py-0.5"
-                        >
-                          <span className="flex items-center gap-1.5">
-                            {item.name}
+                  <span>{cat.label}</span>
+                  <ChevronDown
+                    className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${
+                      activeDropdown === cat.key ? 'rotate-180 text-[#111827]' : ''
+                    }`}
+                  />
+                </button>
+
+                {/* 2-Column Hover Mega-Dropdown */}
+                {activeDropdown === cat.key && (
+                  <div
+                    className="absolute top-[58px] left-0 bg-white rounded-2xl shadow-[0_16px_45px_rgba(17,24,39,0.12)] border border-slate-100 p-5 min-w-[420px] max-w-[500px] z-50 animate-fade-in"
+                    onMouseEnter={() => handleMouseEnter(cat.key)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                      {/* Left Column */}
+                      <div className="space-y-1">
+                        {cat.col1.map((item) => (
+                          <Link
+                            key={item.name}
+                            to={item.path}
+                            onClick={(e) => handleServiceClick(e, item, cat.label)}
+                            className="flex items-center justify-between text-[12.5px] text-slate-700 hover:text-[#111827] hover:bg-slate-50 px-2 py-1.5 rounded-lg font-medium transition-all group"
+                          >
+                            <span>{item.name}</span>
                             {item.isLive && (
-                              <span className="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-1.5 py-0.2 rounded">
+                              <span className="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-200">
                                 Live
                               </span>
                             )}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
+                          </Link>
+                        ))}
+                      </div>
 
-                    {/* Right Column */}
-                    <div className="space-y-2">
-                      {cat.col2.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.path}
-                          onClick={() => setActiveDropdown(null)}
-                          className="block text-[13px] text-slate-700 hover:text-[#0B1E36] hover:translate-x-0.5 font-normal transition-all py-0.5"
-                        >
-                          {item.name}
-                        </Link>
-                      ))}
+                      {/* Right Column */}
+                      <div className="space-y-1">
+                        {cat.col2.map((item) => (
+                          <Link
+                            key={item.name}
+                            to={item.path}
+                            onClick={(e) => handleServiceClick(e, item, cat.label)}
+                            className="block text-[12.5px] text-slate-700 hover:text-[#111827] hover:bg-slate-50 px-2 py-1.5 rounded-lg font-medium transition-all"
+                          >
+                            {item.name}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            ))}
 
-          {/* Direct Pricing Link */}
-          <Link
-            to="/pricing"
-            className={`text-[13px] font-medium transition-colors hover:text-[#0B1E36] py-1 ${
-              location.pathname === '/pricing' ? 'text-[#0B1E36] font-bold' : 'text-slate-700'
-            }`}
-          >
-            Pricing
-          </Link>
+            {/* Direct Pricing Link */}
+            <Link
+              to="/pricing"
+              className={`text-[12px] xl:text-[13px] font-medium transition-colors hover:text-[#111827] py-1 whitespace-nowrap ${
+                location.pathname === '/pricing' ? 'text-[#111827] font-semibold' : 'text-slate-700'
+              }`}
+            >
+              Pricing
+            </Link>
+          </div>
         </div>
 
-        {/* Right CTA / Auth Controls */}
-        <div className="hidden lg:flex items-center gap-3">
+        {/* Right Section: Compact Expandable Search Tab + Auth Controls */}
+        <div className="hidden lg:flex items-center gap-2.5 xl:gap-3.5 shrink-0">
+          {/* Instant Search Tab */}
+          <NavbarSearch />
+
           {isAuthenticated ? (
             <div className="relative">
               <button
                 onClick={() => setUserDropdown(!userDropdown)}
                 className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition"
               >
-                <div className="w-7 h-7 rounded-full bg-slate-100 text-[#0B1E36] font-bold flex items-center justify-center text-xs">
+                <div className="w-7 h-7 rounded-full bg-slate-100 text-[#111827] font-bold flex items-center justify-center text-xs">
                   {user?.full_name?.charAt(0) || 'U'}
                 </div>
                 <div className="text-left">
@@ -317,7 +350,7 @@ export default function Navbar() {
                   <Link
                     to="/"
                     onClick={() => setUserDropdown(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-50 hover:text-[#0B1E36] transition"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-50 hover:text-[#111827] transition"
                   >
                     <Home className="w-3.5 h-3.5 text-slate-400" />
                     BharatFiling Home
@@ -332,7 +365,7 @@ export default function Navbar() {
                         : '/dashboard'
                     }
                     onClick={() => setUserDropdown(false)}
-                    className="block px-3 py-2 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-50 hover:text-[#0B1E36] transition"
+                    className="block px-3 py-2 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-50 hover:text-[#111827] transition"
                   >
                     {user?.role === 'CA'
                       ? 'CA Workbench'
@@ -363,19 +396,18 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="rounded-full bg-white px-5 py-2 text-[13px] font-semibold text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs transition"
+                className="rounded-full bg-white px-4 py-1.5 text-[12.5px] font-semibold text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs transition"
               >
                 Log In
               </Link>
               <Link
-                to="/apply/gst"
-                className="rounded-full bg-[#0B1E36] hover:bg-[#142C4F] text-white px-5 py-2 text-[13px] font-bold shadow-xs hover:shadow transition flex items-center gap-1.5"
+                to="/register"
+                className="rounded-full bg-[#111827] hover:bg-[#1F2937] text-white px-4 py-1.5 text-[12.5px] font-bold shadow-xs hover:shadow transition"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                Start GST
+                Register
               </Link>
             </div>
           )}
@@ -394,13 +426,18 @@ export default function Navbar() {
       {/* Mobile Drawer with Accordion Sub-options */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-100 bg-white px-4 py-4 space-y-3 shadow-lg max-h-[80vh] overflow-y-auto">
+          {/* Mobile Instant Search Tab */}
+          <div className="pb-1">
+            <NavbarSearch isMobile onCloseMobile={() => setMobileMenuOpen(false)} />
+          </div>
+
           <div className="space-y-1">
             {/* Top Home link for mobile */}
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
               className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-xl ${
-                location.pathname === '/' ? 'bg-slate-100 text-[#0B1E36] font-bold' : 'text-slate-800 hover:bg-slate-50'
+                location.pathname === '/' ? 'bg-slate-100 text-[#111827] font-bold' : 'text-slate-800 hover:bg-slate-50'
               }`}
             >
               <Home className="w-4 h-4 text-slate-500" />
@@ -418,19 +455,19 @@ export default function Navbar() {
                   <span>{cat.label}</span>
                   <ChevronDown
                     className={`w-4 h-4 text-slate-400 transition-transform ${
-                      mobileExpandedCat === cat.key ? 'rotate-180 text-[#0B1E36]' : ''
+                      mobileExpandedCat === cat.key ? 'rotate-180 text-[#111827]' : ''
                     }`}
                   />
                 </button>
 
                 {mobileExpandedCat === cat.key && (
-                  <div className="px-4 py-2 space-y-1.5 bg-slate-50/70 rounded-xl mt-1">
+                  <div className="px-4 py-2 space-y-1 bg-slate-50/70 rounded-xl mt-1">
                     {[...cat.col1, ...cat.col2].map((item) => (
                       <Link
                         key={item.name}
                         to={item.path}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block text-xs text-slate-600 hover:text-[#0B1E36] py-1"
+                        onClick={(e) => handleMobileServiceClick(e, item, cat.label)}
+                        className="block text-xs text-slate-600 hover:text-[#111827] py-1"
                       >
                         {item.name}
                       </Link>
@@ -461,7 +498,7 @@ export default function Navbar() {
                       : '/dashboard'
                   }
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-2.5 rounded-full bg-[#0B1E36] text-white font-bold text-sm"
+                  className="w-full text-center py-2.5 rounded-full bg-[#111827] text-white font-bold text-sm"
                 >
                   Go to {user?.role === 'CA' ? 'CA Workbench' : user?.role === 'ADMIN' ? 'Admin Portal' : 'Dashboard'}
                 </Link>
@@ -485,17 +522,29 @@ export default function Navbar() {
                   Log In
                 </Link>
                 <Link
-                  to="/apply/gst"
+                  to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 text-center py-2.5 rounded-full bg-[#0B1E36] text-white font-bold text-sm"
+                  className="flex-1 text-center py-2.5 rounded-full bg-[#111827] text-white font-bold text-sm"
                 >
-                  Start GST
+                  Register
                 </Link>
               </div>
             )}
           </div>
         </div>
       )}
+
+      {/* Authentication Required Popup Modal */}
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        service={selectedServiceForAuth}
+        onSuccess={() => {
+          if (selectedServiceForAuth?.path) {
+            navigate(selectedServiceForAuth.path);
+          }
+        }}
+      />
     </header>
   );
 }

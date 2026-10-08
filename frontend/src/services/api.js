@@ -1,4 +1,4 @@
-const API_BASE = '/api/v1';
+const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
 
 const getHeaders = (isMultipart = false) => {
   const token = localStorage.getItem('bharatfiling_token') || localStorage.getItem('taxveda_token');
@@ -99,6 +99,18 @@ export const api = {
   getRequirements: async (businessType, state) => {
     const query = state ? `?state=${encodeURIComponent(state)}` : '';
     const res = await fetch(`${API_BASE}/fields/requirements/${encodeURIComponent(businessType)}${query}`);
+    return handleResponse(res);
+  },
+
+  // Dynamic Services Catalog & Pricing
+  getServices: async (category = '') => {
+    const query = category ? `?category=${encodeURIComponent(category)}` : '';
+    const res = await fetch(`${API_BASE}/services${query}`);
+    return handleResponse(res);
+  },
+
+  getService: async (identifier) => {
+    const res = await fetch(`${API_BASE}/services/${encodeURIComponent(identifier)}`);
     return handleResponse(res);
   },
 
