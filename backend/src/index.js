@@ -6,7 +6,7 @@ import authRoutes from './routes/auth.routes.js';
 import profileRoutes from './routes/profile.routes.js';
 import businessRoutes from './routes/business.routes.js';
 import fieldRoutes from './routes/field.routes.js';
-import gstRoutes from './routes/gst.routes.js';
+import gstRoutes from './routes/gst-registration/index.js';
 import documentRoutes from './routes/document.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import caRoutes from './routes/ca.routes.js';

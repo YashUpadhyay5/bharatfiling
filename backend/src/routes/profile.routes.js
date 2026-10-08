@@ -1,14 +1,25 @@
 import express from 'express';
 import { db } from '../database/db.js';
+import { CustomerProfileModel } from '../models/CustomerProfile.js';
 import { authenticate } from '../middleware/auth.js';
 import { validatePAN, validateAadhaar, validatePincode, validateMobile } from '../services/validationEngine.js';
 
 const router = express.Router();
 
 // GET Master Customer Profile
-router.get('/', authenticate, (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
-    const profile = db.getProfiles().find((p) => p.user_id === req.user.id);
+    let profile = null;
+    try {
+      profile = await CustomerProfileModel.findByUserId(req.user.id);
+    } catch (e) {
+      // Fallback
+    }
+
+    if (!profile) {
+      profile = db.getProfiles().find((p) => p.user_id === req.user.id);
+    }
+
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Profile not found.' });
     }
@@ -23,7 +34,7 @@ router.get('/', authenticate, (req, res) => {
 });
 
 // UPDATE Master Customer Profile
-router.put('/', authenticate, (req, res) => {
+router.put('/', authenticate, async (req, res) => {
   try {
     const profiles = db.getProfiles();
     const index = profiles.findIndex((p) => p.user_id === req.user.id);
@@ -78,6 +89,18 @@ router.put('/', authenticate, (req, res) => {
 
     profiles[index] = updatedProfile;
     db.saveProfiles(profiles);
+
+    // Sync to Supabase
+    try {
+      await CustomerProfileModel.updateByUserId(req.user.id, {
+        personal_info: updatedProfile.personal_info,
+        identity_info: updatedProfile.identity_info,
+        contact_info: updatedProfile.contact_info,
+        address_info: updatedProfile.address_info,
+      });
+    } catch (dbErr) {
+      console.warn('Notice: Fallback sync during profile update:', dbErr.message);
+    }
 
     res.json({
       success: true,

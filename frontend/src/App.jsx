@@ -17,9 +17,11 @@ import ContactPage from './pages/ContactPage.jsx';
 import FaqPage from './pages/FaqPage.jsx';
 import AuthPages from './pages/AuthPages.jsx';
 import CustomerDashboard from './pages/CustomerDashboard.jsx';
-import GstWizardPage from './pages/GstWizardPage.jsx';
-import GstOnboardingPage from './pages/GstOnboardingPage.jsx';
-import CheckoutPage from './pages/CheckoutPage.jsx';
+// Modular GST Registration Flow (Isolated 3-Screen Pipeline & Dossier Desk)
+import GstRegistrationModule, {
+  OrderCheckoutPage as GstCheckoutPage,
+  DossierUploadPage as GstDossierPage,
+} from './pages/gst-registration/index.jsx';
 import CaDashboardPage from './pages/CaDashboardPage.jsx';
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
 
@@ -65,13 +67,14 @@ export default function App() {
               <Route path="/login" element={<AuthPages defaultMode="login" />} />
               <Route path="/register" element={<AuthPages defaultMode="register" />} />
 
-              {/* Customer Portal & Onboarding Flow */}
+              {/* Customer Portal & Modular GST Registration Flow */}
               <Route path="/dashboard" element={<CustomerDashboard />} />
-              <Route path="/apply/gst" element={<GstOnboardingPage />} />
-              <Route path="/apply/gst/dossier" element={<GstWizardPage />} />
-              <Route path="/apply/gst/:id" element={<GstWizardPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/checkout/:orderId" element={<CheckoutPage />} />
+              <Route path="/apply/gst" element={<GstRegistrationModule />} />
+              <Route path="/apply/gst/dossier" element={<GstDossierPage />} />
+              <Route path="/apply/gst/dossier/:id" element={<GstDossierPage />} />
+              <Route path="/apply/gst/:id" element={<GstDossierPage />} />
+              <Route path="/checkout" element={<GstCheckoutPage />} />
+              <Route path="/checkout/:orderId" element={<GstCheckoutPage />} />
 
               {/* Professional CA Portal */}
               <Route path="/ca/dashboard" element={<CaDashboardPage />} />

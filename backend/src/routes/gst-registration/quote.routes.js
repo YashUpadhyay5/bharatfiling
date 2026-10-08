@@ -1,0 +1,98 @@
+import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import { db } from '../../database/db.js';
+import { optionalAuth } from '../../middleware/auth.js';
+
+const router = express.Router();
+
+/**
+ * POST /onboarding-quote & POST /quote
+ * Generates an instant quotation and initial application draft based on Screens 1 & 2.
+ */
+router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
+  try {
+    const { name, phone, pan, state = 'Karnataka', businessType = 'Proprietorship', email = '' } = req.body;
+
+    if (!name || !phone) {
+      return res.status(400).json({ success: false, message: 'Name and Phone number are required.' });
+    }
+
+    const userId = req.user?.id || 'usr_guest_lead';
+    const cleanPhone = String(phone).replace(/\D/g, '').slice(-10);
+    const cleanPan = (pan || '').toUpperCase().trim();
+    const cleanEmail = email || `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@gmail.com`;
+
+    // Unique order ID e.g. est1791262...d
+    const orderId = `est${Date.now()}${Math.floor(1000 + Math.random() * 9000)}d`;
+    const appId = `app_gst_${uuidv4().slice(0, 8)}`;
+    const allApps = db.getApplications();
+    const appSeq = String(allApps.length + 1).padStart(6, '0');
+    const appNumber = `GST-2026-${appSeq}`;
+
+    // Clean initial application draft (No 11 steps!)
+    const newApp = {
+      id: appId,
+      application_number: appNumber,
+      user_id: userId,
+      business_id: `biz_${uuidv4().slice(0, 8)}`,
+      business_type: businessType,
+      state: state,
+      customer_status: 'Quote Generated',
+      internal_status: 'PAYMENT_PENDING',
+      fields_data: {
+        applicant_name: name,
+        mobile_number: cleanPhone,
+        pan_number: cleanPan,
+        email: cleanEmail,
+        state: state,
+        business_type: businessType,
+      },
+      assigned_ca_id: null,
+      payment_completed: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    allApps.push(newApp);
+    db.saveApplications(allApps);
+
+    // Create Order with monthly breakdown ₹1,499 + ₹270 (18% GST) = ₹1,769
+    const newOrder = {
+      id: orderId,
+      order_number: `#${orderId}`,
+      application_id: appId,
+      application_number: appNumber,
+      user_id: userId,
+      service_name: 'GST Registration (GST Registration + Monthly Filing)',
+      amount: 1769,
+      subtotal: 1499,
+      gst_amount: 270,
+      currency: 'INR',
+      status: 'CREATED',
+      billing_cycle: 'Monthly',
+      customer_name: name,
+      customer_phone: cleanPhone,
+      customer_pan: cleanPan,
+      customer_email: cleanEmail,
+      state: state,
+      business_type: businessType,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const orders = db.getOrders();
+    orders.push(newOrder);
+    db.saveOrders(orders);
+
+    res.json({
+      success: true,
+      orderId,
+      order: newOrder,
+      application: newApp,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to create quote order.', error: err.message });
+  }
+});
+
+export default router;

@@ -213,6 +213,46 @@ Every feature, enhancement, and architectural change is documented below with **
 
 ---
 
+### Feature 9: Enterprise Modular Architecture (Dedicated Module Folders for 3-Screen Flows) & Removal of Legacy 11-Step Wizard
+
+- **WHAT**:
+  1. Complete removal of the cumbersome legacy 11-step wizard (`GstWizardPage.jsx`, 963 lines) from frontend, backend, and database schema.
+  2. Implementation of a strict **Domain-Driven Modular Architecture**:
+     - Frontend creates a dedicated `frontend/src/pages/gst-registration/` folder where every interconnected screen is an isolated, single-responsibility file.
+     - Backend creates a dedicated `backend/src/routes/gst-registration/` folder splitting quotes, checkout, payment, and dossier into distinct sub-routers.
+  3. Establishes the exact architectural blueprint for **all upcoming compliance modules** (Company Incorporation, LLP, Income Tax, Trademark).
+- **WHY**:
+  1. Monolithic 600- to 900-line files cramming multiple pages into one file make code unmaintainable, error-prone, and hard to understand.
+  2. Forcing customers through an 11-step wizard after they already completed checkout/payment on Screen 3 created a confusing, broken user experience.
+  3. In enterprise software (ClearTax, Stripe, IndiaFilings), each compliance product lives in its own self-contained module folder so new modules can be plugged in without risking regressions in existing ones.
+- **HOW IT WORKS**:
+  1. **Screen 1 (`1-ApplicantPanPage.jsx`)**: Captures Legal Name, Mobile (+91), and PAN with real-time 10-character structure validation badge. Advances to Screen 2.
+  2. **Screen 2 (`2-BusinessJurisdictionPage.jsx`)**: Captures State / UT and Business Nature. Clicks "Get a Quote", calls `POST /api/v1/gst/onboarding-quote`, receives a unique order ID (e.g. `est1791...d`), and navigates immediately to Screen 3.
+  3. **Screen 3 (`3-OrderCheckoutPage.jsx`)**: Displays the live order quotation breakdown (₹1,499 base + ₹270 18% GST = ₹1,769 total), deliverables accordion, customer summary, and launches the NPCI UPI AutoPay / QR modal. Upon payment confirmation, triggers celebration confetti and redirects to Screen 4.
+  4. **Screen 4 (`4-DossierUploadPage.jsx`)**: Clean post-payment document upload desk. Replaces the 11-step wizard with a simple 3-file drag-and-drop dropzone (Electricity Bill / Rent Agreement, Aadhaar Card, Passport Photo) and live CA assignment tracker.
+  5. **Backend Sub-Routers (`backend/src/routes/gst-registration/`)**:
+     - `quote.routes.js`: Lead generation and initial application draft.
+     - `checkout.routes.js`: Live quotation order breakdown retrieval.
+     - `payment.routes.js`: UPI AutoPay mandate confirmation and status updates.
+     - `dossier.routes.js`: Post-payment document uploads and CA dossier handoff.
+     - `index.js`: Master barrel router mounted cleanly at `/api/v1/gst`.
+- **WHERE IT IS LOCATED**:
+  - `frontend/src/pages/gst-registration/1-ApplicantPanPage.jsx` *(Screen 1)*
+  - `frontend/src/pages/gst-registration/2-BusinessJurisdictionPage.jsx` *(Screen 2)*
+  - `frontend/src/pages/gst-registration/3-OrderCheckoutPage.jsx` *(Screen 3)*
+  - `frontend/src/pages/gst-registration/4-DossierUploadPage.jsx` *(Screen 4 / Document Desk)*
+  - `frontend/src/pages/gst-registration/index.jsx` *(Master module coordinator)*
+  - `frontend/src/pages/gst-registration/constants.js` *(States & business natures)*
+  - `frontend/src/pages/gst-registration/components/` *(Hero, TrustFooter, PanBadge)*
+  - `backend/src/routes/gst-registration/quote.routes.js` *(Quote API)*
+  - `backend/src/routes/gst-registration/checkout.routes.js` *(Checkout order API)*
+  - `backend/src/routes/gst-registration/payment.routes.js` *(Payment verification API)*
+  - `backend/src/routes/gst-registration/dossier.routes.js` *(Dossier document API)*
+  - `backend/src/routes/gst-registration/index.js` *(Master barrel router)*
+  - `backend/src/database/migrations/004_remove_11_steps_and_modularize.sql` *(DB migration)*
+
+---
+
 ## 3. Complete Database Schema & Table Structure
 
 The production database comprises **11 relational PostgreSQL tables** on Supabase:

@@ -224,10 +224,10 @@ export default function CustomerDashboard() {
 
                   <div className="flex items-center gap-2">
                     <Link
-                      to={`/apply/gst/${activeApp.id}`}
-                      className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition"
+                      to={`/apply/gst/dossier/${activeApp.id}`}
+                      className="px-4 py-2 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-sm transition"
                     >
-                      Open Application Wizard &rarr;
+                      Open Document Desk & Dossier &rarr;
                     </Link>
                   </div>
                 </div>
