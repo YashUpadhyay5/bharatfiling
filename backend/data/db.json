@@ -59,6 +59,16 @@
       "full_name": "Rahul Verma (BharatFiling Demo)",
       "created_at": "2026-10-08T08:58:57.039Z",
       "updated_at": "2026-10-08T08:58:57.039Z"
+    },
+    {
+      "id": "usr_yash_live",
+      "email": "yash@gmail.com",
+      "phone": "9876543299",
+      "password_hash": "/BCQDGJFkOmgA1pdeCMC.OFH33CKemi0tEmYIganmg.7p326",
+      "role": "CUSTOMER",
+      "full_name": "Yash Upadhyay",
+      "created_at": "2026-10-08T09:52:37.974Z",
+      "updated_at": "2026-10-08T09:52:37.975Z"
     }
   ],
   "customer_profiles": [
@@ -123,6 +133,35 @@
       },
       "created_at": "2026-10-06T10:44:16.860Z",
       "updated_at": "2026-10-06T10:44:16.860Z"
+    },
+    {
+      "id": "prof_yash_live",
+      "user_id": "usr_yash_live",
+      "personal_info": {
+        "full_name": "Yash Upadhyay",
+        "father_name": "S. Upadhyay",
+        "dob": "1995-08-15",
+        "gender": "Male"
+      },
+      "identity_info": {
+        "pan_number": "ABCDE9876F",
+        "pan_verified": true,
+        "aadhaar_number": "987654321099",
+        "aadhaar_verified": true
+      },
+      "contact_info": {
+        "mobile_number": "9876543299",
+        "mobile_verified": true,
+        "email": "yash@gmail.com",
+        "email_verified": true
+      },
+      "address_info": {
+        "address_line_1": "Tech Innovation Park, Sector 4",
+        "address_line_2": "HSR Layout",
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": "560102"
+      }
     }
   ],
   "businesses": [
@@ -317,6 +356,42 @@
     }
   ],
   "gst_applications": [
+    {
+      "id": "app_gst_yash_live",
+      "application_number": "GST-2026-YASH01",
+      "user_id": "usr_yash_live",
+      "business_id": "biz_yash_live",
+      "business_type": "Proprietorship",
+      "state": "Karnataka",
+      "current_step": 1,
+      "customer_status": "Payment Confirmed",
+      "internal_status": "PAYMENT_CONFIRMED",
+      "payment_completed": true,
+      "fields_data": {
+        "legal_name": "Yash Tech Solutions",
+        "trade_name": "Yash Cloud Services",
+        "business_type": "Proprietorship",
+        "pan_number": "ABCDE9876F",
+        "aadhaar_number": "987654321099",
+        "applicant_name": "Yash Upadhyay",
+        "father_name": "S. Upadhyay",
+        "dob": "1995-08-15",
+        "mobile_number": "9876543299",
+        "email": "yash@gmail.com",
+        "state": "Karnataka",
+        "address_line_1": "Tech Innovation Park, Sector 4",
+        "city": "Bengaluru",
+        "pincode": "560102",
+        "business_activity": "Information Technology & Consulting",
+        "hsn_sac_codes": [
+          "998313",
+          "998314"
+        ]
+      },
+      "assigned_ca_id": "usr_ca_001",
+      "created_at": "2026-10-08T09:52:37.975Z",
+      "updated_at": "2026-10-08T09:52:37.975Z"
+    },
     {
       "id": "app_gst_001",
       "application_number": "GST-2026-000001",
@@ -1086,6 +1161,24 @@
     }
   ],
   "orders": [
+    {
+      "id": "ord_yash_live",
+      "order_number": "#GST-YASH-2026",
+      "application_id": "app_gst_yash_live",
+      "user_id": "usr_yash_live",
+      "customer_name": "Yash Upadhyay",
+      "customer_email": "yash@gmail.com",
+      "customer_phone": "9876543299",
+      "customer_pan": "ABCDE9876F",
+      "service_name": "GST Registration (New Normal)",
+      "amount": 1769,
+      "currency": "INR",
+      "status": "PAID",
+      "payment_method": "UPI_AUTOPAY",
+      "payment_id": "pay_upi_yash_live",
+      "created_at": "2026-10-08T09:52:37.975Z",
+      "paid_at": "2026-10-08T09:52:37.975Z"
+    },
     {
       "id": "ord_001",
       "application_id": "app_gst_001",
