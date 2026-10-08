@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { ENV } from './config/env.js';
 import { initSocketServer } from './services/socket.service.js';
 import authRoutes from './routes/auth.routes.js';
@@ -62,6 +63,28 @@ app.use((err, req, res, next) => {
     error: ENV.NODE_ENV === 'development' ? err.message : undefined,
   });
 });
+
+// Serve Static Frontend Assets (Production & Render Single-Service Deployment)
+const frontendDistPath = path.resolve(process.cwd(), '../frontend/dist');
+const localDistPath = path.resolve(process.cwd(), './dist');
+
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+} else if (fs.existsSync(localDistPath)) {
+  app.use(express.static(localDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(localDistPath, 'index.html'));
+  });
+}
 
 // 404 Route Catch-all
 app.use((req, res) => {

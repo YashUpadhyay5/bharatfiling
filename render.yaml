@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: bharatfiling
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: '*'
+      - key: RAZORPAY_KEY_ID
+        value: rzp_test_BharatFilingDemo123
+      - key: RAZORPAY_KEY_SECRET
+        value: BharatFilingSecretKeyDemo456
