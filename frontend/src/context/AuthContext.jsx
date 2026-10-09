@@ -4,11 +4,18 @@ import { api } from '../services/api.js';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('bharatfiling_user') || localStorage.getItem('taxveda_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
   const [token, setToken] = useState(
     localStorage.getItem('bharatfiling_token') || localStorage.getItem('taxveda_token')
   );
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!user && !!token);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -20,6 +27,7 @@ export const AuthProvider = ({ children }) => {
         const res = await api.getMe();
         if (res.success && res.user) {
           setUser(res.user);
+          localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
         } else {
           logout();
         }
@@ -38,6 +46,9 @@ export const AuthProvider = ({ children }) => {
     const res = await api.login(identifier, password);
     if (res.success && res.token) {
       localStorage.setItem('bharatfiling_token', res.token);
+      if (res.user) {
+        localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
+      }
       setToken(res.token);
       setUser(res.user);
     }
@@ -48,6 +59,9 @@ export const AuthProvider = ({ children }) => {
     const res = await api.register(userData);
     if (res.success && res.token) {
       localStorage.setItem('bharatfiling_token', res.token);
+      if (res.user) {
+        localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
+      }
       setToken(res.token);
       setUser(res.user);
     }
@@ -57,6 +71,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('bharatfiling_token');
     localStorage.removeItem('taxveda_token');
+    localStorage.removeItem('bharatfiling_user');
+    localStorage.removeItem('taxveda_user');
     setToken(null);
     setUser(null);
   };

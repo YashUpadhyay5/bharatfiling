@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -27,11 +27,13 @@ import {
   Download,
   Lock,
 } from 'lucide-react';
+import NotificationBell from '../components/common/NotificationBell.jsx';
 
 export default function CaDashboardPage() {
-  const { user } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { showSuccess, showError } = useToast();
   const { socket, joinCADesk } = useSocket();
+  const navigate = useNavigate();
 
   const [cases, setCases] = useState([]);
   const [metrics, setMetrics] = useState(null);
@@ -64,9 +66,20 @@ export default function CaDashboardPage() {
   };
 
   useEffect(() => {
+    if (authLoading && !user) return;
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/ca/dashboard', { replace: true });
+      return;
+    }
+    if (user?.role !== 'CA' && user?.role !== 'ADMIN') {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
     fetchCases();
     joinCADesk();
+  }, [authLoading, isAuthenticated, user]);
 
+  useEffect(() => {
     if (socket) {
       const handleNewCase = (newCase) => {
         showSuccess(`🔔 New GST Application Received: ${newCase.customer_name} (${newCase.state}) - ₹${newCase.amount} Paid!`);
@@ -193,6 +206,7 @@ export default function CaDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <Link
               to="/"
               className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold border border-slate-700 text-slate-300 hover:text-white transition"

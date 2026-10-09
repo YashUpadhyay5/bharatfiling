@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import NavbarSearch from './NavbarSearch.jsx';
 import AuthRequiredModal from './AuthRequiredModal.jsx';
+import NotificationBell from './NotificationBell.jsx';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -326,6 +327,8 @@ export default function Navbar() {
           {/* Instant Search Tab */}
           <NavbarSearch />
 
+          {isAuthenticated && <NotificationBell />}
+
           {isAuthenticated ? (
             <div className="relative">
               <button
@@ -413,14 +416,17 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition"
-          aria-label="Toggle navigation"
-        >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile Header Controls */}
+        <div className="lg:hidden flex items-center gap-1.5">
+          {isAuthenticated && <NotificationBell />}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition"
+            aria-label="Toggle navigation"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Drawer with Accordion Sub-options */}

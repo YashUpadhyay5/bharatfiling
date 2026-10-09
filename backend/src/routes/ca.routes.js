@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { db } from '../database/db.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import { emitToApplication, emitToCADesk, emitToUser } from '../services/socket.service.js';
+import { createAndDispatchNotification } from '../services/notification.service.js';
 
 const router = express.Router();
 
@@ -440,6 +441,67 @@ router.post('/cases/:id/action', (req, res) => {
       customer_status: app.customer_status,
       arn: app.arn,
       gstin: app.gstin,
+    });
+
+    // -------------------------------------------------------------
+    // PERSISTENT & REAL-TIME NOTIFICATION DISPATCH (AUDITABLE)
+    // -------------------------------------------------------------
+    let notifTitle = 'Application Status Updated';
+    let notifMessage = `Your filing has been updated to ${app.customer_status}.`;
+    let notifSeverity = 'info';
+    let notifType = `CA_ACTION_${action_type}`;
+
+    if (action_type === 'VERIFY_DOCS' || action_type === 'APPROVE_CA_REVIEW') {
+      notifTitle = 'Documents Verified by CA';
+      notifMessage = `${req.user.full_name} verified your submitted documents. Form REG-01 preparation is complete.`;
+      notifSeverity = 'success';
+      notifType = 'DOCS_VERIFIED';
+    } else if (action_type === 'SUBMIT_TO_PORTAL') {
+      notifTitle = 'Form REG-01 Filed on GST Portal';
+      notifMessage = `Your application was submitted to the tax portal. ARN: ${app.arn}.`;
+      notifSeverity = 'success';
+      notifType = 'ARN_GENERATED';
+    } else if (action_type === 'RECORD_GOVT_APPROVAL') {
+      notifTitle = 'Government Approval Granted! 🎉';
+      notifMessage = `Your GST registration was approved by tax authorities. GSTIN: ${app.gstin}.`;
+      notifSeverity = 'success';
+      notifType = 'GOVT_APPROVED';
+    } else if (action_type === 'DISPATCH_CERTIFICATE' || action_type === 'ISSUE_CERTIFICATE_AND_COMPLETE') {
+      notifTitle = 'Official Registration Certificate Ready! 📜';
+      notifMessage = `Your statutory Form REG-06 registration certificate is ready for download.`;
+      notifSeverity = 'success';
+      notifType = 'CERTIFICATE_ISSUED';
+    } else if (action_type === 'FLAG_CLARIFICATION') {
+      notifTitle = 'Clarification Required (REG-03)';
+      notifMessage = clarification_text || 'Tax officer or CA requested additional document clarification.';
+      notifSeverity = 'warning';
+      notifType = 'CLARIFICATION_REQUIRED';
+    } else if (action_type === 'SUBMIT_CLARIFICATION_REPLY') {
+      notifTitle = 'Clarification Reply Filed (REG-04)';
+      notifMessage = `CA submitted clarification reply to tax authorities on your behalf.`;
+      notifSeverity = 'info';
+      notifType = 'CLARIFICATION_REPLIED';
+    }
+
+    createAndDispatchNotification({
+      recipient_id: app.user_id,
+      recipient_role: 'CUSTOMER',
+      application_id: app.id,
+      type: notifType,
+      title: notifTitle,
+      message: notifMessage,
+      severity: notifSeverity,
+      action_url: `/dashboard?app=${app.id}`,
+      metadata: {
+        action_type,
+        internal_status: app.internal_status,
+        customer_status: app.customer_status,
+        arn: app.arn,
+        gstin: app.gstin,
+        certificate_url: app.certificate_url,
+        ca_name: req.user.full_name,
+      },
+      dedup_key: `${notifType}_${app.id}_${app.internal_status}_${app.arn || ''}_${app.gstin || ''}`,
     });
 
     res.json({

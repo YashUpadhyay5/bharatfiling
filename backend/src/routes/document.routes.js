@@ -6,6 +6,7 @@ import { db } from '../database/db.js';
 import { authenticate } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
 import { processDocumentOCR } from '../services/ocrPipeline.js';
+import { createAndDispatchNotification } from '../services/notification.service.js';
 
 const router = express.Router();
 
@@ -80,6 +81,20 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
       created_at: new Date().toISOString(),
     });
     db.saveCaseEvents(events);
+
+    // Persistent Notification to CA Desk
+    createAndDispatchNotification({
+      recipient_id: null,
+      recipient_role: 'CA',
+      application_id,
+      type: 'DOCUMENT_UPLOADED',
+      title: 'Customer Uploaded Document 📄',
+      message: `${req.user.full_name || 'Customer'} uploaded ${document_type.replace(/_/g, ' ')} for Application #${app.application_number || app.id}.`,
+      severity: 'info',
+      action_url: `/ca/dashboard?caseId=${application_id}`,
+      metadata: { document_type, filename: file.originalname },
+      dedup_key: `DOC_UPLOAD_${docId}`,
+    });
 
     res.status(201).json({
       success: true,

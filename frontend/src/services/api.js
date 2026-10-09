@@ -336,4 +336,45 @@ export const api = {
     });
     return handleResponse(res);
   },
+
+  // Notifications
+  getNotifications: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const url = `${API_BASE}/notifications${query ? `?${query}` : ''}`;
+    const res = await fetch(url, {
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  getUnreadNotificationCount: async () => {
+    const res = await fetch(`${API_BASE}/notifications/unread-count`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  markNotificationRead: async (id) => {
+    const res = await fetch(`${API_BASE}/notifications/${id}/read`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  markAllNotificationsRead: async () => {
+    const res = await fetch(`${API_BASE}/notifications/mark-all-read`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  deleteNotification: async (id) => {
+    const res = await fetch(`${API_BASE}/notifications/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
 };

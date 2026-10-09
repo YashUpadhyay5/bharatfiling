@@ -2,7 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 
-const DB_FILE_PATH = path.resolve(process.cwd(), 'data/db.json');
+const DB_FILE_PATH = fs.existsSync(path.resolve(process.cwd(), 'backend/data'))
+  ? path.resolve(process.cwd(), 'backend/data/db.json')
+  : path.resolve(process.cwd(), 'data/db.json');
 
 class DatabaseStore {
   constructor() {
@@ -17,6 +19,7 @@ class DatabaseStore {
       case_events: [],
       support_tickets: [],
       audit_logs: [],
+      notifications: [],
     };
     this.init();
   }
@@ -41,6 +44,7 @@ class DatabaseStore {
         this.data.case_events = this.data.case_events || [];
         this.data.support_tickets = this.data.support_tickets || [];
         this.data.audit_logs = this.data.audit_logs || [];
+        this.data.notifications = this.data.notifications || [];
       } catch (err) {
         console.error('Failed to parse database file, re-seeding:', err);
         this.seedInitialData();
@@ -327,6 +331,9 @@ class DatabaseStore {
 
   getAuditLogs() { this.reload(); return this.data.audit_logs || []; }
   saveAuditLogs(logs) { this.data.audit_logs = logs; this.persist(); }
+
+  getNotifications() { this.reload(); return this.data.notifications || []; }
+  saveNotifications(notifications) { this.data.notifications = notifications; this.persist(); }
 }
 
 export const db = new DatabaseStore();

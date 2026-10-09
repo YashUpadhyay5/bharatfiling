@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { ShieldCheck, Users, CreditCard, Activity, RefreshCw, Clock } from 'lucide-react';
+import NotificationBell from '../components/common/NotificationBell.jsx';
 
 export default function AdminDashboardPage() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isAuthenticated, loading: authLoading } = useAuth();
   const { showError } = useToast();
+  const navigate = useNavigate();
 
   const [analytics, setAnalytics] = useState(null);
   const [users, setUsers] = useState([]);
@@ -34,8 +36,17 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
+    if (authLoading && !user) return;
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/admin', { replace: true });
+      return;
+    }
+    if (!isAdmin && user?.role !== 'ADMIN') {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
     fetchAdminData();
-  }, []);
+  }, [authLoading, isAuthenticated, user, isAdmin]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 sm:p-6 lg:p-8">
@@ -49,6 +60,7 @@ export default function AdminDashboardPage() {
             <h1 className="text-xl sm:text-2xl font-black mt-1">Platform Operations & Analytics</h1>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <Link
               to="/"
               className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold flex items-center gap-1.5 border border-slate-700 text-slate-300 hover:text-white transition"

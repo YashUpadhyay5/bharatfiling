@@ -13,13 +13,37 @@ export default function AuthPages({ defaultMode = 'login' }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login, register, quickSwitchAccount } = useAuth();
+  const { user, isAuthenticated, loading: authLoading, login, register, quickSwitchAccount } = useAuth();
   const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
   const redirectParam = new URLSearchParams(location.search).get('redirect');
   const from = redirectParam || location.state?.from?.pathname || '/dashboard';
+
+  // Automatically forward already-authenticated users to their proper portal
+  React.useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
+      if (user.role === 'CA') {
+        navigate('/ca/dashboard', { replace: true });
+      } else if (user.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from || '/dashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, authLoading, user, from]);
+
+  if (authLoading || (isAuthenticated && user)) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-9 h-9 border-4 border-slate-200 border-t-[#111827] rounded-full animate-spin" />
+          <p className="text-xs font-semibold text-slate-500">Redirecting to your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();

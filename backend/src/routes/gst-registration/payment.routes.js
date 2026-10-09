@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { db } from '../../database/db.js';
 import { optionalAuth } from '../../middleware/auth.js';
 import { emitToCADesk } from '../../services/socket.service.js';
+import { createAndDispatchNotification } from '../../services/notification.service.js';
 
 const router = express.Router();
 
@@ -77,6 +78,47 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
           amount: updatedOrder?.amount || 1769,
           state: updatedApp?.state || 'Karnataka',
           submitted_at: new Date().toISOString(),
+        });
+
+        // 1. Persistent Notification to Customer
+        if (updatedApp?.user_id) {
+          createAndDispatchNotification({
+            recipient_id: updatedApp.user_id,
+            recipient_role: 'CUSTOMER',
+            application_id: appId,
+            order_id: updatedOrder?.id,
+            type: 'PAYMENT_SUCCESS',
+            title: 'Payment Confirmed & Filing Active 💳',
+            message: `Your payment of ₹${updatedOrder?.amount || 1769} has been verified. Case transferred to CA verification desk.`,
+            severity: 'success',
+            action_url: `/dashboard?app=${appId}`,
+            metadata: {
+              amount: updatedOrder?.amount || 1769,
+              order_id: updatedOrder?.id,
+              service_name: updatedOrder?.service_name,
+            },
+            dedup_key: `PAYMENT_SUCCESS_${updatedOrder?.id || order_id}`,
+          });
+        }
+
+        // 2. Persistent Notification to CA Desk
+        createAndDispatchNotification({
+          recipient_id: null,
+          recipient_role: 'CA',
+          application_id: appId,
+          order_id: updatedOrder?.id,
+          type: 'NEW_PAID_CASE',
+          title: 'New Paid Filing Case Received',
+          message: `${updatedOrder?.customer_name || 'Customer'} paid ₹${updatedOrder?.amount || 1769} for ${updatedOrder?.service_name || 'GST Registration'}.`,
+          severity: 'info',
+          action_url: `/ca/dashboard?caseId=${appId}`,
+          metadata: {
+            customer_name: updatedOrder?.customer_name,
+            customer_phone: updatedOrder?.customer_phone,
+            amount: updatedOrder?.amount || 1769,
+            state: updatedApp?.state,
+          },
+          dedup_key: `NEW_PAID_CASE_${updatedOrder?.id || order_id}`,
         });
       }
     }

@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 
 export default function CustomerDashboard() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { showSuccess, showError } = useToast();
   const { socket, joinApplication, joinUser } = useSocket();
   const navigate = useNavigate();
@@ -58,8 +58,11 @@ export default function CustomerDashboard() {
   };
 
   useEffect(() => {
+    // If still restoring auth session from token, wait!
+    if (authLoading && !user) return;
+
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate('/login?redirect=/dashboard', { replace: true });
       return;
     }
     // Automatically route Chartered Accountants to their specialized workbench
@@ -72,7 +75,7 @@ export default function CustomerDashboard() {
       return;
     }
     fetchDashboardData();
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, authLoading]);
 
   const [searchParams] = useSearchParams();
   const [selectedAppIndex, setSelectedAppIndex] = useState(0);
@@ -295,7 +298,7 @@ export default function CustomerDashboard() {
     document.body.removeChild(link);
   };
 
-  if (loading) {
+  if (loading || (authLoading && !user)) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="text-center space-y-3">

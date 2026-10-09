@@ -7,6 +7,7 @@ import {
   createRazorpayOrder,
   verifyRazorpaySignature,
 } from '../services/paymentService.js';
+import { createAndDispatchNotification } from '../services/notification.service.js';
 
 const router = express.Router();
 
@@ -126,6 +127,36 @@ router.post('/verify', authenticate, (req, res) => {
         created_at: new Date().toISOString(),
       });
       db.saveCaseEvents(events);
+
+      // 1. Persistent Notification to Customer
+      createAndDispatchNotification({
+        recipient_id: app.user_id,
+        recipient_role: 'CUSTOMER',
+        application_id: app.id,
+        order_id,
+        type: 'PAYMENT_SUCCESS',
+        title: 'Payment Confirmed & Filing Active 💳',
+        message: 'Your payment was verified successfully. Your filing case is active on the CA preparation desk.',
+        severity: 'success',
+        action_url: `/dashboard?app=${app.id}`,
+        metadata: { payment_id, order_id },
+        dedup_key: `PAYMENT_SUCCESS_${payment_id}`,
+      });
+
+      // 2. Persistent Notification to CA Desk
+      createAndDispatchNotification({
+        recipient_id: null,
+        recipient_role: 'CA',
+        application_id: app.id,
+        order_id,
+        type: 'NEW_PAID_CASE',
+        title: 'New Paid Filing Case Received',
+        message: `Customer completed payment for GST Registration (Application #${app.application_number || app.id}).`,
+        severity: 'info',
+        action_url: `/ca/dashboard?caseId=${app.id}`,
+        metadata: { payment_id, order_id, application_id: app.id },
+        dedup_key: `NEW_PAID_CASE_${payment_id}`,
+      });
     }
 
     res.json({
@@ -205,6 +236,38 @@ router.post('/verify-upi', optionalAuth, (req, res) => {
         created_at: new Date().toISOString(),
       });
       db.saveCaseEvents(events);
+
+      // 1. Persistent Notification to Customer
+      createAndDispatchNotification({
+        recipient_id: app.user_id,
+        recipient_role: 'CUSTOMER',
+        application_id: app.id,
+        order_id: order?.id,
+        type: payment_mode === 'AUTOPAY' ? 'AUTOPAY_ACTIVATED' : 'PAYMENT_SUCCESS',
+        title: payment_mode === 'AUTOPAY' ? 'UPI AutoPay Mandate Active ⚡' : 'Payment Verified Successfully 💳',
+        message: payment_mode === 'AUTOPAY'
+          ? `AutoPay recurring mandate of ₹${amount}/mo authorized. Filing dossier activated.`
+          : `UPI payment of ₹${amount} confirmed. Case assigned to CA preparation desk.`,
+        severity: 'success',
+        action_url: `/dashboard?app=${app.id}`,
+        metadata: { paymentTxnId, upi_id, amount, payment_mode },
+        dedup_key: `PAYMENT_UPI_${paymentTxnId}`,
+      });
+
+      // 2. Persistent Notification to CA Desk
+      createAndDispatchNotification({
+        recipient_id: null,
+        recipient_role: 'CA',
+        application_id: app.id,
+        order_id: order?.id,
+        type: 'NEW_PAID_CASE',
+        title: 'New Paid Filing Case Received',
+        message: `Customer verified ₹${amount} via ${payment_mode} for GST Registration.`,
+        severity: 'info',
+        action_url: `/ca/dashboard?caseId=${app.id}`,
+        metadata: { paymentTxnId, amount, payment_mode },
+        dedup_key: `NEW_PAID_CASE_${paymentTxnId}`,
+      });
     }
 
     res.json({
