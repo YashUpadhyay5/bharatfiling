@@ -32,8 +32,14 @@ export const AuthProvider = ({ children }) => {
           logout();
         }
       } catch (err) {
-        console.warn('Session expired or invalid:', err.message);
-        logout();
+        // Only invalidate if the server explicitly returned 401 Unauthorized or 403 Forbidden
+        if (err.status === 401 || err.status === 403) {
+          console.warn('Session expired or invalid:', err.message);
+          logout();
+        } else {
+          // Cold start or transient network hiccup: retain the user's cached session from localStorage
+          console.warn('Backend waking up or network unavailable. Retaining cached session:', err.message);
+        }
       } finally {
         setLoading(false);
       }

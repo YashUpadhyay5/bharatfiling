@@ -70,18 +70,30 @@ app.use((err, req, res, next) => {
 const frontendDistPath = path.resolve(process.cwd(), '../frontend/dist');
 const localDistPath = path.resolve(process.cwd(), './dist');
 
+const staticOptions = {
+  maxAge: '1y',
+  immutable: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  },
+};
+
 if (fs.existsSync(frontendDistPath)) {
-  app.use(express.static(frontendDistPath));
+  app.use(express.static(frontendDistPath, staticOptions));
   app.use((req, res, next) => {
     if (req.method === 'GET' && !req.originalUrl.startsWith('/api') && !req.originalUrl.startsWith('/uploads')) {
+      res.setHeader('Cache-Control', 'no-cache');
       return res.sendFile(path.join(frontendDistPath, 'index.html'));
     }
     next();
   });
 } else if (fs.existsSync(localDistPath)) {
-  app.use(express.static(localDistPath));
+  app.use(express.static(localDistPath, staticOptions));
   app.use((req, res, next) => {
     if (req.method === 'GET' && !req.originalUrl.startsWith('/api') && !req.originalUrl.startsWith('/uploads')) {
+      res.setHeader('Cache-Control', 'no-cache');
       return res.sendFile(path.join(localDistPath, 'index.html'));
     }
     next();
