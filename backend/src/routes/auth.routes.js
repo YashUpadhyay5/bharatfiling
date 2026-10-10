@@ -102,7 +102,19 @@ router.post('/register/request-otp', async (req, res) => {
     });
 
     // 6. Dispatch email via provider
-    await emailService.sendRegistrationOtp(cleanEmail, otp, full_name);
+    try {
+      await emailService.sendRegistrationOtp(cleanEmail, otp, full_name);
+    } catch (emailErr) {
+      console.warn(`[Registration Email Dispatch Failed for ${cleanEmail}]:`, emailErr.message);
+      // TRANSACTIONAL ROLLBACK: Remove staged OTP so the user is NOT trapped by 60s cooldown (429)
+      await OtpModel.deleteByTxnId(txn_id);
+      return res.status(500).json({
+        success: false,
+        message: emailErr.message && emailErr.message.includes('own email address')
+          ? 'Trial email provider restriction: In sandbox mode, emails can only be sent to the verified account owner. Please verify custom domain or contact support.'
+          : 'Could not deliver verification email to this address. Please verify your email or try again.',
+      });
+    }
 
     res.json({
       success: true,
@@ -294,50 +306,59 @@ router.post('/forgot-password/request-otp', async (req, res) => {
       user = db.getUsers().find((u) => u.email.toLowerCase() === cleanEmail);
     }
 
-    // Enforce 60-second cooldown if user exists
-    if (user) {
-      const latestOtp = await OtpModel.findLatestActive(cleanEmail, 'PASSWORD_RESET');
-      if (latestOtp) {
-        const elapsedSeconds = Math.floor((Date.now() - new Date(latestOtp.created_at).getTime()) / 1000);
-        if (elapsedSeconds < 60) {
-          return res.status(429).json({
-            success: false,
-            message: `Please wait ${60 - elapsedSeconds} seconds before requesting a new recovery code.`,
-            cooldown_remaining: 60 - elapsedSeconds,
-          });
-        }
-      }
-
-      await OtpModel.supersedeExisting(cleanEmail, 'PASSWORD_RESET');
-
-      const otp = cryptoService.generateNumericOtp();
-      const txn_id = `txn_${cryptoService.generateSecureToken(12)}`;
-      const otp_hash = cryptoService.createOtpHmac(otp, cleanEmail, 'PASSWORD_RESET', txn_id);
-      const expires_at = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-
-      await OtpModel.create({
-        txn_id,
-        email: cleanEmail,
-        otp_hash,
-        purpose: 'PASSWORD_RESET',
-        expires_at,
-      });
-
-      await emailService.sendPasswordResetOtp(cleanEmail, otp, user.full_name);
-
-      return res.json({
-        success: true,
-        message: `If an account with ${cleanEmail} exists, a 6-digit recovery code has been sent.`,
-        txn_id,
-        cooldown_seconds: 60,
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        not_registered: true,
+        message: 'No BharatFiling account found with this email. Please create a new account.',
       });
     }
 
-    // Generic response if email not found (prevents account enumeration)
+    // Enforce 60-second cooldown
+    const latestOtp = await OtpModel.findLatestActive(cleanEmail, 'PASSWORD_RESET');
+    if (latestOtp) {
+      const elapsedSeconds = Math.floor((Date.now() - new Date(latestOtp.created_at).getTime()) / 1000);
+      if (elapsedSeconds < 60) {
+        return res.status(429).json({
+          success: false,
+          message: `Please wait ${60 - elapsedSeconds} seconds before requesting a new recovery code.`,
+          cooldown_remaining: 60 - elapsedSeconds,
+        });
+      }
+    }
+
+    await OtpModel.supersedeExisting(cleanEmail, 'PASSWORD_RESET');
+
+    const otp = cryptoService.generateNumericOtp();
+    const txn_id = `txn_${cryptoService.generateSecureToken(12)}`;
+    const otp_hash = cryptoService.createOtpHmac(otp, cleanEmail, 'PASSWORD_RESET', txn_id);
+    const expires_at = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+    await OtpModel.create({
+      txn_id,
+      email: cleanEmail,
+      otp_hash,
+      purpose: 'PASSWORD_RESET',
+      expires_at,
+    });
+
+    try {
+      await emailService.sendPasswordResetOtp(cleanEmail, otp, user.full_name);
+    } catch (emailErr) {
+      console.warn(`[Password Reset Email Dispatch Failed for ${cleanEmail}]:`, emailErr.message);
+      await OtpModel.deleteByTxnId(txn_id);
+      return res.status(500).json({
+        success: false,
+        message: emailErr.message && emailErr.message.includes('own email address')
+          ? 'Trial email provider restriction: In sandbox mode, emails can only be sent to the verified account owner. Verify a custom domain or contact support.'
+          : 'Could not deliver recovery email to this address. Please try again.',
+      });
+    }
+
     return res.json({
       success: true,
-      message: `If an account with ${cleanEmail} exists, a 6-digit recovery code has been sent.`,
-      txn_id: `txn_${cryptoService.generateSecureToken(12)}`,
+      message: `A 6-digit recovery code has been sent to ${cleanEmail}.`,
+      txn_id,
       cooldown_seconds: 60,
     });
   } catch (err) {

@@ -42,6 +42,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
   const [fpNewPassword, setFpNewPassword] = useState('');
   const [fpConfirmPassword, setFpConfirmPassword] = useState('');
   const [fpCooldown, setFpCooldown] = useState(0);
+  const [unregisteredAlert, setUnregisteredAlert] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -223,6 +224,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
       return;
     }
 
+    setUnregisteredAlert(false);
     setLoading(true);
     try {
       const res = await requestForgotPasswordOtp(forgotEmail);
@@ -233,7 +235,12 @@ export default function AuthPages({ defaultMode = 'login' }) {
         showSuccess(res.message || 'Recovery code sent!');
       }
     } catch (err) {
-      showError(err.message || 'Failed to request recovery code.');
+      if (err.data?.not_registered || err.status === 404) {
+        setUnregisteredAlert(true);
+        showError(err.message || 'No BharatFiling account found with this email.');
+      } else {
+        showError(err.message || 'Failed to request recovery code.');
+      }
     } finally {
       setLoading(false);
     }
@@ -634,6 +641,29 @@ export default function AuthPages({ defaultMode = 'login' }) {
                       />
                     </div>
                   </div>
+
+                  {unregisteredAlert && (
+                    <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
+                      <div className="font-bold flex items-center gap-1.5 text-xs text-amber-800">
+                        <User className="w-4 h-4 text-amber-600" />
+                        No Account Found
+                      </div>
+                      <p className="text-[11px] text-amber-800 leading-relaxed">
+                        There is no BharatFiling account registered with <span className="font-bold">{forgotEmail}</span>. Would you like to create one?
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEmail(forgotEmail);
+                          setMode('register');
+                          setUnregisteredAlert(false);
+                        }}
+                        className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-xs"
+                      >
+                        Create New Account Now <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
 
                   <button
                     type="submit"

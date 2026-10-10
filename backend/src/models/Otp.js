@@ -240,4 +240,20 @@ export class OtpModel {
       db.saveOtps(otps);
     }
   }
+
+  /**
+   * Deletes an OTP record by transaction ID (used for immediate rollback on email dispatch failure)
+   */
+  static async deleteByTxnId(txnId) {
+    try {
+      await supabase.from('otps').delete().eq('txn_id', txnId);
+    } catch (e) {
+      // Fallback
+    }
+
+    const otps = db.getOtps();
+    const filtered = otps.filter((o) => o.txn_id !== txnId);
+    db.saveOtps(filtered);
+  }
 }
+
