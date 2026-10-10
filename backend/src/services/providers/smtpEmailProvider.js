@@ -19,6 +19,9 @@ function getTransporter() {
             user: ENV.SMTP_USER,
             pass: ENV.SMTP_PASS.replace(/\s+/g, ''),
           },
+          connectionTimeout: 5000,
+          greetingTimeout: 5000,
+          socketTimeout: 5000,
         }
       : {
           host: ENV.SMTP_HOST,
@@ -28,6 +31,9 @@ function getTransporter() {
             user: ENV.SMTP_USER,
             pass: ENV.SMTP_PASS,
           },
+          connectionTimeout: 5000,
+          greetingTimeout: 5000,
+          socketTimeout: 5000,
           pool: true,
           maxConnections: 5,
           maxMessages: 100,

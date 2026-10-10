@@ -1,9 +1,13 @@
 import { ENV } from '../config/env.js';
 import { devEmailProvider } from './providers/devEmailProvider.js';
 import { smtpEmailProvider } from './providers/smtpEmailProvider.js';
+import { httpEmailProvider } from './providers/httpEmailProvider.js';
 
 function getActiveProvider() {
-  if (ENV.EMAIL_PROVIDER === 'smtp' && ENV.SMTP_HOST && ENV.SMTP_USER) {
+  if (ENV.RESEND_API_KEY || ENV.BREVO_API_KEY) {
+    return httpEmailProvider;
+  }
+  if (ENV.EMAIL_PROVIDER === 'smtp' && ENV.SMTP_USER && ENV.SMTP_PASS) {
     return smtpEmailProvider;
   }
   return devEmailProvider;

@@ -29,4 +29,6 @@ export const ENV = {
   SMTP_USER: process.env.SMTP_USER || 'yashupdhyay486@gmail.com',
   SMTP_PASS: process.env.SMTP_PASS || 'tosxtytzdyyyeolk',
   SMTP_FROM: process.env.SMTP_FROM || 'BharatFiling <yashupdhyay486@gmail.com>',
+  RESEND_API_KEY: process.env.RESEND_API_KEY || '',
+  BREVO_API_KEY: process.env.BREVO_API_KEY || '',
 };
