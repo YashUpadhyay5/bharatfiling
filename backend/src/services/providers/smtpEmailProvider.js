@@ -5,23 +5,35 @@ let transporter = null;
 
 function getTransporter() {
   if (!transporter) {
-    if (!ENV.SMTP_HOST || !ENV.SMTP_USER || !ENV.SMTP_PASS) {
-      console.warn('⚠️ SMTP credentials not fully configured in environment. Using fallback logger.');
+    if (!ENV.SMTP_USER || !ENV.SMTP_PASS) {
+      console.warn('⚠️ SMTP credentials not fully configured in environment (SMTP_PASS missing). Using fallback logger.');
       return null;
     }
 
-    transporter = nodemailer.createTransport({
-      host: ENV.SMTP_HOST,
-      port: ENV.SMTP_PORT,
-      secure: ENV.SMTP_SECURE, // true for 465, false for 587/starttls
-      auth: {
-        user: ENV.SMTP_USER,
-        pass: ENV.SMTP_PASS,
-      },
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-    });
+    const isGmail = ENV.SMTP_SERVICE === 'gmail' || ENV.SMTP_HOST === 'smtp.gmail.com' || ENV.SMTP_USER.includes('@gmail.com');
+
+    const transportOptions = isGmail
+      ? {
+          service: 'gmail',
+          auth: {
+            user: ENV.SMTP_USER,
+            pass: ENV.SMTP_PASS.replace(/\s+/g, ''),
+          },
+        }
+      : {
+          host: ENV.SMTP_HOST,
+          port: ENV.SMTP_PORT,
+          secure: ENV.SMTP_SECURE,
+          auth: {
+            user: ENV.SMTP_USER,
+            pass: ENV.SMTP_PASS,
+          },
+          pool: true,
+          maxConnections: 5,
+          maxMessages: 100,
+        };
+
+    transporter = nodemailer.createTransport(transportOptions);
   }
   return transporter;
 }

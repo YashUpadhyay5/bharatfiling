@@ -16,8 +16,8 @@ router.get('/applications', authenticate, (req, res) => {
       if (req.user.role === 'ADMIN') return true;
       if (a.user_id === req.user.id) return a.payment_completed === true;
       if (
-        (a.fields_data?.email?.toLowerCase() === req.user.email?.toLowerCase() ||
-         a.fields_data?.mobile_number === req.user.phone) &&
+        a.fields_data?.email &&
+        a.fields_data.email.toLowerCase() === req.user.email?.toLowerCase() &&
         a.payment_completed === true
       ) {
         a.user_id = req.user.id;

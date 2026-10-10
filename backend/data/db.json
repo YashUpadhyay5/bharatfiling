@@ -594,7 +594,7 @@
     {
       "id": "app_gst_4760a413",
       "application_number": "GST-2026-000007",
-      "user_id": "usr_ca680611",
+      "user_id": "usr_cust_test_archive",
       "business_id": "biz_6fcfbd65",
       "business_type": "Proprietorship",
       "state": "Karnataka",
@@ -607,8 +607,8 @@
         "dob": "",
         "pan_number": "",
         "aadhaar_number": "",
-        "mobile_number": "07668976193",
-        "email": "yashupdhyay486@gmail.com",
+        "mobile_number": "9999900000",
+        "email": "archive.test@example.com",
         "business_type": "Proprietorship",
         "state": "Karnataka",
         "legal_name": "",
@@ -629,7 +629,7 @@
     {
       "id": "app_gst_3b2511ed",
       "application_number": "GST-2026-000008",
-      "user_id": "usr_ca680611",
+      "user_id": "usr_cust_test_archive",
       "business_id": "biz_44c1c2d2",
       "business_type": "Proprietorship",
       "state": "Karnataka",
@@ -642,8 +642,8 @@
         "dob": "",
         "pan_number": "",
         "aadhaar_number": "",
-        "mobile_number": "07668976193",
-        "email": "yashupdhyay486@gmail.com",
+        "mobile_number": "9999900000",
+        "email": "archive.test@example.com",
         "business_type": "Proprietorship",
         "state": "Karnataka",
         "legal_name": "",
@@ -664,7 +664,7 @@
     {
       "id": "app_gst_0b609b43",
       "application_number": "GST-2026-000009",
-      "user_id": "usr_guest_lead",
+      "user_id": "usr_cust_test_archive",
       "business_id": "biz_06dd9c95",
       "business_type": "Proprietorship",
       "state": "Karnataka",
@@ -673,9 +673,9 @@
       "internal_status": "PAID",
       "fields_data": {
         "applicant_name": "Yash Updhyay",
-        "mobile_number": "7668976193",
+        "mobile_number": "9999900000",
         "pan_number": "ABCDE1234U",
-        "email": "yashupdhyay@gmail.com",
+        "email": "archive.test@example.com",
         "state": "Karnataka",
         "business_type": "Proprietorship"
       },
@@ -687,7 +687,7 @@
     {
       "id": "app_gst_0eae2485",
       "application_number": "GST-2026-000010",
-      "user_id": "usr_guest_lead",
+      "user_id": "usr_cust_test_archive",
       "business_id": "biz_66824431",
       "business_type": "Other Commercial Services",
       "state": "Bihar",
@@ -696,9 +696,9 @@
       "internal_status": "PAID",
       "fields_data": {
         "applicant_name": "yash upadhyay",
-        "mobile_number": "7668976193",
+        "mobile_number": "9999900000",
         "pan_number": "AOOPU9849P",
-        "email": "yashupadhyay@gmail.com",
+        "email": "archive.test@example.com",
         "state": "Bihar",
         "business_type": "Other Commercial Services"
       },
@@ -848,7 +848,7 @@
     {
       "id": "app_gst_7adecb33",
       "application_number": "GST-2026-000017",
-      "user_id": "usr_guest_lead",
+      "user_id": "usr_cust_test_archive",
       "business_id": "biz_22211649",
       "business_type": "Retail Trade",
       "state": "Karnataka",
@@ -856,9 +856,9 @@
       "internal_status": "PAYMENT_CONFIRMED",
       "fields_data": {
         "applicant_name": "Yash Upadhyay",
-        "mobile_number": "7668976193",
+        "mobile_number": "9999900000",
         "pan_number": "ABCDE1234F",
-        "email": "yashupadhyay@gmail.com",
+        "email": "archive.test@example.com",
         "state": "Karnataka",
         "business_type": "Retail Trade"
       },
@@ -892,7 +892,7 @@
     {
       "id": "app_gst_0ed11c2e",
       "application_number": "GST-2026-000019",
-      "user_id": "usr_guest_lead",
+      "user_id": "usr_cust_test_archive",
       "business_id": "biz_819355b5",
       "business_type": "Retail Trade",
       "state": "Karnataka",
@@ -900,9 +900,9 @@
       "internal_status": "CA_REVIEW",
       "fields_data": {
         "applicant_name": "Yash Upadhyay",
-        "mobile_number": "7668976193",
+        "mobile_number": "9999900000",
         "pan_number": "ABCDE1234F",
-        "email": "yashupadhyay@gmail.com",
+        "email": "archive.test@example.com",
         "state": "Karnataka",
         "business_type": "Retail Trade"
       },
