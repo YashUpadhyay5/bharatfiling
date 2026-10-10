@@ -109,7 +109,6 @@ router.post('/register/request-otp', async (req, res) => {
       message: `A 6-digit verification code has been sent to ${cleanEmail}.`,
       txn_id,
       cooldown_seconds: 60,
-      otp: ENV.EMAIL_PROVIDER !== 'smtp' ? otp : undefined,
     });
   } catch (err) {
     console.error('[Register Request OTP Error]:', err);
@@ -331,7 +330,6 @@ router.post('/forgot-password/request-otp', async (req, res) => {
         message: `If an account with ${cleanEmail} exists, a 6-digit recovery code has been sent.`,
         txn_id,
         cooldown_seconds: 60,
-        otp: ENV.EMAIL_PROVIDER !== 'smtp' ? otp : undefined,
       });
     }
 
