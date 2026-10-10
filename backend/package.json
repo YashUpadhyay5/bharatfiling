@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/index.js",
+    "build": "echo 'Backend dependencies ready'",
     "start": "node src/index.js"
   },
   "keywords": [

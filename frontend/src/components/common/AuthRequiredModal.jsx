@@ -385,7 +385,8 @@ export default function AuthRequiredModal({
                     type="text"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="name@company.com or 10-digit mobile"
+                    autoComplete="username"
+                    placeholder="Enter email address or mobile number"
                     className="w-full pl-10 pr-3.5 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                     required
                   />
@@ -415,6 +416,7 @@ export default function AuthRequiredModal({
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
                     placeholder="Enter account password"
                     className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                     required
@@ -451,7 +453,8 @@ export default function AuthRequiredModal({
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Rahul Sharma"
+                    autoComplete="name"
+                    placeholder="Enter full legal name"
                     className="w-full pl-10 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                     required
                   />
@@ -469,7 +472,8 @@ export default function AuthRequiredModal({
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@domain.com"
+                      autoComplete="email"
+                      placeholder="Enter email address"
                       className="w-full pl-9 pr-2.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                       required
                     />
@@ -486,7 +490,8 @@ export default function AuthRequiredModal({
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="10-digit number"
+                      autoComplete="tel"
+                      placeholder="Enter 10-digit mobile number"
                       maxLength={10}
                       className="w-full pl-9 pr-2.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                       required
@@ -505,7 +510,8 @@ export default function AuthRequiredModal({
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Minimum 6 characters"
+                    autoComplete="new-password"
+                    placeholder="Create a password (min. 6 characters)"
                     className="w-full pl-10 pr-10 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                     required
                   />
@@ -550,6 +556,7 @@ export default function AuthRequiredModal({
                     maxLength={6}
                     value={regOtp}
                     onChange={(e) => setRegOtp(e.target.value.replace(/\D/g, ''))}
+                    autoComplete="one-time-code"
                     placeholder="123456"
                     className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#111827] focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
                     autoFocus

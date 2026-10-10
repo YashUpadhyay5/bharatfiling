@@ -421,7 +421,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     type="text"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="e.g. customer@bharatfiling.com or 9876501234"
+                    autoComplete="username"
+                    placeholder="Enter email address or mobile number"
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -449,7 +450,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="•••••••••••• (e.g. Test@123)"
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -478,7 +480,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Full name as printed on PAN card"
+                    autoComplete="name"
+                    placeholder="Enter your full legal name"
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -493,7 +496,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="official@company.com"
+                    autoComplete="email"
+                    placeholder="Enter your email address"
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -508,7 +512,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="10-digit mobile number"
+                    autoComplete="tel"
+                    placeholder="Enter 10-digit mobile number"
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -523,7 +528,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     type="password"
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
-                    placeholder="At least 6 characters"
+                    autoComplete="new-password"
+                    placeholder="Create a password (min. 6 characters)"
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -620,7 +626,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         type="email"
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
-                        placeholder="e.g. customer@bharatfiling.com"
+                        autoComplete="email"
+                        placeholder="Enter your registered email address"
                         className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                         required
                         autoFocus
@@ -671,6 +678,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         maxLength={6}
                         value={fpOtp}
                         onChange={(e) => setFpOtp(e.target.value.replace(/\D/g, ''))}
+                        autoComplete="one-time-code"
                         placeholder="123456"
                         className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
                         autoFocus
@@ -725,7 +733,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         type="password"
                         value={fpNewPassword}
                         onChange={(e) => setFpNewPassword(e.target.value)}
-                        placeholder="At least 6 characters"
+                        autoComplete="new-password"
+                        placeholder="Enter new password (min. 6 characters)"
                         className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                         required
                         autoFocus
@@ -741,6 +750,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         type="password"
                         value={fpConfirmPassword}
                         onChange={(e) => setFpConfirmPassword(e.target.value)}
+                        autoComplete="new-password"
                         placeholder="Re-enter new password"
                         className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                         required
