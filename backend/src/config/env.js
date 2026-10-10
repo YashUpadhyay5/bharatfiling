@@ -1,7 +1,12 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
-dotenv.config();
+const envFile = fs.existsSync(path.resolve(process.cwd(), 'backend/.env'))
+  ? path.resolve(process.cwd(), 'backend/.env')
+  : path.resolve(process.cwd(), '.env');
+
+dotenv.config({ path: envFile });
 
 export const ENV = {
   PORT: parseInt(process.env.PORT || '5000', 10),
