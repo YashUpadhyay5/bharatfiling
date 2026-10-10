@@ -8,7 +8,7 @@ export const httpEmailProvider = {
   async send({ to, subject, html, text }) {
     // 1. Resend API
     if (ENV.RESEND_API_KEY) {
-      const from = ENV.SMTP_FROM || 'BharatFiling <onboarding@resend.dev>';
+      const from = ENV.RESEND_FROM || 'BharatFiling <onboarding@resend.dev>';
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {

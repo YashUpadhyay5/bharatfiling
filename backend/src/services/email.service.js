@@ -14,11 +14,28 @@ function getActiveProvider() {
 }
 
 export const emailService = {
+  async _sendWithFallback(payload) {
+    const provider = getActiveProvider();
+    try {
+      return await provider.send(payload);
+    } catch (primaryErr) {
+      console.warn(`[Primary Email Provider Failed]: ${primaryErr.message}`);
+      if (provider !== smtpEmailProvider && ENV.SMTP_USER && ENV.SMTP_PASS) {
+        try {
+          console.log('[Email Dispatch]: Falling back to SMTP...');
+          return await smtpEmailProvider.send(payload);
+        } catch (smtpErr) {
+          console.warn(`[SMTP Fallback Failed]: ${smtpErr.message}`);
+        }
+      }
+      throw primaryErr;
+    }
+  },
+
   /**
    * Dispatches 6-digit registration OTP email
    */
   async sendRegistrationOtp(email, otp, name = 'Valued Client') {
-    const provider = getActiveProvider();
     const subject = `${otp} is your BharatFiling registration code`;
     
     const text = `Hello ${name},\n\nThank you for signing up with BharatFiling. Your 6-digit registration verification code is: ${otp}\n\nThis code is valid for 5 minutes. Never share this code with anyone.\n\nBharatFiling Platform`;
@@ -80,7 +97,7 @@ export const emailService = {
 </html>
     `;
 
-    return provider.send({
+    return this._sendWithFallback({
       to: email,
       subject,
       text,
@@ -93,7 +110,6 @@ export const emailService = {
    * Dispatches 6-digit password recovery OTP email
    */
   async sendPasswordResetOtp(email, otp, name = 'Valued Client') {
-    const provider = getActiveProvider();
     const subject = `${otp} is your BharatFiling password recovery code`;
 
     const text = `Hello ${name},\n\nWe received a request to reset your BharatFiling account password. Your 6-digit recovery verification code is: ${otp}\n\nThis code is valid for 5 minutes. If you did not request a password reset, you can safely ignore this email.\n\nBharatFiling Platform`;
@@ -154,7 +170,7 @@ export const emailService = {
 </html>
     `;
 
-    return provider.send({
+    return this._sendWithFallback({
       to: email,
       subject,
       text,
@@ -167,7 +183,6 @@ export const emailService = {
    * Dispatches security alert notification email after successful password change
    */
   async sendPasswordChangedAlert(email, name = 'Valued Client') {
-    const provider = getActiveProvider();
     const subject = `Security Alert: Your BharatFiling password was updated`;
 
     const formattedDate = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
@@ -221,7 +236,7 @@ export const emailService = {
 </html>
     `;
 
-    return provider.send({
+    return this._sendWithFallback({
       to: email,
       subject,
       text,
