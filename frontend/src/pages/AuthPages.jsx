@@ -43,6 +43,9 @@ export default function AuthPages({ defaultMode = 'login' }) {
   const [fpConfirmPassword, setFpConfirmPassword] = useState('');
   const [fpCooldown, setFpCooldown] = useState(0);
 
+  // Dev OTP storage for console logging and preview
+  const [devOtp, setDevOtp] = useState('');
+
   const [loading, setLoading] = useState(false);
 
   const {
@@ -156,7 +159,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
         setRegTxnId(res.txn_id);
         setRegStep(2);
         setRegCooldown(res.cooldown_seconds || 60);
-        showSuccess(res.message || 'Verification code sent to your email!');
+        if (res.otp) {
+          setDevOtp(res.otp);
+          console.log(
+            '%c🔑 [BharatFiling Verification Code (OTP)]: ' + res.otp,
+            'background: #0f172a; color: #10b981; font-size: 16px; font-weight: bold; padding: 6px 12px; border-radius: 8px;'
+          );
+          showSuccess(`Verification code dispatched! [Console: ${res.otp}]`);
+        } else {
+          showSuccess(res.message || 'Verification code sent to your email!');
+        }
       }
     } catch (err) {
       showError(err.message || 'Failed to send verification code.');
@@ -206,7 +218,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
       if (res.success) {
         setRegTxnId(res.txn_id);
         setRegCooldown(res.cooldown_seconds || 60);
-        showSuccess('New verification code sent to your email!');
+        if (res.otp) {
+          setDevOtp(res.otp);
+          console.log(
+            '%c🔑 [BharatFiling Verification Code (OTP)]: ' + res.otp,
+            'background: #0f172a; color: #10b981; font-size: 16px; font-weight: bold; padding: 6px 12px; border-radius: 8px;'
+          );
+          showSuccess(`New code sent! [Console: ${res.otp}]`);
+        } else {
+          showSuccess('New verification code sent to your email!');
+        }
       }
     } catch (err) {
       showError(err.message || 'Failed to resend code.');
@@ -230,7 +251,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
         setFpTxnId(res.txn_id);
         setFpStep(2);
         setFpCooldown(res.cooldown_seconds || 60);
-        showSuccess(res.message || 'Recovery code sent!');
+        if (res.otp) {
+          setDevOtp(res.otp);
+          console.log(
+            '%c🔑 [BharatFiling Recovery Code (OTP)]: ' + res.otp,
+            'background: #0f172a; color: #f59e0b; font-size: 16px; font-weight: bold; padding: 6px 12px; border-radius: 8px;'
+          );
+          showSuccess(`Recovery code sent! [Console: ${res.otp}]`);
+        } else {
+          showSuccess(res.message || 'Recovery code sent!');
+        }
       }
     } catch (err) {
       showError(err.message || 'Failed to request recovery code.');
@@ -276,7 +306,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
       if (res.success) {
         setFpTxnId(res.txn_id);
         setFpCooldown(res.cooldown_seconds || 60);
-        showSuccess('New recovery code sent to your email!');
+        if (res.otp) {
+          setDevOtp(res.otp);
+          console.log(
+            '%c🔑 [BharatFiling Recovery Code (OTP)]: ' + res.otp,
+            'background: #0f172a; color: #f59e0b; font-size: 16px; font-weight: bold; padding: 6px 12px; border-radius: 8px;'
+          );
+          showSuccess(`New recovery code sent! [Console: ${res.otp}]`);
+        } else {
+          showSuccess('New recovery code sent to your email!');
+        }
       }
     } catch (err) {
       showError(err.message || 'Failed to resend code.');
@@ -560,6 +599,22 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 </p>
               </div>
 
+              {devOtp && (
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-mono font-bold text-xs">
+                    <span>🔑 Dev Code:</span>
+                    <span className="text-sm bg-white px-2.5 py-0.5 rounded-md border border-amber-300 tracking-widest text-amber-800">{devOtp}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setRegOtp(devOtp)}
+                    className="text-[11px] font-bold text-amber-900 hover:text-amber-950 bg-amber-200 hover:bg-amber-300 px-3 py-1.5 rounded-lg transition cursor-pointer shadow-xs"
+                  >
+                    Auto-Fill
+                  </button>
+                </div>
+              )}
+
               <div>
                 <label className="block font-bold text-slate-700 mb-1.5">6-Digit Verification Code</label>
                 <div className="relative">
@@ -668,6 +723,22 @@ export default function AuthPages({ defaultMode = 'login' }) {
                       If an account exists for <span className="font-bold">{forgotEmail}</span>, a 6-digit recovery OTP has been sent.
                     </p>
                   </div>
+
+                  {devOtp && (
+                    <div className="p-3 rounded-xl bg-amber-100/70 border border-amber-300 text-amber-900 flex items-center justify-between">
+                      <div className="flex items-center gap-2 font-mono font-bold text-xs">
+                        <span>🔑 Dev Recovery Code:</span>
+                        <span className="text-sm bg-white px-2.5 py-0.5 rounded-md border border-amber-400 tracking-widest text-amber-800">{devOtp}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFpOtp(devOtp)}
+                        className="text-[11px] font-bold text-amber-900 hover:text-amber-950 bg-amber-200 hover:bg-amber-300 px-3 py-1.5 rounded-lg transition cursor-pointer shadow-xs"
+                      >
+                        Auto-Fill
+                      </button>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block font-bold text-slate-700 mb-1.5">6-Digit Recovery Code</label>

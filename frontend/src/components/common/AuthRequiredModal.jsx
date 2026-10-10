@@ -44,6 +44,7 @@ export default function AuthRequiredModal({
   const [regTxnId, setRegTxnId] = useState('');
   const [regOtp, setRegOtp] = useState('');
   const [regCooldown, setRegCooldown] = useState(0);
+  const [devOtp, setDevOtp] = useState('');
 
   const {
     login,
@@ -159,6 +160,13 @@ export default function AuthRequiredModal({
         setRegTxnId(res.txn_id);
         setRegStep(2);
         setRegCooldown(res.cooldown_seconds || 60);
+        if (res.otp) {
+          setDevOtp(res.otp);
+          console.log(
+            '%c🔑 [BharatFiling Verification Code (OTP)]: ' + res.otp,
+            'background: #0f172a; color: #10b981; font-size: 16px; font-weight: bold; padding: 6px 12px; border-radius: 8px;'
+          );
+        }
       } else {
         setAuthError(res.message || 'Failed to dispatch verification code.');
       }
@@ -213,7 +221,16 @@ export default function AuthRequiredModal({
       if (res.success) {
         setRegTxnId(res.txn_id);
         setRegCooldown(res.cooldown_seconds || 60);
-        showSuccess('New verification code sent to your email!');
+        if (res.otp) {
+          setDevOtp(res.otp);
+          console.log(
+            '%c🔑 [BharatFiling Verification Code (OTP)]: ' + res.otp,
+            'background: #0f172a; color: #10b981; font-size: 16px; font-weight: bold; padding: 6px 12px; border-radius: 8px;'
+          );
+          showSuccess(`New code sent! [Console: ${res.otp}]`);
+        } else {
+          showSuccess('New verification code sent to your email!');
+        }
       }
     } catch (err) {
       setAuthError(err.message || 'Failed to resend code.');
@@ -546,6 +563,22 @@ export default function AuthRequiredModal({
                   We've sent a 6-digit confirmation code to <span className="font-bold">{email}</span>.
                 </p>
               </div>
+
+              {devOtp && (
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-mono font-bold text-xs">
+                    <span>🔑 Dev Code:</span>
+                    <span className="text-sm bg-white px-2.5 py-0.5 rounded-md border border-amber-300 tracking-widest text-amber-800">{devOtp}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setRegOtp(devOtp)}
+                    className="text-[11px] font-bold text-amber-900 hover:text-amber-950 bg-amber-200 hover:bg-amber-300 px-3 py-1.5 rounded-lg transition cursor-pointer shadow-xs"
+                  >
+                    Auto-Fill
+                  </button>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">6-Digit Verification Code</label>
