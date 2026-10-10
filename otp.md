@@ -21,6 +21,7 @@
 10. [Branded HTML Email Templates](#10-branded-html-email-templates)
 11. [Frontend State Machine & UX Flow](#11-frontend-state-machine--ux-flow)
 12. [Security & OWASP ASVS Compliance Checklist](#12-security--owasp-asvs-compliance-checklist)
+13. [Production Email Dispatching Guide: Why, Where & Step-by-Step Execution](#13-production-email-dispatching-guide-why-where--step-by-step-execution)
 
 ---
 
@@ -380,56 +381,48 @@ All authentication endpoints are served by the Express backend at `https://bhara
 
 ## 7. Email Service Architecture (`email.service.js`)
 
-The email delivery layer follows the **Strategy Pattern**, making the underlying email provider completely pluggable:
+The email delivery layer follows the **Strategy & Multi-Tier Fallback Pattern**, making the email transport resilient to cloud firewall constraints and provider outages:
 
 ```javascript
 // Architecture interface in backend/src/services/email.service.js
+import { ENV } from '../config/env.js';
 import { devEmailProvider } from './providers/devEmailProvider.js';
 import { smtpEmailProvider } from './providers/smtpEmailProvider.js';
-import { ENV } from '../config/env.js';
+import { httpEmailProvider } from './providers/httpEmailProvider.js';
+
+function getActiveProvider() {
+  if (ENV.RESEND_API_KEY || ENV.BREVO_API_KEY) {
+    return httpEmailProvider;   // Primary: HTTPS Port 443 (Never blocked by cloud firewalls)
+  }
+  if (ENV.EMAIL_PROVIDER === 'smtp' && ENV.SMTP_USER && ENV.SMTP_PASS) {
+    return smtpEmailProvider;   // Secondary: Direct SMTP / Gmail App Password
+  }
+  return devEmailProvider;       // Safe fallback: Server-side log simulation
+}
 
 export const emailService = {
-  async sendRegistrationOtp(email, otp, name) {
-    const provider = ENV.EMAIL_PROVIDER === 'smtp' ? smtpEmailProvider : devEmailProvider;
-    return provider.send({
-      to: email,
-      subject: `${otp} is your BharatFiling registration code`,
-      template: 'REGISTRATION_OTP',
-      data: { otp, name },
-    });
+  async _sendWithFallback(payload) {
+    const provider = getActiveProvider();
+    try {
+      return await provider.send(payload);
+    } catch (primaryErr) {
+      console.warn(`[Primary Provider Failed]: ${primaryErr.message}`);
+      // Automatic fallback to SMTP if Resend sandbox or rate limit triggers
+      if (provider !== smtpEmailProvider && ENV.SMTP_USER && ENV.SMTP_PASS) {
+        return await smtpEmailProvider.send(payload);
+      }
+      throw primaryErr;
+    }
   },
-
-  async sendPasswordResetOtp(email, otp, name) {
-    const provider = ENV.EMAIL_PROVIDER === 'smtp' ? smtpEmailProvider : devEmailProvider;
-    return provider.send({
-      to: email,
-      subject: `${otp} is your BharatFiling password recovery code`,
-      template: 'PASSWORD_RESET_OTP',
-      data: { otp, name },
-    });
-  },
-
-  async sendPasswordChangedAlert(email, name) {
-    const provider = ENV.EMAIL_PROVIDER === 'smtp' ? smtpEmailProvider : devEmailProvider;
-    return provider.send({
-      to: email,
-      subject: `Security Alert: Your BharatFiling password was updated`,
-      template: 'PASSWORD_CHANGED_ALERT',
-      data: { name, timestamp: new Date().toISOString() },
-    });
-  },
+  // sendRegistrationOtp, sendPasswordResetOtp, sendPasswordChangedAlert call _sendWithFallback
 };
 ```
 
-### Development Mode Behavior (`EMAIL_PROVIDER=dev`):
-* Does not require any external credentials or SMTP keys.
-* Outputs the OTP directly in the backend terminal with structured formatting for immediate developer testing.
-* Can optionally generate an Ethereal test inbox link.
-
-### Production Mode Behavior (`EMAIL_PROVIDER=smtp`):
-* Authenticates with the official corporate SMTP server via TLS.
-* Connects through connection pooling to deliver transactional emails in $<1.5$ seconds.
-* Catches socket/handshake errors gracefully, logging failure alerts without crashing Express.
+### Dispatch Layer Characteristics:
+* **HTTPS Provider (`httpEmailProvider.js`):** Sends via Resend/Brevo REST APIs over standard HTTPS (Port 443). Bypasses cloud host SMTP egress port blocks.
+* **SMTP Provider (`smtpEmailProvider.js`):** Connects to `smtp.gmail.com:465` (or corporate SMTP) using 5-second socket timeouts to prevent unhandled process hangs.
+* **Auto-Fallback Engine:** If Resend is operating in sandbox mode and encounters an unverified external recipient, the system automatically falls back to the configured SMTP channel.
+* **Safe Dev Provider (`devEmailProvider.js`):** Logs structured email simulation in development environments when no credentials are present, keeping Express running smoothly.
 
 ---
 
@@ -616,6 +609,132 @@ In [`frontend/src/pages/AuthPages.jsx`](file:///C:/Users/DELL/Desktop/bharatfili
 | **Timing Attacks** | `crypto.timingSafeEqual` used for constant-time cryptographic hash verification. |
 | **Privilege Escalation** | Registration hardcodes `role: 'CUSTOMER'`; CA and Admin roles are strictly locked. |
 | **Plaintext Leakage** | Plaintext OTPs and passwords are never logged, returned in JSON, or stored in browser storage. |
+
+---
+
+## 13. Production Email Dispatching Guide: Why, Where & Step-by-Step Execution
+
+This section provides the end-to-end operational guide for sending production emails (registration OTP, password recovery, alerts) reliably from the cloud.
+
+---
+
+### A. The Core Principle: Web Service vs. Static Site
+
+When configuring environment variables in cloud platforms like **Render**, developers often confuse the **Static Site** with the **Web Service**:
+
+```
+                       ┌──────────────────────────────────────────────┐
+                       │               RENDER DASHBOARD               │
+                       └──────────────────────┬───────────────────────┘
+                                              │
+                    ┌─────────────────────────┴─────────────────────────┐
+                    │                                                   │
+         ❌ DO NOT CONFIGURE HERE                           ✅ CONFIGURE HERE
+                    ▼                                                   ▼
+         ┌─────────────────────┐                             ┌─────────────────────┐
+         │     STATIC SITE     │                             │     WEB SERVICE     │
+         │   `bharatfiling`    │                             │  `bharatfiling-1`   │
+         ├─────────────────────┤                             ├─────────────────────┤
+         │ • React / Vite SPA  │                             │ • Express 5 Node.js │
+         │ • Client-side code  │                             │ • Server-side API   │
+         │ • Runs in browser   │                             │ • Runs on Linux VM  │
+         │ • NO backend logic  │                             │ • Executes OTP logic│
+         │ • NO email dispatch │                             │ • Dispatches emails │
+         └─────────────────────┘                             └─────────────────────┘
+```
+
+> [!CAUTION]
+> **Common Mistake:** Adding `EMAIL_PROVIDER`, `RESEND_API_KEY`, or `SMTP_PASS` to the **Static Site** (`bharatfiling`) will have **zero effect**. Static sites run in the visitor's browser and do not execute server code. Furthermore, secrets placed in static site settings could inadvertently be exposed to browser bundles.
+> 
+> **Correct Action:** All email credentials, database keys, and JWT secrets **must be added exclusively** to the **Web Service** (`bharatfiling-1`).
+
+---
+
+### B. WHY: Cloud Constraints & Solution Architecture
+
+#### 1. Why Direct SMTP (Port 25, 465, 587) Fails on Free Cloud Hosts
+Cloud hosting platforms (including Render, AWS Free Tier, DigitalOcean) **block outbound TCP traffic on ports 25, 465, and 587** by default on free/shared tiers to prevent their IP ranges from being abused for spam.
+* When code tries to use traditional `nodemailer` with `smtp.gmail.com:465` on a blocked port, the network connection hangs indefinitely or throws `ETIMEDOUT` / `ECONNREFUSED`.
+* Without socket timeouts, this can cause backend processes to freeze while waiting for an SMTP handshake.
+
+#### 2. Why HTTPS REST APIs (Port 443) are the Production Solution
+Standard web traffic uses **HTTPS (Port 443)**, which is **never blocked** by cloud hosts.
+By calling email APIs (such as **Resend** or **Brevo**) over standard HTTPS REST endpoints (`POST https://api.resend.com/emails`), emails are dispatched in under 500ms without touching blocked SMTP ports.
+
+#### 3. Why Multi-Tier Automated Fallback is Implemented
+* **Resend Sandbox Behavior:** In free/trial mode without a verified custom domain, Resend restricts delivery **only** to the email address that created the Resend account (e.g. `yashupdhyay486@gmail.com`). If an external user (e.g. `amanvishwakarma9832@gmail.com`) requests an OTP, Resend returns HTTP `403 Forbidden` (`validation_error: can only send to your own email`).
+* **The Solution in `email.service.js`:** BharatFiling implements a two-tier fallback:
+  1. **Primary Tier:** HTTPS REST API via Resend (Port 443).
+  2. **Secondary Tier:** If Resend rejects the recipient (e.g., external address during trial), the engine automatically catches the error and dispatches via Gmail SMTP (Google App Password) or Brevo.
+  3. **Zero Frontend Hangs:** 5-second socket timeouts ensure the user receives immediate feedback even under network degradation.
+
+---
+
+### C. WHERE: Exact Files in Codebase & Render Settings
+
+#### 1. Codebase File Structure
+| Purpose | File Path |
+| :--- | :--- |
+| **Central Secret Loader** | [`backend/src/config/env.js`](file:///C:/Users/DELL/Desktop/bharatfiling/backend/src/config/env.js) |
+| **HTTPS REST Provider** | [`backend/src/services/providers/httpEmailProvider.js`](file:///C:/Users/DELL/Desktop/bharatfiling/backend/src/services/providers/httpEmailProvider.js) |
+| **SMTP Provider** | [`backend/src/services/providers/smtpEmailProvider.js`](file:///C:/Users/DELL/Desktop/bharatfiling/backend/src/services/providers/smtpEmailProvider.js) |
+| **Dev Fallback Provider** | [`backend/src/services/providers/devEmailProvider.js`](file:///C:/Users/DELL/Desktop/bharatfiling/backend/src/services/providers/devEmailProvider.js) |
+| **Dispatch Orchestrator** | [`backend/src/services/email.service.js`](file:///C:/Users/DELL/Desktop/bharatfiling/backend/src/services/email.service.js) |
+| **OTP Auth Endpoints** | [`backend/src/routes/auth.routes.js`](file:///C:/Users/DELL/Desktop/bharatfiling/backend/src/routes/auth.routes.js) |
+
+#### 2. Render Cloud Dashboard Location
+1. Log in to [dashboard.render.com](https://dashboard.render.com).
+2. Look at your Services list.
+3. Select the **Web Service** named **`bharatfiling-1`** (Type: `Web Service`, URL: `https://bharatfiling-1.onrender.com`).
+4. In the left navigation menu, click **Environment**.
+5. Click **Add Environment Variable** or **Edit**.
+
+---
+
+### D. HOW: Step-by-Step Render Production Environment Setup
+
+In the **`bharatfiling-1`** Web Service Environment tab, configure the following variables:
+
+| Variable Key | Recommended Value | Description |
+| :--- | :--- | :--- |
+| `EMAIL_PROVIDER` | `resend` (or `smtp`) | Sets the default dispatch engine |
+| `RESEND_API_KEY` | `your_resend_api_key` | Resend API key for instant HTTPS Port 443 delivery |
+| `FROM_EMAIL` | `onboarding@resend.dev` | Default test sender (use `@bharatfiling.com` after domain verification) |
+| `FROM_NAME` | `BharatFiling` | Display sender name shown in user's inbox |
+| `SMTP_USER` | `yashupdhyay486@gmail.com` | Fallback Gmail sender account |
+| `SMTP_PASS` | `your_16_digit_app_password` | Google 16-character App Password (no spaces) |
+| `SMTP_HOST` | `smtp.gmail.com` | SMTP Server Host |
+| `SMTP_PORT` | `465` | SMTP Secure Port |
+| `NODE_ENV` | `production` | Enforces production security optimizations |
+| `FRONTEND_URL` | `https://bharatfiling.onrender.com` | Allowed CORS origin for frontend requests |
+| `JWT_SECRET` | *(Existing Secret)* | Secret key for signing Express JWT tokens |
+| `OTP_PEPPER` | *(Existing Secret)* | Cryptographic HMAC secret for OTP hashes |
+| `SUPABASE_URL` | *(Existing URL)* | Supabase PostgreSQL API endpoint |
+| `SUPABASE_SERVICE_ROLE_KEY` | *(Existing Key)* | Supabase Service Role key |
+
+> [!TIP]
+> After clicking **Save Changes** in Render, Render will automatically trigger a new deployment of `bharatfiling-1`. The updated environment variables take effect within 60–90 seconds.
+
+---
+
+### E. Production Custom Domain Setup (`@bharatfiling.com`)
+
+To send emails directly from `support@bharatfiling.com` to **any user in the world** without sandbox restrictions:
+
+1. **Add Domain in Resend:**
+   * Go to [resend.com/domains](https://resend.com/domains) -> Click **Add Domain**.
+   * Enter `bharatfiling.com` (or a subdomain like `mail.bharatfiling.com`).
+2. **Add DNS Records to Your Domain Registrar (Hostinger / GoDaddy / Cloudflare):**
+   * Resend provides 3 DNS records:
+     * **DKIM (CNAME or TXT):** Ensures email cryptographic authenticity.
+     * **SPF (TXT):** Authorizes Resend mail servers (`v=spf1 include:resend.com ~all`).
+     * **DMARC (TXT):** Policy specification (`v=DMARC1; p=none;`).
+3. **Verify Domain:**
+   * Click **Verify** in Resend dashboard. DNS verification typically takes 5–15 minutes.
+4. **Update Render Environment:**
+   * In `bharatfiling-1`, update:
+     * `FROM_EMAIL` = `support@bharatfiling.com`
+   * Now, every user worldwide receives OTPs directly from the official verified domain!
 
 ---
 
