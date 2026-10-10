@@ -1,4 +1,10 @@
-const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
+const rawApiUrl =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? 'https://bharatfiling-1.onrender.com/api/v1' : '/api/v1');
+
+const API_BASE = rawApiUrl.endsWith('/api/v1')
+  ? rawApiUrl
+  : `${rawApiUrl.replace(/\/$/, '')}/api/v1`;
 
 const getHeaders = (isMultipart = false) => {
   const token = localStorage.getItem('bharatfiling_token') || localStorage.getItem('taxveda_token');
@@ -62,6 +68,60 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
+    });
+    return handleResponse(res);
+  },
+
+  requestRegisterOtp: async (userData) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/register/request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
+    return handleResponse(res);
+  },
+
+  verifyRegisterOtp: async ({ email, otp, txn_id }) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/register/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp, txn_id }),
+    });
+    return handleResponse(res);
+  },
+
+  requestForgotPasswordOtp: async (email) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/forgot-password/request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return handleResponse(res);
+  },
+
+  verifyForgotPasswordOtp: async ({ email, otp, txn_id }) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/forgot-password/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp, txn_id }),
+    });
+    return handleResponse(res);
+  },
+
+  resetPassword: async ({ email, reset_token, new_password }) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/forgot-password/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, reset_token, new_password }),
+    });
+    return handleResponse(res);
+  },
+
+  changePassword: async ({ current_password, new_password }) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/change-password`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ current_password, new_password }),
     });
     return handleResponse(res);
   },

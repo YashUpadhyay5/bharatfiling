@@ -18,6 +18,9 @@ import {
   FileCheck2,
   Eye,
   EyeOff,
+  KeyRound,
+  RotateCcw,
+  ArrowLeft,
 } from 'lucide-react';
 
 export default function AuthRequiredModal({
@@ -36,9 +39,30 @@ export default function AuthRequiredModal({
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
 
-  const { login, register, quickSwitchAccount } = useAuth();
+  // Registration OTP staging
+  const [regStep, setRegStep] = useState(1); // 1: form details, 2: OTP verification
+  const [regTxnId, setRegTxnId] = useState('');
+  const [regOtp, setRegOtp] = useState('');
+  const [regCooldown, setRegCooldown] = useState(0);
+
+  const {
+    login,
+    register,
+    requestRegisterOtp,
+    verifyRegisterOtp,
+    quickSwitchAccount,
+  } = useAuth();
   const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
+
+  // Cooldown timer
+  useEffect(() => {
+    if (regCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setRegCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [regCooldown]);
 
   // Close on Escape key
   useEffect(() => {
@@ -117,9 +141,14 @@ export default function AuthRequiredModal({
       return;
     }
 
+    if (password.length < 6) {
+      setAuthError('Password must be at least 6 characters long.');
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await register({
+      const res = await requestRegisterOtp({
         full_name: fullName,
         email,
         phone: cleanPhone,
@@ -127,12 +156,67 @@ export default function AuthRequiredModal({
       });
 
       if (res.success) {
-        handleAuthSuccess(res.user);
+        setRegTxnId(res.txn_id);
+        setRegStep(2);
+        setRegCooldown(res.cooldown_seconds || 60);
       } else {
-        setAuthError(res.message || 'Registration failed. Please try again.');
+        setAuthError(res.message || 'Failed to dispatch verification code.');
       }
     } catch (err) {
       setAuthError(err.message || 'Registration failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterVerifyOtp = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+
+    if (!regOtp || regOtp.trim().length !== 6) {
+      setAuthError('Please enter the 6-digit verification code.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await verifyRegisterOtp({
+        email,
+        otp: regOtp.trim(),
+        txn_id: regTxnId,
+      });
+
+      if (res.success) {
+        handleAuthSuccess(res.user);
+      } else {
+        setAuthError(res.message || 'Verification failed.');
+      }
+    } catch (err) {
+      setAuthError(err.message || 'OTP verification failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendRegisterOtp = async () => {
+    if (regCooldown > 0) return;
+    setLoading(true);
+    setAuthError('');
+    try {
+      const cleanPhone = phone.replace(/\D/g, '');
+      const res = await requestRegisterOtp({
+        full_name: fullName,
+        email,
+        phone: cleanPhone,
+        password,
+      });
+      if (res.success) {
+        setRegTxnId(res.txn_id);
+        setRegCooldown(res.cooldown_seconds || 60);
+        showSuccess('New verification code sent to your email!');
+      }
+    } catch (err) {
+      setAuthError(err.message || 'Failed to resend code.');
     } finally {
       setLoading(false);
     }
@@ -235,6 +319,7 @@ export default function AuthRequiredModal({
               type="button"
               onClick={() => {
                 setMode('login');
+                setRegStep(1);
                 setAuthError('');
               }}
               className={`py-2 rounded-xl transition duration-150 ${
@@ -249,6 +334,7 @@ export default function AuthRequiredModal({
               type="button"
               onClick={() => {
                 setMode('register');
+                setRegStep(1);
                 setAuthError('');
               }}
               className={`py-2 rounded-xl transition duration-150 ${
@@ -264,12 +350,18 @@ export default function AuthRequiredModal({
           {/* Title & Help Text */}
           <div className="text-left space-y-0.5">
             <h3 className="text-sm font-bold text-slate-900">
-              {mode === 'login' ? 'Sign In to Your Account' : 'Create Free Client Account'}
+              {mode === 'login'
+                ? 'Sign In to Your Account'
+                : regStep === 1
+                ? 'Create Free Client Account'
+                : 'Verify Email Address'}
             </h3>
             <p className="text-xs text-slate-500">
               {mode === 'login'
                 ? 'Enter your credentials to continue to filing setup.'
-                : 'Set up your Master Profile to initialize your filing vault.'}
+                : regStep === 1
+                ? 'Set up your Master Profile to initialize your filing vault.'
+                : `Enter the 6-digit verification code sent to ${email}`}
             </p>
           </div>
 
@@ -301,9 +393,22 @@ export default function AuthRequiredModal({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Password
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-700">
+                    Password
+                  </label>
+                  <a
+                    href="/login"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onClose();
+                      navigate('/login');
+                    }}
+                    className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
+                  >
+                    Forgot Password?
+                  </a>
+                </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
@@ -333,8 +438,8 @@ export default function AuthRequiredModal({
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
-          ) : (
-            /* Create Account Form */
+          ) : regStep === 1 ? (
+            /* Create Account Form - Step 1: Details */
             <form onSubmit={handleRegisterSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -419,9 +524,72 @@ export default function AuthRequiredModal({
                 disabled={loading}
                 className="w-full py-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 active:scale-[0.99] cursor-pointer"
               >
-                {loading ? 'Creating Profile...' : 'Register & Start Filing'}
+                {loading ? 'Sending Code...' : 'Continue & Verify Email OTP'}
                 <ArrowRight className="w-4 h-4" />
               </button>
+            </form>
+          ) : (
+            /* Create Account Form - Step 2: OTP Verification */
+            <form onSubmit={handleRegisterVerifyOtp} className="space-y-4">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-xs">
+                  <Mail className="w-4 h-4 text-emerald-600" />
+                  Check Your Email Inbox
+                </div>
+                <p className="text-[11px] text-emerald-700 leading-relaxed">
+                  We've sent a 6-digit confirmation code to <span className="font-bold">{email}</span>.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">6-Digit Verification Code</label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={regOtp}
+                    onChange={(e) => setRegOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="123456"
+                    className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#111827] focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
+                    autoFocus
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || regOtp.length !== 6}
+                className="w-full py-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 active:scale-[0.99] cursor-pointer"
+              >
+                {loading ? 'Verifying...' : 'Verify OTP & Start Filing'}
+                <CheckCircle2 className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setRegStep(1)}
+                  className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3 h-3" /> Back
+                </button>
+
+                <button
+                  type="button"
+                  disabled={regCooldown > 0 || loading}
+                  onClick={handleResendRegisterOtp}
+                  className={`font-bold flex items-center gap-1 ${
+                    regCooldown > 0
+                      ? 'text-slate-400 cursor-not-allowed'
+                      : 'text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
+                  }`}
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  {regCooldown > 0 ? `Resend code in ${regCooldown}s` : 'Resend Code'}
+                </button>
+              </div>
             </form>
           )}
 

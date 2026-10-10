@@ -1,9 +1,13 @@
 import { io } from 'socket.io-client';
 
-const BACKEND_URL =
+const rawSocketUrl =
   import.meta.env.VITE_SOCKET_URL ||
-  import.meta.env.VITE_API_URL?.replace('/api/v1', '') ||
-  (typeof window !== 'undefined'
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? 'https://bharatfiling-1.onrender.com' : '');
+
+const BACKEND_URL = rawSocketUrl
+  ? rawSocketUrl.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '')
+  : (typeof window !== 'undefined'
     ? (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin)
     : 'http://localhost:5000');
 

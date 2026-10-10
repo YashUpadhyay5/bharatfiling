@@ -74,6 +74,39 @@ export const AuthProvider = ({ children }) => {
     return res;
   };
 
+  const requestRegisterOtp = async (userData) => {
+    return await api.requestRegisterOtp(userData);
+  };
+
+  const verifyRegisterOtp = async ({ email, otp, txn_id }) => {
+    const res = await api.verifyRegisterOtp({ email, otp, txn_id });
+    if (res.success && res.token) {
+      localStorage.setItem('bharatfiling_token', res.token);
+      if (res.user) {
+        localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
+      }
+      setToken(res.token);
+      setUser(res.user);
+    }
+    return res;
+  };
+
+  const requestForgotPasswordOtp = async (email) => {
+    return await api.requestForgotPasswordOtp(email);
+  };
+
+  const verifyForgotPasswordOtp = async ({ email, otp, txn_id }) => {
+    return await api.verifyForgotPasswordOtp({ email, otp, txn_id });
+  };
+
+  const resetPassword = async ({ email, reset_token, new_password }) => {
+    return await api.resetPassword({ email, reset_token, new_password });
+  };
+
+  const changePassword = async ({ current_password, new_password }) => {
+    return await api.changePassword({ current_password, new_password });
+  };
+
   const logout = () => {
     localStorage.removeItem('bharatfiling_token');
     localStorage.removeItem('taxveda_token');
@@ -109,6 +142,12 @@ export const AuthProvider = ({ children }) => {
         isAdmin: user?.role === 'ADMIN',
         login,
         register,
+        requestRegisterOtp,
+        verifyRegisterOtp,
+        requestForgotPasswordOtp,
+        verifyForgotPasswordOtp,
+        resetPassword,
+        changePassword,
         logout,
         quickSwitchAccount,
       }}

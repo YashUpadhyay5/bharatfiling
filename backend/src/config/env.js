@@ -15,4 +15,12 @@ export const ENV = {
   STORAGE_TYPE: process.env.STORAGE_TYPE || 'local',
   STORAGE_DIR: path.resolve(process.cwd(), process.env.STORAGE_DIR || './uploads'),
   DATABASE_URL: process.env.DATABASE_URL || '',
+  OTP_PEPPER: process.env.OTP_PEPPER || 'bf_prod_otp_keyed_pepper_2026_india_tax_os',
+  EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || (process.env.SMTP_HOST ? 'smtp' : 'dev'),
+  SMTP_HOST: process.env.SMTP_HOST || '',
+  SMTP_PORT: parseInt(process.env.SMTP_PORT || '587', 10),
+  SMTP_SECURE: process.env.SMTP_SECURE === 'true',
+  SMTP_USER: process.env.SMTP_USER || '',
+  SMTP_PASS: process.env.SMTP_PASS || '',
+  SMTP_FROM: process.env.SMTP_FROM || 'BharatFiling <support@bharatfiling.com>',
 };

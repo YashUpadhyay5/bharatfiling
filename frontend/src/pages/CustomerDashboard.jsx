@@ -23,6 +23,8 @@ import {
   PhoneCall,
   Sparkles,
   ArrowRight,
+  Lock,
+  KeyRound,
 } from 'lucide-react';
 
 export default function CustomerDashboard() {
@@ -37,6 +39,47 @@ export default function CustomerDashboard() {
   const [businesses, setBusinesses] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwdLoading, setPwdLoading] = useState(false);
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showError('Please fill in all password fields.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      showError('New password must be at least 6 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showError('New password and confirmation do not match.');
+      return;
+    }
+    setPwdLoading(true);
+    try {
+      const res = await api.changePassword({
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+      if (res.success) {
+        showSuccess('Password updated successfully! A security confirmation was sent to your email.');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        showError(res.message || 'Failed to update password.');
+      }
+    } catch (err) {
+      showError(err.message || 'Failed to update password. Please check your current password.');
+    } finally {
+      setPwdLoading(false);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -832,6 +875,72 @@ export default function CustomerDashboard() {
                 <div className="text-slate-700 leading-relaxed">
                   {profile.address_info?.address_line_1}, {profile.address_info?.address_line_2}, {profile.address_info?.city}, {profile.address_info?.state} — {profile.address_info?.pincode}
                 </div>
+              </div>
+
+              {/* Security & Password Management */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 sm:col-span-2">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-sm">Security & Password Management</h3>
+                      <p className="text-[11px] text-slate-500">
+                        Update your account password. An email audit alert is dispatched upon change.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handlePasswordChange} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Current Password</label>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="••••••••••••"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">New Password</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Min 6 characters"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter new password"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                      required
+                    />
+                  </div>
+
+                  <div className="sm:col-span-3 flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      disabled={pwdLoading}
+                      className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                    >
+                      {pwdLoading ? 'Updating Password...' : 'Save New Password'}
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>

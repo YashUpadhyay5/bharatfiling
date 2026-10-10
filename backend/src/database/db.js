@@ -20,6 +20,7 @@ class DatabaseStore {
       support_tickets: [],
       audit_logs: [],
       notifications: [],
+      otps: [],
     };
     this.init();
   }
@@ -334,6 +335,9 @@ class DatabaseStore {
 
   getNotifications() { this.reload(); return this.data.notifications || []; }
   saveNotifications(notifications) { this.data.notifications = notifications; this.persist(); }
+
+  getOtps() { this.reload(); return this.data.otps || []; }
+  saveOtps(otps) { this.data.otps = otps; this.persist(); }
 }
 
 export const db = new DatabaseStore();
