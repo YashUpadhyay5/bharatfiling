@@ -24,6 +24,11 @@ const GstRegistrationModule = lazy(() => import('./pages/gst-registration/index.
 const GstCheckoutPage = lazy(() =>
   import('./pages/gst-registration/index.jsx').then((m) => ({ default: m.OrderCheckoutPage }))
 );
+const UdyamLandingPage = lazy(() => import('./pages/UdyamLandingPage.jsx'));
+const UdyamRegistrationModule = lazy(() => import('./pages/udyam-registration/index.jsx'));
+const UdyamCheckoutPage = lazy(() =>
+  import('./pages/udyam-registration/index.jsx').then((m) => ({ default: m.UdyamCheckoutPage }))
+);
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 
@@ -92,9 +97,14 @@ export default function App() {
 
                   {/* Customer Portal & Modular 3-Screen Statutory Registration Flow */}
                   <Route path="/dashboard" element={<CustomerDashboard />} />
+                  <Route path="/services/udyam-registration" element={<UdyamLandingPage />} />
+                  <Route path="/services/msme-registration" element={<UdyamLandingPage />} />
+                  <Route path="/apply/udyam" element={<UdyamRegistrationModule />} />
+                  <Route path="/apply/msme" element={<UdyamRegistrationModule />} />
                   <Route path="/apply/gst" element={<GstRegistrationModule />} />
                   <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                   <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
+                  <Route path="/checkout/udyam/:orderId" element={<UdyamCheckoutPage />} />
                   <Route path="/checkout" element={<GstCheckoutPage />} />
                   <Route path="/checkout/:orderId" element={<GstCheckoutPage />} />
 

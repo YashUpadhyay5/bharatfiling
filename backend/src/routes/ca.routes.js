@@ -32,6 +32,7 @@ router.get('/cases', (req, res) => {
         moduleType === 'ITR' ? 'Income Tax Return Filing (ITR-1 to 4)' :
         moduleType === 'TRADEMARK' ? 'Trademark Registration (Form TM-A)' :
         moduleType === 'LLP' ? 'Limited Liability Partnership (MCA FiLLiP)' :
+        moduleType === 'UDYAM' || moduleType === 'MSME' ? 'UDYAM Registration (UDYAM + LEDGERS)' :
         'GST Registration (Form REG-01)'
       );
 
@@ -42,7 +43,14 @@ router.get('/cases', (req, res) => {
       const businessType = app.business_type || app.fields_data?.business_type || appOrder?.business_type || 'Proprietorship';
       const legalName = app.fields_data?.legal_name || app.fields_data?.trade_name || `${customerName} Enterprise`;
       const panNumber = app.fields_data?.pan_number || appOrder?.customer_pan || 'ABCDE1234F';
-      const amountPaid = appOrder?.amount || (moduleType === 'COMPANY' ? 4999 : moduleType === 'ITR' ? 999 : moduleType === 'TRADEMARK' ? 1999 : moduleType === 'LLP' ? 3999 : 1769);
+      const amountPaid = appOrder?.amount || (
+        moduleType === 'COMPANY' ? 4999 :
+        moduleType === 'ITR' ? 999 :
+        moduleType === 'TRADEMARK' ? 1999 :
+        moduleType === 'LLP' ? 3999 :
+        moduleType === 'UDYAM' || moduleType === 'MSME' ? 3421 :
+        1769
+      );
       const orderNumber = appOrder?.order_number || appOrder?.id || '#est2026';
       const submittedAt = app.created_at || appOrder?.created_at || new Date().toISOString();
 
@@ -214,6 +222,10 @@ router.post('/cases/:id/action', (req, res) => {
           defaultArn = `LLP-SRN-L${Math.floor(10000000 + Math.random() * 90000000)}`;
           step2Title = `Step 2: Form FiLLiP Filed on MCA Portal (SRN: ${arn || defaultArn})`;
           step2Desc = `LLP incorporation dossier filed with ROC. Service Request Number (SRN) generated.`;
+        } else if (moduleType === 'UDYAM' || moduleType === 'MSME') {
+          defaultArn = `UDYAM-ACK-${Math.floor(1000000 + Math.random() * 9000000)}`;
+          step2Title = `Step 2: MSME Udyam Dossier Filed on National Portal (Ack: ${arn || defaultArn})`;
+          step2Desc = `Udyam registration application prepared and submitted to Ministry of MSME portal. Statutory Acknowledgement Number generated.`;
         }
 
         const genArn = arn || defaultArn;
@@ -263,6 +275,10 @@ router.post('/cases/:id/action', (req, res) => {
           defaultGstin = `LLPIN-AAA-${Math.floor(1000 + Math.random() * 9000)}`;
           step3Title = `Step 3: ROC Approval Granted (LLPIN: ${gstin || defaultGstin})`;
           step3Desc = `LLP incorporation approved by ROC. Limited Liability Partnership Identification Number allotted.`;
+        } else if (moduleType === 'UDYAM' || moduleType === 'MSME') {
+          defaultGstin = `UDYAM-${(app.state || 'KR').slice(0, 2).toUpperCase()}-03-${Math.floor(1000000 + Math.random() * 9000000)}`;
+          step3Title = `Step 3: Udyam Registration Number Allotted (UDYAM: ${gstin || defaultGstin})`;
+          step3Desc = `MSME status approved. Permanent Udyam Registration Number issued by Ministry of MSME.`;
         }
 
         const allottedGstin = gstin || defaultGstin;
@@ -313,6 +329,10 @@ router.post('/cases/:id/action', (req, res) => {
           defaultCertUrl = '/sample_gst_certificate.pdf';
           step4Title = 'Step 4: LLP Certificate of Incorporation Dispatched';
           step4Desc = 'Official ROC Certificate of Incorporation for Limited Liability Partnership delivered to customer dashboard.';
+        } else if (moduleType === 'UDYAM' || moduleType === 'MSME') {
+          defaultCertUrl = '/sample_gst_certificate.pdf';
+          step4Title = 'Step 4: Official Udyam Registration Certificate Dispatched';
+          step4Desc = 'Ministry of MSME official e-Certificate with dynamic QR code delivered to client dashboard in real time.';
         }
 
         const finalGstin = gstin || app.gstin || 'STATUTORY-REG-COMPLETED';

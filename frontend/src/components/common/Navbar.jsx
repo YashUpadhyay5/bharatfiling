@@ -99,7 +99,7 @@ export default function Navbar() {
       label: 'Registrations',
       col1: [
         { name: 'GST Registration', path: '/apply/gst', isLive: true },
-        { name: 'MSME / Udyam Registration', path: '/services' },
+        { name: 'MSME / Udyam Registration', path: '/apply/udyam', isLive: true },
         { name: 'Import Export Code (IEC)', path: '/services' },
         { name: 'FSSAI Food License', path: '/services' },
         { name: 'Professional Tax (PT)', path: '/services' },

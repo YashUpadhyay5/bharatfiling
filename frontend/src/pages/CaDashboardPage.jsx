@@ -82,7 +82,7 @@ export default function CaDashboardPage() {
   useEffect(() => {
     if (socket) {
       const handleNewCase = (newCase) => {
-        showSuccess(`🔔 New GST Application Received: ${newCase.customer_name} (${newCase.state}) - ₹${newCase.amount} Paid!`);
+        showSuccess(`🔔 New ${newCase.module_type || 'Statutory'} Filing Received: ${newCase.customer_name} (${newCase.state}) - ₹${newCase.amount} Paid!`);
         fetchCases();
       };
 
@@ -290,8 +290,14 @@ export default function CaDashboardPage() {
                       {/* Customer Details */}
                       <td className="p-4">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/60">
-                            {c.module_type || 'GST'}
+                          <span
+                            className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
+                              c.module_type === 'UDYAM' || c.module_type === 'MSME'
+                                ? 'bg-purple-900/60 text-purple-300 border-purple-700/60'
+                                : 'bg-blue-900/60 text-blue-300 border-blue-700/60'
+                            }`}
+                          >
+                            {c.module_type === 'UDYAM' || c.module_type === 'MSME' ? 'UDYAM / MSME' : c.module_type || 'GST'}
                           </span>
                           <span className="font-mono text-[10px] text-slate-400">{c.application_number}</span>
                         </div>
@@ -341,7 +347,7 @@ export default function CaDashboardPage() {
                           ₹{c.amount_paid || 1769} INR
                         </div>
                         <div className="text-[10px] text-slate-400">
-                          UPI AutoPay Paid
+                          {c.module_type === 'UDYAM' || c.module_type === 'MSME' ? 'Direct Gateway Paid' : 'Verified Paid'}
                         </div>
                       </td>
 
@@ -449,6 +455,38 @@ export default function CaDashboardPage() {
                     <span className="text-slate-500 uppercase text-[10px] font-bold block">Fee Paid</span>
                     <span className="font-bold text-emerald-400">₹{selectedCase.amount_paid || 1769} INR (Paid)</span>
                   </div>
+
+                  {/* Udyam NIC & Plant Details if available */}
+                  {(selectedCase.fields_data?.nic_division || selectedCase.nic_division) && (
+                    <div className="col-span-2 md:col-span-4 bg-purple-950/30 p-3.5 rounded-xl border border-purple-800/50 space-y-1.5 mt-2">
+                      <span className="text-purple-300 font-bold uppercase text-[10px] tracking-wider block">
+                        Udyam Classification (NIC 2008 & Plant Unit Details):
+                      </span>
+                      <div className="text-white font-medium text-xs">
+                        <strong>Activity:</strong> {selectedCase.fields_data?.nic_division || selectedCase.nic_division} ➔{' '}
+                        {selectedCase.fields_data?.nic_sub_division || selectedCase.nic_sub_division || ''} ➔{' '}
+                        {selectedCase.fields_data?.nic_sub_class || selectedCase.nic_sub_class || ''}
+                      </div>
+                      <div className="text-slate-300 text-[11px] grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        <div>
+                          Enterprise Name: <strong className="text-white">{selectedCase.fields_data?.enterprise_name || selectedCase.customer_name}</strong>
+                        </div>
+                        <div>
+                          Major Activity: <strong className="text-white">{selectedCase.fields_data?.major_activity || 'Services'}</strong>
+                        </div>
+                        {selectedCase.fields_data?.plant_address && (
+                          <div className="col-span-2">
+                            Plant Address: <span className="text-slate-200">{selectedCase.fields_data.plant_address}</span>
+                          </div>
+                        )}
+                        {selectedCase.fields_data?.bank_account_no && (
+                          <div className="col-span-2 text-emerald-400 font-mono text-[10px]">
+                            Bank Account: {selectedCase.fields_data.bank_account_no} (IFSC: {selectedCase.fields_data.bank_ifsc || 'HDFC0001234'})
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 2. Visual 4-Stage Progressive Workflow */}
@@ -570,6 +608,8 @@ export default function CaDashboardPage() {
                               ? 'Verify Logo & Class'
                               : caseModule === 'LLP'
                               ? 'Verify Partner KYC'
+                              : caseModule === 'UDYAM' || caseModule === 'MSME'
+                              ? 'Verify PAN & NIC Code'
                               : 'CA Read & Verify Docs';
 
                           const step1Desc =
@@ -581,13 +621,15 @@ export default function CaDashboardPage() {
                               ? 'Verify logo, trademark class specification, and applicant power of attorney.'
                               : caseModule === 'LLP'
                               ? 'Verify partner DPINs, partnership deed, and office address proof.'
+                              : caseModule === 'UDYAM' || caseModule === 'MSME'
+                              ? 'Verify PAN/GSTIN, 12-digit Aadhaar, 3-tier NIC code activity, and plant unit address.'
                               : 'Inspect applicant PAN, Aadhaar/ID, premises address, and constitution.';
 
                           return (
                             <div
                               className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition ${
                                 isStep1Done
-                                  ? 'bg-emerald-950/20 border-emerald-800'
+                                    ? 'bg-emerald-950/20 border-emerald-800'
                                   : 'bg-slate-900 border-slate-700 ring-1 ring-emerald-500/30'
                               }`}
                             >
@@ -656,6 +698,8 @@ export default function CaDashboardPage() {
                               ? 'File Form TM-A'
                               : caseModule === 'LLP'
                               ? 'Submit FiLLiP to MCA'
+                              : caseModule === 'UDYAM' || caseModule === 'MSME'
+                              ? 'Submit to MSME Portal'
                               : 'Submit to GST Portal';
 
                           const step2Placeholder =
@@ -667,6 +711,8 @@ export default function CaDashboardPage() {
                               ? 'TM App (e.g. TM-APP-1234567)'
                               : caseModule === 'LLP'
                               ? 'MCA SRN (e.g. LLP-SRN-L12345678)'
+                              : caseModule === 'UDYAM' || caseModule === 'MSME'
+                              ? 'Udyam Ack (e.g. UDYAM-ACK-1234567)'
                               : 'ARN (e.g. AA2908260012345)';
 
                           const step2BtnText =
@@ -678,6 +724,8 @@ export default function CaDashboardPage() {
                               ? 'File & Record TM App No'
                               : caseModule === 'LLP'
                               ? 'Transmit & Record SRN'
+                              : caseModule === 'UDYAM' || caseModule === 'MSME'
+                              ? 'File & Record Udyam Ack'
                               : 'Transmit & Record ARN';
 
                           return (
@@ -770,6 +818,8 @@ export default function CaDashboardPage() {
                               ? 'Record TM Acceptance'
                               : caseModule === 'LLP'
                               ? 'Record ROC Approval (LLPIN)'
+                              : caseModule === 'UDYAM' || caseModule === 'MSME'
+                              ? 'Allot Udyam Reg Number'
                               : 'Government Approval';
 
                           const step3Placeholder =
@@ -781,6 +831,8 @@ export default function CaDashboardPage() {
                               ? 'TM Reg (e.g. TM-REG-1234567)'
                               : caseModule === 'LLP'
                               ? 'LLPIN (e.g. LLPIN-AAA-1234)'
+                              : caseModule === 'UDYAM' || caseModule === 'MSME'
+                              ? 'UDYAM No (e.g. UDYAM-KR-03-0012345)'
                               : 'GSTIN (e.g. 29AABCB1234F1Z9)';
 
                           return (
@@ -868,6 +920,8 @@ export default function CaDashboardPage() {
                               ? 'Send TM Certificate'
                               : caseModule === 'LLP'
                               ? 'Send LLP Certificate'
+                              : caseModule === 'UDYAM' || caseModule === 'MSME'
+                              ? 'Send Udyam Certificate'
                               : 'Send Certificate to Customer';
 
                           const step4BtnText =
@@ -879,6 +933,8 @@ export default function CaDashboardPage() {
                               ? 'Dispatch TM Certificate'
                               : caseModule === 'LLP'
                               ? 'Dispatch LLP Certificate'
+                              : caseModule === 'UDYAM' || caseModule === 'MSME'
+                              ? 'Dispatch Udyam Certificate'
                               : 'Dispatch Certificate';
 
                           return (

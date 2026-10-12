@@ -209,6 +209,9 @@ export default function CustomerDashboard() {
         return { title: '2. Search & Draft by Attorney', desc: 'Form TM-A Prepared' };
       case 'LLP':
         return { title: '2. Partner KYC Verified', desc: 'FiLLiP Dossier Prepared' };
+      case 'UDYAM':
+      case 'MSME':
+        return { title: '2. Verified by CA', desc: 'Udyam Dossier & NIC Checked' };
       default:
         return { title: '2. Docs Verified by CA', desc: 'Form REG-01 Prepared' };
     }
@@ -235,6 +238,12 @@ export default function CustomerDashboard() {
         return {
           title: '3. Filed on MCA Portal',
           desc: activeApp?.arn ? `SRN: ${activeApp.arn}` : 'ROC Corporate Verification',
+        };
+      case 'UDYAM':
+      case 'MSME':
+        return {
+          title: '3. Filed on MSME Portal',
+          desc: activeApp?.arn ? `Ack: ${activeApp.arn}` : 'Ministry of MSME Verification',
         };
       default:
         return {
@@ -265,6 +274,12 @@ export default function CustomerDashboard() {
         return {
           title: '4. LLPIN Allotted',
           desc: activeApp?.gstin ? `LLPIN: ${activeApp.gstin}` : 'COI Delivery Pending',
+        };
+      case 'UDYAM':
+      case 'MSME':
+        return {
+          title: '4. Udyam Certificate Ready',
+          desc: activeApp?.gstin ? `Udyam: ${activeApp.gstin}` : 'Official MSME e-Certificate',
         };
       default:
         return {
@@ -334,6 +349,8 @@ export default function CustomerDashboard() {
         ? 'TM_CERT'
         : moduleType === 'LLP'
         ? 'LLP_COI'
+        : moduleType === 'UDYAM' || moduleType === 'MSME'
+        ? 'UDYAM_CERT'
         : 'GST_REG06';
     link.download = `${prefix}_${activeApp?.gstin || activeApp?.application_number || 'Certificate'}.pdf`;
     document.body.appendChild(link);
@@ -581,6 +598,8 @@ export default function CustomerDashboard() {
                         ? 'TM Application No'
                         : moduleType === 'LLP'
                         ? 'FiLLiP SRN'
+                        : moduleType === 'UDYAM' || moduleType === 'MSME'
+                        ? 'Udyam Ack No'
                         : 'Government ARN'}
                     </div>
                     <div className="font-mono font-bold text-slate-900 text-sm mt-0.5">
@@ -602,6 +621,8 @@ export default function CustomerDashboard() {
                         ? 'Registered TM No'
                         : moduleType === 'LLP'
                         ? 'Allotted LLPIN'
+                        : moduleType === 'UDYAM' || moduleType === 'MSME'
+                        ? 'Udyam Reg Number'
                         : 'Allotted GSTIN'}
                     </div>
                     <div className="font-mono font-bold text-sm mt-0.5">
@@ -633,6 +654,8 @@ export default function CustomerDashboard() {
                           ? 'Download TM Certificate'
                           : moduleType === 'LLP'
                           ? 'Download LLP Certificate'
+                          : moduleType === 'UDYAM' || moduleType === 'MSME'
+                          ? 'Download Udyam Certificate'
                           : 'Download GST Certificate (REG-06)'}
                       </span>
                     </button>

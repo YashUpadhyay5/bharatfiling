@@ -360,6 +360,32 @@ export const api = {
     return handleResponse(res);
   },
 
+  // MSME / Udyam Registration & Direct Gateway Checkout
+  createUdyamQuote: async (udyamData) => {
+    const res = await fetchWithRetry(`${API_BASE}/udyam/onboarding-quote`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(udyamData),
+    });
+    return handleResponse(res);
+  },
+
+  getUdyamCheckoutOrder: async (orderId) => {
+    const res = await fetchWithRetry(`${API_BASE}/udyam/checkout-order/${orderId}`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  verifyUdyamDirectPayment: async (payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/udyam/payment/verify`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
   // CA Portal
   getCACases: async () => {
     const res = await fetchWithRetry(`${API_BASE}/ca/cases`, {

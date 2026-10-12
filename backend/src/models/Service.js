@@ -104,6 +104,20 @@ export class ServiceModel {
         keywords: ['trademark', 'tm', 'brand', 'logo'],
         is_active: true,
       },
+      {
+        id: 'udyam-registration',
+        title: 'MSME / Udyam Registration (UDYAM + LEDGERS)',
+        slug: 'udyam-registration',
+        category: 'REGISTRATION',
+        badge: 'Fast-Track',
+        base_fee: 2899.00,
+        govt_fee: 0.00,
+        gst_rate: 18.00,
+        description: 'Complete online Udyam (MSME) registration, 3-tier NIC code classification, and official Ministry e-Certificate.',
+        features: ['Aadhaar & PAN Verification', '3-Tier NIC Code Selection', 'Official UDYAM Certificate', 'Collateral-Free Loan Eligibility'],
+        keywords: ['udyam', 'msme', 'registration', 'small business'],
+        is_active: true,
+      },
     ];
   }
 

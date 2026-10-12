@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import {
   ShieldCheck,
   Check,
@@ -17,9 +17,12 @@ import { api } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PaymentModal from '../../components/checkout/PaymentModal.jsx';
+import UdyamCheckoutPage from '../udyam-registration/3-UdyamCheckoutPage.jsx';
 
 export default function OrderCheckoutPage() {
-  const { orderId } = useParams();
+  const { orderId: paramOrderId } = useParams();
+  const [searchParams] = useSearchParams();
+  const orderId = paramOrderId || searchParams.get('generator') || searchParams.get('orderId');
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
@@ -109,6 +112,10 @@ export default function OrderCheckoutPage() {
         </div>
       </div>
     );
+  }
+
+  if (order?.module_type === 'UDYAM' || order?.service_name?.toLowerCase().includes('udyam')) {
+    return <UdyamCheckoutPage />;
   }
 
   const currentDateFormatted = new Date().toLocaleDateString('en-GB', {
