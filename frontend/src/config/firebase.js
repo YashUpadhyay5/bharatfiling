@@ -17,40 +17,42 @@ export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 /**
- * Sets up an invisible Google reCAPTCHA verifier for SMS OTP spam prevention.
- * Replaces the container with a fresh DOM element on every run so grecaptcha
- * never throws "reCAPTCHA has already been rendered in this element".
+ * Retrieves or creates a singleton invisible Google reCAPTCHA verifier.
+ * Once created, it is reused across all dispatches so grecaptcha never
+ * attempts to re-render into an element, completely eliminating
+ * "reCAPTCHA has already been rendered in this element".
  */
-export const setupRecaptcha = (containerId = 'recaptcha-container') => {
+export const getRecaptchaVerifier = (containerId = 'recaptcha-container') => {
   if (typeof window === 'undefined') return null;
 
-  // 1. Clear any prior verifier instance
+  // 1. If an active verifier already exists and container is still present, reuse it!
+  if (window.recaptchaVerifier && document.getElementById(containerId)) {
+    return window.recaptchaVerifier;
+  }
+
+  // 2. Clear old instance if container was detached
   if (window.recaptchaVerifier) {
     try {
       window.recaptchaVerifier.clear();
-    } catch {
+    } catch (_) {
       // Ignored
     }
     window.recaptchaVerifier = null;
   }
 
-  // 2. Ensure pristine DOM container so grecaptcha never encounters previous widget bindings
+  // 3. Ensure clean container in DOM
   let container = document.getElementById(containerId);
-  if (container) {
-    const freshContainer = document.createElement('div');
-    freshContainer.id = containerId;
-    if (container.parentNode) {
-      container.parentNode.replaceChild(freshContainer, container);
-    }
-    container = freshContainer;
-  } else {
+  if (!container) {
     container = document.createElement('div');
     container.id = containerId;
     document.body.appendChild(container);
+  } else {
+    // Wipe any stale inner nodes
+    container.innerHTML = '';
   }
 
-  // 3. Bind RecaptchaVerifier directly to the clean DOM element
-  window.recaptchaVerifier = new RecaptchaVerifier(auth, container, {
+  // 4. Initialize RecaptchaVerifier ONCE for the session
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
     size: 'invisible',
     callback: () => {
       // reCAPTCHA solved - permits signInWithPhoneNumber
@@ -59,7 +61,7 @@ export const setupRecaptcha = (containerId = 'recaptcha-container') => {
       if (window.recaptchaVerifier) {
         try {
           window.recaptchaVerifier.clear();
-        } catch {
+        } catch (_) {
           // Ignored
         }
         window.recaptchaVerifier = null;
@@ -70,13 +72,15 @@ export const setupRecaptcha = (containerId = 'recaptcha-container') => {
   return window.recaptchaVerifier;
 };
 
+export const setupRecaptcha = getRecaptchaVerifier;
+
 /**
  * Dispatches a 6-digit SMS OTP via Firebase to any Indian mobile number (+91)
  * 10,000 completely free SMS verifications per month with zero DLT requirement
  */
 export const sendPhoneOtp = async (phoneNumber, containerId = 'recaptcha-container') => {
   try {
-    const verifier = setupRecaptcha(containerId);
+    const verifier = getRecaptchaVerifier(containerId);
     const cleanDigits = String(phoneNumber).replace(/\D/g, '');
     if (cleanDigits.length < 10) {
       throw new Error('Please enter a valid 10-digit Indian mobile number.');
@@ -89,6 +93,23 @@ export const sendPhoneOtp = async (phoneNumber, containerId = 'recaptcha-contain
     return confirmationResult;
   } catch (err) {
     console.error('[Firebase Phone OTP Error]:', err);
+
+    // If reCAPTCHA itself fails or becomes invalidated, clear verifier so next call retries cleanly
+    if (
+      err.message?.includes('reCAPTCHA') ||
+      err.code === 'auth/captcha-check-failed' ||
+      err.code === 'auth/invalid-app-credential'
+    ) {
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (_) {}
+        window.recaptchaVerifier = null;
+      }
+      const el = document.getElementById(containerId);
+      if (el) el.innerHTML = '';
+    }
+
     const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'your domain';
     if (err.code === 'auth/unauthorized-domain') {
       throw new Error(

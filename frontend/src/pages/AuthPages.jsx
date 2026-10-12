@@ -225,6 +225,12 @@ export default function AuthPages({ defaultMode = 'login' }) {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      showError('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length < 10) {
       showError('Please enter a valid 10-digit Indian mobile number.');
@@ -257,6 +263,12 @@ export default function AuthPages({ defaultMode = 'login' }) {
     e.preventDefault();
     if (!fullName || !email || !phone || !regPassword) {
       showError('Please fill in all mandatory registration fields.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      showError('Please enter a valid email address (e.g. name@example.com).');
       return;
     }
 
