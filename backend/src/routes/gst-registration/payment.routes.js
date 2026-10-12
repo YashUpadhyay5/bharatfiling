@@ -2,6 +2,7 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../../database/db.js';
 import { optionalAuth } from '../../middleware/auth.js';
+import { GUEST_USER_ID } from '../../middleware/ownership.js';
 import { emitToCADesk } from '../../services/socket.service.js';
 import { createAndDispatchNotification } from '../../services/notification.service.js';
 
@@ -22,8 +23,31 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
     const orders = db.getOrders();
     const orderIndex = orders.findIndex((o) => o.id === order_id || o.order_number === `#${order_id}`);
 
+    if (orderIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    const existingOrder = orders[orderIndex];
+    if (existingOrder.user_id && existingOrder.user_id !== GUEST_USER_ID) {
+      const u = req.user;
+      if (!u || (u.id !== existingOrder.user_id && u.role !== 'ADMIN' && u.role !== 'CA')) {
+        return res.status(403).json({ success: false, message: 'You are not allowed to pay for this order.' });
+      }
+    }
+
+    // Idempotent: a paid order is never re-processed (no duplicate notifications / events)
+    if (existingOrder.status === 'PAID') {
+      const paidApp = db.getApplications().find((a) => a.id === existingOrder.application_id) || null;
+      return res.json({
+        success: true,
+        message: 'Payment already verified.',
+        order: existingOrder,
+        application: paidApp,
+      });
+    }
+
     let updatedOrder;
-    if (orderIndex !== -1) {
+    {
       orders[orderIndex] = {
         ...orders[orderIndex],
         status: 'PAID',
@@ -37,7 +61,7 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
     }
 
     // Update corresponding application
-    const appId = updatedOrder?.application_id || req.body.application_id;
+    const appId = updatedOrder?.application_id;
     let updatedApp = null;
 
     if (appId) {
@@ -46,7 +70,8 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
       if (appIndex !== -1) {
         apps[appIndex] = {
           ...apps[appIndex],
-          user_id: req.user?.id || (apps[appIndex].user_id !== 'usr_guest_lead' ? apps[appIndex].user_id : req.user?.id || apps[appIndex].user_id),
+          user_id:
+            apps[appIndex].user_id === GUEST_USER_ID && req.user?.id ? req.user.id : apps[appIndex].user_id,
           payment_completed: true,
           internal_status: 'CA_REVIEW',
           customer_status: 'CA Processing',

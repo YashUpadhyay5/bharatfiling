@@ -237,8 +237,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
       return;
     }
 
-    if (regPassword.length < 6) {
-      showError('Password must be at least 6 characters.');
+    if (regPassword.length < 8) {
+      showError('Password must be at least 8 characters.');
       return;
     }
 
@@ -272,8 +272,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
       return;
     }
 
-    if (regPassword.length < 6) {
-      showError('Password must be at least 6 characters.');
+    if (regPassword.length < 8) {
+      showError('Password must be at least 8 characters.');
       return;
     }
 
@@ -417,8 +417,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
       return;
     }
 
-    if (fpNewPassword.length < 6) {
-      showError('Password must be at least 6 characters.');
+    if (fpNewPassword.length < 8) {
+      showError('Password must be at least 8 characters.');
       return;
     }
 
@@ -551,8 +551,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
       return;
     }
 
-    if (fpNewPassword.length < 6) {
-      showError('Password must be at least 6 characters.');
+    if (fpNewPassword.length < 8) {
+      showError('Password must be at least 8 characters.');
       return;
     }
 
@@ -651,7 +651,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 ? fpMethod === 'phone'
                   ? `Enter the 6-digit SMS code sent to +91 ${forgotPhone.replace(/\D/g, '').slice(-10)}`
                   : `Enter the 6-digit code sent to ${forgotEmail}`
-                : 'Choose a strong password with at least 6 characters')}
+                : 'Choose a strong password with at least 8 characters')}
           </p>
 
           {/* Mode Switch Tabs (Only when not in forgot password or OTP step) */}
@@ -932,7 +932,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     autoComplete="new-password"
-                    placeholder="Create a password (min. 6 characters)"
+                    placeholder="Create a password (min. 8 characters)"
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -1228,7 +1228,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                           type="password"
                           value={fpNewPassword}
                           onChange={(e) => setFpNewPassword(e.target.value)}
-                          placeholder="Enter new password (min. 6 characters)"
+                          placeholder="Enter new password (min. 8 characters)"
                           className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                           required
                         />
@@ -1361,7 +1361,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         value={fpNewPassword}
                         onChange={(e) => setFpNewPassword(e.target.value)}
                         autoComplete="new-password"
-                        placeholder="Enter new password (min. 6 characters)"
+                        placeholder="Enter new password (min. 8 characters)"
                         className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                         required
                         autoFocus
@@ -1398,13 +1398,14 @@ export default function AuthPages({ defaultMode = 'login' }) {
             </div>
           )}
 
-          {/* Quick Demo Test Logins */}
+          {/* Quick Demo Test Logins (local development builds only - never shipped to production) */}
+          {import.meta.env.DEV && (
           <div className="mt-6 pt-5 border-t border-slate-200 text-center">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
               Quick 1-Click Demo Accounts
             </span>
             <p className="text-[10px] text-slate-400 mb-3">
-              Standard Password: <span className="font-mono font-semibold text-emerald-600">Test@123</span>
+              Local seed accounts only
             </p>
             <div className="grid grid-cols-3 gap-2">
               <button
@@ -1433,6 +1434,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
               </button>
             </div>
           </div>
+          )}
         </div>
       </div>
       {/* Invisible Google reCAPTCHA container for Firebase Phone SMS OTP */}

@@ -141,8 +141,8 @@ export default function AuthRequiredModal({
       return;
     }
 
-    if (password.length < 6) {
-      setAuthError('Password must be at least 6 characters long.');
+    if (password.length < 8) {
+      setAuthError('Password must be at least 8 characters long.');
       return;
     }
 
@@ -230,12 +230,7 @@ export default function AuthRequiredModal({
       if (res?.success) {
         handleAuthSuccess(res.user);
       } else {
-        const loginRes = await login('rahul.verma@example.com', 'Password@123');
-        if (loginRes.success) {
-          handleAuthSuccess(loginRes.user);
-        } else {
-          setAuthError('Demo account currently unavailable.');
-        }
+        setAuthError('Demo account currently unavailable.');
       }
     } catch (err) {
       setAuthError('Failed to switch demo account.');
@@ -511,7 +506,7 @@ export default function AuthRequiredModal({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="new-password"
-                    placeholder="Create a password (min. 6 characters)"
+                    placeholder="Create a password (min. 8 characters)"
                     className="w-full pl-10 pr-10 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#111827]/10 focus:border-[#111827] transition"
                     required
                   />
@@ -600,7 +595,8 @@ export default function AuthRequiredModal({
             </form>
           )}
 
-          {/* Quick Demo 1-Click Testing Helper */}
+          {/* Quick Demo 1-Click Testing Helper (local development builds only) */}
+          {import.meta.env.DEV && (
           <div className="pt-2 border-t border-slate-100">
             <button
               type="button"
@@ -612,6 +608,7 @@ export default function AuthRequiredModal({
               <span>1-Click Test: Continue as Demo Client (Rahul Verma)</span>
             </button>
           </div>
+          )}
 
           {/* Footer Security Badges */}
           <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 pt-1">

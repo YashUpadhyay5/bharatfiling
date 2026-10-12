@@ -3,12 +3,32 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../database/db.js';
-import { authenticate } from '../middleware/auth.js';
-import { upload } from '../middleware/upload.js';
+import { authenticate, requireRole } from '../middleware/auth.js';
+import { upload, verifyUploadedFileSignature } from '../middleware/upload.js';
+import { ENV } from '../config/env.js';
+import { canAccessApplication, canAccessByApplicationId } from '../middleware/ownership.js';
 import { processDocumentOCR } from '../services/ocrPipeline.js';
 import { createAndDispatchNotification } from '../services/notification.service.js';
 
 const router = express.Router();
+
+const DOCUMENT_TYPE_REGEX = /^[A-Za-z0-9 _-]{1,60}$/;
+const DOCUMENT_STATUS_REGEX = /^[A-Z_]{3,40}$/;
+
+// Only ever delete files that live inside the configured upload directory.
+const isInsideStorageDir = (filePath) => {
+  if (!filePath) return false;
+  const rel = path.relative(ENV.STORAGE_DIR, path.resolve(filePath));
+  return rel !== '' && !rel.startsWith('..') && !path.isAbsolute(rel);
+};
+
+const discardUpload = (file) => {
+  try {
+    if (file?.path && isInsideStorageDir(file.path)) fs.unlinkSync(file.path);
+  } catch {
+    // best effort
+  }
+};
 
 // Upload document for an application
 router.post('/upload', authenticate, upload.single('file'), async (req, res) => {
@@ -20,12 +40,31 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
 
     const { application_id, document_type } = req.body;
     if (!application_id || !document_type) {
+      discardUpload(file);
       return res.status(400).json({ success: false, message: 'application_id and document_type are required.' });
+    }
+    if (typeof document_type !== 'string' || !DOCUMENT_TYPE_REGEX.test(document_type)) {
+      discardUpload(file);
+      return res.status(400).json({ success: false, message: 'Invalid document_type.' });
     }
 
     const app = db.getApplications().find((a) => a.id === application_id);
     if (!app) {
+      discardUpload(file);
       return res.status(404).json({ success: false, message: 'Application not found.' });
+    }
+    if (!canAccessApplication(req.user, app)) {
+      discardUpload(file);
+      return res.status(403).json({ success: false, message: 'You do not have access to this application.' });
+    }
+
+    // The client-declared mimetype/extension is not trustworthy: check the real file signature.
+    if (!verifyUploadedFileSignature(file.path)) {
+      discardUpload(file);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file content. Only genuine PDF, JPG and PNG files are accepted.',
+      });
     }
 
     // Process AI / OCR
@@ -111,6 +150,9 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
 router.get('/application/:appId', authenticate, (req, res) => {
   try {
     const { appId } = req.params;
+    if (!canAccessByApplicationId(req.user, appId)) {
+      return res.status(403).json({ success: false, message: 'You do not have access to this application.' });
+    }
     const docs = db.getDocuments().filter((d) => d.application_id === appId);
     res.json({
       success: true,
@@ -133,8 +175,11 @@ router.delete('/:id', authenticate, (req, res) => {
     }
 
     const doc = docs[index];
+    if (doc.user_id !== req.user.id && !canAccessByApplicationId(req.user, doc.application_id)) {
+      return res.status(403).json({ success: false, message: 'You do not have access to this document.' });
+    }
     // Remove local file if exists
-    if (fs.existsSync(doc.file_path)) {
+    if (isInsideStorageDir(doc.file_path) && fs.existsSync(doc.file_path)) {
       try {
         fs.unlinkSync(doc.file_path);
       } catch (e) {}
@@ -153,10 +198,17 @@ router.delete('/:id', authenticate, (req, res) => {
 });
 
 // CA status update on document (Approve, Reject, Request Correction)
-router.put('/:id/status', authenticate, (req, res) => {
+router.put('/:id/status', authenticate, requireRole(['CA', 'ADMIN']), (req, res) => {
   try {
     const { id } = req.params;
     const { status, ca_notes } = req.body;
+
+    if (status !== undefined && (typeof status !== 'string' || !DOCUMENT_STATUS_REGEX.test(status))) {
+      return res.status(400).json({ success: false, message: 'Invalid document status.' });
+    }
+    if (ca_notes !== undefined && (typeof ca_notes !== 'string' || ca_notes.length > 2000)) {
+      return res.status(400).json({ success: false, message: 'Invalid notes.' });
+    }
 
     const docs = db.getDocuments();
     const doc = docs.find((d) => d.id === id);

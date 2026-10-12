@@ -11,7 +11,7 @@ export const generateToken = (user) => {
       full_name: user.full_name,
     },
     ENV.JWT_SECRET,
-    { expiresIn: ENV.JWT_EXPIRES_IN }
+    { algorithm: 'HS256', expiresIn: ENV.JWT_EXPIRES_IN }
   );
 };
 
@@ -28,7 +28,7 @@ export const authenticate = (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, ENV.JWT_SECRET);
+    const decoded = jwt.verify(token, ENV.JWT_SECRET, { algorithms: ['HS256'] });
     req.user = decoded;
     next();
   } catch (err) {
@@ -44,7 +44,7 @@ export const optionalAuth = (req, res, next) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      const decoded = jwt.verify(token, ENV.JWT_SECRET);
+      const decoded = jwt.verify(token, ENV.JWT_SECRET, { algorithms: ['HS256'] });
       req.user = decoded;
     } catch {
       // Ignore invalid token in optional auth

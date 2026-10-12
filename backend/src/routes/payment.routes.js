@@ -1,7 +1,9 @@
 import express from 'express';
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../database/db.js';
 import { authenticate, optionalAuth } from '../middleware/auth.js';
+import { canAccessApplication, GUEST_USER_ID } from '../middleware/ownership.js';
 import {
   getGSTRegistrationPricing,
   createRazorpayOrder,
@@ -36,6 +38,10 @@ router.post('/create-order', authenticate, async (req, res) => {
     const app = db.getApplications().find((a) => a.id === application_id);
     if (!app) {
       return res.status(404).json({ success: false, message: 'Application not found.' });
+    }
+
+    if (!canAccessApplication(req.user, app)) {
+      return res.status(403).json({ success: false, message: 'You do not have access to this application.' });
     }
 
     const pricing = await getGSTRegistrationPricing(app.business_type);
@@ -81,7 +87,25 @@ router.post('/create-order', authenticate, async (req, res) => {
 // VERIFY Razorpay Payment & Transition State
 router.post('/verify', authenticate, (req, res) => {
   try {
-    const { order_id, payment_id, signature, application_id } = req.body;
+    const { order_id, payment_id, signature } = req.body;
+
+    if (!order_id || !payment_id || typeof order_id !== 'string' || typeof payment_id !== 'string') {
+      return res.status(400).json({ success: false, message: 'order_id and payment_id are required.' });
+    }
+
+    // Only orders we created ourselves can be settled, and only by their owner (or staff).
+    const orderRecord = db.getOrders().find((o) => o.razorpay_order_id === order_id);
+    if (!orderRecord) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+    if (orderRecord.user_id !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'You are not allowed to settle this order.' });
+    }
+    if (orderRecord.status === 'PAID') {
+      return res.json({ success: true, message: 'Payment already verified.' });
+    }
+    // The application is taken from OUR order record, never from the request body.
+    const application_id = orderRecord.application_id;
 
     const isValid = verifyRazorpaySignature({
       order_id,
@@ -98,7 +122,7 @@ router.post('/verify', authenticate, (req, res) => {
 
     // Update Order
     const orders = db.getOrders();
-    const order = orders.find((o) => o.razorpay_order_id === order_id || o.application_id === application_id);
+    const order = orders.find((o) => o.razorpay_order_id === order_id);
     if (order) {
       order.status = 'PAID';
       order.razorpay_payment_id = payment_id;
@@ -172,24 +196,48 @@ router.post('/verify', authenticate, (req, res) => {
 // VERIFY UPI / AutoPay Payment & Register Mandate
 router.post('/verify-upi', optionalAuth, (req, res) => {
   try {
-    const {
-      order_id,
-      upi_id = 'user@okhdfcbank',
-      payment_mode = 'UPI_QR', // or 'AUTOPAY'
-      amount = 1769,
-    } = req.body;
+    const { order_id } = req.body;
+    let { upi_id = 'user@okhdfcbank', payment_mode = 'UPI_QR' } = req.body;
 
-    if (!order_id) {
+    if (!order_id || typeof order_id !== 'string') {
       return res.status(400).json({ success: false, message: 'order_id is required.' });
     }
+    if (!['UPI_QR', 'AUTOPAY'].includes(payment_mode)) {
+      payment_mode = 'UPI_QR';
+    }
+    upi_id = String(upi_id).slice(0, 80);
+    if (!/^[A-Za-z0-9._-]{2,64}@[A-Za-z0-9.-]{2,32}$/.test(upi_id)) {
+      upi_id = 'unspecified@upi';
+    }
 
-    const paymentTxnId = `upi_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
+    const paymentTxnId = `upi_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
 
-    // Update or create Order in DB
+    // Only an order created by our own quote flow can be settled
     const orders = db.getOrders();
     let order = orders.find((o) => o.id === order_id || o.order_number === `#${order_id}`);
 
-    if (order) {
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+    if (order.user_id && order.user_id !== GUEST_USER_ID) {
+      const u = req.user;
+      if (!u || (u.id !== order.user_id && u.role !== 'ADMIN' && u.role !== 'CA')) {
+        return res.status(403).json({ success: false, message: 'You are not allowed to pay for this order.' });
+      }
+    }
+    if (order.status === 'PAID' || order.status === 'ACTIVE_AUTOPAY') {
+      return res.json({
+        success: true,
+        message: 'Payment already verified.',
+        transaction_id: order.transaction_id,
+        order,
+        application: db.getApplications().find((a) => a.id === order.application_id) || null,
+      });
+    }
+    // The charged amount is whatever the server quoted - never a client supplied figure
+    const amount = order.amount;
+
+    {
       order.status = payment_mode === 'AUTOPAY' ? 'ACTIVE_AUTOPAY' : 'PAID';
       order.payment_mode = payment_mode;
       order.upi_id = upi_id;
@@ -197,22 +245,6 @@ router.post('/verify-upi', optionalAuth, (req, res) => {
       order.paid_amount = amount;
       order.paid_at = new Date().toISOString();
       order.updated_at = new Date().toISOString();
-    } else {
-      order = {
-        id: order_id,
-        order_number: `#${order_id}`,
-        service_name: 'GST Registration (GST Registration + Monthly Filing)',
-        amount: Number(amount) || 1769,
-        currency: 'INR',
-        status: payment_mode === 'AUTOPAY' ? 'ACTIVE_AUTOPAY' : 'PAID',
-        payment_mode,
-        upi_id,
-        transaction_id: paymentTxnId,
-        paid_amount: amount,
-        paid_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      };
-      orders.push(order);
     }
     db.saveOrders(orders);
 

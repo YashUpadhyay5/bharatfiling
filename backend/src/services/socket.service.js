@@ -1,42 +1,72 @@
 import { Server } from 'socket.io';
+import jwt from 'jsonwebtoken';
+import { ENV } from '../config/env.js';
+import { canAccessByApplicationId } from '../middleware/ownership.js';
+import { getAllowedOrigins } from '../config/cors.js';
 
 let ioInstance = null;
 
 /**
  * Initializes Socket.IO server on top of HTTP server.
+ *
+ * Connections may be anonymous, but rooms (which carry PII such as customer names, phone
+ * numbers and case details) can only be joined by an authenticated user, and only the
+ * rooms that user is entitled to.
  */
 export function initSocketServer(httpServer) {
+  const allowedOrigins = getAllowedOrigins();
+
   ioInstance = new Server(httpServer, {
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+      origin: (origin, cb) => {
+        // Non-browser clients send no Origin header
+        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+        return cb(null, false);
+      },
+      methods: ['GET', 'POST'],
       credentials: true,
     },
     transports: ['websocket', 'polling'],
+    maxHttpBufferSize: 1e5,
+  });
+
+  // Identify the caller from the JWT supplied in the handshake (if any)
+  ioInstance.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
+    if (token && typeof token === 'string') {
+      try {
+        socket.data.user = jwt.verify(token, ENV.JWT_SECRET, { algorithms: ['HS256'] });
+      } catch {
+        socket.data.user = null;
+      }
+    }
+    next();
   });
 
   ioInstance.on('connection', (socket) => {
-    // 1. Join CA Desk room
+    const user = socket.data.user || null;
+
+    // 1. Join CA Desk room (CA / Admin only)
     socket.on('join_ca_desk', () => {
-      socket.join('room:ca_desk');
+      if (user && (user.role === 'CA' || user.role === 'ADMIN')) {
+        socket.join('room:ca_desk');
+      }
     });
 
-    // 2. Join customer case room for live application tracking
+    // 2. Join an application room (owner / CA / Admin only)
     socket.on('join_application', (applicationId) => {
-      if (applicationId) {
+      if (!user || typeof applicationId !== 'string' || applicationId.length > 100) return;
+      if (canAccessByApplicationId(user, applicationId)) {
         socket.join(`room:application_${applicationId}`);
       }
     });
 
-    // 3. Join customer personal notification room
+    // 3. Join personal notification room (own id only)
     socket.on('join_user', (userId) => {
-      if (userId) {
+      if (!user || typeof userId !== 'string') return;
+      if (userId === user.id) {
         socket.join(`room:user_${userId}`);
       }
-    });
-
-    socket.on('disconnect', () => {
-      // Clean disconnect
     });
   });
 
