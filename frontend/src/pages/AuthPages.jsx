@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { sendPhoneOtp } from '../config/firebase.js';
 import {
   Lock,
   Mail,
@@ -14,6 +15,8 @@ import {
   KeyRound,
   RotateCcw,
   ArrowLeft,
+  Smartphone,
+  MessageSquare,
 } from 'lucide-react';
 
 export default function AuthPages({ defaultMode = 'login' }) {
@@ -22,6 +25,12 @@ export default function AuthPages({ defaultMode = 'login' }) {
   // Login form state
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneLoginActive, setPhoneLoginActive] = useState(false);
+  const [phoneLoginStep, setPhoneLoginStep] = useState(1); // 1: phone, 2: OTP
+  const [phoneLoginMobile, setPhoneLoginMobile] = useState('');
+  const [phoneLoginOtp, setPhoneLoginOtp] = useState('');
+  const [phoneLoginConfirmation, setPhoneLoginConfirmation] = useState(null);
+  const [phoneLoginCooldown, setPhoneLoginCooldown] = useState(0);
 
   // Register form state
   const [fullName, setFullName] = useState('');
@@ -29,9 +38,11 @@ export default function AuthPages({ defaultMode = 'login' }) {
   const [email, setEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regStep, setRegStep] = useState(1); // 1: details, 2: OTP
+  const [regMethod, setRegMethod] = useState('phone'); // 'phone' | 'email'
   const [regTxnId, setRegTxnId] = useState('');
   const [regOtp, setRegOtp] = useState('');
   const [regCooldown, setRegCooldown] = useState(0);
+  const [phoneConfirmationResult, setPhoneConfirmationResult] = useState(null);
 
   // Forgot password state
   const [forgotEmail, setForgotEmail] = useState('');
@@ -51,6 +62,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
     isAuthenticated,
     loading: authLoading,
     login,
+    registerWithPhone,
+    loginWithPhone,
     requestRegisterOtp,
     verifyRegisterOtp,
     requestForgotPasswordOtp,
@@ -96,6 +109,14 @@ export default function AuthPages({ defaultMode = 'login' }) {
     return () => clearInterval(timer);
   }, [fpCooldown]);
 
+  useEffect(() => {
+    if (phoneLoginCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setPhoneLoginCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [phoneLoginCooldown]);
+
   if (authLoading || (isAuthenticated && user)) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center p-4">
@@ -131,7 +152,103 @@ export default function AuthPages({ defaultMode = 'login' }) {
     }
   };
 
-  // --- REGISTER STEP 1: REQUEST OTP ---
+  // --- PHONE LOGIN: REQUEST SMS OTP ---
+  const handlePhoneLoginRequestOtp = async (e) => {
+    e.preventDefault();
+    const cleanDigits = phoneLoginMobile.replace(/\D/g, '');
+    if (cleanDigits.length < 10) {
+      showError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const confirmation = await sendPhoneOtp(phoneLoginMobile, 'recaptcha-container');
+      setPhoneLoginConfirmation(confirmation);
+      setPhoneLoginStep(2);
+      setPhoneLoginCooldown(60);
+      showSuccess(`SMS OTP sent to +91 ${cleanDigits.slice(-10)} via Firebase!`);
+    } catch (err) {
+      console.error('Phone login OTP error:', err);
+      showError(err.message || 'Failed to dispatch SMS OTP. Please try password login.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- PHONE LOGIN: VERIFY SMS OTP ---
+  const handlePhoneLoginVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!phoneLoginOtp || phoneLoginOtp.trim().length !== 6) {
+      showError('Please enter the 6-digit code received on your phone.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (!phoneLoginConfirmation) {
+        throw new Error('Verification session expired. Please request a new OTP.');
+      }
+      const userCredential = await phoneLoginConfirmation.confirm(phoneLoginOtp.trim());
+      const idToken = await userCredential.user.getIdToken();
+      const res = await loginWithPhone(idToken);
+      if (res.success) {
+        showSuccess('Mobile login successful! Welcome back.');
+        if (res.user.role === 'CA') navigate('/ca/dashboard');
+        else if (res.user.role === 'ADMIN') navigate('/admin');
+        else navigate(from);
+      }
+    } catch (err) {
+      console.error('Phone login verify error:', err);
+      if (err.data?.not_registered || err.status === 404) {
+        setPhone(phoneLoginMobile);
+        setMode('register');
+        setRegStep(1);
+        showError(err.message || 'Mobile number not registered. Please create an account.');
+      } else {
+        showError(err.message || 'Failed to sign in with SMS OTP.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- REGISTER: SEND PHONE SMS OTP (FIREBASE) ---
+  const handleRegisterSendPhoneOtp = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!fullName || !email || !phone || !regPassword) {
+      showError('Please fill in all mandatory registration fields.');
+      return;
+    }
+
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      showError('Please enter a valid 10-digit Indian mobile number.');
+      return;
+    }
+
+    if (regPassword.length < 6) {
+      showError('Password must be at least 6 characters.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const confirmation = await sendPhoneOtp(phone, 'recaptcha-container');
+      setPhoneConfirmationResult(confirmation);
+      setRegMethod('phone');
+      setRegStep(2);
+      setRegCooldown(60);
+      showSuccess(`SMS OTP sent to +91 ${cleanPhone.slice(-10)} via Firebase!`);
+    } catch (err) {
+      console.error('Firebase Phone OTP error:', err);
+      showError(err.message || 'Failed to send SMS OTP. Please try Email OTP instead.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- REGISTER STEP 1: REQUEST EMAIL OTP ---
   const handleRegisterRequestOtp = async (e) => {
     e.preventDefault();
     if (!fullName || !email || !phone || !regPassword) {
@@ -155,6 +272,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
       if (res.success) {
         setRegTxnId(res.txn_id);
+        setRegMethod('email');
         setRegStep(2);
         setRegCooldown(res.cooldown_seconds || 60);
         showSuccess(res.message || 'Verification code sent to your email!');
@@ -166,7 +284,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
     }
   };
 
-  // --- REGISTER STEP 2: VERIFY OTP ---
+  // --- REGISTER STEP 2: VERIFY OTP (PHONE OR EMAIL) ---
   const handleRegisterVerifyOtp = async (e) => {
     e.preventDefault();
     if (!regOtp || regOtp.trim().length !== 6) {
@@ -176,17 +294,38 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
     setLoading(true);
     try {
-      const res = await verifyRegisterOtp({
-        email,
-        otp: regOtp.trim(),
-        txn_id: regTxnId,
-      });
+      if (regMethod === 'phone') {
+        if (!phoneConfirmationResult) {
+          throw new Error('Phone verification session expired. Please request a new code.');
+        }
+        const userCredential = await phoneConfirmationResult.confirm(regOtp.trim());
+        const idToken = await userCredential.user.getIdToken();
+        const res = await registerWithPhone({
+          id_token: idToken,
+          full_name: fullName,
+          email,
+          password: regPassword,
+          phone,
+        });
 
-      if (res.success) {
-        showSuccess('Account verified & created! Welcome to BharatFiling.');
-        navigate(from);
+        if (res.success) {
+          showSuccess('Mobile verified & account created! Welcome to BharatFiling.');
+          navigate(from);
+        }
+      } else {
+        const res = await verifyRegisterOtp({
+          email,
+          otp: regOtp.trim(),
+          txn_id: regTxnId,
+        });
+
+        if (res.success) {
+          showSuccess('Account verified & created! Welcome to BharatFiling.');
+          navigate(from);
+        }
       }
     } catch (err) {
+      console.error('OTP Verification error:', err);
       showError(err.message || 'OTP verification failed. Please try again.');
     } finally {
       setLoading(false);
@@ -198,16 +337,23 @@ export default function AuthPages({ defaultMode = 'login' }) {
     if (regCooldown > 0) return;
     setLoading(true);
     try {
-      const res = await requestRegisterOtp({
-        full_name: fullName,
-        email,
-        phone,
-        password: regPassword,
-      });
-      if (res.success) {
-        setRegTxnId(res.txn_id);
-        setRegCooldown(res.cooldown_seconds || 60);
-        showSuccess('New verification code sent to your email!');
+      if (regMethod === 'phone') {
+        const confirmation = await sendPhoneOtp(phone, 'recaptcha-container');
+        setPhoneConfirmationResult(confirmation);
+        setRegCooldown(60);
+        showSuccess('New SMS OTP dispatched to your mobile number!');
+      } else {
+        const res = await requestRegisterOtp({
+          full_name: fullName,
+          email,
+          phone,
+          password: regPassword,
+        });
+        if (res.success) {
+          setRegTxnId(res.txn_id);
+          setRegCooldown(res.cooldown_seconds || 60);
+          showSuccess('New verification code sent to your email!');
+        }
       }
     } catch (err) {
       showError(err.message || 'Failed to resend code.');
@@ -365,8 +511,13 @@ export default function AuthPages({ defaultMode = 'login' }) {
           </Link>
 
           <h2 className="text-xl font-extrabold">
-            {mode === 'login' && 'Sign in to BharatFiling'}
-            {mode === 'register' && (regStep === 1 ? 'Create Customer Account' : 'Verify Email Address')}
+            {mode === 'login' && (phoneLoginActive ? 'Sign in with Mobile OTP' : 'Sign in to BharatFiling')}
+            {mode === 'register' &&
+              (regStep === 1
+                ? 'Create Customer Account'
+                : regMethod === 'phone'
+                ? 'Verify Mobile Number'
+                : 'Verify Email Address')}
             {mode === 'forgot-password' &&
               (fpStep === 1
                 ? 'Reset Your Password'
@@ -376,10 +527,15 @@ export default function AuthPages({ defaultMode = 'login' }) {
           </h2>
 
           <p className="text-xs text-slate-400">
-            {mode === 'login' && 'Access your applications, Master Profile & GST certificates'}
+            {mode === 'login' &&
+              (phoneLoginActive
+                ? 'Instant passwordless login via 6-digit SMS OTP'
+                : 'Access your applications, Master Profile & GST certificates')}
             {mode === 'register' &&
               (regStep === 1
                 ? 'One Master Profile for all your business compliance needs'
+                : regMethod === 'phone'
+                ? `Enter the 6-digit SMS code sent to +91 ${phone.replace(/\D/g, '').slice(-10)}`
                 : `Enter the 6-digit code sent to ${email}`)}
             {mode === 'forgot-password' &&
               (fpStep === 1
@@ -393,7 +549,10 @@ export default function AuthPages({ defaultMode = 'login' }) {
           {mode !== 'forgot-password' && regStep === 1 && (
             <div className="flex bg-slate-800 p-1 rounded-xl mt-4 text-xs font-bold">
               <button
-                onClick={() => setMode('login')}
+                onClick={() => {
+                  setMode('login');
+                  setPhoneLoginActive(false);
+                }}
                 className={`flex-1 py-1.5 rounded-lg transition ${
                   mode === 'login' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
                 }`}
@@ -404,6 +563,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 onClick={() => {
                   setMode('register');
                   setRegStep(1);
+                  setPhoneLoginActive(false);
                 }}
                 className={`flex-1 py-1.5 rounded-lg transition ${
                   mode === 'register' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
@@ -417,8 +577,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
         {/* Form Body */}
         <div className="p-6">
-          {/* ======================= LOGIN VIEW ======================= */}
-          {mode === 'login' && (
+          {/* ======================= LOGIN VIEW: PASSWORD ======================= */}
+          {mode === 'login' && !phoneLoginActive && (
             <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Email or Mobile Number</label>
@@ -473,7 +633,134 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 {loading ? 'Signing in...' : 'Sign In & Access Dashboard'}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
+
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPhoneLoginActive(true);
+                    setPhoneLoginStep(1);
+                    setPhoneLoginMobile(identifier.replace(/\D/g, '').length >= 10 ? identifier : '');
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-emerald-600 transition cursor-pointer"
+                >
+                  <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
+                  Sign in with Mobile SMS OTP instead
+                </button>
+              </div>
             </form>
+          )}
+
+          {/* ======================= LOGIN VIEW: PHONE OTP ======================= */}
+          {mode === 'login' && phoneLoginActive && (
+            <div className="space-y-4 text-xs">
+              {phoneLoginStep === 1 && (
+                <form onSubmit={handlePhoneLoginRequestOtp} className="space-y-4">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Indian Mobile Number</label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                      <input
+                        type="tel"
+                        value={phoneLoginMobile}
+                        onChange={(e) => setPhoneLoginMobile(e.target.value)}
+                        placeholder="10-digit mobile number"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      A 6-digit SMS OTP will be sent to your mobile phone via Google Firebase.
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    {loading ? 'Sending SMS OTP...' : 'Send SMS OTP'}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  <div className="text-center pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setPhoneLoginActive(false)}
+                      className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 mx-auto text-xs cursor-pointer"
+                    >
+                      <ArrowLeft className="w-3 h-3" /> Back to Password Sign In
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {phoneLoginStep === 2 && (
+                <form onSubmit={handlePhoneLoginVerifyOtp} className="space-y-4">
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                      <Smartphone className="w-4 h-4 text-emerald-600" />
+                      SMS OTP Sent
+                    </div>
+                    <p className="text-[11px] text-emerald-700">
+                      Enter the 6-digit code sent to <span className="font-bold">+91 {phoneLoginMobile.slice(-10)}</span>.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1.5">6-Digit SMS Code</label>
+                    <div className="relative">
+                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={phoneLoginOtp}
+                        onChange={(e) => setPhoneLoginOtp(e.target.value.replace(/\D/g, ''))}
+                        autoComplete="one-time-code"
+                        placeholder="123456"
+                        className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
+                        autoFocus
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading || phoneLoginOtp.length !== 6}
+                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    {loading ? 'Verifying OTP...' : 'Verify & Sign In'}
+                    <CheckCircle2 className="w-4 h-4" />
+                  </button>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setPhoneLoginStep(1)}
+                      className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <ArrowLeft className="w-3 h-3" /> Change Number
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={phoneLoginCooldown > 0 || loading}
+                      onClick={handlePhoneLoginRequestOtp}
+                      className={`font-bold flex items-center gap-1 ${
+                        phoneLoginCooldown > 0
+                          ? 'text-slate-400 cursor-not-allowed'
+                          : 'text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
+                      }`}
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      {phoneLoginCooldown > 0 ? `Resend in ${phoneLoginCooldown}s` : 'Resend Code'}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           )}
 
           {/* ======================= REGISTER VIEW: STEP 1 ======================= */}
@@ -543,29 +830,57 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                {loading ? 'Sending Verification Code...' : 'Continue & Send Email OTP'}
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              <div className="pt-2 space-y-2">
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={handleRegisterSendPhoneOtp}
+                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Smartphone className="w-4 h-4 text-emerald-200" />
+                  {loading && regMethod === 'phone'
+                    ? 'Sending SMS OTP...'
+                    : 'Verify via Mobile SMS OTP (Fastest)'}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer border border-slate-300"
+                >
+                  <Mail className="w-4 h-4 text-slate-500" />
+                  {loading && regMethod === 'email'
+                    ? 'Sending Email OTP...'
+                    : 'Or Continue with Email OTP'}
+                </button>
+              </div>
             </form>
           )}
 
           {/* ======================= REGISTER VIEW: STEP 2 (OTP) ======================= */}
           {mode === 'register' && regStep === 2 && (
             <form onSubmit={handleRegisterVerifyOtp} className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
-                <div className="font-bold flex items-center gap-1.5 text-xs">
-                  <Mail className="w-4 h-4 text-emerald-600" />
-                  Check Your Email Inbox
+              {regMethod === 'phone' ? (
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                    <Smartphone className="w-4 h-4 text-emerald-600" />
+                    SMS Verification Code Dispatched
+                  </div>
+                  <p className="text-[11px] text-emerald-700">
+                    We've sent a 6-digit SMS verification code to <span className="font-bold">+91 {phone.replace(/\D/g, '').slice(-10)}</span> via Firebase.
+                  </p>
                 </div>
-                <p className="text-[11px] text-emerald-700">
-                  We've sent a 6-digit confirmation code to <span className="font-bold">{email}</span>. Please enter it below.
-                </p>
-              </div>
+              ) : (
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                    <Mail className="w-4 h-4 text-emerald-600" />
+                    Check Your Email Inbox
+                  </div>
+                  <p className="text-[11px] text-emerald-700">
+                    We've sent a 6-digit confirmation code to <span className="font-bold">{email}</span>. Please enter it below.
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1.5">6-Digit Verification Code</label>
@@ -597,9 +912,9 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 <button
                   type="button"
                   onClick={() => setRegStep(1)}
-                  className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1"
+                  className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
                 >
-                  <ArrowLeft className="w-3 h-3" /> Back / Change Email
+                  <ArrowLeft className="w-3 h-3" /> Back / Edit Details
                 </button>
 
                 <button
@@ -613,7 +928,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   }`}
                 >
                   <RotateCcw className="w-3 h-3" />
-                  {regCooldown > 0 ? `Resend code in ${regCooldown}s` : 'Resend Code'}
+                  {regCooldown > 0 ? `Resend in ${regCooldown}s` : 'Resend Code'}
                 </button>
               </div>
             </form>
@@ -838,6 +1153,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
           </div>
         </div>
       </div>
+      {/* Invisible Google reCAPTCHA container for Firebase Phone SMS OTP */}
+      <div id="recaptcha-container"></div>
     </div>
   );
 }

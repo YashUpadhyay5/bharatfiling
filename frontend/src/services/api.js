@@ -90,6 +90,24 @@ export const api = {
     return handleResponse(res);
   },
 
+  registerWithPhone: async (payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/register/phone-verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  loginWithPhone: async (idToken) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/login/phone`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+    return handleResponse(res);
+  },
+
   requestForgotPasswordOtp: async (email) => {
     const res = await fetchWithRetry(`${API_BASE}/auth/forgot-password/request-otp`, {
       method: 'POST',

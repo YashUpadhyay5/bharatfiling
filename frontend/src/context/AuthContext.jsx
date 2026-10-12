@@ -91,6 +91,32 @@ export const AuthProvider = ({ children }) => {
     return res;
   };
 
+  const registerWithPhone = async (payload) => {
+    const res = await api.registerWithPhone(payload);
+    if (res.success && res.token) {
+      localStorage.setItem('bharatfiling_token', res.token);
+      if (res.user) {
+        localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
+      }
+      setToken(res.token);
+      setUser(res.user);
+    }
+    return res;
+  };
+
+  const loginWithPhone = async (idToken) => {
+    const res = await api.loginWithPhone(idToken);
+    if (res.success && res.token) {
+      localStorage.setItem('bharatfiling_token', res.token);
+      if (res.user) {
+        localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
+      }
+      setToken(res.token);
+      setUser(res.user);
+    }
+    return res;
+  };
+
   const requestForgotPasswordOtp = async (email) => {
     return await api.requestForgotPasswordOtp(email);
   };
@@ -144,6 +170,8 @@ export const AuthProvider = ({ children }) => {
         register,
         requestRegisterOtp,
         verifyRegisterOtp,
+        registerWithPhone,
+        loginWithPhone,
         requestForgotPasswordOtp,
         verifyForgotPasswordOtp,
         resetPassword,

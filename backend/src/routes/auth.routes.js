@@ -8,6 +8,7 @@ import { OtpModel } from '../models/Otp.js';
 import { generateToken, authenticate } from '../middleware/auth.js';
 import { cryptoService } from '../services/crypto.service.js';
 import { emailService } from '../services/email.service.js';
+import { firebaseAuthService } from '../services/firebaseAuth.service.js';
 import { ENV } from '../config/env.js';
 
 const router = express.Router();
@@ -280,6 +281,120 @@ router.post('/register/verify-otp', async (req, res) => {
   } catch (err) {
     console.error('[Register Verify OTP Error]:', err);
     res.status(500).json({ success: false, message: 'Server error during OTP verification.' });
+  }
+});
+
+// ============================================================================
+// 1B. REGISTRATION & LOGIN VIA FIREBASE PHONE SMS OTP
+// ============================================================================
+
+/**
+ * POST /api/v1/auth/register/phone-verify
+ * Verifies Firebase SMS OTP token and completes user registration
+ */
+router.post('/register/phone-verify', async (req, res) => {
+  try {
+    const { id_token, full_name, email, password, phone } = req.body;
+
+    if (!id_token || !full_name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'All registration details and phone verification token are required.' });
+    }
+
+    const decoded = await firebaseAuthService.verifyIdToken(id_token);
+    const verifiedPhone = decoded.phone_number || phone;
+
+    const cleanEmail = normalizeEmail(email);
+    const cleanPhone = verifiedPhone.replace(/\D/g, '').slice(-10);
+
+    const existing = (await UserModel.findByEmail(cleanEmail)) || (await UserModel.findByPhone(cleanPhone));
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'An account with this email or mobile number already exists. Please sign in.' });
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const password_hash = bcrypt.hashSync(password, salt);
+
+    const newUser = await UserModel.create({
+      email: cleanEmail,
+      phone: cleanPhone,
+      password_hash,
+      role: 'CUSTOMER',
+      full_name: full_name.trim(),
+      is_verified: true,
+    });
+
+    try {
+      await CustomerProfileModel.create({
+        user_id: newUser.id,
+        personal_info: { full_name: newUser.full_name, father_name: '', dob: '', gender: '' },
+        identity_info: { pan_number: '', pan_verified: false, aadhaar_number: '', aadhaar_verified: false },
+        contact_info: { mobile_number: cleanPhone, mobile_verified: true, email: cleanEmail, email_verified: false },
+        address_info: { address_line_1: '', address_line_2: '', city: '', state: 'Karnataka', pincode: '' },
+      });
+    } catch {
+      // Ignored
+    }
+
+    const token = generateToken(newUser);
+
+    res.status(201).json({
+      success: true,
+      message: 'Mobile number verified via SMS and account created successfully! Welcome to BharatFiling.',
+      token,
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        phone: newUser.phone,
+        role: newUser.role,
+        full_name: newUser.full_name,
+      },
+    });
+  } catch (err) {
+    console.error('[Register Phone Verify Error]:', err);
+    res.status(400).json({ success: false, message: err.message || 'Failed to verify phone OTP.' });
+  }
+});
+
+/**
+ * POST /api/v1/auth/login/phone
+ * Instant passwordless login via verified Firebase SMS OTP
+ */
+router.post('/login/phone', async (req, res) => {
+  try {
+    const { id_token } = req.body;
+    if (!id_token) {
+      return res.status(400).json({ success: false, message: 'Phone verification token is required.' });
+    }
+
+    const decoded = await firebaseAuthService.verifyIdToken(id_token);
+    const cleanPhone = (decoded.phone_number || '').replace(/\D/g, '').slice(-10);
+
+    const user = await UserModel.findByPhone(cleanPhone);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        not_registered: true,
+        phone: cleanPhone,
+        message: `No BharatFiling account found for mobile number ${cleanPhone}. Please register.`,
+      });
+    }
+
+    const token = generateToken(user);
+    res.json({
+      success: true,
+      message: 'Mobile login successful! Welcome back.',
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        full_name: user.full_name,
+      },
+    });
+  } catch (err) {
+    console.error('[Login Phone Error]:', err);
+    res.status(400).json({ success: false, message: err.message || 'Failed to authenticate phone OTP.' });
   }
 });
 

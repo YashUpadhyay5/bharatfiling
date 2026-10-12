@@ -31,4 +31,6 @@ export const ENV = {
   SMTP_FROM: process.env.SMTP_FROM || 'BharatFiling <yashupdhyay486@gmail.com>',
   RESEND_API_KEY: process.env.RESEND_API_KEY || '',
   BREVO_API_KEY: process.env.BREVO_API_KEY || '',
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || 'bharatfiling-prod',
+  FIREBASE_API_KEY: process.env.FIREBASE_API_KEY || '',
 };
