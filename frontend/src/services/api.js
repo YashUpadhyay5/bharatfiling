@@ -1,10 +1,6 @@
-const rawApiUrl =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? 'https://bharatfiling-1.onrender.com/api/v1' : '/api/v1');
+import { API_BASE_URL } from '../config/domain.js';
 
-const API_BASE = rawApiUrl.endsWith('/api/v1')
-  ? rawApiUrl
-  : `${rawApiUrl.replace(/\/$/, '')}/api/v1`;
+const API_BASE = API_BASE_URL;
 
 const getHeaders = (isMultipart = false) => {
   const token = localStorage.getItem('bharatfiling_token') || localStorage.getItem('taxveda_token');

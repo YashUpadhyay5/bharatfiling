@@ -588,4 +588,25 @@ In both registration and forgot-password flows in `backend/src/routes/auth.route
 
 ---
 
+## 14. Zero-Friction Company Custom Domain Switch Guide (1-Minute Setup)
+
+When switching from `bharatfiling.onrender.com` to your official company domain (e.g. `bharatfiling.com` / `www.bharatfiling.com`):
+
+### The Single File in Code:
+Open [`frontend/src/config/domain.js`](file:///C:/Users/DELL/Desktop/bharatfiling/frontend/src/config/domain.js):
+* **Line 14:** Change `COMPANY_DOMAIN = 'bharatfiling.onrender.com'` to `'bharatfiling.com'`
+* **Line 17:** Change `DEFAULT_BACKEND_URL` to `'https://api.bharatfiling.com'` (or leave as Render if backend remains on Render).
+
+### The Single Setting in Firebase Console:
+1. Open [Firebase Console](https://console.firebase.google.com/) → Project: **`bharatfiling-prod`**.
+2. Go to **Authentication** → **Settings** → **Authorized domains**.
+3. Click **Add domain** and enter `bharatfiling.com` and `www.bharatfiling.com`.
+
+### Backend CORS:
+In [`backend/src/index.js`](file:///C:/Users/DELL/Desktop/bharatfiling/backend/src/index.js), CORS uses `origin: true` which dynamically accepts any frontend origin. **Zero backend code changes are required!**
+
+> Complete line-by-line documentation is preserved in [`domainchnages.md`](file:///C:/Users/DELL/Desktop/bharatfiling/domainchnages.md).
+
+---
+
 *Document finalized and verified against active BharatFiling codebase.*

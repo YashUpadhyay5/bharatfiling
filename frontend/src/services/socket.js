@@ -1,15 +1,7 @@
 import { io } from 'socket.io-client';
+import { SOCKET_BASE_URL } from '../config/domain.js';
 
-const rawSocketUrl =
-  import.meta.env.VITE_SOCKET_URL ||
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? 'https://bharatfiling-1.onrender.com' : '');
-
-const BACKEND_URL = rawSocketUrl
-  ? rawSocketUrl.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '')
-  : (typeof window !== 'undefined'
-    ? (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin)
-    : 'http://localhost:5000');
+const BACKEND_URL = SOCKET_BASE_URL;
 
 let socket = null;
 
