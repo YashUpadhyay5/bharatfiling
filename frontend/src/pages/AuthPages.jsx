@@ -34,7 +34,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
   // Register form state
   const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('7668976193');
   const [email, setEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regStep, setRegStep] = useState(1); // 1: details, 2: OTP
@@ -45,8 +45,11 @@ export default function AuthPages({ defaultMode = 'login' }) {
   const [phoneConfirmationResult, setPhoneConfirmationResult] = useState(null);
 
   // Forgot password state
+  const [fpMethod, setFpMethod] = useState('phone'); // 'phone' | 'email'
+  const [forgotPhone, setForgotPhone] = useState('7668976193');
+  const [fpPhoneConfirmation, setFpPhoneConfirmation] = useState(null);
   const [forgotEmail, setForgotEmail] = useState('');
-  const [fpStep, setFpStep] = useState(1); // 1: email, 2: OTP, 3: new password
+  const [fpStep, setFpStep] = useState(1); // 1: email/phone, 2: OTP/reset
   const [fpTxnId, setFpTxnId] = useState('');
   const [fpOtp, setFpOtp] = useState('');
   const [fpResetToken, setFpResetToken] = useState('');
@@ -69,6 +72,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
     requestForgotPasswordOtp,
     verifyForgotPasswordOtp,
     resetPassword,
+    resetPasswordWithPhone,
     quickSwitchAccount,
   } = useAuth();
 
@@ -362,7 +366,88 @@ export default function AuthPages({ defaultMode = 'login' }) {
     }
   };
 
-  // --- FORGOT PASSWORD STEP 1: REQUEST OTP ---
+  // --- FORGOT PASSWORD (PHONE): REQUEST SMS OTP ---
+  const handleForgotPhoneRequestOtp = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const cleanDigits = forgotPhone.replace(/\D/g, '');
+    if (cleanDigits.length < 10) {
+      showError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    setUnregisteredAlert(false);
+    setLoading(true);
+    try {
+      const confirmation = await sendPhoneOtp(forgotPhone, 'recaptcha-container');
+      setFpPhoneConfirmation(confirmation);
+      setFpMethod('phone');
+      setFpStep(2);
+      setFpCooldown(60);
+      showSuccess(`Random 6-digit SMS OTP sent to +91 ${cleanDigits.slice(-10)} via Firebase!`);
+    } catch (err) {
+      console.error('Firebase Forgot Phone OTP Error:', err);
+      showError(err.message || 'Failed to dispatch recovery SMS. Please try Email recovery.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- FORGOT PASSWORD (PHONE): VERIFY OTP & RESET PASSWORD ---
+  const handleForgotPhoneResetPassword = async (e) => {
+    e.preventDefault();
+    if (!fpOtp || fpOtp.trim().length !== 6) {
+      showError('Please enter the 6-digit recovery code received via SMS.');
+      return;
+    }
+
+    if (!fpNewPassword || !fpConfirmPassword) {
+      showError('Please fill both new password fields.');
+      return;
+    }
+
+    if (fpNewPassword.length < 6) {
+      showError('Password must be at least 6 characters.');
+      return;
+    }
+
+    if (fpNewPassword !== fpConfirmPassword) {
+      showError('New password and confirm password do not match.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (!fpPhoneConfirmation) {
+        throw new Error('Recovery session expired. Please request a new code.');
+      }
+      const userCredential = await fpPhoneConfirmation.confirm(fpOtp.trim());
+      const idToken = await userCredential.user.getIdToken();
+      const res = await resetPasswordWithPhone({
+        id_token: idToken,
+        phone: forgotPhone,
+        new_password: fpNewPassword,
+      });
+
+      if (res.success) {
+        showSuccess('Password updated successfully! Welcome back to BharatFiling.');
+        navigate(from);
+      }
+    } catch (err) {
+      console.error('Phone reset password error:', err);
+      if (err.data?.not_registered || err.status === 404) {
+        setPhone(forgotPhone);
+        setMode('register');
+        setRegStep(1);
+        showError(err.message || 'Mobile number not registered. Please create an account.');
+      } else {
+        showError(err.message || 'Failed to reset password. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- FORGOT PASSWORD (EMAIL) STEP 1: REQUEST OTP ---
   const handleForgotRequestOtp = async (e) => {
     e.preventDefault();
     if (!forgotEmail) {
@@ -376,6 +461,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
       const res = await requestForgotPasswordOtp(forgotEmail);
       if (res.success) {
         setFpTxnId(res.txn_id);
+        setFpMethod('email');
         setFpStep(2);
         setFpCooldown(res.cooldown_seconds || 60);
         showSuccess(res.message || 'Recovery code sent!');
@@ -392,7 +478,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
     }
   };
 
-  // --- FORGOT PASSWORD STEP 2: VERIFY OTP ---
+  // --- FORGOT PASSWORD (EMAIL) STEP 2: VERIFY OTP ---
   const handleForgotVerifyOtp = async (e) => {
     e.preventDefault();
     if (!fpOtp || fpOtp.trim().length !== 6) {
@@ -425,11 +511,18 @@ export default function AuthPages({ defaultMode = 'login' }) {
     if (fpCooldown > 0) return;
     setLoading(true);
     try {
-      const res = await requestForgotPasswordOtp(forgotEmail);
-      if (res.success) {
-        setFpTxnId(res.txn_id);
-        setFpCooldown(res.cooldown_seconds || 60);
-        showSuccess('New recovery code sent to your email!');
+      if (fpMethod === 'phone') {
+        const confirmation = await sendPhoneOtp(forgotPhone, 'recaptcha-container');
+        setFpPhoneConfirmation(confirmation);
+        setFpCooldown(60);
+        showSuccess('New 6-digit recovery code sent to your mobile phone!');
+      } else {
+        const res = await requestForgotPasswordOtp(forgotEmail);
+        if (res.success) {
+          setFpTxnId(res.txn_id);
+          setFpCooldown(res.cooldown_seconds || 60);
+          showSuccess('New recovery code sent to your email!');
+        }
       }
     } catch (err) {
       showError(err.message || 'Failed to resend code.');
@@ -539,9 +632,13 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 : `Enter the 6-digit code sent to ${email}`)}
             {mode === 'forgot-password' &&
               (fpStep === 1
-                ? 'Enter your registered email to receive a 6-digit recovery OTP'
+                ? fpMethod === 'phone'
+                  ? 'Enter your mobile number to receive a 6-digit recovery SMS'
+                  : 'Enter your registered email to receive a 6-digit recovery OTP'
                 : fpStep === 2
-                ? `Enter the 6-digit code sent to ${forgotEmail}`
+                ? fpMethod === 'phone'
+                  ? `Enter the 6-digit SMS code sent to +91 ${forgotPhone.replace(/\D/g, '').slice(-10)}`
+                  : `Enter the 6-digit code sent to ${forgotEmail}`
                 : 'Choose a strong password with at least 6 characters')}
           </p>
 
@@ -937,134 +1034,307 @@ export default function AuthPages({ defaultMode = 'login' }) {
           {/* ======================= FORGOT PASSWORD VIEW ======================= */}
           {mode === 'forgot-password' && (
             <div className="space-y-4 text-xs">
-              {/* STEP 1: Enter Email */}
+              {/* STEP 1: Phone or Email Recovery Selector */}
               {fpStep === 1 && (
-                <form onSubmit={handleForgotRequestOtp} className="space-y-4">
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">Your Registered Email</label>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                      <input
-                        type="email"
-                        value={forgotEmail}
-                        onChange={(e) => setForgotEmail(e.target.value)}
-                        autoComplete="email"
-                        placeholder="Enter your registered email address"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
-                        required
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-
-                  {unregisteredAlert && (
-                    <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
-                      <div className="font-bold flex items-center gap-1.5 text-xs text-amber-800">
-                        <User className="w-4 h-4 text-amber-600" />
-                        No Account Found
-                      </div>
-                      <p className="text-[11px] text-amber-800 leading-relaxed">
-                        There is no BharatFiling account registered with <span className="font-bold">{forgotEmail}</span>. Would you like to create one?
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEmail(forgotEmail);
-                          setMode('register');
-                          setUnregisteredAlert(false);
-                        }}
-                        className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-xs"
-                      >
-                        Create New Account Now <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    {loading ? 'Sending Recovery Code...' : 'Send Recovery Code'}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-
-                  <div className="text-center pt-2 border-t border-slate-100">
+                <div className="space-y-4">
+                  {/* Selector Tabs: Mobile SMS vs Email */}
+                  <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200">
                     <button
                       type="button"
-                      onClick={() => setMode('login')}
-                      className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 mx-auto"
-                    >
-                      <ArrowLeft className="w-3 h-3" /> Back to Sign In
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* STEP 2: Enter 6-digit OTP */}
-              {fpStep === 2 && (
-                <form onSubmit={handleForgotVerifyOtp} className="space-y-4">
-                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
-                    <div className="font-bold flex items-center gap-1.5 text-xs">
-                      <Mail className="w-4 h-4 text-amber-600" />
-                      Recovery Code Dispatched
-                    </div>
-                    <p className="text-[11px] text-amber-800">
-                      If an account exists for <span className="font-bold">{forgotEmail}</span>, a 6-digit recovery OTP has been sent.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1.5">6-Digit Recovery Code</label>
-                    <div className="relative">
-                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                      <input
-                        type="text"
-                        maxLength={6}
-                        value={fpOtp}
-                        onChange={(e) => setFpOtp(e.target.value.replace(/\D/g, ''))}
-                        autoComplete="one-time-code"
-                        placeholder="123456"
-                        className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
-                        autoFocus
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading || fpOtp.length !== 6}
-                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    {loading ? 'Verifying...' : 'Verify Code & Continue'}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
-                    <button
-                      type="button"
-                      onClick={() => setFpStep(1)}
-                      className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1"
-                    >
-                      <ArrowLeft className="w-3 h-3" /> Back
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={fpCooldown > 0 || loading}
-                      onClick={handleResendForgotOtp}
-                      className={`font-bold flex items-center gap-1 ${
-                        fpCooldown > 0
-                          ? 'text-slate-400 cursor-not-allowed'
-                          : 'text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
+                      onClick={() => {
+                        setFpMethod('phone');
+                        setUnregisteredAlert(false);
+                      }}
+                      className={`flex-1 py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        fpMethod === 'phone'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      <RotateCcw className="w-3 h-3" />
-                      {fpCooldown > 0 ? `Resend in ${fpCooldown}s` : 'Resend Code'}
+                      <Smartphone className="w-3.5 h-3.5" />
+                      Via Mobile SMS OTP
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFpMethod('email');
+                        setUnregisteredAlert(false);
+                      }}
+                      className={`flex-1 py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        fpMethod === 'email'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                      Via Email OTP
                     </button>
                   </div>
-                </form>
+
+                  {fpMethod === 'phone' ? (
+                    <form onSubmit={handleForgotPhoneRequestOtp} className="space-y-4">
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">Registered Mobile Number</label>
+                        <div className="relative">
+                          <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                          <input
+                            type="tel"
+                            value={forgotPhone}
+                            onChange={(e) => setForgotPhone(e.target.value)}
+                            placeholder="10-digit mobile number"
+                            className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                            required
+                            autoFocus
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          A random 6-digit SMS recovery code will be dispatched to this number via Google Firebase.
+                        </p>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        {loading ? 'Sending Recovery SMS...' : 'Send SMS Recovery Code'}
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+
+                      <div className="text-center pt-2 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => setMode('login')}
+                          className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 mx-auto cursor-pointer"
+                        >
+                          <ArrowLeft className="w-3 h-3" /> Back to Sign In
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleForgotRequestOtp} className="space-y-4">
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">Your Registered Email</label>
+                        <div className="relative">
+                          <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                          <input
+                            type="email"
+                            value={forgotEmail}
+                            onChange={(e) => setForgotEmail(e.target.value)}
+                            autoComplete="email"
+                            placeholder="Enter your registered email address"
+                            className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                            required
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+
+                      {unregisteredAlert && (
+                        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
+                          <div className="font-bold flex items-center gap-1.5 text-xs text-amber-800">
+                            <User className="w-4 h-4 text-amber-600" />
+                            No Account Found
+                          </div>
+                          <p className="text-[11px] text-amber-800 leading-relaxed">
+                            There is no BharatFiling account registered with <span className="font-bold">{forgotEmail}</span>. Would you like to create one?
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEmail(forgotEmail);
+                              setMode('register');
+                              setUnregisteredAlert(false);
+                            }}
+                            className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-xs"
+                          >
+                            Create New Account Now <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        {loading ? 'Sending Recovery Code...' : 'Send Recovery Code'}
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+
+                      <div className="text-center pt-2 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => setMode('login')}
+                          className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 mx-auto cursor-pointer"
+                        >
+                          <ArrowLeft className="w-3 h-3" /> Back to Sign In
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
+
+              {/* STEP 2: Phone OTP + New Password OR Email OTP */}
+              {fpStep === 2 && (
+                fpMethod === 'phone' ? (
+                  <form onSubmit={handleForgotPhoneResetPassword} className="space-y-4">
+                    <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                      <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                        <Smartphone className="w-4 h-4 text-emerald-600" />
+                        SMS Recovery Code Dispatched
+                      </div>
+                      <p className="text-[11px] text-emerald-700">
+                        Enter the random 6-digit SMS OTP sent to <span className="font-bold">+91 {forgotPhone.replace(/\D/g, '').slice(-10)}</span> via Firebase.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1.5">6-Digit SMS Recovery Code</label>
+                      <div className="relative">
+                        <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                        <input
+                          type="text"
+                          maxLength={6}
+                          value={fpOtp}
+                          onChange={(e) => setFpOtp(e.target.value.replace(/\D/g, ''))}
+                          autoComplete="one-time-code"
+                          placeholder="123456"
+                          className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
+                          autoFocus
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">New Password</label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                        <input
+                          type="password"
+                          value={fpNewPassword}
+                          onChange={(e) => setFpNewPassword(e.target.value)}
+                          placeholder="Enter new password (min. 6 characters)"
+                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Confirm New Password</label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                        <input
+                          type="password"
+                          value={fpConfirmPassword}
+                          onChange={(e) => setFpConfirmPassword(e.target.value)}
+                          placeholder="Re-enter new password"
+                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading || fpOtp.length !== 6}
+                      className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      {loading ? 'Verifying & Updating...' : 'Verify SMS OTP & Set New Password'}
+                      <CheckCircle2 className="w-4 h-4" />
+                    </button>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setFpStep(1)}
+                        className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <ArrowLeft className="w-3 h-3" /> Change Number
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={fpCooldown > 0 || loading}
+                        onClick={handleResendForgotOtp}
+                        className={`font-bold flex items-center gap-1 ${
+                          fpCooldown > 0
+                            ? 'text-slate-400 cursor-not-allowed'
+                            : 'text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
+                        }`}
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        {fpCooldown > 0 ? `Resend in ${fpCooldown}s` : 'Resend Code'}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <form onSubmit={handleForgotVerifyOtp} className="space-y-4">
+                    <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
+                      <div className="font-bold flex items-center gap-1.5 text-xs">
+                        <Mail className="w-4 h-4 text-amber-600" />
+                        Recovery Code Dispatched
+                      </div>
+                      <p className="text-[11px] text-amber-800">
+                        If an account exists for <span className="font-bold">{forgotEmail}</span>, a 6-digit recovery OTP has been sent.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1.5">6-Digit Recovery Code</label>
+                      <div className="relative">
+                        <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                        <input
+                          type="text"
+                          maxLength={6}
+                          value={fpOtp}
+                          onChange={(e) => setFpOtp(e.target.value.replace(/\D/g, ''))}
+                          autoComplete="one-time-code"
+                          placeholder="123456"
+                          className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
+                          autoFocus
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading || fpOtp.length !== 6}
+                      className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      {loading ? 'Verifying...' : 'Verify Code & Continue'}
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setFpStep(1)}
+                        className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <ArrowLeft className="w-3 h-3" /> Back
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={fpCooldown > 0 || loading}
+                        onClick={handleResendForgotOtp}
+                        className={`font-bold flex items-center gap-1 ${
+                          fpCooldown > 0
+                            ? 'text-slate-400 cursor-not-allowed'
+                            : 'text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
+                        }`}
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        {fpCooldown > 0 ? `Resend in ${fpCooldown}s` : 'Resend Code'}
+                      </button>
+                    </div>
+                  </form>
+                )
               )}
 
               {/* STEP 3: Enter New Password */}

@@ -135,6 +135,15 @@ export const api = {
     return handleResponse(res);
   },
 
+  resetPasswordWithPhone: async ({ id_token, phone, new_password }) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/forgot-password/phone-reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token, phone, new_password }),
+    });
+    return handleResponse(res);
+  },
+
   changePassword: async ({ current_password, new_password }) => {
     const res = await fetchWithRetry(`${API_BASE}/auth/change-password`, {
       method: 'POST',

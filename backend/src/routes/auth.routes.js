@@ -398,6 +398,69 @@ router.post('/login/phone', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/v1/auth/forgot-password/phone-reset
+ * Resets password using verified Firebase SMS OTP token
+ */
+router.post('/forgot-password/phone-reset', async (req, res) => {
+  try {
+    const { id_token, phone, new_password } = req.body;
+
+    if (!id_token || !new_password) {
+      return res.status(400).json({ success: false, message: 'Phone verification token and new password are required.' });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
+    }
+
+    // 1. Verify Firebase ID Token
+    const decoded = await firebaseAuthService.verifyIdToken(id_token);
+    const verifiedPhone = (decoded.phone_number || phone || '').replace(/\D/g, '').slice(-10);
+
+    if (!verifiedPhone) {
+      return res.status(400).json({ success: false, message: 'Could not determine verified phone number.' });
+    }
+
+    // 2. Find User in DB
+    const user = await UserModel.findByPhone(verifiedPhone);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        not_registered: true,
+        phone: verifiedPhone,
+        message: `No BharatFiling account found with mobile number ${verifiedPhone}. Please register.`,
+      });
+    }
+
+    // 3. Hash New Password with Bcrypt
+    const salt = bcrypt.genSaltSync(10);
+    const password_hash = bcrypt.hashSync(new_password, salt);
+
+    // 4. Update in Database
+    await UserModel.update(user.id, { password_hash, updated_at: new Date().toISOString() });
+
+    // 5. Issue session JWT token so user is logged in automatically
+    const token = generateToken(user);
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully! Welcome back to BharatFiling.',
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        full_name: user.full_name,
+      },
+    });
+  } catch (err) {
+    console.error('[Forgot Password Phone Reset Error]:', err);
+    res.status(400).json({ success: false, message: err.message || 'Failed to reset password via phone.' });
+  }
+});
+
 // ============================================================================
 // 2. FORGOT PASSWORD WITH EMAIL OTP FLOW
 // ============================================================================

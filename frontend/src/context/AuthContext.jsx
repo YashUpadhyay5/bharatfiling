@@ -129,6 +129,19 @@ export const AuthProvider = ({ children }) => {
     return await api.resetPassword({ email, reset_token, new_password });
   };
 
+  const resetPasswordWithPhone = async ({ id_token, phone, new_password }) => {
+    const res = await api.resetPasswordWithPhone({ id_token, phone, new_password });
+    if (res.success && res.token) {
+      localStorage.setItem('bharatfiling_token', res.token);
+      if (res.user) {
+        localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
+      }
+      setToken(res.token);
+      setUser(res.user);
+    }
+    return res;
+  };
+
   const changePassword = async ({ current_password, new_password }) => {
     return await api.changePassword({ current_password, new_password });
   };
@@ -175,6 +188,7 @@ export const AuthProvider = ({ children }) => {
         requestForgotPasswordOtp,
         verifyForgotPasswordOtp,
         resetPassword,
+        resetPasswordWithPhone,
         changePassword,
         logout,
         quickSwitchAccount,

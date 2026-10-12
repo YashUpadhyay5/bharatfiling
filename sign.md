@@ -550,6 +550,8 @@ In `backend/src/services/firebaseAuth.service.js`, BharatFiling cryptographicall
   Accepts `{ id_token, full_name, email, password, phone }`. Verifies token, creates user in `public.users` (with fallback to `db.json`), creates customer profile, and returns signed BharatFiling JWT.
 * `POST /api/v1/auth/login/phone`:
   Accepts `{ id_token }`. Verifies token, matches user by `phone`, and issues session JWT. If mobile number is not registered, returns `{ success: false, not_registered: true }`.
+* `POST /api/v1/auth/forgot-password/phone-reset`:
+  Accepts `{ id_token, phone, new_password }`. Verifies token, hashes new password with Bcrypt (cost 10), updates password in database, and returns fresh session JWT.
 
 ---
 
