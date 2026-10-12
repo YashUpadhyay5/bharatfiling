@@ -102,23 +102,26 @@ router.post('/register/request-otp', async (req, res) => {
     });
 
     // 6. Dispatch email via provider
+    let dispatchResult = null;
     try {
-      await emailService.sendRegistrationOtp(cleanEmail, otp, full_name);
+      dispatchResult = await emailService.sendRegistrationOtp(cleanEmail, otp, full_name);
     } catch (emailErr) {
       console.warn(`[Registration Email Dispatch Failed for ${cleanEmail}]:`, emailErr.message);
       // TRANSACTIONAL ROLLBACK: Remove staged OTP so the user is NOT trapped by 60s cooldown (429)
       await OtpModel.deleteByTxnId(txn_id);
       return res.status(500).json({
         success: false,
-        message: emailErr.message && emailErr.message.includes('own email address')
-          ? 'Trial email provider restriction: In sandbox mode, emails can only be sent to the verified account owner. Please verify custom domain or contact support.'
-          : 'Could not deliver verification email to this address. Please verify your email or try again.',
+        message: 'Could not deliver verification email to this address. Please verify your email or try again.',
       });
     }
 
+    const successMessage = dispatchResult?.provider === 'resend-sandbox-routed'
+      ? `A 6-digit verification code has been dispatched! (In sandbox mode, check inbox of ${dispatchResult.sandboxOwner})`
+      : `A 6-digit verification code has been sent to ${cleanEmail}.`;
+
     res.json({
       success: true,
-      message: `A 6-digit verification code has been sent to ${cleanEmail}.`,
+      message: successMessage,
       txn_id,
       cooldown_seconds: 60,
     });
@@ -299,12 +302,8 @@ router.post('/forgot-password/request-otp', async (req, res) => {
     const cleanEmail = normalizeEmail(email);
 
     // 1. Locate user in DB
-    let user = null;
-    try {
-      user = await UserModel.findByEmail(cleanEmail);
-    } catch {
-      user = db.getUsers().find((u) => u.email.toLowerCase() === cleanEmail);
-    }
+    // 1. Locate user in DB
+    const user = await UserModel.findByEmail(cleanEmail);
 
     if (!user) {
       return res.status(404).json({
@@ -342,22 +341,25 @@ router.post('/forgot-password/request-otp', async (req, res) => {
       expires_at,
     });
 
+    let dispatchResult = null;
     try {
-      await emailService.sendPasswordResetOtp(cleanEmail, otp, user.full_name);
+      dispatchResult = await emailService.sendPasswordResetOtp(cleanEmail, otp, user.full_name);
     } catch (emailErr) {
       console.warn(`[Password Reset Email Dispatch Failed for ${cleanEmail}]:`, emailErr.message);
       await OtpModel.deleteByTxnId(txn_id);
       return res.status(500).json({
         success: false,
-        message: emailErr.message && emailErr.message.includes('own email address')
-          ? 'Trial email provider restriction: In sandbox mode, emails can only be sent to the verified account owner. Verify a custom domain or contact support.'
-          : 'Could not deliver recovery email to this address. Please try again.',
+        message: 'Could not deliver recovery email to this address. Please try again.',
       });
     }
 
+    const successMessage = dispatchResult?.provider === 'resend-sandbox-routed'
+      ? `A 6-digit recovery code has been dispatched! (In sandbox mode, check inbox of ${dispatchResult.sandboxOwner})`
+      : `A 6-digit recovery code has been sent to ${cleanEmail}.`;
+
     return res.json({
       success: true,
-      message: `A 6-digit recovery code has been sent to ${cleanEmail}.`,
+      message: successMessage,
       txn_id,
       cooldown_seconds: 60,
     });
