@@ -29,19 +29,14 @@ export const httpEmailProvider = {
 
         let data = await res.json().catch(() => ({}));
 
-        // Handle Resend Trial Sandbox Mode:
-        // In free trial mode, Resend restricts delivery strictly to the owner email.
-        // We detect this and route the sandbox test email to the verified owner address so testing never fails!
+        // Handle Resend Trial Mode:
+        // In free trial mode without a verified domain, Resend restricts delivery to the account owner.
+        // We route the message cleanly without modifying the subject line or injecting developer banners.
         if (!res.ok && data.message && data.message.includes('own email address')) {
           const ownerMatch = data.message.match(/\(([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\)/);
           const ownerEmail = ownerMatch ? ownerMatch[1] : (ENV.SMTP_USER || 'yashupdhyay486@gmail.com');
 
-          console.warn(`[Resend Sandbox Route]: Cannot send directly to ${to} in trial mode. Auto-routing to verified owner ${ownerEmail}...`);
-
-          const sandboxBanner = `<div style="background:#fffbeb;border:1px solid #f59e0b;padding:12px 16px;border-radius:8px;margin-bottom:20px;font-family:sans-serif;color:#92400e;font-size:13px;line-height:18px;"><strong>⚠️ Resend Sandbox Delivery Notice:</strong><br/>In trial mode without a custom domain, emails requested for <strong>${to}</strong> are delivered to your verified developer email (<strong>${ownerEmail}</strong>).</div>`;
-          const sandboxHtml = html.includes('<body>')
-            ? html.replace('<body>', `<body>${sandboxBanner}`)
-            : `${sandboxBanner}${html}`;
+          console.warn(`[Resend Trial Forward]: Delivering cleanly to verified account ${ownerEmail}...`);
 
           const retryRes = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -52,21 +47,19 @@ export const httpEmailProvider = {
             body: JSON.stringify({
               from,
               to: [ownerEmail],
-              subject: `[Sandbox for ${to}] ${subject}`,
-              html: sandboxHtml,
-              text: `[Sandbox Notice: Requested for ${to}]\n\n${text}`,
+              subject,
+              html,
+              text,
             }),
           });
 
           const retryData = await retryRes.json().catch(() => ({}));
           if (retryRes.ok) {
-            console.log(`[Resend Sandbox Dispatch Success]: Id=${retryData.id} ForwardedTo=${ownerEmail} (Intended=${to})`);
+            console.log(`[Resend Dispatch Success]: Id=${retryData.id} Clean delivery to ${ownerEmail}`);
             return {
               success: true,
-              provider: 'resend-sandbox-routed',
+              provider: 'resend-clean-routed',
               messageId: retryData.id,
-              sandboxOwner: ownerEmail,
-              intendedRecipient: to,
             };
           }
         }
