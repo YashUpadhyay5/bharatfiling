@@ -10,6 +10,7 @@ import {
   verifyRazorpaySignature,
 } from '../services/paymentService.js';
 import { createAndDispatchNotification } from '../services/notification.service.js';
+import { ENV } from '../config/env.js';
 
 const router = express.Router();
 
@@ -196,6 +197,13 @@ router.post('/verify', authenticate, (req, res) => {
 // VERIFY UPI / AutoPay Payment & Register Mandate
 router.post('/verify-upi', optionalAuth, (req, res) => {
   try {
+    if (!ENV.ALLOW_SIMULATED_PAYMENTS) {
+      return res.status(503).json({
+        success: false,
+        message: 'Online payments are being enabled for this service. Please contact support to complete your order.',
+      });
+    }
+
     const { order_id } = req.body;
     let { upi_id = 'user@okhdfcbank', payment_mode = 'UPI_QR' } = req.body;
 

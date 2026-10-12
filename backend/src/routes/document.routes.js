@@ -6,7 +6,7 @@ import { db } from '../database/db.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import { upload, verifyUploadedFileSignature } from '../middleware/upload.js';
 import { ENV } from '../config/env.js';
-import { canAccessApplication, canAccessByApplicationId } from '../middleware/ownership.js';
+import { canAccessApplication, canAccessByApplicationId, publicDocument } from '../middleware/ownership.js';
 import { processDocumentOCR } from '../services/ocrPipeline.js';
 import { createAndDispatchNotification } from '../services/notification.service.js';
 
@@ -76,7 +76,6 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
     });
 
     const docId = `doc_${uuidv4().slice(0, 8)}`;
-    const relativeUrl = `/uploads/${file.filename}`;
 
     const newDoc = {
       id: docId,
@@ -86,7 +85,7 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
       original_name: file.originalname,
       file_name: file.filename,
       file_path: file.path,
-      file_url: relativeUrl,
+      file_url: `/api/v1/documents/${docId}/file`,
       mime_type: file.mimetype,
       file_size: file.size,
       status: (ocrResult.confidence < 0.6 || (ocrResult.mismatch_warnings && ocrResult.mismatch_warnings.length > 0)) ? 'FLAGGED_MISMATCH' : 'AI_CHECKED',
@@ -138,11 +137,34 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
     res.status(201).json({
       success: true,
       message: 'Document uploaded and verified by AI pipeline successfully.',
-      document: newDoc,
+      document: publicDocument(newDoc),
       ocr: ocrResult,
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Document upload failed.', error: err.message });
+  }
+});
+
+// Download / view a document (authenticated; owner, CA or admin only)
+router.get('/:id/file', authenticate, (req, res) => {
+  try {
+    const doc = db.getDocuments().find((d) => d.id === req.params.id);
+    if (!doc || (doc.user_id !== req.user.id && !canAccessByApplicationId(req.user, doc.application_id))) {
+      return res.status(404).json({ success: false, message: 'Document not found.' });
+    }
+    const fileName = path.basename(String(doc.file_name || ''));
+    const absolute = path.join(ENV.STORAGE_DIR, fileName);
+    if (!fileName || !isInsideStorageDir(absolute) || !fs.existsSync(absolute)) {
+      return res.status(404).json({ success: false, message: 'File not found.' });
+    }
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    return res.sendFile(absolute, {
+      headers: { 'Content-Type': doc.mime_type || 'application/octet-stream' },
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Failed to retrieve document.' });
   }
 });
 
@@ -156,7 +178,7 @@ router.get('/application/:appId', authenticate, (req, res) => {
     const docs = db.getDocuments().filter((d) => d.application_id === appId);
     res.json({
       success: true,
-      documents: docs,
+      documents: docs.map(publicDocument),
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to retrieve documents.', error: err.message });
@@ -225,7 +247,7 @@ router.put('/:id/status', authenticate, requireRole(['CA', 'ADMIN']), (req, res)
     res.json({
       success: true,
       message: `Document status updated to ${status}.`,
-      document: doc,
+      document: publicDocument(doc),
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Status update failed.', error: err.message });

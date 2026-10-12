@@ -506,10 +506,13 @@ router.post('/forgot-password/request-otp', async (req, res) => {
     const user = await UserModel.findByEmail(cleanEmail);
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        not_registered: true,
-        message: 'No BharatFiling account found with this email. Please create a new account.',
+      // Same response as for a registered address so the endpoint can't be used to discover
+      // which emails have accounts. No code is generated or sent.
+      return res.json({
+        success: true,
+        message: `If an account exists for ${cleanEmail}, a 6-digit recovery code has been sent.`,
+        txn_id: `txn_${cryptoService.generateSecureToken(12)}`,
+        cooldown_seconds: 60,
       });
     }
 
@@ -555,7 +558,7 @@ router.post('/forgot-password/request-otp', async (req, res) => {
 
     const successMessage = dispatchResult?.provider === 'resend-sandbox-routed'
       ? `A 6-digit recovery code has been dispatched! (In sandbox mode, check inbox of ${dispatchResult.sandboxOwner})`
-      : `A 6-digit recovery code has been sent to ${cleanEmail}.`;
+      : `If an account exists for ${cleanEmail}, a 6-digit recovery code has been sent.`;
 
     return res.json({
       success: true,

@@ -33,3 +33,10 @@ export const findApplication = (idOrNumber) =>
 /** Same as above but for documents / orders that carry an application_id. */
 export const canAccessByApplicationId = (user, applicationId) =>
   canAccessApplication(user, findApplication(applicationId));
+
+/** Document record without server-side storage details (absolute path / stored file name). */
+export const publicDocument = (doc) => {
+  if (!doc) return doc;
+  const { file_path, file_name, ...rest } = doc;
+  return rest;
+};

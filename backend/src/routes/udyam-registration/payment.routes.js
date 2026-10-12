@@ -5,6 +5,7 @@ import { optionalAuth } from '../../middleware/auth.js';
 import { GUEST_USER_ID } from '../../middleware/ownership.js';
 import { emitToCADesk } from '../../services/socket.service.js';
 import { createAndDispatchNotification } from '../../services/notification.service.js';
+import { ENV } from '../../config/env.js';
 
 const router = express.Router();
 
@@ -14,6 +15,13 @@ const router = express.Router();
  */
 router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => {
   try {
+    if (!ENV.ALLOW_SIMULATED_PAYMENTS) {
+      return res.status(503).json({
+        success: false,
+        message: 'Online payments are being enabled for this service. Please contact support to complete your order.',
+      });
+    }
+
     const { order_id, payment_id, payment_method, billing_info } = req.body;
 
     if (!order_id) {

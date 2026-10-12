@@ -54,6 +54,9 @@ export const ENV = {
   BREVO_API_KEY: process.env.BREVO_API_KEY || '',
   // Web API key of the Firebase project used for phone-OTP verification (restrict it in Google Cloud).
   FIREBASE_API_KEY: process.env.FIREBASE_API_KEY || '',
+  // Payment settlement endpoints currently trust the browser's "I paid" call (no gateway callback
+  // is wired up yet). They are therefore disabled in production unless explicitly enabled.
+  ALLOW_SIMULATED_PAYMENTS: process.env.ALLOW_SIMULATED_PAYMENTS === 'true' || !IS_PRODUCTION,
   // Optional: seed passwords for the demo ADMIN / CA accounts (never seeded in production without them).
   SEED_ADMIN_PASSWORD: process.env.SEED_ADMIN_PASSWORD || '',
 };

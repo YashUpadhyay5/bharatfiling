@@ -28,11 +28,21 @@ const app = express();
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
-// Security headers. CSP is left to the frontend host because the SPA relies on inline
-// Firebase / reCAPTCHA scripts; everything else (nosniff, frameguard, HSTS, ...) is on.
+// Security headers (nosniff, frameguard, HSTS, referrer-policy, ...)
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    // Non-breaking CSP directives only (a full script-src policy needs browser testing against
+    // Firebase / reCAPTCHA); these still block plugin content, <base> hijacking and clickjacking.
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        defaultSrc: helmet.contentSecurityPolicy.dangerouslyDisableDefaultSrc,
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        frameAncestors: ["'self'"],
+        formAction: ["'self'"],
+      },
+    },
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
@@ -94,19 +104,8 @@ app.use('/api/v1/auth/forgot-password/reset-password', otpVerifyLimiter);
 app.use('/api/v1/auth/forgot-password/phone-reset', otpVerifyLimiter);
 app.use('/api/v1/support/chat', makeLimiter(15, 60, 'Too many questions. Please try again shortly.'));
 
-// Serve static uploaded documents (random, unguessable file names - see middleware/upload.js)
-app.use(
-  '/uploads',
-  express.static(ENV.STORAGE_DIR, {
-    index: false,
-    dotfiles: 'deny',
-    setHeaders: (res) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('Content-Disposition', 'inline');
-      res.setHeader('Cache-Control', 'private, max-age=0, no-store');
-    },
-  })
-);
+// NOTE: uploaded KYC documents are NOT served statically. They are only available through
+// the authenticated GET /api/v1/documents/:id/file endpoint (owner / CA / admin).
 
 // Health Check
 app.get('/api/health', (req, res) => {

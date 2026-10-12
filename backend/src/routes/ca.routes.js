@@ -2,6 +2,7 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../database/db.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
+import { publicDocument } from '../middleware/ownership.js';
 import { emitToApplication, emitToCADesk, emitToUser } from '../services/socket.service.js';
 import { createAndDispatchNotification } from '../services/notification.service.js';
 
@@ -117,7 +118,7 @@ router.get('/cases/:id', (req, res) => {
           phone: customer?.phone,
         },
         profile,
-        documents: docs,
+        documents: docs.map(publicDocument),
         timeline,
         orders,
       },
@@ -132,6 +133,38 @@ router.post('/cases/:id/action', (req, res) => {
   try {
     const { id } = req.params;
     const { action_type, arn, gstin, certificate_url, note, document_id, clarification_text } = req.body;
+
+    // Government reference numbers are entered by the CA from the real portal response;
+    // the platform never invents ARN / GSTIN / SRN / CIN values.
+    const REFERENCE_PATTERN = /^[A-Za-z0-9/_-]{5,40}$/;
+    const cleanArn = typeof arn === 'string' ? arn.trim() : '';
+    const cleanGstin = typeof gstin === 'string' ? gstin.trim() : '';
+
+    if (action_type === 'SUBMIT_TO_PORTAL') {
+      if (!REFERENCE_PATTERN.test(cleanArn)) {
+        return res.status(400).json({
+          success: false,
+          message: 'A valid portal reference number (ARN / SRN / Acknowledgement No.) from the government portal is required.',
+        });
+      }
+    }
+    if (action_type === 'RECORD_GOVT_APPROVAL') {
+      if (!REFERENCE_PATTERN.test(cleanGstin)) {
+        return res.status(400).json({
+          success: false,
+          message: 'A valid registration number (GSTIN / CIN / LLPIN / Udyam No.) from the government portal is required.',
+        });
+      }
+    }
+    // certificate_url ends up in an <a href> shown to customers: allow only same-site paths or https URLs
+    if (
+      certificate_url !== undefined &&
+      certificate_url !== null &&
+      certificate_url !== '' &&
+      !(typeof certificate_url === 'string' && /^(\/(?!\/)|https:\/\/)[^\s<>"']*$/.test(certificate_url) && certificate_url.length <= 500)
+    ) {
+      return res.status(400).json({ success: false, message: 'certificate_url must be a relative path or an https URL.' });
+    }
 
     const apps = db.getApplications();
     const appIndex = apps.findIndex((a) => a.id === id || a.application_number === id);
@@ -202,33 +235,27 @@ router.post('/cases/:id/action', (req, res) => {
           });
         }
 
-        let defaultArn = `AA290826${Math.floor(1000000 + Math.random() * 9000000)}`;
-        let step2Title = `Step 2: Form REG-01 Filed on GST Portal (ARN: ${arn || defaultArn})`;
+        let step2Title = `Step 2: Form REG-01 Filed on GST Portal (ARN: ${cleanArn})`;
         let step2Desc = `Application officially transmitted to GST Portal. 15-digit statutory ARN generated. Transferred to Jurisdictional Tax Officer.`;
 
         if (moduleType === 'COMPANY') {
-          defaultArn = `MCA-SRN-T${Math.floor(10000000 + Math.random() * 90000000)}`;
-          step2Title = `Step 2: SPICe+ Dossier Filed on MCA Portal (SRN: ${arn || defaultArn})`;
+          step2Title = `Step 2: SPICe+ Dossier Filed on MCA Portal (SRN: ${cleanArn})`;
           step2Desc = `Incorporation dossier submitted to Ministry of Corporate Affairs. Service Request Number (SRN) generated. Transferred to Registrar of Companies.`;
         } else if (moduleType === 'ITR') {
-          defaultArn = `ITR-ACK-${Math.floor(1000000000 + Math.random() * 9000000000)}`;
-          step2Title = `Step 2: Return Filed on Income Tax E-filing Portal (Ack: ${arn || defaultArn})`;
+          step2Title = `Step 2: Return Filed on Income Tax E-filing Portal (Ack: ${cleanArn})`;
           step2Desc = `Statutory tax return transmitted to ITD portal. Centralized Acknowledgement Number generated.`;
         } else if (moduleType === 'TRADEMARK') {
-          defaultArn = `TM-APP-${Math.floor(1000000 + Math.random() * 9000000)}`;
-          step2Title = `Step 2: Form TM-A Filed on IP India Portal (Application No: ${arn || defaultArn})`;
+          step2Title = `Step 2: Form TM-A Filed on IP India Portal (Application No: ${cleanArn})`;
           step2Desc = `Trademark application submitted to Trade Marks Registry. Statutory Application Number generated.`;
         } else if (moduleType === 'LLP') {
-          defaultArn = `LLP-SRN-L${Math.floor(10000000 + Math.random() * 90000000)}`;
-          step2Title = `Step 2: Form FiLLiP Filed on MCA Portal (SRN: ${arn || defaultArn})`;
+          step2Title = `Step 2: Form FiLLiP Filed on MCA Portal (SRN: ${cleanArn})`;
           step2Desc = `LLP incorporation dossier filed with ROC. Service Request Number (SRN) generated.`;
         } else if (moduleType === 'UDYAM' || moduleType === 'MSME') {
-          defaultArn = `UDYAM-ACK-${Math.floor(1000000 + Math.random() * 9000000)}`;
-          step2Title = `Step 2: MSME Udyam Dossier Filed on National Portal (Ack: ${arn || defaultArn})`;
+          step2Title = `Step 2: MSME Udyam Dossier Filed on National Portal (Ack: ${cleanArn})`;
           step2Desc = `Udyam registration application prepared and submitted to Ministry of MSME portal. Statutory Acknowledgement Number generated.`;
         }
 
-        const genArn = arn || defaultArn;
+        const genArn = cleanArn;
         app.arn = genArn;
         app.arn_generated_at = new Date().toISOString();
         app.internal_status = 'GOVERNMENT_PROCESSING';
@@ -255,33 +282,27 @@ router.post('/cases/:id/action', (req, res) => {
           });
         }
 
-        let defaultGstin = '29AABCB1234F1Z9';
-        let step3Title = `Step 3: Government Approval Granted (GSTIN: ${gstin || defaultGstin})`;
+        let step3Title = `Step 3: Government Approval Granted (GSTIN: ${cleanGstin})`;
         let step3Desc = `Application approved by Jurisdictional Tax Officer. Unique 15-digit GSTIN allotted.`;
 
         if (moduleType === 'COMPANY') {
-          defaultGstin = `U72200KA2026PTC${Math.floor(100000 + Math.random() * 900000)}`;
-          step3Title = `Step 3: ROC Approval Granted (CIN: ${gstin || defaultGstin})`;
+          step3Title = `Step 3: ROC Approval Granted (CIN: ${cleanGstin})`;
           step3Desc = `Company incorporation approved by Registrar of Companies (ROC). Corporate Identity Number (CIN) allotted.`;
         } else if (moduleType === 'ITR') {
-          defaultGstin = `CPC/2026/INT/${Math.floor(1000000 + Math.random() * 9000000)}`;
           step3Title = `Step 3: CPC Intimation u/s 143(1) Approved`;
           step3Desc = `Return successfully processed by Centralized Processing Centre (CPC Bangalore). Refund / Nil liability determined.`;
         } else if (moduleType === 'TRADEMARK') {
-          defaultGstin = `TM-REG-${Math.floor(1000000 + Math.random() * 9000000)}`;
           step3Title = `Step 3: Trademark Registry Acceptance & Examination Passed`;
           step3Desc = `Form TM-A accepted by Examiner of Trade Marks and advertised in Trade Marks Journal.`;
         } else if (moduleType === 'LLP') {
-          defaultGstin = `LLPIN-AAA-${Math.floor(1000 + Math.random() * 9000)}`;
-          step3Title = `Step 3: ROC Approval Granted (LLPIN: ${gstin || defaultGstin})`;
+          step3Title = `Step 3: ROC Approval Granted (LLPIN: ${cleanGstin})`;
           step3Desc = `LLP incorporation approved by ROC. Limited Liability Partnership Identification Number allotted.`;
         } else if (moduleType === 'UDYAM' || moduleType === 'MSME') {
-          defaultGstin = `UDYAM-${(app.state || 'KR').slice(0, 2).toUpperCase()}-03-${Math.floor(1000000 + Math.random() * 9000000)}`;
-          step3Title = `Step 3: Udyam Registration Number Allotted (UDYAM: ${gstin || defaultGstin})`;
+          step3Title = `Step 3: Udyam Registration Number Allotted (UDYAM: ${cleanGstin})`;
           step3Desc = `MSME status approved. Permanent Udyam Registration Number issued by Ministry of MSME.`;
         }
 
-        const allottedGstin = gstin || defaultGstin;
+        const allottedGstin = cleanGstin;
         app.gstin = allottedGstin;
         app.approved_at = new Date().toISOString();
         app.internal_status = 'GOVERNMENT_APPROVED';
