@@ -111,7 +111,7 @@ export default function PaymentModal({
           particleCount: 120,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#155EEF', '#027A48', '#FF9933'],
+          colors: ['#111827', '#F26522', '#10B981'],
         });
 
         setTimeout(() => {
@@ -130,55 +130,55 @@ export default function PaymentModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#252B36]/60 backdrop-blur-xs">
-      <div className="bg-white rounded-xl max-w-xl w-full shadow-xl border border-[#E5E7EB] overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden relative">
         {/* Modal Header */}
-        <div className="p-5 bg-[#F8F9FB] border-b border-[#E5E7EB] flex items-center justify-between">
+        <div className="p-5 sm:p-6 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#EFF8FF] text-[#155EEF] flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[#111827] text-white flex items-center justify-center shadow-xs">
               {activeTab === 'autopay' ? (
-                <CreditCard className="w-5 h-5 text-[#155EEF]" />
+                <CreditCard className="w-5 h-5 text-amber-300" />
               ) : (
-                <QrCode className="w-5 h-5 text-[#155EEF]" />
+                <QrCode className="w-5 h-5 text-amber-300" />
               )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-[#252B36]">
+                <h3 className="text-base font-extrabold text-slate-900">
                   {activeTab === 'autopay' ? 'UPI AutoPay Setup' : 'Dynamic UPI QR Code'}
                 </h3>
-                <span className="text-[10px] font-semibold text-[#027A48] bg-[#ECFDF3] px-2 py-0.5 rounded border border-[#A6F4C5]">
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                   NPCI Certified
                 </span>
               </div>
-              <p className="text-xs text-[#667085]">
-                Subscription payment via UPI | Monthly fee: <strong className="text-[#252B36]">₹{order?.amount || 1769} INR</strong>
+              <p className="text-xs text-slate-500">
+                Subscription payment via UPI | Monthly fee: <strong className="text-slate-900">₹{order?.amount || 1769} INR</strong>
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white hover:bg-[#F8F9FB] text-[#667085] hover:text-[#252B36] border border-[#E5E7EB] flex items-center justify-center transition cursor-pointer"
+            className="w-8 h-8 rounded-full bg-slate-200/60 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-[#E5E7EB] bg-[#F8F9FB] p-1.5 gap-1.5">
+        <div className="flex border-b border-slate-100 bg-slate-50/40 p-1.5 gap-1.5">
           <button
             onClick={() => {
               setActiveTab('autopay');
               setErrorMessage('');
             }}
-            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'autopay'
-                ? 'bg-white text-[#155EEF] shadow-xs border border-[#E5E7EB]'
-                : 'text-[#667085] hover:text-[#252B36]'
+                ? 'bg-white text-[#111827] shadow-xs border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Smartphone className="w-4 h-4 text-[#155EEF]" />
+            <Smartphone className="w-4 h-4 text-emerald-600" />
             UPI AutoPay (Recommended)
           </button>
           <button
@@ -186,13 +186,13 @@ export default function PaymentModal({
               setActiveTab('qr');
               setErrorMessage('');
             }}
-            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'qr'
-                ? 'bg-white text-[#155EEF] shadow-xs border border-[#E5E7EB]'
-                : 'text-[#667085] hover:text-[#252B36]'
+                ? 'bg-white text-[#111827] shadow-xs border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <QrCode className="w-4 h-4 text-[#155EEF]" />
+            <QrCode className="w-4 h-4 text-[#F26522]" />
             Scan Dynamic QR
           </button>
         </div>
@@ -202,54 +202,54 @@ export default function PaymentModal({
           {isSuccess ? (
             /* Success State */
             <div className="text-center py-6 space-y-4">
-              <div className="w-14 h-14 rounded-full bg-[#ECFDF3] text-[#027A48] flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-8 h-8" />
+              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto animate-bounce">
+                <CheckCircle2 className="w-10 h-10" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-lg font-bold text-[#252B36]">Payment & Mandate Confirmed!</h4>
-                <p className="text-xs text-[#667085]">
-                  Your GST registration order <strong className="text-[#252B36]">#{order?.id}</strong> is active.
+                <h4 className="text-xl font-extrabold text-slate-900">Payment & Mandate Confirmed!</h4>
+                <p className="text-xs text-slate-600">
+                  Your GST registration order <strong className="text-slate-800">#{order?.id}</strong> is active.
                 </p>
               </div>
-              <div className="p-3 bg-[#F8F9FB] rounded-lg border border-[#E5E7EB] text-xs text-[#667085] inline-block">
-                Ref ID: <span className="font-mono font-bold text-[#252B36]">{transactionId}</span>
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 inline-block">
+                Ref ID: <span className="font-mono font-bold text-slate-800">{transactionId}</span>
               </div>
-              <div className="text-xs text-[#027A48] font-semibold flex items-center justify-center gap-1.5 pt-2">
+              <div className="text-xs text-emerald-700 font-semibold flex items-center justify-center gap-1.5 pt-2">
                 <Sparkles className="w-4 h-4" />
-                Redirecting to compliance dashboard...
+                Redirecting to Document Upload & Dossier Desk...
               </div>
             </div>
           ) : activeTab === 'autopay' ? (
-            /* TAB 1: UPI AutoPay Setup */
+            /* TAB 1: UPI AutoPay Setup (Matches Image 4) */
             <div className="space-y-4">
               {/* Mandate Details Card */}
-              <div className="bg-[#F8F9FB] rounded-lg p-4 border border-[#E5E7EB] space-y-2.5">
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#667085]">Subscription Plan</span>
-                  <span className="font-semibold text-[#252B36]">GST Registration + Monthly Filing</span>
+                  <span className="text-slate-500 font-medium">Subscription Plan</span>
+                  <span className="font-bold text-slate-900">GST Registration + Monthly Filing</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#667085]">Monthly Auto-Debit</span>
-                  <span className="font-bold text-[#155EEF] text-sm">₹{order?.amount || 1769} / month</span>
+                  <span className="text-slate-500 font-medium">Monthly Auto-Debit</span>
+                  <span className="font-extrabold text-[#111827] text-sm">₹{order?.amount || 1769} / month</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#667085]">Next Billing Date</span>
-                  <span className="font-semibold text-[#252B36]">1st of Next Month</span>
+                  <span className="text-slate-500 font-medium">Next Billing Date</span>
+                  <span className="font-semibold text-slate-700">1st of Next Month</span>
                 </div>
-                <div className="pt-2 border-t border-[#E5E7EB] flex items-center justify-between text-[11px] text-[#667085]">
+                <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500">
                   <span className="flex items-center gap-1">
-                    <Lock className="w-3.5 h-3.5 text-[#027A48]" /> NPCI e-Mandate Protection
+                    <Lock className="w-3.5 h-3.5 text-emerald-600" /> NPCI e-Mandate Protection
                   </span>
                   <button
                     onClick={() => setShowMandateInfo(!showMandateInfo)}
-                    className="text-[#155EEF] hover:underline flex items-center gap-0.5 font-semibold cursor-pointer"
+                    className="text-[#111827] hover:underline flex items-center gap-0.5 font-semibold cursor-pointer"
                   >
                     AutoPay FAQs {showMandateInfo ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                   </button>
                 </div>
 
                 {showMandateInfo && (
-                  <div className="pt-2 text-[11px] text-[#667085] border-t border-[#E5E7EB] space-y-1">
+                  <div className="pt-2 text-[11px] text-slate-600 border-t border-slate-100 space-y-1">
                     <p>• You can pause or cancel this mandate at any time directly from BharatFiling or inside your UPI app.</p>
                     <p>• Pre-debit SMS alert will be delivered 24 hours prior to any billing.</p>
                   </div>
@@ -258,7 +258,7 @@ export default function PaymentModal({
 
               {/* UPI ID Input */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-[#252B36]">
+                <label className="block text-xs font-bold text-slate-700">
                   UPI ID (VPA) <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -267,9 +267,9 @@ export default function PaymentModal({
                     value={upiId}
                     onChange={(e) => setUpiId(e.target.value)}
                     placeholder="e.g. yourname@paytm or 9876543210@ybl"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-white border border-[#E5E7EB] text-[#252B36] text-xs font-medium focus:border-[#155EEF] focus:outline-hidden"
+                    className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827]"
                   />
-                  <div className="absolute right-3 top-2.5 flex items-center gap-1 text-[11px] text-[#667085]">
+                  <div className="absolute right-3 top-3 flex items-center gap-1 text-[11px] text-slate-400 font-medium">
                     <span>@okaxis</span>
                     <span>@ybl</span>
                     <span>@paytm</span>
@@ -283,15 +283,15 @@ export default function PaymentModal({
                   type="checkbox"
                   checked={termsAgreed}
                   onChange={(e) => setTermsAgreed(e.target.checked)}
-                  className="mt-0.5 rounded border-[#E5E7EB] text-[#155EEF] focus:ring-[#155EEF]"
+                  className="mt-0.5 rounded border-slate-300 text-[#111827] focus:ring-[#111827]"
                 />
-                <span className="text-[11px] text-[#667085] leading-snug">
-                  By ticking this box, you agree that BharatFiling will automatically continue your monthly compliance plan until you cancel. You may cancel at any time directly from your UPI app.
+                <span className="text-[11px] text-slate-600 leading-snug">
+                  By ticking this box, you agree that BharatFiling will automatically continue your monthly subscription and charge the monthly fee until you cancel. You may cancel at any time to avoid future charges.
                 </span>
               </label>
 
               {errorMessage && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 font-medium">
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium">
                   {errorMessage}
                 </div>
               )}
@@ -301,7 +301,7 @@ export default function PaymentModal({
                 <button
                   onClick={() => handleVerifyPayment('AUTOPAY')}
                   disabled={isProcessing}
-                  className="w-full py-3 px-6 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  className="w-full py-3.5 px-6 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                 >
                   {isProcessing ? (
                     <>
@@ -316,12 +316,13 @@ export default function PaymentModal({
                   )}
                 </button>
 
+                {/* Subtle Demo Simulation */}
                 <button
                   type="button"
                   onClick={() => handleVerifyPayment('AUTOPAY')}
-                  className="w-full py-1.5 text-center text-[11px] font-medium text-[#667085] hover:text-[#155EEF] transition cursor-pointer"
+                  className="w-full py-2 text-center text-[11px] font-semibold text-slate-500 hover:text-[#111827] transition cursor-pointer"
                 >
-                  ⚡ Instant Demo Test (Simulate Payment)
+                  ⚡ Instant Demo Test (Bypass Bank Authentication)
                 </button>
               </div>
             </div>
@@ -329,48 +330,55 @@ export default function PaymentModal({
             /* TAB 2: Dynamic UPI QR Code */
             <div className="space-y-4 text-center">
               <div className="space-y-1">
-                <div className="text-2xl font-bold text-[#252B36]">
+                <div className="text-2xl font-black text-slate-900">
                   ₹{order?.amount || 1769}.00
                 </div>
-                <p className="text-xs text-[#667085]">
+                <p className="text-xs text-slate-500">
                   Scan with GPay, PhonePe, Paytm, BHIM, or any UPI App
                 </p>
               </div>
 
               {/* QR Container */}
-              <div className="relative inline-block p-4 bg-white rounded-xl border border-dashed border-[#E5E7EB]">
+              <div className="relative inline-block p-4 bg-white rounded-3xl border-2 border-dashed border-slate-300 shadow-inner">
                 {qrDataUrl ? (
                   <img
                     src={qrDataUrl}
                     alt="UPI Dynamic QR Code"
-                    className="w-52 h-52 mx-auto rounded-lg object-contain"
+                    className="w-56 h-56 mx-auto rounded-xl object-contain shadow-xs"
                   />
                 ) : (
-                  <div className="w-52 h-52 flex items-center justify-center bg-[#F8F9FB] rounded-lg">
-                    <RefreshCw className="w-6 h-6 animate-spin text-[#667085]" />
+                  <div className="w-56 h-56 flex items-center justify-center bg-slate-50 rounded-xl">
+                    <RefreshCw className="w-6 h-6 animate-spin text-slate-400" />
                   </div>
                 )}
+
+                {/* BharatFiling Shield in center */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1.5 rounded-full shadow-md border border-slate-200">
+                  <div className="w-7 h-7 rounded-full bg-[#111827] text-[#F26522] flex items-center justify-center font-black text-xs">
+                    BF
+                  </div>
+                </div>
               </div>
 
               {/* Expiry Timer */}
-              <div className="flex items-center justify-center gap-2 text-xs font-semibold text-[#B54708] bg-[#FEF0C7] py-1 px-3.5 rounded-md border border-[#FEDF89] w-fit mx-auto">
+              <div className="flex items-center justify-center gap-2 text-xs font-semibold text-amber-700 bg-amber-50 py-1.5 px-4 rounded-full border border-amber-200 w-fit mx-auto">
                 <Clock className="w-3.5 h-3.5" />
-                <span>Expires in: {formatTime(secondsLeft)}</span>
+                <span>QR Expires in: {formatTime(secondsLeft)}</span>
               </div>
 
               {/* Supported UPI Apps Strip */}
-              <div className="pt-2 border-t border-[#E5E7EB] flex items-center justify-center gap-4 text-xs font-semibold text-[#667085]">
-                <span className="text-[#252B36]">Google Pay</span>
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-4 text-xs font-bold text-slate-600">
+                <span className="text-slate-800">Google Pay</span>
                 <span>•</span>
-                <span className="text-[#252B36]">PhonePe</span>
+                <span className="text-purple-700">PhonePe</span>
                 <span>•</span>
-                <span className="text-[#252B36]">Paytm</span>
+                <span className="text-sky-600">Paytm</span>
                 <span>•</span>
-                <span className="text-[#252B36]">BHIM UPI</span>
+                <span className="text-emerald-700">BHIM UPI</span>
               </div>
 
               {errorMessage && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 font-medium">
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium">
                   {errorMessage}
                 </div>
               )}
@@ -380,16 +388,16 @@ export default function PaymentModal({
                 <button
                   onClick={() => handleVerifyPayment('UPI_QR')}
                   disabled={isProcessing}
-                  className="w-full py-3 px-6 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  className="w-full py-3.5 px-6 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                 >
                   {isProcessing ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      Verifying UPI Scan...
+                      Verifying UPI Network Scan...
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4 text-white" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       I have scanned & paid (Verify Now)
                     </>
                   )}
@@ -398,7 +406,7 @@ export default function PaymentModal({
                 <button
                   type="button"
                   onClick={() => handleVerifyPayment('UPI_QR')}
-                  className="w-full py-1.5 text-center text-[11px] font-medium text-[#667085] hover:text-[#155EEF] transition cursor-pointer"
+                  className="w-full py-1.5 text-center text-[11px] font-semibold text-slate-500 hover:text-[#111827] transition cursor-pointer"
                 >
                   ⚡ Instant Demo Test (Simulate Successful Scan)
                 </button>
@@ -408,11 +416,11 @@ export default function PaymentModal({
         </div>
 
         {/* Modal Footer Trust Bar */}
-        <div className="px-6 py-3 bg-[#F8F9FB] border-t border-[#E5E7EB] flex items-center justify-between text-[11px] text-[#667085]">
+        <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
           <div className="flex items-center gap-1.5 font-medium">
-            <ShieldCheck className="w-4 h-4 text-[#027A48]" /> 256-Bit Bank Grade Encryption
+            <ShieldCheck className="w-4 h-4 text-emerald-600" /> 256-Bit Bank Grade Encryption
           </div>
-          <span>NPCI Unified Payments Interface</span>
+          <span>CIN: U67190TN2014PTC096978</span>
         </div>
       </div>
     </div>

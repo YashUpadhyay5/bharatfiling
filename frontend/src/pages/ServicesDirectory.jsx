@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
+  Sparkles,
   Building2,
   Receipt,
   FileCheck2,
+  Calculator,
   Scale,
   Award,
   CheckCircle2,
   Zap,
   ShieldCheck,
-  Check,
 } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -60,19 +61,9 @@ export default function ServicesDirectory() {
       slug: 'gst',
       applyPath: '/apply/gst',
       price: '₹1,499 + GST',
-      badge: 'Statutory Filing',
+      badge: 'Most Popular',
       icon: FileCheck2,
-      desc: 'Complete Form REG-01 preparation with dedicated CA review and official REG-06 certificate issuance.',
-    },
-    {
-      title: 'Udyam / MSME Registration',
-      subtitle: 'Ministry of MSME Portal Allotment',
-      slug: 'udyam',
-      applyPath: '/apply/udyam',
-      price: '₹2,899 + GST',
-      badge: 'MSME License',
-      icon: Award,
-      desc: 'Instant Aadhaar verification, accurate 3-tier NIC classification, and official Udyam Certificate.',
+      desc: 'Complete Form REG-01 preparation with dedicated CA review and official REG-06 delivery.',
     },
     {
       title: 'Pvt Ltd Company Incorporation',
@@ -80,7 +71,7 @@ export default function ServicesDirectory() {
       slug: 'company-registration',
       applyPath: '/apply/company-registration',
       price: '₹4,999 + Govt Fees',
-      badge: 'Startup Formation',
+      badge: 'Startup Favorite',
       icon: Building2,
       desc: 'MCA RUN name approval, DIN, DSC, MOA/AOA drafting, and Certificate of Incorporation (COI).',
     },
@@ -90,9 +81,19 @@ export default function ServicesDirectory() {
       slug: 'income-tax',
       applyPath: '/apply/income-tax',
       price: 'From ₹999',
-      badge: 'Tax Advisory',
+      badge: 'Tax Season',
       icon: Receipt,
       desc: 'ITR-1 to ITR-4 filing, capital gains computation, AIS/26AS reconciliation, and ITR-V verification.',
+    },
+    {
+      title: 'Trademark Registration',
+      subtitle: 'IP India Form TM-A Protection',
+      slug: 'trademark',
+      applyPath: '/apply/trademark',
+      price: '₹1,999 + Govt Fees',
+      badge: 'Brand Protection',
+      icon: Award,
+      desc: 'Brand search report across 45 classes, advocate drafting, and TM Application Number allotment.',
     },
     {
       title: 'LLP Incorporation',
@@ -100,7 +101,7 @@ export default function ServicesDirectory() {
       slug: 'llp-registration',
       applyPath: '/apply/llp-registration',
       price: '₹3,999 + Govt Fees',
-      badge: 'Corporate Secretarial',
+      badge: 'Low Compliance',
       icon: Scale,
       desc: 'DPIN allotment, RUN-LLP name approval, custom LLP deed drafting, and LLPIN certificate.',
     },
@@ -124,175 +125,255 @@ export default function ServicesDirectory() {
           path: '/services/llp-registration',
           applyPath: '/apply/llp-registration',
           badge: 'Low Compliance',
-          desc: 'Setup an LLP with limited liability protection and lower compliance burden than a private company.',
+          desc: 'LLP agreement drafting, designated partner DPIN, and statutory ROC registration.',
           price: '₹3,999 + Govt Fees',
         },
         {
           title: 'One Person Company (OPC)',
           path: '/services/company-registration',
           applyPath: '/apply/company-registration',
-          badge: 'Solo Founder',
-          desc: 'Corporate structure for solo entrepreneurs with limited liability protection and single shareholder.',
+          badge: 'Solo Founders',
+          desc: 'Ideal for solo entrepreneurs looking for corporate status, limited liability, and credibility.',
           price: '₹4,499 + Govt Fees',
-        },
-        {
-          title: 'Partnership Firm Registration',
-          path: '/services/company-registration',
-          applyPath: '/apply/company-registration',
-          badge: 'Traditional Firm',
-          desc: 'Drafting of formal Partnership Deed, notary notarization, and ROF portal registration.',
-          price: '₹2,499 + Stamp Duty',
-        },
-        {
-          title: 'Section 8 Non-Profit Company',
-          path: '/services/company-registration',
-          applyPath: '/apply/company-registration',
-          badge: 'NGO & Trust',
-          desc: 'Incorporate a non-profit organization under Section 8 of the Companies Act with 12A & 80G tax exemptions.',
-          price: '₹8,999 + Govt Fees',
         },
       ],
     },
     {
-      category: 'Taxation, GST & Accounting',
+      category: 'Chartered Accountant & Direct Tax',
       icon: Receipt,
+      items: [
+        {
+          title: 'Business & Professional ITR Filing',
+          path: '/services/income-tax',
+          applyPath: '/apply/income-tax',
+          badge: 'Tax Season',
+          desc: 'ITR-3, ITR-4 (Presumptive 44AD/ADA) filed with expert tax calculation and deduction optimization.',
+          price: 'From ₹999',
+        },
+        {
+          title: 'Corporate Tax Audit (Section 44AB)',
+          path: '/services/income-tax',
+          applyPath: '/apply/income-tax',
+          badge: 'CA Certified',
+          desc: 'Complete tax audit preparation, Form 3CD reporting, and statutory filing by certified CAs.',
+          price: 'From ₹7,999',
+        },
+        {
+          title: 'TDS & TCS Quarterly Returns',
+          path: '/services/income-tax',
+          applyPath: '/apply/income-tax',
+          badge: 'Statutory',
+          desc: 'Form 24Q, 26Q, and 27Q quarterly return preparation with Form 16/16A generation.',
+          price: 'From ₹1,499/qtr',
+        },
+      ],
+    },
+    {
+      category: 'Goods & Services Tax (GST)',
+      icon: FileCheck2,
       items: [
         {
           title: 'GST Registration Online',
           path: '/services/gst-registration',
           applyPath: '/apply/gst',
-          badge: 'Statutory License',
-          desc: 'New GST number allotment for proprietorships, partnerships, LLPs, and companies with CA review.',
+          badge: 'Fast-Track',
+          desc: 'End-to-end registration with AI document OCR and dedicated CA filing across all 36 States & UTs.',
           price: '₹1,499 + GST',
         },
         {
-          title: 'GST Return Filing (GSTR-1 & 3B)',
+          title: 'GSTR-1 & GSTR-3B Monthly Returns',
           path: '/services/gst-return',
-          applyPath: '/apply/gst-return',
-          badge: 'Monthly / Quarterly',
-          desc: 'Automated 2B Input Tax Credit reconciliation, sales ledger reconciliation, and zero penalty filing.',
-          price: '₹999 / month',
+          applyPath: '/apply/gst',
+          badge: 'Monthly Plan',
+          desc: 'Monthly return filing with automated GSTR-2B input tax credit reconciliation and zero penalty guarantee.',
+          price: 'From ₹799/mo',
         },
         {
-          title: 'Income Tax Return (ITR) Filing',
-          path: '/services/income-tax',
-          applyPath: '/apply/income-tax',
-          badge: 'Direct Tax',
-          desc: 'Comprehensive personal & business ITR computation with AIS/26AS tax credit reconciliation.',
-          price: 'From ₹999',
-        },
-        {
-          title: 'Virtual CFO & Bookkeeping',
-          path: '/services/legal',
-          applyPath: '/apply/legal',
-          badge: 'Full Operations',
-          desc: 'Full-stack bookkeeping on Tally/Zoho, monthly P&L and Balance Sheet, and payroll TDS deductions.',
-          price: '₹2,999 / month',
+          title: 'GST Annual Return (GSTR-9 & 9C)',
+          path: '/services/gst-return',
+          applyPath: '/apply/gst',
+          badge: 'Annual Audit',
+          desc: 'Comprehensive annual compliance audit and reconciliation to avoid scrutiny notices.',
+          price: 'From ₹2,999',
         },
       ],
     },
     {
-      category: 'Intellectual Property & Trademarks',
+      category: 'Accounting & Virtual CFO',
+      icon: Calculator,
+      items: [
+        {
+          title: 'Monthly Bookkeeping & Accounting',
+          path: '/services/legal',
+          badge: 'Tally & Zoho',
+          desc: 'Full ledger bookkeeping, vendor reconciliations, and expense management.',
+          price: 'From ₹2,999/mo',
+        },
+        {
+          title: 'Monthly P&L and Balance Sheet',
+          path: '/services/legal',
+          badge: 'Management MIS',
+          desc: 'Periodic financial statements, cash flow reviews, and investor-ready reporting.',
+          price: 'Included in CFO',
+        },
+        {
+          title: 'Payroll & Statutory Deductions',
+          path: '/services/legal',
+          badge: 'PF, ESIC & PT',
+          desc: 'Monthly payroll processing, payslip distribution, and provident fund compliances.',
+          price: 'From ₹1,999/mo',
+        },
+      ],
+    },
+    {
+      category: 'MCA ROC & Secretarial Compliance',
+      icon: Scale,
+      items: [
+        {
+          title: 'Annual ROC Filing (AOC-4 & MGT-7)',
+          path: '/services/llp-registration',
+          applyPath: '/apply/llp-registration',
+          badge: 'Mandatory',
+          desc: 'Annual filing of audited financial statements and annual returns with Ministry of Corporate Affairs.',
+          price: 'From ₹3,499/yr',
+        },
+        {
+          title: 'Director KYC (DIR-3 KYC)',
+          path: '/services/llp-registration',
+          applyPath: '/apply/llp-registration',
+          badge: 'Annual',
+          desc: 'Annual digital KYC filing for all active DIN holders to avoid ₹5,000 government penalty.',
+          price: 'From ₹499/dir',
+        },
+        {
+          title: 'Change in Directors / Registered Office',
+          path: '/services/llp-registration',
+          applyPath: '/apply/llp-registration',
+          badge: 'ROC Filing',
+          desc: 'Drafting board resolutions, filing Form DIR-12 or INC-22 on MCA portal.',
+          price: 'From ₹1,999',
+        },
+      ],
+    },
+    {
+      category: 'Trademark & Legal Contracts',
       icon: Award,
       items: [
         {
-          title: 'Trademark Registration (TM)',
+          title: 'Trademark Registration & IPR',
           path: '/services/trademark',
           applyPath: '/apply/trademark',
           badge: 'Brand Protection',
-          desc: 'Search report across 45 Nice classes, advocate drafting of Form TM-A, and TM number allotment.',
+          desc: 'Brand name, logo, and slogan search, Nice classification, drafting TM-A by IP Advocates.',
           price: '₹1,999 + Govt Fees',
         },
         {
-          title: 'Trademark Objection Reply',
-          path: '/services/trademark',
-          applyPath: '/apply/trademark',
-          badge: 'Legal Representation',
-          desc: 'Drafting professional legal response to Examination Reports issued by the Trademark Registrar.',
-          price: '₹2,499',
+          title: 'Founder Agreements & NDAs',
+          path: '/services/legal',
+          badge: 'Legal Drafting',
+          desc: 'Custom drafted co-founder equity agreements, employee contracts, and non-disclosure agreements.',
+          price: 'From ₹2,499',
         },
         {
-          title: 'Copyright Registration',
+          title: 'Trademark Hearing & Examination Reply',
           path: '/services/trademark',
           applyPath: '/apply/trademark',
-          badge: 'Creative IP',
-          desc: 'Protect original artistic, musical, literary works, and computer software source code.',
-          price: '₹3,499 + Govt Fees',
+          badge: 'Advocate Support',
+          desc: 'Drafting replies to Trademark Examination objections and Advocate appearance at hearings.',
+          price: 'From ₹2,999',
         },
       ],
     },
   ];
 
   return (
-    <div className="min-h-screen bg-white font-sans flex flex-col">
-      <Breadcrumbs items={[{ label: 'Services Directory' }]} />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-12">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-2">
-          <span className="text-xs font-bold text-[#155EEF] uppercase tracking-wider">
-            Comprehensive Statutory Catalog
-          </span>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#252B36] tracking-tight">
-            Corporate, Taxation & Compliance Services
+    <div className="min-h-screen bg-slate-50 font-sans">
+      <Breadcrumbs items={[{ label: 'All Services' }]} />
+      <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
+        {/* Top Header */}
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-xs font-bold shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Full-Stack Statutory & Compliance Directory</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            All CA, Finance & Legal Services
           </h1>
-          <p className="text-sm text-[#667085] leading-relaxed">
-            Every statutory filing is reviewed and certified by licensed Chartered Accountants. Transparent fixed pricing with zero hidden costs.
+          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">
+            Explore our end-to-end corporate, direct tax, and secretarial catalog. Every statutory filing is reviewed and certified by licensed Chartered Accountants.
           </p>
         </div>
 
-        {/* Fast-Track 3-Screen Statutory Filings Grid */}
-        <div className="bg-[#F8F9FB] rounded-xl p-6 sm:p-8 border border-[#E5E7EB] space-y-5">
-          <div className="space-y-1">
-            <span className="text-xs font-semibold text-[#155EEF] uppercase tracking-wider">Fast-Track Setup</span>
-            <h2 className="text-lg sm:text-xl font-bold text-[#252B36]">
-              Instant Statutory Registrations (3-Screen Application)
-            </h2>
+        {/* Professional Light-Themed Highlight Section: Fast-Track Statutory Filings */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 mb-2">
+                <Zap className="w-3.5 h-3.5 text-emerald-600" /> Fast-Track Statutory Registrations
+              </div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                Start a New Statutory Filing (3-Minute Setup)
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Choose a core statutory service to start the isolated 3-screen registration pipeline with dedicated CA review and live portal tracking.
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {fastTrackFilings.map((filing, fIdx) => {
               const IconComp = filing.icon;
+              const isAccentBadge =
+                filing.badge === 'Most Popular' || filing.badge === 'Startup Favorite';
               return (
                 <div
                   key={fIdx}
-                  className="bg-white border border-[#E5E7EB] hover:border-[#155EEF] rounded-xl p-5 flex flex-col justify-between transition-colors shadow-xs group"
+                  className="bg-white hover:bg-slate-50/50 border border-slate-200/90 hover:border-[#111827] rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-lg group shadow-xs relative"
                 >
+                  {/* Subtle Hairline Top Accent on Hover */}
+                  <div className="absolute inset-x-6 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#111827] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-full"></div>
+
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="w-8 h-8 rounded-lg bg-[#EFF8FF] text-[#155EEF] flex items-center justify-center border border-[#D1E9FF]">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-[#111827] text-[#111827] group-hover:text-white flex items-center justify-center border border-slate-200 transition-colors duration-200">
                         <IconComp className="w-4 h-4" />
                       </div>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#F8F9FB] text-[#667085] border border-[#E5E7EB]">
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          isAccentBadge
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : 'bg-slate-100 text-slate-700 border-slate-200'
+                        }`}
+                      >
                         {filing.badge}
                       </span>
                     </div>
 
                     <div>
-                      <h3 className="font-bold text-sm text-[#252B36] group-hover:text-[#155EEF] transition-colors leading-snug">
+                      <h3 className="font-extrabold text-sm text-slate-900 group-hover:text-[#111827] transition-colors leading-snug">
                         {filing.title}
                       </h3>
-                      <p className="text-[11px] text-[#667085] mt-0.5">
+                      <p className="text-[11px] font-medium text-slate-500 mt-0.5">
                         {filing.subtitle}
                       </p>
                     </div>
 
-                    <p className="text-xs text-[#667085] leading-relaxed">
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       {filing.desc}
                     </p>
                   </div>
 
-                  <div className="pt-4 mt-4 border-t border-[#E5E7EB] space-y-2">
-                    <div className="text-xs font-extrabold text-[#252B36]">
+                  <div className="pt-4 mt-4 border-t border-slate-100 space-y-2.5">
+                    <div className="text-xs font-black text-slate-900">
                       {filing.price}
                     </div>
                     <button
                       type="button"
                       onClick={() => handleSelectService({ ...filing, path: filing.applyPath }, true)}
-                      className="w-full py-2 px-3 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 px-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <span>Apply Online</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -302,64 +383,68 @@ export default function ServicesDirectory() {
         </div>
 
         {/* Detailed Categories Catalog */}
-        <div className="space-y-10">
+        <div className="space-y-12">
           {serviceCategories.map((cat, idx) => {
             const IconComp = cat.icon;
             return (
               <div key={idx} className="space-y-4">
-                <div className="flex items-center gap-2.5 border-b border-[#E5E7EB] pb-3">
-                  <div className="w-7 h-7 rounded-lg bg-[#EFF8FF] text-[#155EEF] flex items-center justify-center border border-[#D1E9FF]">
+                <div className="flex items-center gap-2.5 border-b border-slate-200 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#111827] text-white flex items-center justify-center">
                     <IconComp className="w-4 h-4" />
                   </div>
-                  <h2 className="text-base sm:text-lg font-bold text-[#252B36]">
+                  <h2 className="text-lg font-bold text-slate-900">
                     {cat.category}
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {cat.items.map((item, itemIdx) => (
                     <div
                       key={itemIdx}
-                      className="p-5 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#155EEF] transition-colors flex flex-col justify-between shadow-xs"
+                      className="p-6 rounded-2xl bg-white border border-slate-200/90 hover:border-[#111827] hover:shadow-lg transition-all duration-200 flex flex-col justify-between relative group shadow-xs"
                     >
-                      <div className="space-y-2.5">
+                      {/* Subtle Hairline Top Accent on Hover */}
+                      <div className="absolute inset-x-6 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#111827] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-full"></div>
+
+                      <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#EFF8FF] text-[#155EEF] border border-[#D1E9FF]">
+                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-[#111827] border border-slate-200">
                             {item.badge}
                           </span>
-                          <span className="text-xs font-bold text-[#252B36]">{item.price}</span>
+                          <span className="text-xs font-black text-slate-900">{item.price}</span>
                         </div>
-                        <h3 className="font-bold text-sm text-[#252B36] hover:text-[#155EEF] transition-colors">{item.title}</h3>
-                        <p className="text-xs text-[#667085] leading-relaxed">{item.desc}</p>
+                        <h3 className="font-extrabold text-base text-slate-900 group-hover:text-[#111827] transition-colors">{item.title}</h3>
+                        <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
                       </div>
 
-                      <div className="pt-4 mt-4 border-t border-[#E5E7EB] flex items-center gap-2">
+                      <div className="pt-5 mt-4 border-t border-slate-100 space-y-2">
                         {item.applyPath ? (
-                          <>
+                          <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => handleSelectService(item, true)}
-                              className="flex-1 py-2 px-3 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-xs"
+                              className="flex-1 py-2 px-3 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs hover:shadow-md"
                             >
-                              <span>Apply (3 Steps)</span>
+                              <span>Apply Online (3 Steps)</span>
                               <ArrowRight className="w-3.5 h-3.5" />
                             </button>
                             <button
                               type="button"
                               onClick={() => handleSelectService(item, false)}
-                              className="px-3 py-2 rounded-lg bg-[#F8F9FB] hover:bg-white text-[#252B36] border border-[#E5E7EB] text-xs font-semibold transition-colors cursor-pointer"
+                              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
+                              title="View Overview & Details"
                             >
                               Details
                             </button>
-                          </>
+                          </div>
                         ) : (
                           <button
                             type="button"
                             onClick={() => handleSelectService(item, false)}
-                            className="w-full text-xs font-semibold text-[#155EEF] hover:underline flex items-center justify-between cursor-pointer py-1"
+                            className="w-full text-xs font-bold text-[#111827] hover:text-slate-900 flex items-center justify-between group cursor-pointer py-1.5 px-1 transition"
                           >
-                            <span>View Details & Consult CA</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
+                            <span>View Service & Consult CA</span>
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
                           </button>
                         )}
                       </div>
@@ -371,19 +456,19 @@ export default function ServicesDirectory() {
           })}
         </div>
 
-        {/* Trust Guarantees */}
-        <div className="pt-6 pb-2 flex flex-wrap items-center justify-center gap-6 text-xs text-[#667085] border-t border-[#E5E7EB] max-w-3xl mx-auto">
+        {/* Trust Guarantees Strip */}
+        <div className="pt-8 pb-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 border-t border-slate-200 max-w-3xl mx-auto">
           <div className="flex items-center gap-1.5 font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[#027A48]" /> 40+ CA & Legal Services
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 40+ CA & Legal Services
           </div>
           <div className="flex items-center gap-1.5 font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[#027A48]" /> 100% Online & Paperless
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Online & Paperless
           </div>
           <div className="flex items-center gap-1.5 font-medium">
-            <CheckCircle2 className="w-4 h-4 text-[#027A48]" /> Licensed CA & Advocate Review
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Licensed CA & Advocate Oversight
           </div>
           <div className="flex items-center gap-1.5 font-medium">
-            <ShieldCheck className="w-4 h-4 text-[#027A48]" /> Bank-Grade 256-Bit Security
+            <ShieldCheck className="w-4 h-4 text-emerald-600" /> Bank-Grade 256-Bit Security
           </div>
         </div>
       </div>

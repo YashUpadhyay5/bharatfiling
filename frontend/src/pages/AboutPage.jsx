@@ -1,57 +1,57 @@
 import React from 'react';
-import { ShieldCheck, Award, Users, Building2, Lock } from 'lucide-react';
+import { ShieldCheck, Award, Users, Sparkles, Building2, Lock } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-slate-50 font-sans">
       <Breadcrumbs items={[{ label: 'About Us' }]} />
-      <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-10">
-        <div className="text-center space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#155EEF] bg-[#EFF8FF] px-2.5 py-0.5 rounded border border-[#D1E9FF]">
+      <div className="py-14 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-12">
+        <div className="text-center space-y-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
             About BharatFiling
           </span>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#252B36] tracking-tight">
-            Technology-Driven Corporate & Taxation Platform
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
+            Pioneering AI + CA Compliance in India
           </h1>
-          <p className="text-sm text-[#667085] max-w-2xl mx-auto leading-relaxed">
-            Building India’s trusted corporate compliance, taxation, and business registration operating system.
+          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            We are building India's most trusted corporate compliance and taxation operating system.
           </p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 sm:p-10 border border-[#E5E7EB] shadow-xs space-y-8 text-xs sm:text-sm text-[#252B36] leading-relaxed">
-          <div className="space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold text-[#252B36]">Our Operating Philosophy</h2>
-            <p className="text-[#667085]">
-              Starting and managing a business in India should not require deciphering complex legal terminology or relying on unverified middlemen. At BharatFiling, we combine smart document technology with qualified human professionals to make statutory compliance seamless and completely transparent.
+        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-md space-y-8 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-slate-900">Our Core Philosophy</h2>
+            <p>
+              Starting and running a business in India should not require deciphering thousands of pages of tax statutes or dealing with opaque middlemen. At BharatFiling, we believe that <strong>technology should do the heavy lifting of extraction and validation, while licensed Chartered Accountants and Advocates make the final statutory decisions</strong>.
             </p>
-            <p className="text-[#667085]">
-              We believe in professional accountability. Our intelligent systems assist with document verification and data formatting, while licensed Chartered Accountants and Corporate Advocates prepare, review, and certify every statutory application.
+            <p>
+              We reject the premise that AI should replace professional accountability. In our system, AI inspects documents, classifies electricity bills, extracts PAN and Aadhaar records, and flags name discrepancies. Every filing is then audited, prepared, and signed off by an experienced CA.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-4 border-t border-[#E5E7EB]">
-            <div className="p-4 rounded-lg bg-[#F8F9FB] border border-[#E5E7EB] space-y-2">
-              <ShieldCheck className="w-5 h-5 text-[#155EEF]" />
-              <div className="font-bold text-[#252B36] text-sm">Security & Privacy</div>
-              <p className="text-[#667085] text-xs leading-relaxed">
-                Bank-grade 256-bit encryption. Strict confidentiality policies and encrypted storage for all business identification records.
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-slate-100">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <ShieldCheck className="w-6 h-6 text-emerald-600" />
+              <div className="font-bold text-slate-900 text-sm">Security & Privacy</div>
+              <p className="text-slate-500 text-xs">
+                Bank-grade 256-bit encryption. Identity numbers like PAN and Aadhaar are masked to ensure complete confidentiality.
               </p>
             </div>
 
-            <div className="p-4 rounded-lg bg-[#F8F9FB] border border-[#E5E7EB] space-y-2">
-              <Award className="w-5 h-5 text-[#155EEF]" />
-              <div className="font-bold text-[#252B36] text-sm">Qualified Professionals</div>
-              <p className="text-[#667085] text-xs leading-relaxed">
-                All filings are audited and submitted by verified members of the Institute of Chartered Accountants of India (ICAI).
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <Award className="w-6 h-6 text-blue-600" />
+              <div className="font-bold text-slate-900 text-sm">Licensed Experts</div>
+              <p className="text-slate-500 text-xs">
+                Our panel consists of senior Fellows of the Institute of Chartered Accountants of India (ICAI) and Bar Council advocates.
               </p>
             </div>
 
-            <div className="p-4 rounded-lg bg-[#F8F9FB] border border-[#E5E7EB] space-y-2">
-              <Building2 className="w-5 h-5 text-[#155EEF]" />
-              <div className="font-bold text-[#252B36] text-sm">Master Profile Vault</div>
-              <p className="text-[#667085] text-xs leading-relaxed">
-                Verify your customer details once. Never enter duplicate business address or identity details for future filings.
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <Sparkles className="w-6 h-6 text-amber-600" />
+              <div className="font-bold text-slate-900 text-sm">Master Profile Model</div>
+              <p className="text-slate-500 text-xs">
+                Verify your customer information once. Never fill the same address or identity details twice across any future compliance service.
               </p>
             </div>
           </div>

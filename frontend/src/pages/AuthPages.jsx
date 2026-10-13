@@ -8,6 +8,7 @@ import {
   Mail,
   Phone,
   User,
+  Sparkles,
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
@@ -15,7 +16,7 @@ import {
   RotateCcw,
   ArrowLeft,
   Smartphone,
-  Check,
+  MessageSquare,
 } from 'lucide-react';
 
 export default function AuthPages({ defaultMode = 'login' }) {
@@ -33,7 +34,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
   // Register form state
   const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('7668976193');
   const [email, setEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regStep, setRegStep] = useState(1); // 1: details, 2: OTP
@@ -45,7 +46,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
   // Forgot password state
   const [fpMethod, setFpMethod] = useState('phone'); // 'phone' | 'email'
-  const [forgotPhone, setForgotPhone] = useState('');
+  const [forgotPhone, setForgotPhone] = useState('7668976193');
   const [fpPhoneConfirmation, setFpPhoneConfirmation] = useState(null);
   const [forgotEmail, setForgotEmail] = useState('');
   const [fpStep, setFpStep] = useState(1); // 1: email/phone, 2: OTP/reset
@@ -120,11 +121,22 @@ export default function AuthPages({ defaultMode = 'login' }) {
     return () => clearInterval(timer);
   }, [phoneLoginCooldown]);
 
-  // --- LOGIN: PASSWORD SUBMIT ---
+  if (authLoading || (isAuthenticated && user)) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-9 h-9 border-4 border-slate-200 border-t-[#111827] rounded-full animate-spin" />
+          <p className="text-xs font-semibold text-slate-500">Redirecting to your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- LOGIN SUBMIT ---
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     if (!identifier || !password) {
-      showError('Please enter your email/mobile and password.');
+      showError('Please enter both Email/Phone and Password.');
       return;
     }
 
@@ -132,21 +144,21 @@ export default function AuthPages({ defaultMode = 'login' }) {
     try {
       const res = await login(identifier, password);
       if (res.success) {
-        showSuccess('Welcome back to BharatFiling!');
-        if (res.user?.role === 'CA') navigate('/ca/dashboard');
-        else if (res.user?.role === 'ADMIN') navigate('/admin');
+        showSuccess('Welcome back! Signed in successfully.');
+        if (res.user.role === 'CA') navigate('/ca/dashboard');
+        else if (res.user.role === 'ADMIN') navigate('/admin');
         else navigate(from);
       }
     } catch (err) {
-      showError(err.message || 'Login failed. Please verify your credentials.');
+      showError(err.message || 'Login failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
   };
 
-  // --- LOGIN: PHONE OTP (FIREBASE) STEP 1 ---
+  // --- PHONE LOGIN: REQUEST SMS OTP ---
   const handlePhoneLoginRequestOtp = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
+    e.preventDefault();
     const cleanDigits = phoneLoginMobile.replace(/\D/g, '');
     if (cleanDigits.length < 10) {
       showError('Please enter a valid 10-digit mobile number.');
@@ -161,34 +173,33 @@ export default function AuthPages({ defaultMode = 'login' }) {
       setPhoneLoginCooldown(60);
       showSuccess(`SMS OTP sent to +91 ${cleanDigits.slice(-10)} via Firebase!`);
     } catch (err) {
-      console.error('Firebase Login OTP Error:', err);
-      showError(err.message || 'Failed to dispatch SMS OTP. Please use Password login.');
+      console.error('Phone login OTP error:', err);
+      showError(err.message || 'Failed to dispatch SMS OTP. Please try password login.');
     } finally {
       setLoading(false);
     }
   };
 
-  // --- LOGIN: PHONE OTP (FIREBASE) STEP 2 ---
+  // --- PHONE LOGIN: VERIFY SMS OTP ---
   const handlePhoneLoginVerifyOtp = async (e) => {
     e.preventDefault();
     if (!phoneLoginOtp || phoneLoginOtp.trim().length !== 6) {
-      showError('Please enter the 6-digit OTP received via SMS.');
+      showError('Please enter the 6-digit code received on your phone.');
       return;
     }
 
     setLoading(true);
     try {
       if (!phoneLoginConfirmation) {
-        throw new Error('OTP session expired. Please request a new code.');
+        throw new Error('Verification session expired. Please request a new OTP.');
       }
       const userCredential = await phoneLoginConfirmation.confirm(phoneLoginOtp.trim());
       const idToken = await userCredential.user.getIdToken();
       const res = await loginWithPhone(idToken);
-
       if (res.success) {
-        showSuccess('Mobile authenticated successfully!');
-        if (res.user?.role === 'CA') navigate('/ca/dashboard');
-        else if (res.user?.role === 'ADMIN') navigate('/admin');
+        showSuccess('Mobile login successful! Welcome back.');
+        if (res.user.role === 'CA') navigate('/ca/dashboard');
+        else if (res.user.role === 'ADMIN') navigate('/admin');
         else navigate(from);
       }
     } catch (err) {
@@ -199,27 +210,35 @@ export default function AuthPages({ defaultMode = 'login' }) {
         setRegStep(1);
         showError(err.message || 'Mobile number not registered. Please create an account.');
       } else {
-        showError(err.message || 'Invalid SMS OTP. Please check the code.');
+        showError(err.message || 'Failed to sign in with SMS OTP.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // --- REGISTER: METHOD (PHONE) ---
+  // --- REGISTER: SEND PHONE SMS OTP (FIREBASE) ---
   const handleRegisterSendPhoneOtp = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!fullName || !email || !phone || !regPassword) {
-      showError('Please fill in all registration fields first.');
+      showError('Please fill in all mandatory registration fields.');
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      showError('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      showError('Please enter a valid 10-digit Indian mobile number.');
+      return;
+    }
+
     if (regPassword.length < 6) {
       showError('Password must be at least 6 characters.');
-      return;
-    }
-    const cleanDigits = phone.replace(/\D/g, '');
-    if (cleanDigits.length < 10) {
-      showError('Please enter a valid 10-digit mobile number.');
       return;
     }
 
@@ -230,23 +249,29 @@ export default function AuthPages({ defaultMode = 'login' }) {
       setRegMethod('phone');
       setRegStep(2);
       setRegCooldown(60);
-      showSuccess(`SMS OTP dispatched to +91 ${cleanDigits.slice(-10)} via Firebase!`);
+      showSuccess(`SMS OTP sent to +91 ${cleanPhone.slice(-10)} via Firebase!`);
     } catch (err) {
-      console.error('Firebase Register OTP Error:', err);
-      showError(err.message || 'SMS dispatch failed. Trying Email verification instead.');
-      handleRegisterRequestOtp(e);
+      console.error('Firebase Phone OTP error:', err);
+      showError(err.message || 'Failed to send SMS OTP. Please try Email OTP instead.');
     } finally {
       setLoading(false);
     }
   };
 
-  // --- REGISTER: METHOD (EMAIL) ---
+  // --- REGISTER STEP 1: REQUEST EMAIL OTP ---
   const handleRegisterRequestOtp = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
+    e.preventDefault();
     if (!fullName || !email || !phone || !regPassword) {
-      showError('Please fill in all registration fields.');
+      showError('Please fill in all mandatory registration fields.');
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      showError('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+
     if (regPassword.length < 6) {
       showError('Password must be at least 6 characters.');
       return;
@@ -254,11 +279,10 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
     setLoading(true);
     try {
-      const cleanPhone = phone.replace(/\D/g, '');
       const res = await requestRegisterOtp({
         full_name: fullName,
         email,
-        phone: cleanPhone,
+        phone,
         password: regPassword,
       });
 
@@ -267,16 +291,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
         setRegMethod('email');
         setRegStep(2);
         setRegCooldown(res.cooldown_seconds || 60);
-        showSuccess(res.message || 'Verification code sent to your email.');
+        showSuccess(res.message || 'Verification code sent to your email!');
       }
     } catch (err) {
-      showError(err.message || 'Failed to request registration code.');
+      showError(err.message || 'Failed to send verification code.');
     } finally {
       setLoading(false);
     }
   };
 
-  // --- REGISTER STEP 2: VERIFY OTP ---
+  // --- REGISTER STEP 2: VERIFY OTP (PHONE OR EMAIL) ---
   const handleRegisterVerifyOtp = async (e) => {
     e.preventDefault();
     if (!regOtp || regOtp.trim().length !== 6) {
@@ -371,7 +395,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
       setFpMethod('phone');
       setFpStep(2);
       setFpCooldown(60);
-      showSuccess(`Recovery SMS OTP sent to +91 ${cleanDigits.slice(-10)} via Firebase!`);
+      showSuccess(`Random 6-digit SMS OTP sent to +91 ${cleanDigits.slice(-10)} via Firebase!`);
     } catch (err) {
       console.error('Firebase Forgot Phone OTP Error:', err);
       showError(err.message || 'Failed to dispatch recovery SMS. Please try Email recovery.');
@@ -482,10 +506,10 @@ export default function AuthPages({ defaultMode = 'login' }) {
         txn_id: fpTxnId,
       });
 
-      if (res.success) {
+      if (res.success && res.reset_token) {
         setFpResetToken(res.reset_token);
         setFpStep(3);
-        showSuccess('Recovery code verified! Please set a new password.');
+        showSuccess('Recovery code verified! Enter your new password.');
       }
     } catch (err) {
       showError(err.message || 'Invalid or expired recovery code.');
@@ -497,14 +521,29 @@ export default function AuthPages({ defaultMode = 'login' }) {
   // --- RESEND FORGOT OTP ---
   const handleResendForgotOtp = async () => {
     if (fpCooldown > 0) return;
-    if (fpMethod === 'phone') {
-      handleForgotPhoneRequestOtp();
-    } else {
-      handleForgotRequestOtp({ preventDefault: () => {} });
+    setLoading(true);
+    try {
+      if (fpMethod === 'phone') {
+        const confirmation = await sendPhoneOtp(forgotPhone, 'recaptcha-container');
+        setFpPhoneConfirmation(confirmation);
+        setFpCooldown(60);
+        showSuccess('New 6-digit recovery code sent to your mobile phone!');
+      } else {
+        const res = await requestForgotPasswordOtp(forgotEmail);
+        if (res.success) {
+          setFpTxnId(res.txn_id);
+          setFpCooldown(res.cooldown_seconds || 60);
+          showSuccess('New recovery code sent to your email!');
+        }
+      }
+    } catch (err) {
+      showError(err.message || 'Failed to resend code.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // --- FORGOT PASSWORD (EMAIL) STEP 3: RESET PASSWORD ---
+  // --- FORGOT PASSWORD STEP 3: RESET PASSWORD ---
   const handleForgotResetPassword = async (e) => {
     e.preventDefault();
     if (!fpNewPassword || !fpConfirmPassword) {
@@ -513,7 +552,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
     }
 
     if (fpNewPassword.length < 6) {
-      showError('New password must be at least 6 characters.');
+      showError('Password must be at least 6 characters.');
       return;
     }
 
@@ -561,85 +600,82 @@ export default function AuthPages({ defaultMode = 'login' }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center p-4 py-12 font-sans">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-xs border border-[#E5E7EB] overflow-hidden">
-        
-        {/* Header (White Corporate Header) */}
-        <div className="p-6 text-center space-y-3 border-b border-[#E5E7EB]">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 py-12">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-slate-900 text-white p-6 text-center space-y-2 border-b border-slate-800">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF8FF] border border-[#D1E9FF]">
-              <ShieldCheck className="w-4 h-4 text-[#155EEF]" />
-            </div>
-            <span className="font-extrabold text-lg text-[#252B36] tracking-tight">
-              Bharat<span className="text-[#155EEF]">Filing</span>
+            <img
+              src="/bharatfiling-icon-transparent.png"
+              alt="BharatFiling"
+              className="h-8 w-auto object-contain bg-white/10 rounded-lg p-0.5"
+            />
+            <span className="font-extrabold text-lg text-white">
+              Bharat<span className="text-[#F26522]">Filing</span>
             </span>
           </Link>
 
-          <div>
-            <h2 className="text-xl font-bold text-[#252B36]">
-              {mode === 'login' && (phoneLoginActive ? 'Sign in with Mobile OTP' : 'Sign in to BharatFiling')}
-              {mode === 'register' &&
-                (regStep === 1
-                  ? 'Create Customer Account'
-                  : regMethod === 'phone'
-                  ? 'Verify Mobile Number'
-                  : 'Verify Email Address')}
-              {mode === 'forgot-password' &&
-                (fpStep === 1
-                  ? 'Reset Your Password'
-                  : fpStep === 2
-                  ? 'Enter Recovery Code'
-                  : 'Set New Password')}
-            </h2>
+          <h2 className="text-xl font-extrabold">
+            {mode === 'login' && (phoneLoginActive ? 'Sign in with Mobile OTP' : 'Sign in to BharatFiling')}
+            {mode === 'register' &&
+              (regStep === 1
+                ? 'Create Customer Account'
+                : regMethod === 'phone'
+                ? 'Verify Mobile Number'
+                : 'Verify Email Address')}
+            {mode === 'forgot-password' &&
+              (fpStep === 1
+                ? 'Reset Your Password'
+                : fpStep === 2
+                ? 'Enter Recovery Code'
+                : 'Set New Password')}
+          </h2>
 
-            <p className="text-xs text-[#667085] mt-1">
-              {mode === 'login' &&
-                (phoneLoginActive
-                  ? 'Instant passwordless login via 6-digit SMS OTP'
-                  : 'Access your statutory applications and Master Profile')}
-              {mode === 'register' &&
-                (regStep === 1
-                  ? 'One Master Profile for all your business compliance needs'
-                  : regMethod === 'phone'
-                  ? `Enter the 6-digit SMS code sent to +91 ${phone.replace(/\D/g, '').slice(-10)}`
-                  : `Enter the 6-digit code sent to ${email}`)}
-              {mode === 'forgot-password' &&
-                (fpStep === 1
-                  ? fpMethod === 'phone'
-                    ? 'Enter your mobile number to receive a 6-digit recovery SMS'
-                    : 'Enter your registered email to receive a 6-digit recovery OTP'
-                  : fpStep === 2
-                  ? fpMethod === 'phone'
-                    ? `Enter the 6-digit SMS code sent to +91 ${forgotPhone.replace(/\D/g, '').slice(-10)}`
-                    : `Enter the 6-digit code sent to ${forgotEmail}`
-                  : 'Choose a strong password with at least 6 characters')}
-            </p>
-          </div>
+          <p className="text-xs text-slate-400">
+            {mode === 'login' &&
+              (phoneLoginActive
+                ? 'Instant passwordless login via 6-digit SMS OTP'
+                : 'Access your applications, Master Profile & GST certificates')}
+            {mode === 'register' &&
+              (regStep === 1
+                ? 'One Master Profile for all your business compliance needs'
+                : regMethod === 'phone'
+                ? `Enter the 6-digit SMS code sent to +91 ${phone.replace(/\D/g, '').slice(-10)}`
+                : `Enter the 6-digit code sent to ${email}`)}
+            {mode === 'forgot-password' &&
+              (fpStep === 1
+                ? fpMethod === 'phone'
+                  ? 'Enter your mobile number to receive a 6-digit recovery SMS'
+                  : 'Enter your registered email to receive a 6-digit recovery OTP'
+                : fpStep === 2
+                ? fpMethod === 'phone'
+                  ? `Enter the 6-digit SMS code sent to +91 ${forgotPhone.replace(/\D/g, '').slice(-10)}`
+                  : `Enter the 6-digit code sent to ${forgotEmail}`
+                : 'Choose a strong password with at least 6 characters')}
+          </p>
 
-          {/* Mode Switch Tabs */}
+          {/* Mode Switch Tabs (Only when not in forgot password or OTP step) */}
           {mode !== 'forgot-password' && regStep === 1 && (
-            <div className="flex bg-[#F8F9FB] p-1 rounded-lg border border-[#E5E7EB] text-xs font-semibold">
+            <div className="flex bg-slate-800 p-1 rounded-xl mt-4 text-xs font-bold">
               <button
-                type="button"
                 onClick={() => {
                   setMode('login');
                   setPhoneLoginActive(false);
                 }}
-                className={`flex-1 py-1.5 rounded-md transition-colors cursor-pointer ${
-                  mode === 'login' ? 'bg-[#155EEF] text-white shadow-xs' : 'text-[#667085] hover:text-[#252B36]'
+                className={`flex-1 py-1.5 rounded-lg transition ${
+                  mode === 'login' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Sign In
               </button>
               <button
-                type="button"
                 onClick={() => {
                   setMode('register');
                   setRegStep(1);
                   setPhoneLoginActive(false);
                 }}
-                className={`flex-1 py-1.5 rounded-md transition-colors cursor-pointer ${
-                  mode === 'register' ? 'bg-[#155EEF] text-white shadow-xs' : 'text-[#667085] hover:text-[#252B36]'
+                className={`flex-1 py-1.5 rounded-lg transition ${
+                  mode === 'register' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Register
@@ -654,16 +690,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
           {mode === 'login' && !phoneLoginActive && (
             <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-[#252B36] mb-1">Email or Mobile Number</label>
+                <label className="block font-bold text-slate-700 mb-1">Email or Mobile Number</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="text"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     autoComplete="username"
                     placeholder="Enter email address or mobile number"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
                 </div>
@@ -671,7 +707,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="font-semibold text-[#252B36]">Password</label>
+                  <label className="font-bold text-slate-700">Password</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -679,20 +715,20 @@ export default function AuthPages({ defaultMode = 'login' }) {
                       setFpStep(1);
                       setForgotEmail(identifier.includes('@') ? identifier : '');
                     }}
-                    className="text-[11px] font-semibold text-[#155EEF] hover:underline cursor-pointer"
+                    className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
                   >
                     Forgot Password?
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
                 </div>
@@ -701,7 +737,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {loading ? 'Signing in...' : 'Sign In & Access Dashboard'}
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -715,9 +751,9 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     setPhoneLoginStep(1);
                     setPhoneLoginMobile(identifier.replace(/\D/g, '').length >= 10 ? identifier : '');
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#155EEF] hover:underline transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-emerald-600 transition cursor-pointer"
                 >
-                  <Smartphone className="w-3.5 h-3.5 text-[#155EEF]" />
+                  <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
                   Sign in with Mobile SMS OTP instead
                 </button>
               </div>
@@ -730,20 +766,20 @@ export default function AuthPages({ defaultMode = 'login' }) {
               {phoneLoginStep === 1 && (
                 <form onSubmit={handlePhoneLoginRequestOtp} className="space-y-4">
                   <div>
-                    <label className="block font-semibold text-[#252B36] mb-1">Indian Mobile Number</label>
+                    <label className="block font-bold text-slate-700 mb-1">Indian Mobile Number</label>
                     <div className="relative">
-                      <Phone className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                       <input
                         type="tel"
                         value={phoneLoginMobile}
                         onChange={(e) => setPhoneLoginMobile(e.target.value)}
                         placeholder="10-digit mobile number"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                         required
                         autoFocus
                       />
                     </div>
-                    <p className="text-[10px] text-[#667085] mt-1">
+                    <p className="text-[10px] text-slate-400 mt-1">
                       A 6-digit SMS OTP will be sent to your mobile phone via Google Firebase.
                     </p>
                   </div>
@@ -751,17 +787,17 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {loading ? 'Sending SMS OTP...' : 'Send SMS OTP'}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
 
-                  <div className="text-center pt-2 border-t border-[#E5E7EB]">
+                  <div className="text-center pt-2 border-t border-slate-100">
                     <button
                       type="button"
                       onClick={() => setPhoneLoginActive(false)}
-                      className="text-[#667085] hover:text-[#252B36] font-semibold flex items-center gap-1 mx-auto text-xs cursor-pointer"
+                      className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 mx-auto text-xs cursor-pointer"
                     >
                       <ArrowLeft className="w-3 h-3" /> Back to Password Sign In
                     </button>
@@ -771,20 +807,20 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
               {phoneLoginStep === 2 && (
                 <form onSubmit={handlePhoneLoginVerifyOtp} className="space-y-4">
-                  <div className="p-3.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] text-[#027A48] space-y-1">
-                    <div className="font-semibold flex items-center gap-1.5 text-xs text-[#027A48]">
-                      <Smartphone className="w-4 h-4 text-[#027A48]" />
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                      <Smartphone className="w-4 h-4 text-emerald-600" />
                       SMS OTP Sent
                     </div>
-                    <p className="text-[11px] text-[#027A48]">
+                    <p className="text-[11px] text-emerald-700">
                       Enter the 6-digit code sent to <span className="font-bold">+91 {phoneLoginMobile.slice(-10)}</span>.
                     </p>
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-[#252B36] mb-1.5">6-Digit SMS Code</label>
+                    <label className="block font-bold text-slate-700 mb-1.5">6-Digit SMS Code</label>
                     <div className="relative">
-                      <KeyRound className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                       <input
                         type="text"
                         maxLength={6}
@@ -792,7 +828,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         onChange={(e) => setPhoneLoginOtp(e.target.value.replace(/\D/g, ''))}
                         autoComplete="one-time-code"
                         placeholder="123456"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] focus:ring-1 focus:ring-[#155EEF] focus:border-[#155EEF] focus:outline-none text-center text-lg font-mono font-bold tracking-[0.4em]"
+                        className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
                         autoFocus
                         required
                       />
@@ -802,17 +838,17 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   <button
                     type="submit"
                     disabled={loading || phoneLoginOtp.length !== 6}
-                    className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {loading ? 'Verifying OTP...' : 'Verify & Sign In'}
                     <CheckCircle2 className="w-4 h-4" />
                   </button>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-[#E5E7EB] text-[11px]">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
                     <button
                       type="button"
                       onClick={() => setPhoneLoginStep(1)}
-                      className="text-[#667085] hover:text-[#252B36] font-semibold flex items-center gap-1 cursor-pointer"
+                      className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
                     >
                       <ArrowLeft className="w-3 h-3" /> Change Number
                     </button>
@@ -821,10 +857,10 @@ export default function AuthPages({ defaultMode = 'login' }) {
                       type="button"
                       disabled={phoneLoginCooldown > 0 || loading}
                       onClick={handlePhoneLoginRequestOtp}
-                      className={`font-semibold flex items-center gap-1 ${
+                      className={`font-bold flex items-center gap-1 ${
                         phoneLoginCooldown > 0
-                          ? 'text-[#667085] cursor-not-allowed'
-                          : 'text-[#155EEF] hover:underline cursor-pointer'
+                          ? 'text-slate-400 cursor-not-allowed'
+                          : 'text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
                       }`}
                     >
                       <RotateCcw className="w-3 h-3" />
@@ -840,64 +876,64 @@ export default function AuthPages({ defaultMode = 'login' }) {
           {mode === 'register' && regStep === 1 && (
             <form onSubmit={handleRegisterRequestOtp} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-[#252B36] mb-1">Full Legal Name</label>
+                <label className="block font-bold text-slate-700 mb-1">Full Legal Name</label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     autoComplete="name"
                     placeholder="Enter your full legal name"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#252B36] mb-1">Email Address</label>
+                <label className="block font-bold text-slate-700 mb-1">Email Address (Verification OTP sent here)</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
                     placeholder="Enter your email address"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#252B36] mb-1">Mobile Number</label>
+                <label className="block font-bold text-slate-700 mb-1">Mobile Number (for GST updates & SMS)</label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     autoComplete="tel"
-                    placeholder="10-digit mobile number"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                    placeholder="Enter 10-digit mobile number"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#252B36] mb-1">Create Password</label>
+                <label className="block font-bold text-slate-700 mb-1">Create Password</label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="password"
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     autoComplete="new-password"
                     placeholder="Create a password (min. 6 characters)"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
                 </div>
@@ -908,20 +944,20 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   type="button"
                   disabled={loading}
                   onClick={handleRegisterSendPhoneOtp}
-                  className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Smartphone className="w-4 h-4" />
+                  <Smartphone className="w-4 h-4 text-emerald-200" />
                   {loading && regMethod === 'phone'
                     ? 'Sending SMS OTP...'
-                    : 'Verify via Mobile SMS OTP'}
+                    : 'Verify via Mobile SMS OTP (Fastest)'}
                 </button>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 rounded-lg bg-white hover:bg-[#F8F9FB] text-[#252B36] font-semibold text-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer border border-[#E5E7EB]"
+                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer border border-slate-300"
                 >
-                  <Mail className="w-4 h-4 text-[#667085]" />
+                  <Mail className="w-4 h-4 text-slate-500" />
                   {loading && regMethod === 'email'
                     ? 'Sending Email OTP...'
                     : 'Or Continue with Email OTP'}
@@ -934,38 +970,38 @@ export default function AuthPages({ defaultMode = 'login' }) {
           {mode === 'register' && regStep === 2 && (
             <form onSubmit={handleRegisterVerifyOtp} className="space-y-4 text-xs">
               {regMethod === 'phone' ? (
-                <div className="p-3.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] text-[#027A48] space-y-1">
-                  <div className="font-semibold flex items-center gap-1.5 text-xs text-[#027A48]">
-                    <Smartphone className="w-4 h-4 text-[#027A48]" />
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                    <Smartphone className="w-4 h-4 text-emerald-600" />
                     SMS Verification Code Dispatched
                   </div>
-                  <p className="text-[11px] text-[#027A48]">
+                  <p className="text-[11px] text-emerald-700">
                     We've sent a 6-digit SMS verification code to <span className="font-bold">+91 {phone.replace(/\D/g, '').slice(-10)}</span> via Firebase.
                   </p>
                 </div>
               ) : (
-                <div className="p-3.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] text-[#027A48] space-y-1">
-                  <div className="font-semibold flex items-center gap-1.5 text-xs text-[#027A48]">
-                    <Mail className="w-4 h-4 text-[#027A48]" />
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                    <Mail className="w-4 h-4 text-emerald-600" />
                     Check Your Email Inbox
                   </div>
-                  <p className="text-[11px] text-[#027A48]">
+                  <p className="text-[11px] text-emerald-700">
                     We've sent a 6-digit confirmation code to <span className="font-bold">{email}</span>. Please enter it below.
                   </p>
                 </div>
               )}
 
               <div>
-                <label className="block font-semibold text-[#252B36] mb-1.5">6-Digit Verification Code</label>
+                <label className="block font-bold text-slate-700 mb-1.5">6-Digit Verification Code</label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="text"
                     maxLength={6}
                     value={regOtp}
                     onChange={(e) => setRegOtp(e.target.value.replace(/\D/g, ''))}
                     placeholder="123456"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] focus:ring-1 focus:ring-[#155EEF] focus:border-[#155EEF] focus:outline-none text-center text-lg font-mono font-bold tracking-[0.4em]"
+                    className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
                     autoFocus
                     required
                   />
@@ -975,17 +1011,17 @@ export default function AuthPages({ defaultMode = 'login' }) {
               <button
                 type="submit"
                 disabled={loading || regOtp.length !== 6}
-                className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {loading ? 'Verifying...' : 'Verify OTP & Complete Account'}
                 <CheckCircle2 className="w-4 h-4" />
               </button>
 
-              <div className="flex items-center justify-between pt-2 border-t border-[#E5E7EB] text-[11px]">
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
                 <button
                   type="button"
                   onClick={() => setRegStep(1)}
-                  className="text-[#667085] hover:text-[#252B36] font-semibold flex items-center gap-1 cursor-pointer"
+                  className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
                 >
                   <ArrowLeft className="w-3 h-3" /> Back / Edit Details
                 </button>
@@ -994,10 +1030,10 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   type="button"
                   disabled={regCooldown > 0 || loading}
                   onClick={handleResendRegisterOtp}
-                  className={`font-semibold flex items-center gap-1 ${
+                  className={`font-bold flex items-center gap-1 ${
                     regCooldown > 0
-                      ? 'text-[#667085] cursor-not-allowed'
-                      : 'text-[#155EEF] hover:underline cursor-pointer'
+                      ? 'text-slate-400 cursor-not-allowed'
+                      : 'text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
                   }`}
                 >
                   <RotateCcw className="w-3 h-3" />
@@ -1013,17 +1049,18 @@ export default function AuthPages({ defaultMode = 'login' }) {
               {/* STEP 1: Phone or Email Recovery Selector */}
               {fpStep === 1 && (
                 <div className="space-y-4">
-                  <div className="flex bg-[#F8F9FB] p-1 rounded-lg text-xs font-semibold border border-[#E5E7EB]">
+                  {/* Selector Tabs: Mobile SMS vs Email */}
+                  <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200">
                     <button
                       type="button"
                       onClick={() => {
                         setFpMethod('phone');
                         setUnregisteredAlert(false);
                       }}
-                      className={`flex-1 py-1.5 rounded-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+                      className={`flex-1 py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
                         fpMethod === 'phone'
-                          ? 'bg-[#155EEF] text-white shadow-xs'
-                          : 'text-[#667085] hover:text-[#252B36]'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       <Smartphone className="w-3.5 h-3.5" />
@@ -1035,10 +1072,10 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         setFpMethod('email');
                         setUnregisteredAlert(false);
                       }}
-                      className={`flex-1 py-1.5 rounded-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+                      className={`flex-1 py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
                         fpMethod === 'email'
-                          ? 'bg-[#155EEF] text-white shadow-xs'
-                          : 'text-[#667085] hover:text-[#252B36]'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       <Mail className="w-3.5 h-3.5" />
@@ -1049,38 +1086,38 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   {fpMethod === 'phone' ? (
                     <form onSubmit={handleForgotPhoneRequestOtp} className="space-y-4">
                       <div>
-                        <label className="block font-semibold text-[#252B36] mb-1">Registered Mobile Number</label>
+                        <label className="block font-bold text-slate-700 mb-1">Registered Mobile Number</label>
                         <div className="relative">
-                          <Phone className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                          <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                           <input
                             type="tel"
                             value={forgotPhone}
                             onChange={(e) => setForgotPhone(e.target.value)}
                             placeholder="10-digit mobile number"
-                            className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                            className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                             required
                             autoFocus
                           />
                         </div>
-                        <p className="text-[10px] text-[#667085] mt-1">
-                          A 6-digit SMS recovery code will be dispatched to this number via Google Firebase.
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          A random 6-digit SMS recovery code will be dispatched to this number via Google Firebase.
                         </p>
                       </div>
 
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         {loading ? 'Sending Recovery SMS...' : 'Send SMS Recovery Code'}
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
 
-                      <div className="text-center pt-2 border-t border-[#E5E7EB]">
+                      <div className="text-center pt-2 border-t border-slate-100">
                         <button
                           type="button"
                           onClick={() => setMode('login')}
-                          className="text-[#667085] hover:text-[#252B36] font-semibold flex items-center gap-1 mx-auto cursor-pointer"
+                          className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 mx-auto cursor-pointer"
                         >
                           <ArrowLeft className="w-3 h-3" /> Back to Sign In
                         </button>
@@ -1089,16 +1126,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   ) : (
                     <form onSubmit={handleForgotRequestOtp} className="space-y-4">
                       <div>
-                        <label className="block font-semibold text-[#252B36] mb-1">Your Registered Email</label>
+                        <label className="block font-bold text-slate-700 mb-1">Your Registered Email</label>
                         <div className="relative">
-                          <Mail className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                          <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                           <input
                             type="email"
                             value={forgotEmail}
                             onChange={(e) => setForgotEmail(e.target.value)}
                             autoComplete="email"
                             placeholder="Enter your registered email address"
-                            className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                            className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                             required
                             autoFocus
                           />
@@ -1106,12 +1143,12 @@ export default function AuthPages({ defaultMode = 'login' }) {
                       </div>
 
                       {unregisteredAlert && (
-                        <div className="p-3.5 rounded-lg bg-[#FFFAEB] border border-[#FEDF89] text-[#B54708] space-y-2">
-                          <div className="font-semibold flex items-center gap-1.5 text-xs text-[#B54708]">
-                            <User className="w-4 h-4 text-[#B54708]" />
+                        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
+                          <div className="font-bold flex items-center gap-1.5 text-xs text-amber-800">
+                            <User className="w-4 h-4 text-amber-600" />
                             No Account Found
                           </div>
-                          <p className="text-[11px] text-[#B54708] leading-relaxed">
+                          <p className="text-[11px] text-amber-800 leading-relaxed">
                             There is no BharatFiling account registered with <span className="font-bold">{forgotEmail}</span>. Would you like to create one?
                           </p>
                           <button
@@ -1121,7 +1158,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                               setMode('register');
                               setUnregisteredAlert(false);
                             }}
-                            className="w-full py-2 px-3 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-xs"
+                            className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-xs"
                           >
                             Create New Account Now <ArrowRight className="w-3.5 h-3.5" />
                           </button>
@@ -1131,17 +1168,17 @@ export default function AuthPages({ defaultMode = 'login' }) {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         {loading ? 'Sending Recovery Code...' : 'Send Recovery Code'}
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
 
-                      <div className="text-center pt-2 border-t border-[#E5E7EB]">
+                      <div className="text-center pt-2 border-t border-slate-100">
                         <button
                           type="button"
                           onClick={() => setMode('login')}
-                          className="text-[#667085] hover:text-[#252B36] font-semibold flex items-center gap-1 mx-auto cursor-pointer"
+                          className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 mx-auto cursor-pointer"
                         >
                           <ArrowLeft className="w-3 h-3" /> Back to Sign In
                         </button>
@@ -1155,20 +1192,20 @@ export default function AuthPages({ defaultMode = 'login' }) {
               {fpStep === 2 && (
                 fpMethod === 'phone' ? (
                   <form onSubmit={handleForgotPhoneResetPassword} className="space-y-4">
-                    <div className="p-3.5 rounded-lg bg-[#ECFDF3] border border-[#A6F4C5] text-[#027A48] space-y-1">
-                      <div className="font-semibold flex items-center gap-1.5 text-xs text-[#027A48]">
-                        <Smartphone className="w-4 h-4 text-[#027A48]" />
+                    <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                      <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                        <Smartphone className="w-4 h-4 text-emerald-600" />
                         SMS Recovery Code Dispatched
                       </div>
-                      <p className="text-[11px] text-[#027A48]">
-                        Enter the 6-digit SMS OTP sent to <span className="font-bold">+91 {forgotPhone.replace(/\D/g, '').slice(-10)}</span> via Firebase.
+                      <p className="text-[11px] text-emerald-700">
+                        Enter the random 6-digit SMS OTP sent to <span className="font-bold">+91 {forgotPhone.replace(/\D/g, '').slice(-10)}</span> via Firebase.
                       </p>
                     </div>
 
                     <div>
-                      <label className="block font-semibold text-[#252B36] mb-1.5">6-Digit SMS Recovery Code</label>
+                      <label className="block font-bold text-slate-700 mb-1.5">6-Digit SMS Recovery Code</label>
                       <div className="relative">
-                        <KeyRound className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                        <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                         <input
                           type="text"
                           maxLength={6}
@@ -1176,7 +1213,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                           onChange={(e) => setFpOtp(e.target.value.replace(/\D/g, ''))}
                           autoComplete="one-time-code"
                           placeholder="123456"
-                          className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] focus:ring-1 focus:ring-[#155EEF] focus:border-[#155EEF] focus:outline-none text-center text-lg font-mono font-bold tracking-[0.4em]"
+                          className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
                           autoFocus
                           required
                         />
@@ -1184,30 +1221,30 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     </div>
 
                     <div>
-                      <label className="block font-semibold text-[#252B36] mb-1">New Password</label>
+                      <label className="block font-bold text-slate-700 mb-1">New Password</label>
                       <div className="relative">
-                        <Lock className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                         <input
                           type="password"
                           value={fpNewPassword}
                           onChange={(e) => setFpNewPassword(e.target.value)}
                           placeholder="Enter new password (min. 6 characters)"
-                          className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                           required
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block font-semibold text-[#252B36] mb-1">Confirm New Password</label>
+                      <label className="block font-bold text-slate-700 mb-1">Confirm New Password</label>
                       <div className="relative">
-                        <Lock className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                         <input
                           type="password"
                           value={fpConfirmPassword}
                           onChange={(e) => setFpConfirmPassword(e.target.value)}
                           placeholder="Re-enter new password"
-                          className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                           required
                         />
                       </div>
@@ -1216,17 +1253,17 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     <button
                       type="submit"
                       disabled={loading || fpOtp.length !== 6}
-                      className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       {loading ? 'Verifying & Updating...' : 'Verify SMS OTP & Set New Password'}
                       <CheckCircle2 className="w-4 h-4" />
                     </button>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-[#E5E7EB] text-[11px]">
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
                       <button
                         type="button"
                         onClick={() => setFpStep(1)}
-                        className="text-[#667085] hover:text-[#252B36] font-semibold flex items-center gap-1 cursor-pointer"
+                        className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
                       >
                         <ArrowLeft className="w-3 h-3" /> Change Number
                       </button>
@@ -1235,10 +1272,10 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         type="button"
                         disabled={fpCooldown > 0 || loading}
                         onClick={handleResendForgotOtp}
-                        className={`font-semibold flex items-center gap-1 ${
+                        className={`font-bold flex items-center gap-1 ${
                           fpCooldown > 0
-                            ? 'text-[#667085] cursor-not-allowed'
-                            : 'text-[#155EEF] hover:underline cursor-pointer'
+                            ? 'text-slate-400 cursor-not-allowed'
+                            : 'text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
                         }`}
                       >
                         <RotateCcw className="w-3 h-3" />
@@ -1248,20 +1285,20 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   </form>
                 ) : (
                   <form onSubmit={handleForgotVerifyOtp} className="space-y-4">
-                    <div className="p-3.5 rounded-lg bg-[#FFFAEB] border border-[#FEDF89] text-[#B54708] space-y-1">
-                      <div className="font-semibold flex items-center gap-1.5 text-xs">
-                        <Mail className="w-4 h-4 text-[#B54708]" />
+                    <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
+                      <div className="font-bold flex items-center gap-1.5 text-xs">
+                        <Mail className="w-4 h-4 text-amber-600" />
                         Recovery Code Dispatched
                       </div>
-                      <p className="text-[11px] text-[#B54708]">
+                      <p className="text-[11px] text-amber-800">
                         If an account exists for <span className="font-bold">{forgotEmail}</span>, a 6-digit recovery OTP has been sent.
                       </p>
                     </div>
 
                     <div>
-                      <label className="block font-semibold text-[#252B36] mb-1.5">6-Digit Recovery Code</label>
+                      <label className="block font-bold text-slate-700 mb-1.5">6-Digit Recovery Code</label>
                       <div className="relative">
-                        <KeyRound className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                        <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                         <input
                           type="text"
                           maxLength={6}
@@ -1269,7 +1306,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                           onChange={(e) => setFpOtp(e.target.value.replace(/\D/g, ''))}
                           autoComplete="one-time-code"
                           placeholder="123456"
-                          className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] focus:ring-1 focus:ring-[#155EEF] focus:border-[#155EEF] focus:outline-none text-center text-lg font-mono font-bold tracking-[0.4em]"
+                          className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden text-center text-lg font-mono font-bold tracking-[0.4em]"
                           autoFocus
                           required
                         />
@@ -1279,17 +1316,17 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     <button
                       type="submit"
                       disabled={loading || fpOtp.length !== 6}
-                      className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       {loading ? 'Verifying...' : 'Verify Code & Continue'}
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-[#E5E7EB] text-[11px]">
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
                       <button
                         type="button"
                         onClick={() => setFpStep(1)}
-                        className="text-[#667085] hover:text-[#252B36] font-semibold flex items-center gap-1 cursor-pointer"
+                        className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
                       >
                         <ArrowLeft className="w-3 h-3" /> Back
                       </button>
@@ -1298,10 +1335,10 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         type="button"
                         disabled={fpCooldown > 0 || loading}
                         onClick={handleResendForgotOtp}
-                        className={`font-semibold flex items-center gap-1 ${
+                        className={`font-bold flex items-center gap-1 ${
                           fpCooldown > 0
-                            ? 'text-[#667085] cursor-not-allowed'
-                            : 'text-[#155EEF] hover:underline cursor-pointer'
+                            ? 'text-slate-400 cursor-not-allowed'
+                            : 'text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
                         }`}
                       >
                         <RotateCcw className="w-3 h-3" />
@@ -1316,16 +1353,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
               {fpStep === 3 && (
                 <form onSubmit={handleForgotResetPassword} className="space-y-3.5">
                   <div>
-                    <label className="block font-semibold text-[#252B36] mb-1">New Password</label>
+                    <label className="block font-bold text-slate-700 mb-1">New Password</label>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                       <input
                         type="password"
                         value={fpNewPassword}
                         onChange={(e) => setFpNewPassword(e.target.value)}
                         autoComplete="new-password"
                         placeholder="Enter new password (min. 6 characters)"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                         required
                         autoFocus
                       />
@@ -1333,16 +1370,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-[#252B36] mb-1">Confirm New Password</label>
+                    <label className="block font-bold text-slate-700 mb-1">Confirm New Password</label>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-[#667085] absolute left-3.5 top-3" />
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                       <input
                         type="password"
                         value={fpConfirmPassword}
                         onChange={(e) => setFpConfirmPassword(e.target.value)}
                         autoComplete="new-password"
                         placeholder="Re-enter new password"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white focus:outline-none focus:border-[#155EEF] focus:ring-1 focus:ring-[#155EEF] text-xs text-[#252B36]"
+                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                         required
                       />
                     </div>
@@ -1351,7 +1388,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {loading ? 'Updating Password...' : 'Save New Password & Sign In'}
                     <CheckCircle2 className="w-4 h-4" />
@@ -1362,37 +1399,37 @@ export default function AuthPages({ defaultMode = 'login' }) {
           )}
 
           {/* Quick Demo Test Logins */}
-          <div className="mt-6 pt-5 border-t border-[#E5E7EB] text-center">
-            <span className="text-[11px] font-semibold text-[#667085] uppercase tracking-wider block mb-1">
-              Development Test Accounts
+          <div className="mt-6 pt-5 border-t border-slate-200 text-center">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              Quick 1-Click Demo Accounts
             </span>
-            <p className="text-[10px] text-[#667085] mb-3">
-              Standard Password: <span className="font-mono font-semibold text-[#155EEF]">Test@123</span>
+            <p className="text-[10px] text-slate-400 mb-3">
+              Standard Password: <span className="font-mono font-semibold text-emerald-600">Test@123</span>
             </p>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => handleDemoLogin('CUSTOMER')}
-                className="p-2.5 rounded-lg bg-[#F8F9FB] hover:bg-white text-[#252B36] hover:text-[#155EEF] border border-[#E5E7EB] hover:border-[#155EEF] text-[11px] font-semibold transition-colors text-center shadow-xs cursor-pointer"
+                className="p-2.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-700 border border-slate-200 text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
               >
                 <div>👤 Customer</div>
-                <div className="text-[9px] font-normal text-[#667085] truncate mt-0.5">customer@...</div>
+                <div className="text-[9px] font-normal text-slate-500 truncate mt-0.5">customer@...</div>
               </button>
               <button
                 type="button"
                 onClick={() => handleDemoLogin('CA')}
-                className="p-2.5 rounded-lg bg-[#F8F9FB] hover:bg-white text-[#252B36] hover:text-[#155EEF] border border-[#E5E7EB] hover:border-[#155EEF] text-[11px] font-semibold transition-colors text-center shadow-xs cursor-pointer"
+                className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
               >
                 <div>⚖️ CA Desk</div>
-                <div className="text-[9px] font-normal text-[#667085] truncate mt-0.5">ca.sharma@...</div>
+                <div className="text-[9px] font-normal text-amber-700 truncate mt-0.5">ca.sharma@...</div>
               </button>
               <button
                 type="button"
                 onClick={() => handleDemoLogin('ADMIN')}
-                className="p-2.5 rounded-lg bg-[#F8F9FB] hover:bg-white text-[#252B36] hover:text-[#155EEF] border border-[#E5E7EB] hover:border-[#155EEF] text-[11px] font-semibold transition-colors text-center shadow-xs cursor-pointer"
+                className="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
               >
                 <div>🛡️ Admin</div>
-                <div className="text-[9px] font-normal text-[#667085] truncate mt-0.5">admin@...</div>
+                <div className="text-[9px] font-normal text-blue-700 truncate mt-0.5">admin@...</div>
               </button>
             </div>
           </div>

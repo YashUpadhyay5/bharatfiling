@@ -7,7 +7,13 @@ import {
   CheckCircle2,
   ShieldCheck,
   ArrowRight,
+  PhoneCall,
   MessageCircle,
+  Building2,
+  Users,
+  Building,
+  HelpCircle,
+  Award,
   Sparkles,
   Check,
   ChevronDown,
@@ -91,103 +97,103 @@ export default function GstLandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans">
       <Breadcrumbs items={[{ label: 'Services', path: '/services' }, { label: 'GST Registration' }]} />
-
       {/* 1. HERO SECTION */}
-      <section className="pt-10 pb-14 md:pt-14 md:pb-18 bg-white border-b border-[#E5E7EB]">
+      <section className="pt-10 pb-16 md:pt-16 md:pb-20 bg-gradient-to-b from-white via-slate-50/40 to-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             
             {/* Left Content */}
-            <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFF8FF] border border-[#D1E9FF] text-[#155EEF] text-xs font-semibold">
-                <FileCheck2 className="w-3.5 h-3.5 text-[#155EEF]" />
+            <div className="lg:col-span-7 space-y-5 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-xs font-semibold">
+                <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Form REG-01 Filing · Govt Portal Ready</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-[#252B36] tracking-tight leading-[1.2]">
+              <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 tracking-tight leading-[1.2]">
                 Apply for GST Number <br className="hidden sm:inline" />
-                <span className="text-[#155EEF]">Online in India</span>
+                <span className="text-[#111827]">Online in India</span>
               </h1>
 
-              <p className="text-sm sm:text-base text-[#667085] max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Obtain your 15-digit GSTIN and official Form REG-06 Certificate in 3 to 7 working days. AI validates your documents instantly; licensed Chartered Accountants file directly on the tax portal.
+              <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Obtain your 15-digit GSTIN and official Form REG-06 Certificate in 3 to 7 working days. AI validates your documents instantly; licensed Chartered Accountants file directly with the tax department.
               </p>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-1">
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-1">
                 <button
                   type="button"
                   onClick={handleStartApplication}
-                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-sm shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
                 >
-                  Start GST Registration
-                  <ArrowRight className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  Start GST Registration Now
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
                 </button>
 
                 <a
-                  href="https://wa.me/9118008908800?text=Hi%20BharatFiling%20Team%2C%20I%20need%20help%20with%20GST%20Registration."
+                  href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20help%20with%20GST%20Registration."
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full sm:w-auto px-5 py-3 rounded-lg bg-white hover:bg-[#F8F9FB] text-[#252B36] font-semibold text-sm border border-[#E5E7EB] transition-colors flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs transition flex items-center justify-center gap-2"
                 >
-                  <MessageCircle className="w-4 h-4 text-[#027A48]" />
+                  <MessageCircle className="w-4 h-4 text-emerald-600" />
                   Talk to CA on WhatsApp
                 </a>
               </div>
 
               {/* Guarantees */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 pt-3 text-xs text-[#667085]">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 pt-3 text-xs text-slate-500">
                 <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-[#027A48]" /> Govt Portal Fee: ₹0
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Govt Portal Fee: ₹0
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-[#027A48]" /> 100% Digital Process
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Digital Process
                 </div>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-[#027A48]" /> Notice (REG-03) Clarification Included
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Free Clarification (REG-03) Support
                 </div>
               </div>
             </div>
 
             {/* Right: Transparent Pricing & Summary Card */}
             <div className="lg:col-span-5">
-              <div className="bg-white rounded-xl p-6 shadow-xs border border-[#E5E7EB] space-y-4">
-                <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3">
+              <div className="bg-white rounded-3xl p-6 shadow-[0_12px_36px_rgba(17,24,39,0.06)] border border-slate-200/80 space-y-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_22px_45px_rgba(17,24,39,0.12)] hover:border-[#111827]/30">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div>
-                    <span className="text-[11px] font-bold text-[#667085] uppercase tracking-wider">All-Inclusive Package</span>
-                    <h3 className="font-bold text-base text-[#252B36]">GST Registration Service</h3>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">All-Inclusive Package</span>
+                    <h3 className="font-bold text-base text-slate-900">GST Registration Service</h3>
                   </div>
-                  <span className="text-xs font-semibold text-[#027A48] bg-[#ECFDF3] px-2.5 py-0.5 rounded border border-[#A6F4C5]">
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                     Transparent
                   </span>
                 </div>
 
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <div className="text-2xl font-bold text-[#252B36]">₹1,499</div>
-                    <div className="text-xs text-[#667085]">+ 18% GST (Total ₹1,769)</div>
+                    <div className="text-3xl font-extrabold text-slate-900">₹1,499</div>
+                    <div className="text-xs text-slate-500">+ 18% GST (Total ₹1,769)</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs font-semibold text-[#027A48]">Govt Fee: ₹0</div>
-                    <div className="text-[11px] text-[#667085]">Timeline: 3–7 Days</div>
+                    <div className="text-xs font-bold text-emerald-600">Govt Fee: ₹0</div>
+                    <div className="text-[11px] text-slate-400">Timeline: 3–7 Days</div>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-xs text-[#667085] border-t border-[#E5E7EB] pt-4">
+                <div className="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-4">
                   <div className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[#027A48] shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <span><strong>AI Document OCR:</strong> Automated extraction and mismatch detection.</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[#027A48] shrink-0 mt-0.5" />
-                    <span><strong>Licensed CA Review:</strong> Form REG-01 prepared and audited by CA.</span>
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Licensed CA Review:</strong> Form REG-01 audited by Chartered Accountant.</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[#027A48] shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <span><strong>Notice Support:</strong> Drafting response to Form REG-03 queries included.</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-[#027A48] shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <span><strong>Certificate Delivery:</strong> REG-06 certificate and GSTIN issued to dashboard.</span>
                   </div>
                 </div>
@@ -196,7 +202,7 @@ export default function GstLandingPage() {
                   <button
                     type="button"
                     onClick={handleStartApplication}
-                    className="w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-3 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] transition-all cursor-pointer"
                   >
                     Start 5-Minute Application
                     <ArrowRight className="w-4 h-4" />
@@ -210,30 +216,30 @@ export default function GstLandingPage() {
       </section>
 
       {/* 2. REQUIRED DOCUMENTS BY ENTITY */}
-      <section className="py-12 bg-[#F8F9FB] border-b border-[#E5E7EB]">
+      <section className="py-14 md:py-18 bg-slate-50/60 border-b border-slate-200/80">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 space-y-2">
-            <span className="text-xs font-bold text-[#155EEF] uppercase tracking-wider">
+          <div className="text-center mb-10 space-y-2">
+            <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Document Checklist
             </span>
-            <h2 className="text-2xl font-bold text-[#252B36]">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
               Documents Required for GST Registration
             </h2>
-            <p className="text-xs sm:text-sm text-[#667085]">
+            <p className="text-sm text-slate-600">
               Select your business constitution to view the exact list of documents needed.
             </p>
           </div>
 
           {/* Entity Selector Tabs */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
             {Object.keys(entityDocs).map((entity) => (
               <button
                 key={entity}
                 onClick={() => setSelectedEntity(entity)}
-                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.95] cursor-pointer ${
                   selectedEntity === entity
-                    ? 'bg-[#155EEF] text-white shadow-xs'
-                    : 'bg-white text-[#252B36] border border-[#E5E7EB] hover:bg-[#F8F9FB]'
+                    ? 'bg-[#111827] text-white shadow-xs'
+                    : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs'
                 }`}
               >
                 {entity}
@@ -242,77 +248,76 @@ export default function GstLandingPage() {
           </div>
 
           {/* Documents Card */}
-          <div className="bg-white rounded-xl p-6 shadow-xs border border-[#E5E7EB]">
-            <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3 mb-4">
-              <h3 className="font-bold text-sm text-[#252B36]">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 transition-all duration-300 hover:shadow-md">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+              <h3 className="font-extrabold text-base text-slate-900">
                 Checklist for {selectedEntity}
               </h3>
-              <span className="text-xs text-[#155EEF] font-semibold">
+              <span className="text-xs text-[#111827] font-semibold">
                 {entityDocs[selectedEntity].length} Documents Required
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {entityDocs[selectedEntity].map((doc, idx) => (
                 <div
                   key={doc}
-                  className="p-3 rounded-lg bg-[#F8F9FB] border border-[#E5E7EB] flex items-start gap-2.5"
+                  className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3 transition-all duration-200 hover:bg-white hover:border-slate-200 hover:shadow-xs"
                 >
-                  <div className="w-5 h-5 rounded-md bg-[#EFF8FF] text-[#155EEF] flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5 border border-[#D1E9FF]">
+                  <div className="w-5 h-5 rounded-full bg-[#111827] text-white flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">
                     {idx + 1}
                   </div>
-                  <span className="text-xs font-medium text-[#252B36] leading-snug">{doc}</span>
+                  <span className="text-xs font-medium text-slate-700 leading-snug">{doc}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-5 pt-4 border-t border-[#E5E7EB] flex flex-col sm:flex-row items-center justify-between gap-3">
-              <span className="text-xs text-[#667085]">
+            <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-xs text-slate-500">
                 Don't have all documents right now? You can start the application and upload them later.
               </span>
-              <button
-                type="button"
-                onClick={handleStartApplication}
-                className="px-5 py-2 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs transition-colors shrink-0 cursor-pointer"
+              <Link
+                to="/apply/gst"
+                className="px-6 py-2.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shrink-0 shadow-xs transition"
               >
                 Begin Application &rarr;
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* 3. GST FAQS */}
-      <section className="py-12 bg-white border-b border-[#E5E7EB]">
+      <section className="py-14 bg-white border-b border-slate-200/80">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 space-y-2">
-            <span className="text-xs font-bold text-[#155EEF] uppercase tracking-wider">
+          <div className="text-center mb-10 space-y-2">
+            <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Answers & Guidance
             </span>
-            <h2 className="text-2xl font-bold text-[#252B36]">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
               Frequently Asked Questions
             </h2>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {gstFaqs.map((faq, idx) => (
               <div
                 key={faq.q}
-                className="bg-[#F8F9FB] rounded-lg border border-[#E5E7EB] overflow-hidden"
+                className="bg-slate-50/50 rounded-2xl border border-slate-200 overflow-hidden transition"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
-                  className="w-full px-5 py-3.5 text-left flex items-center justify-between text-xs sm:text-sm font-semibold text-[#252B36] hover:text-[#155EEF] transition-colors cursor-pointer"
+                  className="w-full px-5 py-4 text-left flex items-center justify-between text-sm font-bold text-slate-900 hover:text-[#111827] transition"
                 >
                   <span>{faq.q}</span>
                   {openFaq === idx ? (
-                    <ChevronUp className="w-4 h-4 text-[#667085] shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-[#667085] shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
                   )}
                 </button>
                 {openFaq === idx && (
-                  <div className="px-5 pb-4 text-xs text-[#667085] leading-relaxed border-t border-[#E5E7EB] pt-3">
+                  <div className="px-5 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
                     {faq.a}
                   </div>
                 )}
@@ -323,19 +328,19 @@ export default function GstLandingPage() {
       </section>
 
       {/* 4. BOTTOM ACTION */}
-      <section className="py-12 bg-[#F8F9FB]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#252B36]">
+      <section className="py-12 bg-slate-50/70">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+          <h2 className="text-2xl font-extrabold text-slate-900">
             Ready to secure your GST Number?
           </h2>
-          <p className="text-xs sm:text-sm text-[#667085]">
+          <p className="text-xs sm:text-sm text-slate-600">
             Submit your details in 5 minutes. Our team will verify your documents and initiate portal submission today.
           </p>
-          <div className="pt-1">
+          <div className="pt-2">
             <button
               type="button"
               onClick={handleStartApplication}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-sm shadow-xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-sm shadow-md transition cursor-pointer"
             >
               Start GST Registration Now
               <ArrowRight className="w-4 h-4" />
