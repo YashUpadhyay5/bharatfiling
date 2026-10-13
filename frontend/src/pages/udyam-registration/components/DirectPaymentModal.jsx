@@ -30,14 +30,14 @@ export default function DirectPaymentModal({
 
   // Billing Details (prefilled from order/customer)
   const [billing, setBilling] = useState({
-    name: order?.customer_name || 'Yash Updhyay',
-    address: order?.plant_address || 'Sector 62, Electronic City',
-    zipCode: '560100',
+    name: order?.customer_name || 'Udyam Applicant',
+    address: order?.plant_address || 'Industrial Area, Phase 1',
+    zipCode: '560001',
     city: 'Bengaluru',
     state: order?.state || 'Karnataka',
     country: 'India',
-    phone: order?.customer_phone || '7668976193',
-    email: order?.customer_email || 'yashupdhyay486@gmail.com',
+    phone: order?.customer_phone || '9876543210',
+    email: order?.customer_email || 'applicant@bharatfiling.org',
     notes: '',
     differentShipping: false,
   });
@@ -441,14 +441,14 @@ export default function DirectPaymentModal({
 
                 {/* Actions */}
                 <div className="space-y-2 pt-1">
-                  <button
-                    type="button"
-                    disabled={isProcessing}
-                    onClick={handleMakePayment}
-                    className="w-full py-2.5 px-4 rounded bg-[#5cb85c] hover:bg-[#4cae4c] text-white font-bold text-sm shadow-xs transition cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    {isProcessing ? 'Processing Payment...' : 'Make Payment'}
-                  </button>
+                    <button
+                      type="button"
+                      disabled={isProcessing}
+                      onClick={handleMakePayment}
+                      className="w-full py-2.5 px-4 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-sm shadow-xs transition cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      {isProcessing ? 'Processing Payment...' : 'Make Payment'}
+                    </button>
                   <div className="text-center">
                     <button
                       type="button"

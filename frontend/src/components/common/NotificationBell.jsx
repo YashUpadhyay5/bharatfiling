@@ -195,15 +195,15 @@ export default function NotificationBell() {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="View notifications"
-        className={`relative p-2 rounded-full border transition-all duration-200 flex items-center justify-center ${
+        className={`relative p-2 rounded-lg border transition-colors flex items-center justify-center ${
           isOpen
-            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+            ? 'bg-[#155EEF] text-white border-[#155EEF] shadow-xs'
+            : 'bg-white text-[#252B36] border-[#E5E7EB] hover:border-[#D0D5DD] hover:bg-[#F8F9FB]'
         }`}
       >
-        <Bell className="w-4 h-4 transition-transform active:scale-90" />
+        <Bell className="w-4 h-4 transition-transform active:scale-95" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-600 text-[9px] font-black text-white ring-2 ring-white animate-pulse">
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#B42318] text-[9px] font-bold text-white ring-2 ring-white animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -211,13 +211,13 @@ export default function NotificationBell() {
 
       {/* Popover Dropdown Inbox */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.18)] border border-slate-100 z-50 overflow-hidden animate-fade-in">
+        <div className="absolute right-0 top-full mt-2 w-[340px] sm:w-[380px] bg-white rounded-xl shadow-lg border border-[#E5E7EB] z-50 overflow-hidden animate-fade-in">
           {/* Header */}
-          <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+          <div className="p-3.5 border-b border-[#E5E7EB] flex items-center justify-between bg-[#F8F9FB]">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-slate-900 tracking-tight">Notifications</span>
+              <span className="text-xs font-bold text-[#252B36] tracking-tight">Notifications</span>
               {unreadCount > 0 && (
-                <span className="bg-rose-100 text-rose-700 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">
+                <span className="bg-[#FEF3F2] text-[#B42318] text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-[#FDA29B]">
                   {unreadCount} new
                 </span>
               )}
@@ -228,7 +228,7 @@ export default function NotificationBell() {
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
-                  className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 transition flex items-center gap-1"
+                  className="text-[11px] font-semibold text-[#155EEF] hover:underline transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <Check className="w-3 h-3" />
                   Mark all read
@@ -238,14 +238,14 @@ export default function NotificationBell() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex border-b border-slate-100 bg-white px-3 pt-2 gap-2 text-xs">
+          <div className="flex border-b border-[#E5E7EB] bg-white px-3 pt-2 gap-2 text-xs">
             <button
               type="button"
               onClick={() => setFilter('all')}
-              className={`pb-2 px-2 font-bold transition border-b-2 ${
+              className={`pb-2 px-2 font-semibold transition-colors border-b-2 cursor-pointer ${
                 filter === 'all'
-                  ? 'border-slate-900 text-slate-900'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'border-[#155EEF] text-[#155EEF]'
+                  : 'border-transparent text-[#667085] hover:text-[#252B36]'
               }`}
             >
               All ({notifications.length})
@@ -253,10 +253,10 @@ export default function NotificationBell() {
             <button
               type="button"
               onClick={() => setFilter('unread')}
-              className={`pb-2 px-2 font-bold transition border-b-2 ${
+              className={`pb-2 px-2 font-semibold transition-colors border-b-2 cursor-pointer ${
                 filter === 'unread'
-                  ? 'border-slate-900 text-slate-900'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'border-[#155EEF] text-[#155EEF]'
+                  : 'border-transparent text-[#667085] hover:text-[#252B36]'
               }`}
             >
               Unread ({unreadCount})

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck,
   Check,
@@ -8,9 +8,7 @@ import {
   CreditCard,
   ChevronDown,
   ChevronUp,
-  ExternalLink,
   ArrowRight,
-  Sparkles,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api } from '../../services/api.js';
@@ -28,7 +26,6 @@ export default function OrderCheckoutPage() {
   const { showSuccess, showError } = useToast();
 
   const [order, setOrder] = useState(null);
-  const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDeliverables, setShowDeliverables] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -41,7 +38,6 @@ export default function OrderCheckoutPage() {
           const res = await api.getCheckoutOrder(orderId);
           if (res.success && res.order) {
             setOrder(res.order);
-            setApplication(res.application);
             return;
           }
         }
@@ -58,12 +54,12 @@ export default function OrderCheckoutPage() {
           amount: 1769,
           customer_name: draft.name || user?.full_name || 'GST Applicant',
           customer_phone: draft.phone || user?.phone || '9876543210',
-          customer_email: user?.email || 'applicant@gmail.com',
+          customer_email: user?.email || 'applicant@bharatfiling.org',
           state: draft.state || 'Karnataka',
           business_type: draft.businessType || 'Retail Trade',
           created_at: new Date().toISOString(),
         });
-      } catch (err) {
+      } catch {
         showError('Loaded order quotation from local session.');
       } finally {
         setLoading(false);
@@ -74,41 +70,41 @@ export default function OrderCheckoutPage() {
   }, [orderId, user]);
 
   const maskEmail = (email) => {
-    if (!email || !email.includes('@')) return 'ya*************@gmail.com';
+    if (!email || !email.includes('@')) return 'user@domain.com';
     const [namePart, domain] = email.split('@');
     if (namePart.length <= 2) return `${namePart}****@${domain}`;
     return `${namePart.slice(0, 2)}${'*'.repeat(Math.max(4, namePart.length - 2))}@${domain}`;
   };
 
   const maskPhone = (phone) => {
-    if (!phone) return '+91-*******193';
+    if (!phone) return '+91-XXXXXX3210';
     const clean = phone.replace(/\D/g, '');
     if (clean.length < 10) return `+91-${phone}`;
-    return `+91-*******${clean.slice(-3)}`;
+    return `+91-XXXXXX${clean.slice(-4)}`;
   };
 
   const handleShare = () => {
     navigator.clipboard?.writeText(window.location.href);
-    showSuccess('Quotation link copied to clipboard!');
+    showSuccess('Quotation link copied to clipboard.');
   };
 
-  const handlePaymentSuccess = (paymentResult) => {
+  const handlePaymentSuccess = () => {
     setIsPaymentModalOpen(false);
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
     });
-    showSuccess('Payment verified & GST order confirmed! Redirecting to Dashboard...');
+    showSuccess('Payment verified and statutory filing initiated. Redirecting to Dashboard...');
     navigate('/dashboard');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-[#111827] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-slate-500 font-semibold">Loading BharatFiling Order Quotation...</p>
+          <div className="w-8 h-8 border-3 border-[#155EEF] border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-[#667085] font-semibold">Loading Order Quotation...</p>
         </div>
       </div>
     );
@@ -118,51 +114,51 @@ export default function OrderCheckoutPage() {
     return <UdyamCheckoutPage />;
   }
 
-  const currentDateFormatted = new Date().toLocaleDateString('en-GB', {
+  const currentDateFormatted = new Date().toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   });
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans pb-20">
+    <div className="min-h-screen bg-[#F8F9FB] font-sans pb-20">
       {/* Top Banner */}
-      <div className="bg-[#EBF3FF] border-b border-blue-100 py-3 px-4 text-center">
-        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs text-slate-700">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-blue-200 text-[#111827] font-bold text-[11px] shadow-2xs">
-            <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
+      <div className="bg-[#EFF8FF] border-b border-[#B2DDFF] py-2.5 px-4 text-center">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs text-[#252B36]">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white border border-[#B2DDFF] text-[#155EEF] font-semibold text-[11px] shadow-xs">
+            <CreditCard className="w-3.5 h-3.5 text-[#155EEF]" />
             UPI AUTOPAY
           </span>
-          <span className="font-medium">
-            Automated recurring filing mandate • Cancel anytime from your UPI app
+          <span className="font-medium text-[#252B36]">
+            Automated recurring filing mandate • Cancel anytime directly from your UPI app
           </span>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 md:pt-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 md:pt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* LEFT COLUMN: Order Details & Deliverables */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-5">
             {/* Header info */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-4">
               <div>
-                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-bold text-[#252B36] tracking-tight">
                   Quotation & Order Summary
                 </h1>
-                <div className="font-mono text-xs text-slate-500 font-semibold tracking-wide">
+                <div className="font-mono text-xs text-[#667085] font-medium tracking-wide">
                   #{order?.id || orderId}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-slate-500">
+              <div className="flex items-center gap-3 text-xs text-[#667085]">
                 <span className="inline-flex items-center gap-1.5 font-medium">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <Calendar className="w-3.5 h-3.5 text-[#667085]" />
                   {currentDateFormatted}
                 </span>
                 <button
                   onClick={handleShare}
                   title="Copy Quotation Link"
-                  className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer"
+                  className="p-1.5 rounded-lg border border-[#E5E7EB] bg-white hover:bg-[#F8F9FB] text-[#667085] transition cursor-pointer"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                 </button>
@@ -170,18 +166,18 @@ export default function OrderCheckoutPage() {
             </div>
 
             {/* Service Package Card */}
-            <div className="bg-white rounded-3xl p-6 shadow-[0_8px_25px_rgba(17,24,39,0.04)] border border-slate-200/90 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-slate-100 pb-3">
-                <h2 className="text-base font-extrabold text-slate-900 leading-snug">
+            <div className="bg-white rounded-xl p-5 sm:p-6 shadow-xs border border-[#E5E7EB] space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-[#E5E7EB] pb-3">
+                <h2 className="text-base font-bold text-[#252B36] leading-snug">
                   GST Registration (GST Registration + Monthly Filing)
                 </h2>
-                <div className="text-lg font-black text-slate-900 whitespace-nowrap">
-                  1,499 <span className="text-xs font-semibold text-slate-500">INR</span>
+                <div className="text-lg font-bold text-[#252B36] whitespace-nowrap">
+                  ₹1,499 <span className="text-xs font-normal text-[#667085]">INR</span>
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Complete online GST registration and monthly return filing ensuring 100% statutory compliance, Form REG-01 preparation, and dedicated Chartered Accountant representation.
+              <p className="text-xs sm:text-sm text-[#667085] leading-relaxed">
+                Complete online GST registration and monthly return filing ensuring statutory compliance, Form REG-01 preparation, and qualified Chartered Accountant representation.
               </p>
 
               {/* Deliverables Accordion */}
@@ -189,28 +185,28 @@ export default function OrderCheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setShowDeliverables(!showDeliverables)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#155EEF] hover:underline transition cursor-pointer"
                 >
                   <span>Deliverables</span>
                   {showDeliverables ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 </button>
 
                 {showDeliverables && (
-                  <div className="mt-3 p-4 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-2 text-xs text-slate-700 animate-in fade-in duration-200">
+                  <div className="mt-3 p-4 bg-[#F8F9FB] rounded-lg border border-[#E5E7EB] space-y-2 text-xs text-[#252B36]">
                     <div className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-[#027A48] shrink-0 mt-0.5" />
                       <span>Drafting and filing of Form REG-01 on official GST common portal</span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-[#027A48] shrink-0 mt-0.5" />
                       <span>Instant Temporary Reference Number (TRN) and ARN allocation</span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>Handling clarification notices (Form REG-03) with tax department</span>
+                      <Check className="w-4 h-4 text-[#027A48] shrink-0 mt-0.5" />
+                      <span>Handling clarification notices (Form REG-03) with tax authorities</span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-[#027A48] shrink-0 mt-0.5" />
                       <span>Delivery of official GST Certificate (Form REG-06)</span>
                     </div>
                   </div>
@@ -219,26 +215,26 @@ export default function OrderCheckoutPage() {
             </div>
 
             {/* Customer Details Summary */}
-            <div className="bg-white rounded-3xl p-6 shadow-[0_8px_25px_rgba(17,24,39,0.04)] border border-slate-200/90 space-y-3">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <div className="bg-white rounded-xl p-5 sm:p-6 shadow-xs border border-[#E5E7EB] space-y-3">
+              <h3 className="text-xs font-bold text-[#667085] uppercase tracking-wider">
                 Applicant Information
               </h3>
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
-                  <span className="text-slate-500 block">Name:</span>
-                  <span className="font-bold text-slate-900">{order?.customer_name || 'Yash Upadhyay'}</span>
+                  <span className="text-[#667085] block">Name:</span>
+                  <span className="font-semibold text-[#252B36]">{order?.customer_name || 'GST Applicant'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Mobile:</span>
-                  <span className="font-bold text-slate-900">{maskPhone(order?.customer_phone)}</span>
+                  <span className="text-[#667085] block">Mobile:</span>
+                  <span className="font-semibold text-[#252B36]">{maskPhone(order?.customer_phone)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">State:</span>
-                  <span className="font-bold text-slate-900">{order?.state || 'Karnataka'}</span>
+                  <span className="text-[#667085] block">State:</span>
+                  <span className="font-semibold text-[#252B36]">{order?.state || 'Karnataka'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Business Nature:</span>
-                  <span className="font-bold text-slate-900">{order?.business_type || 'Retail Trade'}</span>
+                  <span className="text-[#667085] block">Business Nature:</span>
+                  <span className="font-semibold text-[#252B36]">{order?.business_type || 'Retail Trade'}</span>
                 </div>
               </div>
             </div>
@@ -246,45 +242,45 @@ export default function OrderCheckoutPage() {
 
           {/* RIGHT COLUMN: Subscription Card & CTA */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_12px_40px_rgba(17,24,39,0.08)] border border-slate-200/90 space-y-6 sticky top-8">
+            <div className="bg-white rounded-xl p-6 shadow-xs border border-[#E5E7EB] space-y-5 sticky top-8">
               <div>
-                <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold">
+                <span className="px-2.5 py-1 rounded-md bg-[#EFF8FF] border border-[#B2DDFF] text-[#155EEF] text-[11px] font-semibold">
                   Monthly Subscription
                 </span>
-                <h3 className="text-lg font-black text-slate-900 mt-2">
+                <h3 className="text-base font-bold text-[#252B36] mt-2">
                   Statutory Compliance Plan
                 </h3>
               </div>
 
               {/* Price Breakdown */}
-              <div className="space-y-2.5 border-t border-b border-slate-100 py-4 text-xs">
-                <div className="flex justify-between text-slate-600">
+              <div className="space-y-2.5 border-t border-b border-[#E5E7EB] py-4 text-xs">
+                <div className="flex justify-between text-[#667085]">
                   <span>GST Registration + Filing</span>
-                  <span className="font-semibold text-slate-900">₹{order?.subtotal || 1499}</span>
+                  <span className="font-semibold text-[#252B36]">₹{order?.subtotal || 1499}</span>
                 </div>
-                <div className="flex justify-between text-slate-600">
+                <div className="flex justify-between text-[#667085]">
                   <span>GST (18%)</span>
-                  <span className="font-semibold text-slate-900">₹{order?.gst_amount || 270}</span>
+                  <span className="font-semibold text-[#252B36]">₹{order?.gst_amount || 270}</span>
                 </div>
-                <div className="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-100">
+                <div className="flex justify-between text-base font-bold text-[#252B36] pt-2 border-t border-[#E5E7EB]">
                   <span>Total Monthly Fee</span>
-                  <span className="text-[#111827]">₹{order?.amount || 1769} INR</span>
+                  <span className="text-[#155EEF]">₹{order?.amount || 1769} INR</span>
                 </div>
               </div>
 
               {/* Included Benefits */}
-              <div className="space-y-2 text-xs text-slate-600">
+              <div className="space-y-2 text-xs text-[#667085]">
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Check className="w-4 h-4 text-[#027A48] shrink-0" />
                   <span>Cancel anytime from your UPI mobile app</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Check className="w-4 h-4 text-[#027A48] shrink-0" />
                   <span>Dedicated Chartered Accountant assignment</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Zero penalty & on-time filing guarantee</span>
+                  <Check className="w-4 h-4 text-[#027A48] shrink-0" />
+                  <span>On-time statutory filing and notice assistance</span>
                 </div>
               </div>
 
@@ -292,15 +288,15 @@ export default function OrderCheckoutPage() {
               <button
                 type="button"
                 onClick={() => setIsPaymentModalOpen(true)}
-                className="w-full py-4 px-6 rounded-2xl bg-[#111827] hover:bg-[#1F2937] text-white font-black text-sm shadow-xl transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                className="w-full py-3.5 px-6 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-sm shadow-xs transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
               >
                 <span>Activate Subscription • ₹{order?.amount || 1769} INR</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
-              <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 text-center">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>NPCI Certified • 256-bit Bank-Grade Encryption</span>
+              <div className="flex items-center justify-center gap-2 text-[11px] text-[#667085] text-center">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#027A48]" />
+                <span>NPCI Certified • 256-bit Secure Gateway</span>
               </div>
             </div>
           </div>

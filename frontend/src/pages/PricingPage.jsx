@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, ArrowRight, ShieldCheck, Sparkles, Building2, Receipt, FileCheck2, Calculator, Scale, Award, MessageCircle } from 'lucide-react';
+import { CheckCircle2, ArrowRight, ShieldCheck, Building2, Receipt, FileCheck2, Calculator, Scale, Award, MessageCircle } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
@@ -19,6 +19,7 @@ export default function PricingPage() {
       setIsAuthModalOpen(true);
     }
   };
+
   const pricingPlans = [
     {
       title: 'Company Incorporation',
@@ -72,7 +73,7 @@ export default function PricingPage() {
       title: 'Online GST Registration',
       category: 'Indirect Taxation',
       price: '₹1,499',
-      period: 'all-inclusive fee',
+      period: '+ 18% GST',
       popular: false,
       tag: 'Fast-Track',
       icon: FileCheck2,
@@ -98,44 +99,44 @@ export default function PricingPage() {
       price: '₹2,999',
       period: '/ month',
       popular: false,
-      tag: 'Ongoing Finance',
+      tag: 'Monthly Operations',
       icon: Calculator,
-      desc: 'Complete bookkeeping, monthly financial statements, and ongoing payroll & tax management.',
+      desc: 'Ongoing monthly bookkeeping, invoicing, P&L, balance sheets, payroll TDS, and GST returns.',
       breakdown: [
-        { label: 'Monthly Retainer Fee', val: '₹2,999' },
-        { label: 'GST on Services (18%)', val: '₹540' },
-        { label: 'Cloud Ledger Integration', val: 'Included' },
+        { label: 'Bookkeeping on Tally / Zoho', val: 'Included' },
+        { label: 'Monthly GST (GSTR-1 & 3B)', val: 'Included' },
+        { label: 'Quarterly TDS Returns', val: 'Included' },
       ],
       features: [
-        'Tally & Zoho Books Ledger Maintenance',
-        'Monthly P&L, Balance Sheet & Cash Flow',
-        'Vendor Bill Processing & Invoicing',
-        'TDS Deduction & Payroll Compliance',
-        'Monthly Strategic Review with Senior CA',
+        'Dedicated Accounting Desk & Monthly P&L',
+        'GSTR-1, GSTR-3B & 2B ITC Reconciliation',
+        'Monthly Payroll & TDS Form 24Q/26Q',
+        'Advance Tax Estimation & Review',
+        'Quarterly Video Consultation with Senior CA',
       ],
-      ctaText: 'Hire Virtual CFO',
+      ctaText: 'Explore Virtual CFO',
       ctaPath: '/services/legal',
     },
     {
-      title: 'Annual MCA ROC Compliance',
+      title: 'MCA ROC Annual Compliance',
       category: 'Corporate Secretarial',
       price: '₹3,499',
-      period: 'per financial year',
+      period: '+ MCA filing fees',
       popular: false,
-      tag: 'Mandatory Compliance',
+      tag: 'Statutory Secretarial',
       icon: Scale,
-      desc: 'Annual statutory compliance for Pvt Ltd and LLP entities to prevent ROC strike-off and penalties.',
+      desc: 'Annual mandatory MCA compliance for active Private Limited Companies and LLPs.',
       breakdown: [
-        { label: 'CS & CA Audit Fee', val: '₹3,499' },
-        { label: 'GST on Services (18%)', val: '₹630' },
-        { label: 'ROC Filing Assistance', val: 'Included' },
+        { label: 'Form AOC-4 (Financials)', val: 'Included' },
+        { label: 'Form MGT-7 (Annual Return)', val: 'Included' },
+        { label: 'Director KYC (DIR-3 KYC)', val: 'Included' },
       ],
       features: [
-        'Filing Form AOC-4 (Financial Statements)',
-        'Filing Form MGT-7 (Annual Return)',
-        'Director KYC (DIR-3 KYC) for 2 Directors',
-        'Drafting AGM Minutes & Resolutions',
-        'Statutory Audit Support & Assistance',
+        'Statutory Financial Statements Prep (AOC-4)',
+        'Annual Return ROC Preparation (MGT-7)',
+        'Up to 2 Director KYCs (DIR-3 KYC)',
+        'Drafting Minutes of AGM & Board Meetings',
+        'Protection against MCA late fees of ₹100/day',
       ],
       ctaText: 'Manage ROC Filings',
       ctaPath: '/services/llp-registration',
@@ -144,22 +145,22 @@ export default function PricingPage() {
       title: 'Trademark Registration',
       category: 'Intellectual Property',
       price: '₹1,999',
-      period: '+ Govt TM Fee',
+      period: '+ Govt IPR fees',
       popular: false,
       tag: 'Brand Protection',
       icon: Award,
-      desc: 'Protect brand name, logo, or tagline nationwide with licensed IP Attorney representation.',
+      desc: 'Complete brand name, logo, or slogan registration with IP attorneys across 45 classes.',
       breakdown: [
-        { label: 'IP Attorney Drafting Fee', val: '₹1,999' },
-        { label: 'GST on Services (18%)', val: '₹360' },
-        { label: 'Nice Class Classification', val: 'Included' },
+        { label: 'Advocate Search & Drafting Fee', val: '₹1,999' },
+        { label: 'Govt Fee (Individual/MSME)', val: '₹4,500' },
+        { label: 'Govt Fee (Other Companies)', val: '₹9,000' },
       ],
       features: [
-        'Free Comprehensive TM Search Report',
-        'Class 1-45 Selection & Strategy',
-        'Form TM-A Preparation & Submission',
-        'Govt Trademark Application Receipt',
-        'Examination Report Advisory',
+        'Comprehensive Pre-Filing Trademark Search',
+        'Class Recommendation across 45 Nice Classes',
+        'Drafting & Filing Form TM-A with IP India',
+        'Instant Application Number (TM Symbol Right)',
+        'Notice of Publication & Journal Monitoring',
       ],
       ctaText: 'Protect Your Brand',
       ctaPath: '/services/trademark',
@@ -167,106 +168,106 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      <Breadcrumbs items={[{ label: 'Transparent Pricing' }]} />
-      
-      <div className="py-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-14">
+    <div className="flex flex-col min-h-screen bg-white font-sans">
+      <Breadcrumbs items={[{ label: 'Pricing' }]} />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-12">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#111827] bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-            Fair & Transparent
+        <div className="text-center max-w-3xl mx-auto space-y-2">
+          <span className="text-xs font-bold text-[#155EEF] uppercase tracking-wider">
+            100% Upfront Transparency
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
-            Straightforward CA & Compliance Pricing
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#252B36] tracking-tight">
+            Transparent Fixed Pricing. Zero Hidden Fees.
           </h1>
-          <p className="text-sm sm:text-base text-slate-600">
-            We believe in 100% upfront clarity with zero hidden surprises. Every plan includes certified Chartered Accountant review and direct government portal filing.
+          <p className="text-sm text-[#667085] leading-relaxed">
+            Every quote clearly separates professional fees from actual government portal charges. What you see is exactly what you pay.
           </p>
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pricingPlans.map((plan) => {
             const IconComp = plan.icon;
             return (
               <div
                 key={plan.title}
-                className={`bg-white rounded-3xl p-7 border transition-all duration-300 flex flex-col justify-between relative shadow-xs hover:shadow-xl hover:-translate-y-1.5 ${
+                className={`rounded-xl p-6 flex flex-col justify-between transition-colors shadow-xs relative bg-white ${
                   plan.popular
-                    ? 'border-[#111827] ring-2 ring-[#111827]/10'
-                    : 'border-slate-200/90'
+                    ? 'border-2 border-[#155EEF]'
+                    : 'border border-[#E5E7EB] hover:border-[#155EEF]'
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3.5 right-6 bg-[#111827] text-white text-[11px] font-black px-3.5 py-1 rounded-full shadow-md">
+                  <div className="absolute -top-3 right-5 bg-[#155EEF] text-white text-[11px] font-semibold px-2.5 py-0.5 rounded shadow-xs">
                     {plan.tag}
                   </div>
                 )}
 
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#111827] flex items-center justify-center">
-                      <IconComp className="w-5 h-5" />
+                    <div className="w-8 h-8 rounded-lg bg-[#EFF8FF] text-[#155EEF] flex items-center justify-center border border-[#D1E9FF]">
+                      <IconComp className="w-4 h-4" />
                     </div>
                     {!plan.popular && (
-                      <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
+                      <span className="text-[10px] font-semibold text-[#667085] bg-[#F8F9FB] px-2 py-0.5 rounded border border-[#E5E7EB]">
                         {plan.tag}
                       </span>
                     )}
                   </div>
 
                   <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold text-[#667085] uppercase tracking-wider">
                       {plan.category}
                     </span>
-                    <h3 className="text-lg font-extrabold text-slate-900 mt-0.5">
+                    <h3 className="text-base font-bold text-[#252B36] mt-0.5">
                       {plan.title}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    <p className="text-xs text-[#667085] mt-1 leading-relaxed">
                       {plan.desc}
                     </p>
                   </div>
 
-                  <div className="py-2 border-y border-slate-100">
+                  <div className="py-2 border-y border-[#E5E7EB]">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl sm:text-3xl font-black text-slate-900">
+                      <span className="text-2xl font-bold text-[#252B36]">
                         {plan.price}
                       </span>
-                      <span className="text-xs text-slate-500 font-medium">
+                      <span className="text-xs text-[#667085]">
                         {plan.period}
                       </span>
                     </div>
                   </div>
 
                   {/* Fee Breakdown */}
-                  <div className="bg-slate-50/70 rounded-xl p-3 space-y-1.5 text-xs text-slate-600">
+                  <div className="bg-[#F8F9FB] rounded-lg p-3 space-y-1.5 text-xs text-[#667085] border border-[#E5E7EB]">
                     {plan.breakdown.map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between">
                         <span>{item.label}</span>
-                        <span className="font-bold text-slate-900">{item.val}</span>
+                        <span className="font-semibold text-[#252B36]">{item.val}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Features */}
-                  <div className="space-y-2 text-xs text-slate-700 pt-1">
+                  <div className="space-y-2 text-xs text-[#252B36] pt-1">
                     {plan.features.map((feat, idx) => (
                       <div key={idx} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-[#027A48] shrink-0 mt-0.5" />
                         <span>{feat}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="pt-6 mt-6 border-t border-slate-100">
+                <div className="pt-5 mt-5 border-t border-[#E5E7EB]">
                   <button
                     type="button"
                     onClick={() => handleSelectPlan(plan)}
-                    className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer ${
+                    className={`w-full py-2.5 rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       plan.popular
-                        ? 'bg-[#111827] hover:bg-[#1F2937] text-white shadow-md'
-                        : 'bg-slate-100 hover:bg-[#111827] text-slate-800 hover:text-white'
+                        ? 'bg-[#155EEF] hover:bg-[#1048C6] text-white shadow-xs'
+                        : 'bg-[#F8F9FB] hover:bg-[#155EEF] text-[#252B36] hover:text-white border border-[#E5E7EB] hover:border-[#155EEF]'
                     }`}
                   >
                     <span>{plan.ctaText}</span>
@@ -279,30 +280,30 @@ export default function PricingPage() {
         </div>
 
         {/* Custom Quote & Consultation Banner */}
-        <div className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+        <div className="bg-[#F8F9FB] rounded-xl p-6 sm:p-8 border border-[#E5E7EB] flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1.5 text-center md:text-left">
+            <h2 className="text-lg sm:text-xl font-bold text-[#252B36]">
               Need a Custom Corporate Advisory Package?
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-xl">
-              We create customized plans for fast-growing startups, manufacturing units, e-commerce sellers, and foreign subsidiaries needing multi-state compliance and specialized tax planning.
+            <p className="text-xs sm:text-sm text-[#667085] max-w-xl">
+              We design customized compliance packages for startups, e-commerce sellers, manufacturing units, and foreign subsidiaries needing multi-state filing and dedicated CA retainers.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
             <Link
               to="/contact"
-              className="px-6 py-3 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition"
+              className="px-5 py-2.5 rounded-lg bg-[#155EEF] hover:bg-[#1048C6] text-white font-semibold text-xs shadow-xs transition-colors"
             >
               Request Custom Quote
             </Link>
             <a
-              href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20a%20custom%20corporate%20CA%20proposal."
+              href="https://wa.me/9118008908800"
               target="_blank"
               rel="noreferrer"
-              className="px-5 py-3 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs transition flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-lg bg-white hover:bg-[#F8F9FB] text-[#252B36] font-semibold text-xs border border-[#E5E7EB] transition-colors flex items-center gap-1.5"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-600" />
+              <MessageCircle className="w-4 h-4 text-[#027A48]" />
               Chat on WhatsApp
             </a>
           </div>

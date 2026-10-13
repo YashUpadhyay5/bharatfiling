@@ -515,7 +515,7 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-full border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-all shadow-xs text-xs font-medium w-40 xl:w-44 shrink-0 group cursor-pointer ${className}`}
+          className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg border border-[#E5E7EB] hover:border-[#155EEF] bg-[#F8F9FB] hover:bg-white text-[#667085] hover:text-[#252B36] transition-colors shadow-2xs text-xs font-medium w-40 xl:w-44 shrink-0 group cursor-pointer ${className}`}
           aria-label="Search services (⌘K)"
           title="Search services (Press ⌘K or /)"
         >

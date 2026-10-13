@@ -9,6 +9,7 @@ import {
   User,
   LogOut,
   Search,
+  ShieldCheck,
 } from 'lucide-react';
 import NavbarSearch from './NavbarSearch.jsx';
 import AuthRequiredModal from './AuthRequiredModal.jsx';
@@ -216,33 +217,28 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] font-sans">
-      <nav className="w-full max-w-[1480px] mx-auto px-3 sm:px-6 lg:px-8 h-[68px] flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-white border-b border-[#E5E7EB] shadow-[0_1px_2px_rgba(0,0,0,0.03)] font-sans">
+      <nav className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-[68px] flex items-center justify-between">
         {/* Left Section: Brand Logo & 8 Main Category Tabs */}
         <div className="flex items-center min-w-0">
-          {/* Brand Logo with clean spacing */}
+          {/* Brand Logo with IndiaFilings-inspired clean typography */}
           <Link
             to="/"
-            title="Return to BharatFiling Homepage"
-            className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform mr-4 xl:mr-6"
+            title="BharatFiling — India's Compliance Platform"
+            className="flex items-center gap-2.5 shrink-0 group active:scale-95 transition-transform mr-4 xl:mr-7"
           >
-            <img
-              src="/bharatfiling-brand-icon.png"
-              alt="BharatFiling"
-              className="h-8 sm:h-9 w-auto object-contain shrink-0"
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
-              }}
-            />
-            <div className="flex items-baseline font-black tracking-tight text-lg sm:text-xl leading-none select-none">
-              <span className="text-[#111827]">Bharat</span>
-              <span className="text-[#F26522]">Filing</span>
+            <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-[#EFF8FF] border border-[#D1E9FF]">
+              <ShieldCheck className="w-5 h-5 text-[#155EEF]" />
+              <div className="absolute -bottom-0.5 inset-x-1.5 h-[2px] brand-tricolor-accent rounded-full" />
+            </div>
+            <div className="flex items-baseline font-extrabold tracking-tight text-lg sm:text-xl leading-none select-none">
+              <span className="text-[#252B36]">Bharat</span>
+              <span className="text-[#155EEF]">Filing</span>
             </div>
           </Link>
 
-          {/* Desktop 8 Navigation Tabs (Exact IndiaFilings Tabs - Zero-Wrap) */}
-          <div className="hidden lg:flex items-center gap-1.5 xl:gap-3 2xl:gap-4.5 whitespace-nowrap">
+          {/* Desktop Navigation Tabs (IndiaFilings Corporate Style) */}
+          <div className="hidden lg:flex items-center gap-1 xl:gap-2.5 2xl:gap-3.5 whitespace-nowrap">
             {menuCategories.map((cat) => (
               <div
                 key={cat.key}
@@ -252,14 +248,14 @@ export default function Navbar() {
               >
                 <button
                   type="button"
-                  className={`flex items-center gap-0.5 xl:gap-1 text-[12px] xl:text-[13px] font-medium transition-colors hover:text-[#111827] py-1 whitespace-nowrap ${
-                    activeDropdown === cat.key ? 'text-[#111827] font-semibold' : 'text-slate-700'
+                  className={`flex items-center gap-1 text-[13px] font-medium transition-colors py-1 whitespace-nowrap ${
+                    activeDropdown === cat.key ? 'text-[#155EEF] font-semibold' : 'text-[#252B36] hover:text-[#155EEF]'
                   }`}
                 >
                   <span>{cat.label}</span>
                   <ChevronDown
-                    className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${
-                      activeDropdown === cat.key ? 'rotate-180 text-[#111827]' : ''
+                    className={`w-3.5 h-3.5 text-[#667085] transition-transform duration-200 ${
+                      activeDropdown === cat.key ? 'rotate-180 text-[#155EEF]' : ''
                     }`}
                   />
                 </button>
@@ -267,23 +263,23 @@ export default function Navbar() {
                 {/* 2-Column Hover Mega-Dropdown */}
                 {activeDropdown === cat.key && (
                   <div
-                    className="absolute top-[58px] left-0 bg-white rounded-2xl shadow-[0_16px_45px_rgba(17,24,39,0.12)] border border-slate-100 p-5 min-w-[420px] max-w-[500px] z-50 animate-fade-in"
+                    className="absolute top-[64px] left-0 bg-white rounded-xl shadow-lg border border-[#E5E7EB] p-4 min-w-[440px] max-w-[520px] z-50 animate-fade-in"
                     onMouseEnter={() => handleMouseEnter(cat.key)}
                     onMouseLeave={handleMouseLeave}
                   >
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                       {/* Left Column */}
-                      <div className="space-y-1">
+                      <div className="space-y-0.5">
                         {cat.col1.map((item) => (
                           <Link
                             key={item.name}
                             to={item.path}
                             onClick={(e) => handleServiceClick(e, item, cat.label)}
-                            className="flex items-center justify-between text-[12.5px] text-slate-700 hover:text-[#111827] hover:bg-slate-50 px-2 py-1.5 rounded-lg font-medium transition-all group"
+                            className="flex items-center justify-between text-[13px] text-[#252B36] hover:text-[#155EEF] hover:bg-[#EFF8FF] px-2.5 py-1.5 rounded-lg font-medium transition-colors group"
                           >
-                            <span>{item.name}</span>
+                            <span className="truncate">{item.name}</span>
                             {item.isLive && (
-                              <span className="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-200">
+                              <span className="bg-[#ECFDF3] text-[#027A48] text-[9px] font-bold px-1.5 py-0.5 rounded border border-[#A6F4C5] shrink-0 ml-1">
                                 Live
                               </span>
                             )}
@@ -292,13 +288,13 @@ export default function Navbar() {
                       </div>
 
                       {/* Right Column */}
-                      <div className="space-y-1">
+                      <div className="space-y-0.5">
                         {cat.col2.map((item) => (
                           <Link
                             key={item.name}
                             to={item.path}
                             onClick={(e) => handleServiceClick(e, item, cat.label)}
-                            className="block text-[12.5px] text-slate-700 hover:text-[#111827] hover:bg-slate-50 px-2 py-1.5 rounded-lg font-medium transition-all"
+                            className="block text-[13px] text-[#252B36] hover:text-[#155EEF] hover:bg-[#EFF8FF] px-2.5 py-1.5 rounded-lg font-medium transition-colors truncate"
                           >
                             {item.name}
                           </Link>
@@ -313,8 +309,8 @@ export default function Navbar() {
             {/* Direct Pricing Link */}
             <Link
               to="/pricing"
-              className={`text-[12px] xl:text-[13px] font-medium transition-colors hover:text-[#111827] py-1 whitespace-nowrap ${
-                location.pathname === '/pricing' ? 'text-[#111827] font-semibold' : 'text-slate-700'
+              className={`text-[13px] font-medium transition-colors py-1 whitespace-nowrap ${
+                location.pathname === '/pricing' ? 'text-[#155EEF] font-semibold' : 'text-[#252B36] hover:text-[#155EEF]'
               }`}
             >
               Pricing
@@ -322,9 +318,8 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Right Section: Compact Expandable Search Tab + Auth Controls */}
-        <div className="hidden lg:flex items-center gap-2.5 xl:gap-3.5 shrink-0">
-          {/* Instant Search Tab */}
+        {/* Right Section: Search & Auth Controls */}
+        <div className="hidden lg:flex items-center gap-3 shrink-0">
           <NavbarSearch />
 
           {isAuthenticated && <NotificationBell />}
@@ -333,29 +328,28 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setUserDropdown(!userDropdown)}
-                className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition"
+                className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-[#E5E7EB] hover:bg-[#F8F9FB] transition-colors"
               >
-                <div className="w-7 h-7 rounded-full bg-slate-100 text-[#111827] font-bold flex items-center justify-center text-xs">
+                <div className="w-7 h-7 rounded-full bg-[#EFF8FF] text-[#155EEF] font-bold flex items-center justify-center text-xs">
                   {user?.full_name?.charAt(0) || 'U'}
                 </div>
                 <div className="text-left">
-                  <div className="text-xs font-bold text-slate-800 truncate max-w-[110px]">
+                  <div className="text-xs font-semibold text-[#252B36] truncate max-w-[110px]">
                     {user?.full_name?.split(' ')[0]}
                   </div>
-                  <div className="text-[10px] text-slate-500 capitalize">{user?.role?.toLowerCase()}</div>
+                  <div className="text-[10px] text-[#667085] capitalize">{user?.role?.toLowerCase()}</div>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-[#667085]" />
               </button>
 
               {userDropdown && (
-                <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 space-y-1 z-50">
-                  {/* Dedicated Return to Home option */}
+                <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-lg border border-[#E5E7EB] p-1.5 space-y-0.5 z-50">
                   <Link
                     to="/"
                     onClick={() => setUserDropdown(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-50 hover:text-[#111827] transition"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-[#252B36] hover:bg-[#EFF8FF] hover:text-[#155EEF] transition-colors"
                   >
-                    <Home className="w-3.5 h-3.5 text-slate-400" />
+                    <Home className="w-3.5 h-3.5 text-[#667085]" />
                     BharatFiling Home
                   </Link>
 
@@ -368,7 +362,7 @@ export default function Navbar() {
                         : '/dashboard'
                     }
                     onClick={() => setUserDropdown(false)}
-                    className="block px-3 py-2 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-50 hover:text-[#111827] transition"
+                    className="block px-3 py-2 rounded-lg text-xs font-medium text-[#252B36] hover:bg-[#EFF8FF] hover:text-[#155EEF] transition-colors"
                   >
                     {user?.role === 'CA'
                       ? 'CA Workbench'
@@ -380,7 +374,7 @@ export default function Navbar() {
                   <Link
                     to="/dashboard"
                     onClick={() => setUserDropdown(false)}
-                    className="block px-3 py-2 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-50 transition"
+                    className="block px-3 py-2 rounded-lg text-xs font-medium text-[#252B36] hover:bg-[#EFF8FF] hover:text-[#155EEF] transition-colors"
                   >
                     Master Profile
                   </Link>
@@ -390,7 +384,7 @@ export default function Navbar() {
                       setUserDropdown(false);
                       handleLogout();
                     }}
-                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-[#B42318] hover:bg-[#FEF3F2] transition-colors flex items-center gap-2"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     Sign Out
@@ -402,13 +396,13 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="rounded-full bg-white px-4 py-1.5 text-[12.5px] font-semibold text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs transition"
+                className="px-3.5 py-2 text-[13px] font-semibold text-[#252B36] hover:text-[#155EEF] hover:bg-[#F8F9FB] rounded-lg transition-colors"
               >
                 Log In
               </Link>
               <Link
                 to="/register"
-                className="rounded-full bg-[#111827] hover:bg-[#1F2937] text-white px-4 py-1.5 text-[12.5px] font-bold shadow-xs hover:shadow transition"
+                className="bg-[#155EEF] hover:bg-[#1048C6] text-white px-4 py-2 text-[13px] font-semibold rounded-lg shadow-xs transition-colors"
               >
                 Register
               </Link>
@@ -416,12 +410,12 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Header Controls */}
-        <div className="lg:hidden flex items-center gap-1.5">
+        {/* Mobile Header Toggle */}
+        <div className="lg:hidden flex items-center gap-2">
           {isAuthenticated && <NotificationBell />}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition"
+            className="p-2 rounded-lg text-[#252B36] hover:bg-[#F8F9FB] transition-colors"
             aria-label="Toggle navigation"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -431,49 +425,47 @@ export default function Navbar() {
 
       {/* Mobile Drawer with Accordion Sub-options */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-100 bg-white px-4 py-4 space-y-3 shadow-lg max-h-[80vh] overflow-y-auto">
-          {/* Mobile Instant Search Tab */}
+        <div className="lg:hidden border-t border-[#E5E7EB] bg-white px-4 py-4 space-y-3 shadow-lg max-h-[82vh] overflow-y-auto">
           <div className="pb-1">
             <NavbarSearch isMobile onCloseMobile={() => setMobileMenuOpen(false)} />
           </div>
 
           <div className="space-y-1">
-            {/* Top Home link for mobile */}
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-xl ${
-                location.pathname === '/' ? 'bg-slate-100 text-[#111827] font-bold' : 'text-slate-800 hover:bg-slate-50'
+              className={`flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg ${
+                location.pathname === '/' ? 'bg-[#EFF8FF] text-[#155EEF] font-semibold' : 'text-[#252B36] hover:bg-[#F8F9FB]'
               }`}
             >
-              <Home className="w-4 h-4 text-slate-500" />
+              <Home className="w-4 h-4 text-[#667085]" />
               Home
             </Link>
 
             {menuCategories.map((cat) => (
-              <div key={cat.key} className="border-b border-slate-50 pb-1">
+              <div key={cat.key} className="border-b border-[#F1F3F5] pb-1">
                 <button
                   onClick={() =>
                     setMobileExpandedCat(mobileExpandedCat === cat.key ? null : cat.key)
                   }
-                  className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 rounded-xl"
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-[#252B36] hover:bg-[#F8F9FB] rounded-lg transition-colors"
                 >
                   <span>{cat.label}</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-slate-400 transition-transform ${
-                      mobileExpandedCat === cat.key ? 'rotate-180 text-[#111827]' : ''
+                    className={`w-4 h-4 text-[#667085] transition-transform ${
+                      mobileExpandedCat === cat.key ? 'rotate-180 text-[#155EEF]' : ''
                     }`}
                   />
                 </button>
 
                 {mobileExpandedCat === cat.key && (
-                  <div className="px-4 py-2 space-y-1 bg-slate-50/70 rounded-xl mt-1">
+                  <div className="px-4 py-2 space-y-1 bg-[#F8F9FB] rounded-lg mt-1">
                     {[...cat.col1, ...cat.col2].map((item) => (
                       <Link
                         key={item.name}
                         to={item.path}
                         onClick={(e) => handleMobileServiceClick(e, item, cat.label)}
-                        className="block text-xs text-slate-600 hover:text-[#111827] py-1"
+                        className="block text-xs text-[#667085] hover:text-[#155EEF] py-1.5"
                       >
                         {item.name}
                       </Link>
@@ -486,13 +478,13 @@ export default function Navbar() {
             <Link
               to="/pricing"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 rounded-xl"
+              className="block px-3 py-2.5 text-sm font-medium text-[#252B36] hover:bg-[#F8F9FB] rounded-lg"
             >
               Pricing
             </Link>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+          <div className="pt-3 border-t border-[#E5E7EB] flex flex-col gap-2">
             {isAuthenticated ? (
               <>
                 <Link
@@ -504,7 +496,7 @@ export default function Navbar() {
                       : '/dashboard'
                   }
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-2.5 rounded-full bg-[#111827] text-white font-bold text-sm"
+                  className="w-full text-center py-2.5 rounded-lg bg-[#155EEF] text-white font-semibold text-sm"
                 >
                   Go to {user?.role === 'CA' ? 'CA Workbench' : user?.role === 'ADMIN' ? 'Admin Portal' : 'Dashboard'}
                 </Link>
@@ -513,7 +505,7 @@ export default function Navbar() {
                     setMobileMenuOpen(false);
                     handleLogout();
                   }}
-                  className="w-full py-2 text-rose-600 font-semibold text-sm hover:bg-rose-50 rounded-full"
+                  className="w-full py-2 text-[#B42318] font-medium text-sm hover:bg-[#FEF3F2] rounded-lg"
                 >
                   Sign Out
                 </button>
@@ -523,14 +515,14 @@ export default function Navbar() {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 text-center py-2.5 rounded-full border border-slate-300 text-slate-800 font-semibold text-sm"
+                  className="flex-1 text-center py-2.5 rounded-lg border border-[#E5E7EB] text-[#252B36] font-semibold text-sm hover:bg-[#F8F9FB]"
                 >
                   Log In
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 text-center py-2.5 rounded-full bg-[#111827] text-white font-bold text-sm"
+                  className="flex-1 text-center py-2.5 rounded-lg bg-[#155EEF] text-white font-semibold text-sm hover:bg-[#1048C6]"
                 >
                   Register
                 </Link>
