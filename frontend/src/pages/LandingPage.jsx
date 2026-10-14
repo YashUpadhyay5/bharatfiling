@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
+import IndustrySolutionsCarousel from '../components/home/IndustrySolutionsCarousel.jsx';
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(0);
@@ -39,6 +40,16 @@ export default function LandingPage() {
     }
   };
 
+
+  // "Explore Solutions" follows the same sign-in rule as the service cards on this page.
+  const handleExploreIndustry = (industry) =>
+    handleSelectService({
+      title: industry.title,
+      path: industry.path,
+      category: industry.category,
+      price: 'Transparent Pricing',
+      period: 'CA Audited Filing',
+    });
 
   const popularServices = [
     {
@@ -281,6 +292,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* 3b. INDUSTRY SOLUTIONS CAROUSEL */}
+      <IndustrySolutionsCarousel onExplore={handleExploreIndustry} />
 
       {/* 4. HOW IT WORKS */}
       <section className="py-12 sm:py-16 md:py-20 bg-slate-50/60 border-b border-slate-200/80">
