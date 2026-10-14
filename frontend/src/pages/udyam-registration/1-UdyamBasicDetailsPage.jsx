@@ -1,6 +1,8 @@
 import React from 'react';
-import { Check, ChevronDown, Lock } from 'lucide-react';
+import { Check, Lock } from 'lucide-react';
 import { NIC_HIERARCHY } from './constants.js';
+import SearchableSelect from '../../components/common/SearchableSelect.jsx';
+import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 
 export default function UdyamBasicDetailsPage({
   formData,
@@ -56,6 +58,9 @@ export default function UdyamBasicDetailsPage({
           <input
             type="text"
             maxLength={15}
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck="false"
             value={formData.pan}
             onChange={(e) => onInputChange('pan', e.target.value.toUpperCase().trim())}
             placeholder=" "
@@ -77,6 +82,8 @@ export default function UdyamBasicDetailsPage({
         <div className="relative">
           <input
             type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             maxLength={12}
             value={formData.aadhaar}
             onChange={(e) => onInputChange('aadhaar', e.target.value.replace(/\D/g, ''))}
@@ -94,92 +101,63 @@ export default function UdyamBasicDetailsPage({
         </div>
       </div>
 
-      {/* 3. Cascading: NIC Division Dropdown */}
-      <div className="space-y-1">
-        <div className="relative">
-          <select
-            value={formData.nicDivision}
-            onChange={(e) => {
-              onInputChange('nicDivision', e.target.value);
-              onInputChange('nicSubDivision', '');
-              onInputChange('nicSubClass', '');
-            }}
-            className="peer w-full px-4 pt-5 pb-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl focus:border-blue-500 focus:outline-none appearance-none cursor-pointer transition pr-10"
-          >
-            <option value="">Select NIC Division</option>
-            {Object.keys(NIC_HIERARCHY).map((divKey) => (
-              <option key={divKey} value={divKey}>
-                {divKey}
-              </option>
-            ))}
-          </select>
-          <label className="absolute left-4 top-1.5 text-[11px] font-semibold text-blue-600 pointer-events-none">
-            NIC Division <span className="text-rose-500">*</span>
-          </label>
-          <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-4 pointer-events-none" />
-        </div>
-      </div>
+      {/* 3. Cascading: NIC Division Dropdown with Search */}
+      <SearchableSelect
+        label="NIC Division"
+        required
+        value={formData.nicDivision}
+        onChange={(val) => {
+          onInputChange('nicDivision', val);
+          onInputChange('nicSubDivision', '');
+          onInputChange('nicSubClass', '');
+        }}
+        options={Object.keys(NIC_HIERARCHY)}
+        placeholder="Select NIC Division"
+        emptyMessage="No matching division found"
+      />
 
       {/* 4. Cascading: NIC Sub-Division Dropdown (unlocked once Division is selected) */}
       {formData.nicDivision && (
-        <div className="space-y-1 animate-fade-in">
-          <div className="relative">
-            <select
-              value={formData.nicSubDivision}
-              onChange={(e) => {
-                onInputChange('nicSubDivision', e.target.value);
-                onInputChange('nicSubClass', '');
-              }}
-              className="peer w-full px-4 pt-5 pb-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl focus:border-blue-500 focus:outline-none appearance-none cursor-pointer transition pr-10"
-            >
-              <option value="">Select NIC Sub-Division</option>
-              {subDivisions.map((subKey) => (
-                <option key={subKey} value={subKey}>
-                  {subKey}
-                </option>
-              ))}
-            </select>
-            <label className="absolute left-4 top-1.5 text-[11px] font-semibold text-blue-600 pointer-events-none">
-              NIC Sub-Division <span className="text-rose-500">*</span>
-            </label>
-            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-4 pointer-events-none" />
-          </div>
+        <div className="animate-fade-in">
+          <SearchableSelect
+            label="NIC Sub-Division"
+            required
+            value={formData.nicSubDivision}
+            onChange={(val) => {
+              onInputChange('nicSubDivision', val);
+              onInputChange('nicSubClass', '');
+            }}
+            options={subDivisions}
+            placeholder="Select NIC Sub-Division"
+            emptyMessage="No matching sub-division found"
+          />
         </div>
       )}
 
       {/* 5. Cascading: NIC Sub-Class Dropdown (unlocked once Sub-Division is selected) */}
       {formData.nicDivision && formData.nicSubDivision && (
-        <div className="space-y-1 animate-fade-in">
-          <div className="relative">
-            <select
-              value={formData.nicSubClass}
-              onChange={(e) => onInputChange('nicSubClass', e.target.value)}
-              className="peer w-full px-4 pt-5 pb-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl focus:border-blue-500 focus:outline-none appearance-none cursor-pointer transition pr-10"
-            >
-              <option value="">Select NIC Sub-Class</option>
-              {subClasses.map((classStr) => (
-                <option key={classStr} value={classStr}>
-                  {classStr}
-                </option>
-              ))}
-            </select>
-            <label className="absolute left-4 top-1.5 text-[11px] font-semibold text-blue-600 pointer-events-none">
-              NIC Sub-Class <span className="text-rose-500">*</span>
-            </label>
-            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-4 pointer-events-none" />
-          </div>
+        <div className="animate-fade-in">
+          <SearchableSelect
+            label="NIC Sub-Class"
+            required
+            value={formData.nicSubClass}
+            onChange={(val) => onInputChange('nicSubClass', val)}
+            options={subClasses}
+            placeholder="Select NIC Sub-Class"
+            searchPlaceholder="Search activities..."
+            emptyMessage="No matching activities found"
+          />
         </div>
       )}
 
-      {/* 6. Action Button: Gradient Purple/Violet Button matching screenshot */}
+      {/* 6. Action Button: Split Gradient + Arrow Button matching reference screenshot */}
       <div className="pt-2 flex justify-end">
-        <button
+        <SplitGradientButton
           type="submit"
-          disabled={isSubmitting}
-          className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#D946EF] hover:from-[#4F46E5] hover:to-[#C026D3] text-white text-sm font-bold shadow-md hover:shadow-lg transition cursor-pointer disabled:opacity-60"
-        >
-          {isSubmitting ? 'Submitting...' : 'Get a Quote'}
-        </button>
+          label="Get a Quote"
+          loading={isSubmitting}
+          loadingText="Submitting..."
+        />
       </div>
     </form>
   );

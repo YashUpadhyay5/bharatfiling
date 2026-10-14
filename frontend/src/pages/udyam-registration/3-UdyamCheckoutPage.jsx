@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import {
   Share2,
   Calendar,
@@ -16,6 +16,7 @@ import { api } from '../../services/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import DirectPaymentModal from './components/DirectPaymentModal.jsx';
+import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 import { UDYAM_PRICING } from './constants.js';
 
 export default function UdyamCheckoutPage() {
@@ -110,11 +111,25 @@ export default function UdyamCheckoutPage() {
       {/* Top Company Header matching screenshot */}
       <div className="bg-white border-b border-slate-200 py-4 px-4 sm:px-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-black text-slate-900 tracking-tight">
-              Bharat<span className="text-blue-600">Filing</span>
-            </span>
-          </div>
+          <Link
+            to="/"
+            title="Return to BharatFiling Homepage"
+            className="flex items-center gap-2 group transition-transform active:scale-95"
+          >
+            <img
+              src="/bharatfiling-brand-icon.png"
+              alt="BharatFiling"
+              className="h-8 w-auto object-contain shrink-0"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
+              }}
+            />
+            <div className="flex items-baseline font-black tracking-tight text-xl leading-none select-none">
+              <span className="text-[#111827]">Bharat</span>
+              <span className="text-[#F26522]">Filing</span>
+            </div>
+          </Link>
           <div className="text-right text-[11px] text-slate-500 leading-tight hidden sm:block">
             <div className="font-bold text-slate-700">BharatFiling Compliance Private Limited</div>
             <div>Central Compliance Centre, Bengaluru - 560001</div>
@@ -151,8 +166,8 @@ export default function UdyamCheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Product Card & Deliverables */}
           <div className="lg:col-span-8 space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-              <div className="flex items-start justify-between gap-4">
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                 <div className="space-y-1">
                   <h3 className="text-base font-extrabold text-slate-900">
                     {order?.service_name || 'UDYAM Registration (UDYAM + LEDGERS)'}
@@ -161,7 +176,7 @@ export default function UdyamCheckoutPage() {
                     Get UDYAM registration for your business with the LEDGERS platform to track compliance.
                   </p>
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-left sm:text-right shrink-0">
                   <div className="text-base font-extrabold text-slate-900">2,899 INR</div>
                 </div>
               </div>
@@ -253,7 +268,7 @@ export default function UdyamCheckoutPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="font-mono text-slate-600">
+                  <span className="font-mono text-slate-600 break-all">
                     {maskEmail(order?.customer_email || 'yashupdhyay486@gmail.com')}
                   </span>
                 </div>
@@ -306,14 +321,11 @@ export default function UdyamCheckoutPage() {
 
               {/* Pay Online Button */}
               <div className="pt-2">
-                <button
-                  type="button"
+                <SplitGradientButton
                   onClick={() => setIsPaymentModalOpen(true)}
-                  className="w-full py-3 px-4 rounded-xl bg-[#00C853] hover:bg-[#00B248] text-white font-extrabold text-sm shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <ArrowRight className="w-4 h-4 stroke-[3]" />
-                  <span>Pay Online 3,421 INR</span>
-                </button>
+                  label={`Pay Online ${order?.amount || 3421} INR`}
+                  fullWidth
+                />
                 <div className="text-[10px] text-slate-400 text-center mt-2">
                   By clicking Pay, you agree to the{' '}
                   <span className="text-blue-600 underline cursor-pointer">Terms</span> and{' '}

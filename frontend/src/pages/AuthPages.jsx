@@ -600,10 +600,10 @@ export default function AuthPages({ defaultMode = 'login' }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 py-12">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-3 sm:p-4 py-6 sm:py-12">
+      <div className="max-w-md w-full bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
         {/* Header */}
-        <div className="bg-slate-900 text-white p-6 text-center space-y-2 border-b border-slate-800">
+        <div className="bg-slate-900 text-white p-5 sm:p-6 text-center space-y-2 border-b border-slate-800">
           <Link to="/" className="inline-flex items-center gap-2">
             <img
               src="/bharatfiling-icon-transparent.png"
@@ -685,7 +685,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
         </div>
 
         {/* Form Body */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* ======================= LOGIN VIEW: PASSWORD ======================= */}
           {mode === 'login' && !phoneLoginActive && (
             <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
@@ -771,6 +771,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                       <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                       <input
                         type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
                         value={phoneLoginMobile}
                         onChange={(e) => setPhoneLoginMobile(e.target.value)}
                         placeholder="10-digit mobile number"
@@ -823,6 +825,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                       <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                       <input
                         type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         maxLength={6}
                         value={phoneLoginOtp}
                         onChange={(e) => setPhoneLoginOtp(e.target.value.replace(/\D/g, ''))}
@@ -913,6 +917,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="tel"
+                    inputMode="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     autoComplete="tel"
@@ -997,6 +1002,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     maxLength={6}
                     value={regOtp}
                     onChange={(e) => setRegOtp(e.target.value.replace(/\D/g, ''))}
@@ -1091,6 +1098,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                           <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                           <input
                             type="tel"
+                            inputMode="tel"
+                            autoComplete="tel"
                             value={forgotPhone}
                             onChange={(e) => setForgotPhone(e.target.value)}
                             placeholder="10-digit mobile number"
@@ -1208,6 +1217,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                         <input
                           type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           maxLength={6}
                           value={fpOtp}
                           onChange={(e) => setFpOtp(e.target.value.replace(/\D/g, ''))}
@@ -1301,6 +1312,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
                         <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                         <input
                           type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           maxLength={6}
                           value={fpOtp}
                           onChange={(e) => setFpOtp(e.target.value.replace(/\D/g, ''))}
@@ -1407,11 +1420,11 @@ export default function AuthPages({ defaultMode = 'login' }) {
             <p className="text-[10px] text-slate-400 mb-3">
               Local seed accounts only
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               <button
                 type="button"
                 onClick={() => handleDemoLogin('CUSTOMER')}
-                className="p-2.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-700 border border-slate-200 text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
+                className="p-2 sm:p-2.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-700 border border-slate-200 text-[10px] sm:text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
               >
                 <div>👤 Customer</div>
                 <div className="text-[9px] font-normal text-slate-500 truncate mt-0.5">customer@...</div>
@@ -1419,7 +1432,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
               <button
                 type="button"
                 onClick={() => handleDemoLogin('CA')}
-                className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
+                className="p-2 sm:p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[10px] sm:text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
               >
                 <div>⚖️ CA Desk</div>
                 <div className="text-[9px] font-normal text-amber-700 truncate mt-0.5">ca.sharma@...</div>
@@ -1427,7 +1440,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
               <button
                 type="button"
                 onClick={() => handleDemoLogin('ADMIN')}
-                className="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
+                className="p-2 sm:p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[10px] sm:text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
               >
                 <div>🛡️ Admin</div>
                 <div className="text-[9px] font-normal text-blue-700 truncate mt-0.5">admin@...</div>

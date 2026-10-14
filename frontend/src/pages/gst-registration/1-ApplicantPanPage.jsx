@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, Lock } from 'lucide-react';
 import PanVerificationBadge from './components/PanVerificationBadge.jsx';
+import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 
 export default function ApplicantPanPage({
   formData,
@@ -57,6 +58,8 @@ export default function ApplicantPanPage({
           </div>
           <input
             type="tel"
+            inputMode="tel"
+            autoComplete="tel"
             maxLength={10}
             value={formData.phone}
             onChange={(e) => onInputChange('phone', e.target.value.replace(/\D/g, ''))}
@@ -90,6 +93,9 @@ export default function ApplicantPanPage({
         <input
           type="text"
           maxLength={10}
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck="false"
           value={formData.pan}
           onChange={(e) => onInputChange('pan', e.target.value.toUpperCase())}
           placeholder="ABCDE1234F"
@@ -107,13 +113,11 @@ export default function ApplicantPanPage({
 
       {/* Continue Button */}
       <div className="pt-2">
-        <button
+        <SplitGradientButton
           type="submit"
-          className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#6366F1] to-[#A855F7] hover:from-[#4F46E5] hover:to-[#9333EA] text-white font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
-        >
-          <span>Continue</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
+          label="Continue"
+          fullWidth
+        />
       </div>
     </form>
   );

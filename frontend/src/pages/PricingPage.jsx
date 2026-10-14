@@ -185,13 +185,13 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {pricingPlans.map((plan) => {
             const IconComp = plan.icon;
             return (
               <div
                 key={plan.title}
-                className={`bg-white rounded-3xl p-7 border transition-all duration-300 flex flex-col justify-between relative shadow-xs hover:shadow-xl hover:-translate-y-1.5 ${
+                className={`bg-white rounded-3xl p-5 sm:p-7 border transition-all duration-300 flex flex-col justify-between relative shadow-xs hover:shadow-xl hover:-translate-y-1.5 ${
                   plan.popular
                     ? 'border-[#111827] ring-2 ring-[#111827]/10'
                     : 'border-slate-200/90'
@@ -289,10 +289,10 @@ export default function PricingPage() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto shrink-0">
             <Link
               to="/contact"
-              className="px-6 py-3 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition"
+              className="w-full sm:w-auto text-center px-6 py-3 rounded-xl sm:rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition"
             >
               Request Custom Quote
             </Link>
@@ -300,7 +300,7 @@ export default function PricingPage() {
               href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20a%20custom%20corporate%20CA%20proposal."
               target="_blank"
               rel="noreferrer"
-              className="px-5 py-3 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs transition flex items-center gap-1.5"
+              className="w-full sm:w-auto justify-center px-5 py-3 rounded-xl sm:rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs transition flex items-center gap-1.5"
             >
               <MessageCircle className="w-4 h-4 text-emerald-600" />
               Chat on WhatsApp

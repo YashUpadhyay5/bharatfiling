@@ -81,9 +81,9 @@ export default function FaqPage() {
                     >
                       <button
                         onClick={() => setOpenIdx(isOpen ? -1 : globalIdx)}
-                        className="w-full p-4 sm:p-5 text-left flex items-center justify-between font-bold text-xs sm:text-sm text-slate-900"
+                        className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 font-bold text-xs sm:text-sm text-slate-900 cursor-pointer touch-target-safe"
                       >
-                        <span>{faq.q}</span>
+                        <span className="min-w-0 pr-2">{faq.q}</span>
                         {isOpen ? (
                           <ChevronUp className="w-4 h-4 text-emerald-600 shrink-0" />
                         ) : (

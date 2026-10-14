@@ -16,7 +16,8 @@ export default function MainLayout() {
         <Header />
       </ErrorBoundary>
 
-      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
+      {/* pt-[68px] = height of the fixed header; content scrolls under it */}
+      <main id="main-content" tabIndex={-1} className="flex-1 pt-[68px] outline-none">
         <PageOutlet />
       </main>
 

@@ -78,7 +78,7 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Form */}
-          <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-5">
+          <div className="p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-xl space-y-5">
             <h3 className="font-extrabold text-base text-slate-900">Send an Inquiry</h3>
             {submitted ? (
               <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2 text-xs text-emerald-950">
@@ -94,6 +94,7 @@ export default function ContactPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Rahul Verma"
+                    autoComplete="name"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     required
                   />
@@ -103,6 +104,8 @@ export default function ContactPage() {
                   <label className="block font-bold text-slate-700 mb-1">Email Address *</label>
                   <input
                     type="email"
+                    inputMode="email"
+                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="official@company.com"
@@ -115,6 +118,8 @@ export default function ContactPage() {
                   <label className="block font-bold text-slate-700 mb-1">Mobile Number *</label>
                   <input
                     type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="10-digit mobile number"
@@ -137,7 +142,7 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                  className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" /> Submit Question
                 </button>

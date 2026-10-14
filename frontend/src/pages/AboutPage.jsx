@@ -19,7 +19,7 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-md space-y-8 text-xs sm:text-sm text-slate-700 leading-relaxed">
+        <div className="bg-white rounded-3xl p-5 sm:p-8 md:p-12 border border-slate-200 shadow-md space-y-8 text-xs sm:text-sm text-slate-700 leading-relaxed">
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-slate-900">Our Core Philosophy</h2>
             <p>

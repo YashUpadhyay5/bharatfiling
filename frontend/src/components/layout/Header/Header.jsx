@@ -21,6 +21,11 @@ const DESKTOP_MEDIA_QUERY = '(min-width: 1280px)';
 /**
  * Site header.
  *
+ * Fixed to the top with a translucent, blurred background so page content scrolls smoothly
+ * underneath it. MainLayout reserves the matching 68px of space above the page content.
+ * (The sign-in modal, mobile drawer and search dialog are rendered outside this element, so the
+ * backdrop blur can never trap their fixed overlays.)
+ *
  *   [ Logo ]   Home  Startup v  Registrations v  ...  Consultation v  Pricing   [ Search ] [ Log In ] [ Register ]
  *
  * Desktop (>= 1280px): one row, every category visible with its own hover dropdown.
@@ -193,7 +198,7 @@ export default function Header() {
 
       <header
         ref={headerRef}
-        className={`sticky top-0 z-40 border-b border-slate-200/80 bg-white font-sans transition-shadow duration-200 print:hidden ${
+        className={`fixed inset-x-0 top-0 z-40 w-full border-b border-slate-200/80 bg-white/95 font-sans backdrop-blur-md transition-shadow duration-200 print:hidden ${
           scrolled ? 'shadow-[0_8px_24px_-14px_rgba(15,23,42,0.35)]' : 'shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
         }`}
       >

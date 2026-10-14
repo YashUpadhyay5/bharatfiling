@@ -239,15 +239,15 @@ export default function AuthRequiredModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
       {/* Click outside backdrop */}
       <div className="fixed inset-0" onClick={onClose} />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-[450px] bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(17,24,39,0.25)] border border-slate-200/90 overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+      <div className="relative w-full max-w-[450px] bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(17,24,39,0.25)] border border-slate-200/90 overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[92dvh]">
         
         {/* Top Header Bar */}
-        <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-slate-100">
+        <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex items-center justify-between border-b border-slate-100">
           <div className="flex items-center gap-2">
             <img
               src="/bharatfiling-icon-transparent.png"
@@ -261,7 +261,7 @@ export default function AuthRequiredModal({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition flex items-center justify-center"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition flex items-center justify-center cursor-pointer"
             aria-label="Close dialog"
           >
             <X className="w-4 h-4" />
@@ -269,7 +269,7 @@ export default function AuthRequiredModal({
         </div>
 
         {/* Scrollable Content */}
-        <div className="p-6 overflow-y-auto space-y-4">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4">
           
           {/* Selected Service Card */}
           {service && (
@@ -482,6 +482,7 @@ export default function AuthRequiredModal({
                     <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                     <input
                       type="tel"
+                      inputMode="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       autoComplete="tel"
@@ -547,6 +548,8 @@ export default function AuthRequiredModal({
                   <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     maxLength={6}
                     value={regOtp}
                     onChange={(e) => setRegOtp(e.target.value.replace(/\D/g, ''))}
