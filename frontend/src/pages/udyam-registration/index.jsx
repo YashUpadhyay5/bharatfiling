@@ -160,11 +160,11 @@ export default function UdyamRegistrationModule() {
 
             {/* Right Column: Screen 1 or Screen 2 Form */}
             <div className="lg:col-span-7 bg-slate-50/50 p-4 sm:p-6 lg:p-8 rounded-2xl border border-slate-100">
-              <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <div className="mb-4 flex items-center justify-between border-b border-slate-200/80 pb-3">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
                   Step {currentStep} of 3
                 </span>
-                <span className="text-xs font-semibold text-blue-600">
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
                   {currentStep === 1 ? 'Applicant & NIC Code' : 'Enterprise & Bank Setup'}
                 </span>
               </div>
