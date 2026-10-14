@@ -49,14 +49,15 @@ function AppLayout({ children }) {
   const location = useLocation();
   const isCheckout = location.pathname.startsWith('/checkout');
   const isCaOrAdmin = location.pathname.startsWith('/ca') || location.pathname.startsWith('/admin');
+  const showPublicNav = !isCheckout && !isCaOrAdmin;
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isCheckout && !isCaOrAdmin && <Navbar />}
-      <main className="flex-1">
+      {showPublicNav && <Navbar />}
+      <main className={`flex-1 ${showPublicNav ? 'pt-[68px]' : ''}`}>
         <ErrorBoundary>{children}</ErrorBoundary>
       </main>
-      {!isCheckout && !isCaOrAdmin && <Footer />}
+      {showPublicNav && <Footer />}
       <SupportWidget />
     </div>
   );
