@@ -142,7 +142,7 @@ export default function DirectPaymentModal({
           </div>
         </div>
 
-        <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-6 max-h-[85dvh] overflow-y-auto">
           {/* 3. TWO COLUMN: BILLING INFO & ORDER DETAILS */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Left Column: Billing Information */}
@@ -156,6 +156,7 @@ export default function DirectPaymentModal({
                   value={billing.name}
                   onChange={(e) => setBilling({ ...billing, name: e.target.value })}
                   placeholder="Full Name"
+                  autoComplete="name"
                   className="w-full px-3 py-2 text-xs border border-slate-300 rounded focus:border-[#5cb85c] focus:outline-none text-slate-800"
                 />
               </div>
@@ -172,11 +173,14 @@ export default function DirectPaymentModal({
               </div>
 
               {/* Zip Code & City */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
                   value={billing.zipCode}
-                  onChange={(e) => setBilling({ ...billing, zipCode: e.target.value })}
+                  onChange={(e) => setBilling({ ...billing, zipCode: e.target.value.replace(/\D/g, '') })}
                   placeholder="Zip Code"
                   className="w-full px-3 py-2 text-xs border border-slate-300 rounded focus:border-[#5cb85c] focus:outline-none text-slate-800"
                 />
@@ -190,7 +194,7 @@ export default function DirectPaymentModal({
               </div>
 
               {/* State & Country */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   type="text"
                   value={billing.state}
@@ -208,9 +212,11 @@ export default function DirectPaymentModal({
               </div>
 
               {/* Phone & Email */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
                   value={billing.phone}
                   onChange={(e) => setBilling({ ...billing, phone: e.target.value })}
                   placeholder="Phone"
@@ -287,7 +293,7 @@ export default function DirectPaymentModal({
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
               {/* Left Tabs */}
-              <div className="md:col-span-3 space-y-2">
+              <div className="md:col-span-3 flex overflow-x-auto no-scrollbar md:block space-x-2 md:space-x-0 md:space-y-2 pb-1 md:pb-0">
                 {[
                   { id: 'credit_card', label: 'Credit Card' },
                   { id: 'debit_card', label: 'Debit Cards' },
@@ -300,7 +306,7 @@ export default function DirectPaymentModal({
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id)}
-                      className={`w-full text-left px-4 py-2.5 rounded text-xs font-semibold border transition cursor-pointer ${
+                      className={`whitespace-nowrap md:w-full text-left px-4 py-2.5 rounded text-xs font-semibold border transition cursor-pointer ${
                         isActive
                           ? 'bg-[#5cb85c] text-white border-[#5cb85c] shadow-xs'
                           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
@@ -332,6 +338,8 @@ export default function DirectPaymentModal({
                       <div className="relative">
                         <input
                           type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           maxLength={19}
                           value={card.number}
                           onChange={(e) => setCard({ ...card, number: e.target.value })}
@@ -377,6 +385,8 @@ export default function DirectPaymentModal({
                         <div className="relative">
                           <input
                             type="password"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             maxLength={4}
                             value={card.cvv}
                             onChange={(e) => setCard({ ...card, cvv: e.target.value })}
@@ -393,7 +403,7 @@ export default function DirectPaymentModal({
                 {activeTab === 'net_banking' && (
                   <div className="space-y-3 text-xs">
                     <label className="block text-slate-700 font-semibold">Select Your Bank</label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {['HDFC Bank', 'State Bank of India', 'ICICI Bank', 'Axis Bank', 'Kotak Bank', 'Punjab National Bank'].map((b) => (
                         <button
                           key={b}

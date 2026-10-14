@@ -32,7 +32,7 @@ export default function TrustFooter() {
 
   return (
     <div className="mt-8 pt-6 border-t border-slate-200/80">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {trustItems.map((item, idx) => {
           const Icon = item.icon;
           return (

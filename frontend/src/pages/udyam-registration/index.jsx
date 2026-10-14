@@ -149,9 +149,9 @@ export default function UdyamRegistrationModule() {
         subtitle="Save your Udyam application and track real-time CA filing progress."
       />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 pt-5 sm:pt-10">
         {/* Main Card matching screenshots */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-lg p-6 sm:p-10">
+        <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-lg p-4 sm:p-8 lg:p-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left Column: Hero & Benefits */}
             <div className="lg:col-span-5">
@@ -159,7 +159,7 @@ export default function UdyamRegistrationModule() {
             </div>
 
             {/* Right Column: Screen 1 or Screen 2 Form */}
-            <div className="lg:col-span-7 bg-slate-50/50 p-6 sm:p-8 rounded-2xl border border-slate-100">
+            <div className="lg:col-span-7 bg-slate-50/50 p-4 sm:p-6 lg:p-8 rounded-2xl border border-slate-100">
               <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   Step {currentStep} of 3

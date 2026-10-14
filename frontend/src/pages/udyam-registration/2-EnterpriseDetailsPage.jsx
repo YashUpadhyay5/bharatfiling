@@ -105,6 +105,8 @@ export default function EnterpriseDetailsPage({
           </select>
           <input
             type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             maxLength={6}
             value={formData.pincode}
             onChange={(e) => onInputChange('pincode', e.target.value.replace(/\D/g, ''))}
@@ -124,6 +126,8 @@ export default function EnterpriseDetailsPage({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input
             type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={formData.bankAccountNo}
             onChange={(e) => onInputChange('bankAccountNo', e.target.value.replace(/\D/g, ''))}
             placeholder="Bank Account Number"
@@ -132,6 +136,9 @@ export default function EnterpriseDetailsPage({
           <input
             type="text"
             maxLength={11}
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck="false"
             value={formData.bankIfsc}
             onChange={(e) => onInputChange('bankIfsc', e.target.value.toUpperCase().trim())}
             placeholder="IFSC Code (e.g. HDFC0001234)"
@@ -141,11 +148,11 @@ export default function EnterpriseDetailsPage({
       </div>
 
       {/* Navigation Buttons */}
-      <div className="pt-3 flex items-center justify-between gap-4">
+      <div className="pt-3 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <button
           type="button"
           onClick={onBack}
-          className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1.5 transition cursor-pointer"
+          className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5 transition cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back</span>
@@ -154,7 +161,7 @@ export default function EnterpriseDetailsPage({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md hover:shadow-lg flex items-center gap-2 transition cursor-pointer disabled:opacity-60"
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-60"
         >
           <span>{isSubmitting ? 'Generating Order...' : 'Proceed to Checkout'}</span>
           <ArrowRight className="w-4 h-4" />

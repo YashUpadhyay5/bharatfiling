@@ -13,8 +13,8 @@ export default function OnboardingHero() {
   return (
     <div className="space-y-6">
       {/* Top Banner Pill */}
-      <div className="flex justify-center">
-        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-blue-400 bg-white/95 text-blue-900 shadow-sm text-sm font-semibold tracking-wide hover:shadow transition">
+      <div className="flex justify-center sm:justify-start">
+        <div className="inline-flex flex-wrap items-center justify-center gap-1.5 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full border border-blue-400 bg-white/95 text-blue-900 shadow-sm text-xs sm:text-sm font-semibold tracking-wide hover:shadow transition text-center max-w-full">
           <span className="text-base">🚀</span>
           <span>Get Your Udyam Registration - starts from</span>
           <span className="font-extrabold text-blue-950">₹2,899</span>

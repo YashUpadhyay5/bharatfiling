@@ -372,7 +372,7 @@ export default function CustomerDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-white border-r border-slate-200 p-5 space-y-6 shrink-0">
+      <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200 p-3.5 sm:p-4 md:p-5 space-y-3 md:space-y-6 shrink-0">
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Account Portal</span>
@@ -384,55 +384,55 @@ export default function CustomerDashboard() {
           <div className="text-xs text-slate-500 truncate">{user?.email}</div>
         </div>
 
-        <nav className="space-y-1 text-xs font-semibold">
+        <nav className="flex md:flex-col overflow-x-auto no-scrollbar gap-1.5 md:space-y-1 text-xs font-semibold pb-1 md:pb-0">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left ${
+            className={`whitespace-nowrap shrink-0 md:shrink w-auto md:w-full flex items-center gap-2 md:gap-3 px-3 py-2 md:px-3.5 md:py-2.5 rounded-xl transition text-left cursor-pointer ${
               activeTab === 'overview' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <FileCheck2 className="w-4 h-4" />
-            Overview & Status
+            <FileCheck2 className="w-4 h-4 shrink-0" />
+            <span>Overview & Status</span>
           </button>
 
           <button
             onClick={() => setActiveTab('profile')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left ${
+            className={`whitespace-nowrap shrink-0 md:shrink w-auto md:w-full flex items-center gap-2 md:gap-3 px-3 py-2 md:px-3.5 md:py-2.5 rounded-xl transition text-left cursor-pointer ${
               activeTab === 'profile' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <User className="w-4 h-4" />
-            Master Profile
-            <span className="ml-auto text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">
+            <User className="w-4 h-4 shrink-0" />
+            <span>Master Profile</span>
+            <span className="ml-1.5 md:ml-auto text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">
               Verified
             </span>
           </button>
 
           <button
             onClick={() => setActiveTab('businesses')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left ${
+            className={`whitespace-nowrap shrink-0 md:shrink w-auto md:w-full flex items-center gap-2 md:gap-3 px-3 py-2 md:px-3.5 md:py-2.5 rounded-xl transition text-left cursor-pointer ${
               activeTab === 'businesses' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <Building2 className="w-4 h-4" />
-            My Businesses
-            <span className="ml-auto text-xs font-bold text-slate-400">{businesses.length}</span>
+            <Building2 className="w-4 h-4 shrink-0" />
+            <span>My Businesses</span>
+            <span className="ml-1.5 md:ml-auto text-xs font-bold text-slate-400">{businesses.length}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('applications')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left ${
+            className={`whitespace-nowrap shrink-0 md:shrink w-auto md:w-full flex items-center gap-2 md:gap-3 px-3 py-2 md:px-3.5 md:py-2.5 rounded-xl transition text-left cursor-pointer ${
               activeTab === 'applications' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <FileText className="w-4 h-4" />
-            GST Applications
-            <span className="ml-auto text-xs font-bold text-slate-400">{applications.length}</span>
+            <FileText className="w-4 h-4 shrink-0" />
+            <span>GST Applications</span>
+            <span className="ml-1.5 md:ml-auto text-xs font-bold text-slate-400">{applications.length}</span>
           </button>
         </nav>
 
         {/* Assigned CA Mini Card */}
-        <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-2 text-xs">
+        <div className="hidden md:block p-4 rounded-2xl bg-slate-900 text-white space-y-2 text-xs">
           <div className="text-[10px] font-bold uppercase text-emerald-400">Assigned Professional</div>
           <div className="font-extrabold text-sm">{activeApp?.assigned_ca_name || 'Senior CA Review Team'}</div>
           <div className="text-[11px] text-slate-400">Statutory Compliance Desk</div>
@@ -456,7 +456,7 @@ export default function CustomerDashboard() {
       </aside>
 
       {/* Main Dashboard Canvas */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto">
+      <main className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto min-w-0">
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
@@ -473,7 +473,7 @@ export default function CustomerDashboard() {
 
               <Link
                 to="/services"
-                className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5"
               >
                 <Plus className="w-4 h-4" /> Start New Statutory Filing
               </Link>
@@ -481,15 +481,15 @@ export default function CustomerDashboard() {
 
             {/* Multi-Application Selector Tabs */}
             {applications.length > 1 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1 shrink-0">
                   Active Cases ({applications.length}):
                 </span>
                 {applications.map((app, idx) => (
                   <button
                     key={app.id || idx}
                     onClick={() => setSelectedAppIndex(idx)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                    className={`whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
                       selectedAppIndex === idx
                         ? 'bg-slate-900 text-white shadow-xs ring-2 ring-emerald-500'
                         : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
@@ -506,10 +506,10 @@ export default function CustomerDashboard() {
 
             {/* Active Application Card */}
             {activeApp ? (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md space-y-6">
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-slate-200 shadow-md space-y-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-5">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-xs font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
                         {activeApp.application_number}
                       </span>
@@ -520,7 +520,7 @@ export default function CustomerDashboard() {
                         {activeApp.customer_status}
                       </span>
                     </div>
-                    <h2 className="text-lg font-black text-slate-900 mt-2">
+                    <h2 className="text-base sm:text-lg font-black text-slate-900 mt-2">
                       {activeApp.service_name || activeApp.fields_data?.legal_name || activeApp.business_type || 'Statutory Compliance Dossier'}
                     </h2>
                     <div className="text-xs text-slate-500 mt-0.5">
@@ -528,8 +528,8 @@ export default function CustomerDashboard() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-xs border border-emerald-200">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <span className="w-full sm:w-auto text-center px-4 py-2 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-xs border border-emerald-200">
                       Filing Managed by Assigned CA
                     </span>
                   </div>
@@ -560,7 +560,7 @@ export default function CustomerDashboard() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
                     {customerSteps.map((step, idx) => {
                       let bg = 'bg-slate-50 text-slate-500 border-slate-200';
                       let icon = idx + 1;

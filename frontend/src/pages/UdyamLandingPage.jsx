@@ -72,61 +72,61 @@ export default function UdyamLandingPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-blue-950 via-slate-900 to-slate-900 text-white py-12 sm:py-20 relative overflow-hidden">
+      <section className="bg-gradient-to-b from-blue-950 via-slate-900 to-slate-900 text-white py-10 sm:py-16 md:py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#3B82F6_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold">
-                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+            <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[11px] sm:text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                 <span>Ministry of MSME Statutory Portal Filing</span>
-                <span className="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded font-black">
+                <span className="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded font-black shrink-0">
                   LIVE
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
                 Online MSME / Udyam Registration in India
               </h1>
 
-              <p className="text-sm sm:text-base text-slate-300 max-w-xl leading-relaxed">
+              <p className="text-xs sm:text-base text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed px-1">
                 Get your official Government Udyam Registration Certificate with dedicated CA assistance.
                 Unlock collateral-free loans, 50% trademark subsidies, and priority government tenders.
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1">
                 <button
                   onClick={handleStartApplication}
-                  className="px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm transition shadow-lg flex items-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2 cursor-pointer touch-target-safe active:scale-98"
                 >
                   <span>Apply Udyam Registration</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
-                <div className="text-xs text-slate-400">
+                <div className="text-[11px] sm:text-xs text-slate-400 text-center sm:text-left">
                   Starts at <strong className="text-white font-extrabold">₹2,899</strong> + GST | Fast-Track Delivery
                 </div>
               </div>
 
               {/* 3 Value Pillars */}
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800 text-xs">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-slate-800 text-xs text-center sm:text-left">
+                <div className="bg-slate-800/40 sm:bg-transparent p-2.5 sm:p-0 rounded-xl">
                   <div className="font-extrabold text-white text-base">100%</div>
-                  <div className="text-slate-400">Government Portal Approved</div>
+                  <div className="text-slate-400 text-[11px]">Government Portal Approved</div>
                 </div>
-                <div>
+                <div className="bg-slate-800/40 sm:bg-transparent p-2.5 sm:p-0 rounded-xl">
                   <div className="font-extrabold text-white text-base">1-2 Days</div>
-                  <div className="text-slate-400">Express Turnaround</div>
+                  <div className="text-slate-400 text-[11px]">Express Turnaround</div>
                 </div>
-                <div>
+                <div className="bg-slate-800/40 sm:bg-transparent p-2.5 sm:p-0 rounded-xl">
                   <div className="font-extrabold text-white text-base">Direct Payment</div>
-                  <div className="text-slate-400">No AutoPay / No Hidden Mandates</div>
+                  <div className="text-slate-400 text-[11px]">No AutoPay / No Hidden Mandates</div>
                 </div>
               </div>
             </div>
 
             {/* Right Card: Quick Summary Card */}
             <div className="lg:col-span-5">
-              <div className="bg-slate-800/90 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
+              <div className="bg-slate-800/90 border border-slate-700 rounded-3xl p-5 sm:p-8 shadow-2xl space-y-5">
                 <div className="flex items-center justify-between border-b border-slate-700 pb-4">
                   <div>
                     <h3 className="text-base font-bold text-white">UDYAM Fast-Track Filing</h3>
@@ -163,7 +163,7 @@ export default function UdyamLandingPage() {
 
                 <button
                   onClick={handleStartApplication}
-                  className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  className="w-full py-3.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-98 touch-target-safe"
                 >
                   <span>Start Online Filing &rarr;</span>
                 </button>
@@ -234,9 +234,9 @@ export default function UdyamLandingPage() {
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
-                  className="w-full p-4 text-left flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-slate-900 cursor-pointer"
+                  className="w-full p-4 text-left flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-slate-900 cursor-pointer touch-target-safe"
                 >
-                  <span>{faq.q}</span>
+                  <span className="pr-1">{faq.q}</span>
                   {openFaq === idx ? (
                     <ChevronUp className="w-4 h-4 text-slate-500 shrink-0" />
                   ) : (
@@ -244,7 +244,7 @@ export default function UdyamLandingPage() {
                   )}
                 </button>
                 {openFaq === idx && (
-                  <div className="px-4 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 pt-3 bg-white">
+                  <div className="px-4 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 pt-3 bg-white animate-fade-in">
                     {faq.a}
                   </div>
                 )}

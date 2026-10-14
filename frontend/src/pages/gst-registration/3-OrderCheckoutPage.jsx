@@ -219,14 +219,14 @@ export default function OrderCheckoutPage() {
             </div>
 
             {/* Customer Details Summary */}
-            <div className="bg-white rounded-3xl p-6 shadow-[0_8px_25px_rgba(17,24,39,0.04)] border border-slate-200/90 space-y-3">
+            <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-[0_8px_25px_rgba(17,24,39,0.04)] border border-slate-200/90 space-y-3">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Applicant Information
               </h3>
-              <div className="grid grid-cols-2 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
                 <div>
                   <span className="text-slate-500 block">Name:</span>
-                  <span className="font-bold text-slate-900">{order?.customer_name || 'Yash Upadhyay'}</span>
+                  <span className="font-bold text-slate-900 break-words">{order?.customer_name || 'Yash Upadhyay'}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Mobile:</span>
@@ -292,10 +292,10 @@ export default function OrderCheckoutPage() {
               <button
                 type="button"
                 onClick={() => setIsPaymentModalOpen(true)}
-                className="w-full py-4 px-6 rounded-2xl bg-[#111827] hover:bg-[#1F2937] text-white font-black text-sm shadow-xl transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-2xl bg-[#111827] hover:bg-[#1F2937] text-white font-black text-xs sm:text-sm shadow-xl transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
               >
                 <span>Activate Subscription • ₹{order?.amount || 1769} INR</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
 
               <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 text-center">

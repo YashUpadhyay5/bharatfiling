@@ -57,6 +57,8 @@ export default function ApplicantPanPage({
           </div>
           <input
             type="tel"
+            inputMode="tel"
+            autoComplete="tel"
             maxLength={10}
             value={formData.phone}
             onChange={(e) => onInputChange('phone', e.target.value.replace(/\D/g, ''))}
@@ -90,6 +92,9 @@ export default function ApplicantPanPage({
         <input
           type="text"
           maxLength={10}
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck="false"
           value={formData.pan}
           onChange={(e) => onInputChange('pan', e.target.value.toUpperCase())}
           placeholder="ABCDE1234F"

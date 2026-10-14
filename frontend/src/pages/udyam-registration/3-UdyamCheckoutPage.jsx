@@ -151,8 +151,8 @@ export default function UdyamCheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Product Card & Deliverables */}
           <div className="lg:col-span-8 space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-              <div className="flex items-start justify-between gap-4">
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                 <div className="space-y-1">
                   <h3 className="text-base font-extrabold text-slate-900">
                     {order?.service_name || 'UDYAM Registration (UDYAM + LEDGERS)'}
@@ -161,7 +161,7 @@ export default function UdyamCheckoutPage() {
                     Get UDYAM registration for your business with the LEDGERS platform to track compliance.
                   </p>
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-left sm:text-right shrink-0">
                   <div className="text-base font-extrabold text-slate-900">2,899 INR</div>
                 </div>
               </div>
@@ -253,7 +253,7 @@ export default function UdyamCheckoutPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="font-mono text-slate-600">
+                  <span className="font-mono text-slate-600 break-all">
                     {maskEmail(order?.customer_email || 'yashupdhyay486@gmail.com')}
                   </span>
                 </div>

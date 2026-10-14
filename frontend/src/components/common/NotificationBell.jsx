@@ -211,7 +211,7 @@ export default function NotificationBell() {
 
       {/* Popover Dropdown Inbox */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.18)] border border-slate-100 z-50 overflow-hidden animate-fade-in">
+        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-32px)] max-w-[360px] sm:w-[380px] bg-white rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.18)] border border-slate-100 z-50 overflow-hidden animate-fade-in">
           {/* Header */}
           <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
             <div className="flex items-center gap-2">

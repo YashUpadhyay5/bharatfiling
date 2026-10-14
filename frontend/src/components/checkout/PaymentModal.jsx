@@ -130,10 +130,10 @@ export default function PaymentModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[92dvh] overflow-y-auto shadow-2xl border border-slate-200 relative">
         {/* Modal Header */}
-        <div className="p-5 sm:p-6 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-4 sm:p-6 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[#111827] text-white flex items-center justify-center shadow-xs">
               {activeTab === 'autopay' ? (
@@ -198,7 +198,7 @@ export default function PaymentModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {isSuccess ? (
             /* Success State */
             <div className="text-center py-6 space-y-4">
@@ -339,15 +339,15 @@ export default function PaymentModal({
               </div>
 
               {/* QR Container */}
-              <div className="relative inline-block p-4 bg-white rounded-3xl border-2 border-dashed border-slate-300 shadow-inner">
+              <div className="relative inline-block p-3 sm:p-4 bg-white rounded-3xl border-2 border-dashed border-slate-300 shadow-inner">
                 {qrDataUrl ? (
                   <img
                     src={qrDataUrl}
                     alt="UPI Dynamic QR Code"
-                    className="w-56 h-56 mx-auto rounded-xl object-contain shadow-xs"
+                    className="w-44 h-44 sm:w-56 sm:h-56 mx-auto rounded-xl object-contain shadow-xs"
                   />
                 ) : (
-                  <div className="w-56 h-56 flex items-center justify-center bg-slate-50 rounded-xl">
+                  <div className="w-44 h-44 sm:w-56 sm:h-56 flex items-center justify-center bg-slate-50 rounded-xl">
                     <RefreshCw className="w-6 h-6 animate-spin text-slate-400" />
                   </div>
                 )}
@@ -367,13 +367,13 @@ export default function PaymentModal({
               </div>
 
               {/* Supported UPI Apps Strip */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-4 text-xs font-bold text-slate-600">
+              <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs font-bold text-slate-600">
                 <span className="text-slate-800">Google Pay</span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span className="text-purple-700">PhonePe</span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span className="text-sky-600">Paytm</span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span className="text-emerald-700">BHIM UPI</span>
               </div>
 

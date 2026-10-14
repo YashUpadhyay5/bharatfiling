@@ -267,14 +267,14 @@ export default function GstRegistrationModule() {
       </div>
 
       {/* 2. MAIN CONTAINER */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 pt-5 sm:pt-10 md:pt-12">
         <div className="bg-white rounded-3xl shadow-[0_16px_50px_rgba(17,24,39,0.07)] border border-slate-200/90 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[520px]">
             {/* Left Hero */}
             <OnboardingHero currentStep={currentStep} serviceMeta={serviceMeta} />
 
             {/* Right Interactive Form: Screen 1 or Screen 2 */}
-            <div className="lg:col-span-6 p-6 sm:p-10 flex flex-col justify-center">
+            <div className="lg:col-span-6 p-4 sm:p-8 lg:p-10 flex flex-col justify-center">
               {currentStep === 1 ? (
                 <ApplicantPanPage
                   formData={formData}

@@ -168,9 +168,141 @@ export const NIC_HIERARCHY = {
       '70 - Activities of head offices; management consultancy activities': [
         '70200 - Management consultancy, corporate business advisory',
       ],
+      '71 - Architectural and engineering activities': [
+        '71100 - Architectural and engineering activities and related technical consultancy',
+      ],
       '73 - Advertising and market research': [
         '73100 - Advertising and digital marketing agencies',
         '73200 - Market research and public opinion polling',
+      ],
+      '74 - Other professional, scientific and technical activities': [
+        '74101 - Interior design activities',
+        '74201 - Commercial and portrait photography activities',
+      ],
+    },
+  },
+  'I - Accommodation and food service activities': {
+    code: 'I',
+    label: 'I - Accommodation and food service activities',
+    subDivisions: {
+      '55 - Accommodation': [
+        '55101 - Hotels and motels with restaurant facilities',
+        '55102 - Guest houses, homestays and bed & breakfast units',
+        '55109 - Other short-stay accommodation services',
+      ],
+      '56 - Food and beverage service activities': [
+        '56101 - Restaurants, cafes and fast food dining outlets',
+        '56102 - Cloud kitchens and food delivery preparation',
+        '56210 - Event catering and food service contractors',
+        '56301 - Tea/coffee shops, juice bars and beverage outlets',
+      ],
+    },
+  },
+  'F - Construction': {
+    code: 'F',
+    label: 'F - Construction',
+    subDivisions: {
+      '41 - Construction of buildings': [
+        '41001 - Construction of residential buildings',
+        '41002 - Construction of non-residential and commercial buildings',
+      ],
+      '42 - Civil engineering': [
+        '42101 - Construction of roads, highways and bridges',
+        '42201 - Construction of utility projects for water and power',
+      ],
+      '43 - Specialized construction activities': [
+        '43211 - Electrical installation and wiring',
+        '43221 - Plumbing, heat and air-conditioning installation',
+        '43301 - Building completion, plastering, painting and finishing',
+      ],
+    },
+  },
+  'H - Transportation and storage': {
+    code: 'H',
+    label: 'H - Transportation and storage',
+    subDivisions: {
+      '49 - Land transport and transport via pipelines': [
+        '49211 - Urban and suburban passenger land transport (cabs/taxis)',
+        '49231 - Freight transport by road (trucks and commercial carriers)',
+      ],
+      '52 - Warehousing and support activities for transportation': [
+        '52101 - General warehousing and cold storage facilities',
+        '52291 - Freight forwarding, logistics and customs clearance cargo handlers',
+      ],
+      '53 - Postal and courier activities': [
+        '53200 - Courier and express parcel delivery activities',
+      ],
+    },
+  },
+  'N - Administrative and support service activities': {
+    code: 'N',
+    label: 'N - Administrative and support service activities',
+    subDivisions: {
+      '77 - Rental and leasing activities': [
+        '77101 - Renting and operational leasing of passenger cars and motor vehicles',
+        '77301 - Renting of construction and civil engineering machinery',
+      ],
+      '78 - Employment activities': [
+        '78101 - Human resources and placement agency services',
+        '78201 - Temporary employment agency and staffing activities',
+      ],
+      '79 - Travel agency, tour operator and other reservation services': [
+        '79110 - Travel agency and flight/rail booking services',
+        '79120 - Tour operator, holiday packaging and itinerary planning',
+      ],
+      '80 - Security and investigation activities': [
+        '80100 - Private security guard and armed surveillance services',
+      ],
+      '81 - Services to buildings and landscape activities': [
+        '81210 - General cleaning of buildings and corporate facilities',
+        '81291 - Disinfection, pest control and sanitization services',
+      ],
+      '82 - Office administrative and business support activities': [
+        '82110 - Combined office administrative services',
+        '82200 - Activities of call centres and business process outsourcing (BPO)',
+      ],
+    },
+  },
+  'P - Education': {
+    code: 'P',
+    label: 'P - Education',
+    subDivisions: {
+      '85 - Education': [
+        '85101 - Pre-primary and kindergarten education',
+        '85211 - Secondary and higher secondary school education',
+        '85301 - Higher education (colleges and technical universities)',
+        '85411 - Sports, martial arts and recreational education',
+        '85491 - Academic coaching institutes and competitive exam tutoring',
+        '85499 - Online education platforms and e-learning portals',
+      ],
+    },
+  },
+  'Q - Human health and social work activities': {
+    code: 'Q',
+    label: 'Q - Human health and social work activities',
+    subDivisions: {
+      '86 - Human health activities': [
+        '86101 - Hospital and nursing home activities',
+        '86201 - General medical and doctor clinic practices',
+        '86202 - Dental clinic and dental practice activities',
+        '86901 - Diagnostic pathology labs and imaging scan centers',
+        '86905 - Physiotherapy, occupational therapy and rehabilitation',
+      ],
+    },
+  },
+  'S - Other service activities': {
+    code: 'S',
+    label: 'S - Other service activities',
+    subDivisions: {
+      '95 - Repair of computers and personal and household goods': [
+        '95111 - Repair and servicing of computers and laptops',
+        '95120 - Repair of communication equipment and mobile phones',
+        '95221 - Repair of household appliances and consumer electronics',
+      ],
+      '96 - Other personal service activities': [
+        '96021 - Hairdressing, beauty parlours and salon services',
+        '96022 - Spas, wellness massage and rejuvenation treatments',
+        '96011 - Laundries, dry cleaners and garment pressing services',
       ],
     },
   },

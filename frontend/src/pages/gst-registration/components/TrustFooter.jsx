@@ -3,8 +3,8 @@ import { Star, Award, Users, ShieldCheck } from 'lucide-react';
 
 export default function TrustFooter() {
   return (
-    <div className="bg-slate-50/80 border-t border-slate-100 p-4 sm:p-5">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center sm:text-left">
+    <div className="bg-slate-50/80 border-t border-slate-100 p-3.5 sm:p-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 text-center sm:text-left">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 text-amber-500 flex items-center justify-center shadow-2xs shrink-0">
             <Star className="w-4 h-4 fill-amber-400 text-amber-400" />

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import {
@@ -25,6 +25,38 @@ export default function Navbar() {
   const timerRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Lock background body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  // Close menus on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+        setActiveDropdown(null);
+        setUserDropdown(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Close menus on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setActiveDropdown(null);
+    setUserDropdown(false);
+  }, [location.pathname]);
 
   const handleServiceClick = (e, item, categoryLabel) => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -267,7 +299,9 @@ export default function Navbar() {
                 {/* 2-Column Hover Mega-Dropdown */}
                 {activeDropdown === cat.key && (
                   <div
-                    className="absolute top-[58px] left-0 bg-white rounded-2xl shadow-[0_16px_45px_rgba(17,24,39,0.12)] border border-slate-100 p-5 min-w-[420px] max-w-[500px] z-50 animate-fade-in"
+                    className={`absolute top-[58px] ${
+                      ['mca', 'compliance', 'consultation'].includes(cat.key) ? 'right-0' : 'left-0'
+                    } bg-white rounded-2xl shadow-[0_16px_45px_rgba(17,24,39,0.12)] border border-slate-100 p-5 min-w-[420px] max-w-[500px] z-50 animate-fade-in`}
                     onMouseEnter={() => handleMouseEnter(cat.key)}
                     onMouseLeave={handleMouseLeave}
                   >
@@ -429,113 +463,174 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Drawer with Accordion Sub-options */}
+      {/* Mobile Navigation Backdrop & Slide-in Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-100 bg-white px-4 py-4 space-y-3 shadow-lg max-h-[80vh] overflow-y-auto">
-          {/* Mobile Instant Search Tab */}
-          <div className="pb-1">
-            <NavbarSearch isMobile onCloseMobile={() => setMobileMenuOpen(false)} />
-          </div>
+        <div className="lg:hidden fixed inset-0 z-50 flex justify-end">
+          {/* Dimmed Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs animate-fade-in"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
 
-          <div className="space-y-1">
-            {/* Top Home link for mobile */}
-            <Link
-              to="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-xl ${
-                location.pathname === '/' ? 'bg-slate-100 text-[#111827] font-bold' : 'text-slate-800 hover:bg-slate-50'
-              }`}
-            >
-              <Home className="w-4 h-4 text-slate-500" />
-              Home
-            </Link>
-
-            {menuCategories.map((cat) => (
-              <div key={cat.key} className="border-b border-slate-50 pb-1">
-                <button
-                  onClick={() =>
-                    setMobileExpandedCat(mobileExpandedCat === cat.key ? null : cat.key)
-                  }
-                  className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 rounded-xl"
-                >
-                  <span>{cat.label}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-slate-400 transition-transform ${
-                      mobileExpandedCat === cat.key ? 'rotate-180 text-[#111827]' : ''
-                    }`}
-                  />
-                </button>
-
-                {mobileExpandedCat === cat.key && (
-                  <div className="px-4 py-2 space-y-1 bg-slate-50/70 rounded-xl mt-1">
-                    {[...cat.col1, ...cat.col2].map((item) => (
-                      <Link
-                        key={item.name}
-                        to={item.path}
-                        onClick={(e) => handleMobileServiceClick(e, item, cat.label)}
-                        className="block text-xs text-slate-600 hover:text-[#111827] py-1"
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            <Link
-              to="/pricing"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 rounded-xl"
-            >
-              Pricing
-            </Link>
-          </div>
-
-          <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
-            {isAuthenticated ? (
-              <>
-                <Link
-                  to={
-                    user?.role === 'CA'
-                      ? '/ca/dashboard'
-                      : user?.role === 'ADMIN'
-                      ? '/admin'
-                      : '/dashboard'
-                  }
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-2.5 rounded-full bg-[#111827] text-white font-bold text-sm"
-                >
-                  Go to {user?.role === 'CA' ? 'CA Workbench' : user?.role === 'ADMIN' ? 'Admin Portal' : 'Dashboard'}
-                </Link>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleLogout();
+          {/* Drawer Body */}
+          <div
+            className="relative w-full max-w-sm sm:max-w-md bg-white h-full shadow-2xl flex flex-col z-10 animate-slide-in-right overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile Navigation"
+          >
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white shrink-0">
+              <Link
+                to="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2"
+              >
+                <img
+                  src="/bharatfiling-brand-icon.png"
+                  alt="BharatFiling"
+                  className="h-8 w-auto object-contain"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
                   }}
-                  className="w-full py-2 text-rose-600 font-semibold text-sm hover:bg-rose-50 rounded-full"
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <div className="flex gap-2">
+                />
+                <div className="flex items-baseline font-black tracking-tight text-lg leading-none">
+                  <span className="text-[#111827]">Bharat</span>
+                  <span className="text-[#F26522]">Filing</span>
+                </div>
+              </Link>
+
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition touch-target-safe flex items-center justify-center cursor-pointer"
+                aria-label="Close menu"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+              {/* Mobile Instant Search Tab */}
+              <div className="pb-1">
+                <NavbarSearch isMobile onCloseMobile={() => setMobileMenuOpen(false)} />
+              </div>
+
+              <div className="space-y-1">
+                {/* Top Home link for mobile */}
                 <Link
-                  to="/login"
+                  to="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 text-center py-2.5 rounded-full border border-slate-300 text-slate-800 font-semibold text-sm"
+                  className={`flex items-center gap-2.5 px-3.5 py-3 text-sm font-bold rounded-xl transition ${
+                    location.pathname === '/'
+                      ? 'bg-slate-100 text-[#111827]'
+                      : 'text-slate-800 hover:bg-slate-50 active:bg-slate-100'
+                  }`}
                 >
-                  Log In
+                  <Home className="w-4 h-4 text-slate-500 shrink-0" />
+                  Home
                 </Link>
+
+                {menuCategories.map((cat) => (
+                  <div key={cat.key} className="border-b border-slate-100 pb-1">
+                    <button
+                      onClick={() =>
+                        setMobileExpandedCat(mobileExpandedCat === cat.key ? null : cat.key)
+                      }
+                      className="w-full flex items-center justify-between px-3.5 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100 rounded-xl transition cursor-pointer"
+                    >
+                      <span>{cat.label}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                          mobileExpandedCat === cat.key ? 'rotate-180 text-[#111827]' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {mobileExpandedCat === cat.key && (
+                      <div className="px-2 py-2 space-y-1 bg-slate-50/80 rounded-2xl mt-1 mb-2 animate-fade-in">
+                        {[...cat.col1, ...cat.col2].map((item) => (
+                          <Link
+                            key={item.name}
+                            to={item.path}
+                            onClick={(e) => handleMobileServiceClick(e, item, cat.label)}
+                            className="flex items-center justify-between px-3 py-2.5 text-xs font-medium text-slate-700 hover:text-[#111827] hover:bg-white active:bg-slate-100 rounded-xl transition"
+                          >
+                            <span>{item.name}</span>
+                            {item.isLive && (
+                              <span className="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-200">
+                                Live
+                              </span>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
                 <Link
-                  to="/register"
+                  to="/pricing"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 text-center py-2.5 rounded-full bg-[#111827] text-white font-bold text-sm"
+                  className={`flex items-center justify-between px-3.5 py-3 text-sm font-semibold rounded-xl transition ${
+                    location.pathname === '/pricing'
+                      ? 'bg-slate-100 text-[#111827] font-bold'
+                      : 'text-slate-800 hover:bg-slate-50 active:bg-slate-100'
+                  }`}
                 >
-                  Register
+                  Pricing
                 </Link>
               </div>
-            )}
+            </div>
+
+            {/* Fixed Drawer Footer Actions with Safe-Area Inset */}
+            <div className="p-4 border-t border-slate-100 bg-slate-50/80 shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              {isAuthenticated ? (
+                <div className="space-y-2">
+                  <Link
+                    to={
+                      user?.role === 'CA'
+                        ? '/ca/dashboard'
+                        : user?.role === 'ADMIN'
+                        ? '/admin'
+                        : '/dashboard'
+                    }
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-3 rounded-full bg-[#111827] text-white font-bold text-sm block shadow-sm active:scale-98 transition"
+                  >
+                    Go to {user?.role === 'CA' ? 'CA Workbench' : user?.role === 'ADMIN' ? 'Admin Portal' : 'My Dashboard'}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full py-2.5 text-rose-600 font-semibold text-xs hover:bg-rose-50 active:bg-rose-100 rounded-full transition cursor-pointer"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2.5">
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex-1 text-center py-3 rounded-full border border-slate-300 bg-white text-slate-800 font-bold text-xs shadow-xs active:scale-98 transition"
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex-1 text-center py-3 rounded-full bg-[#111827] text-white font-bold text-xs shadow-xs active:scale-98 transition"
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
