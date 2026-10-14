@@ -1,21 +1,31 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Menu } from 'lucide-react';
+import { ChevronDown, Menu } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.jsx';
 import AuthRequiredModal from '../../common/AuthRequiredModal.jsx';
 import NotificationBell from '../../common/NotificationBell.jsx';
 import BrandLogo from './BrandLogo.jsx';
-import UtilityBar from './UtilityBar.jsx';
 import CategoryDropdown from './CategoryDropdown.jsx';
 import UserMenu from './UserMenu.jsx';
 import MobileDrawer from './MobileDrawer.jsx';
 import HeaderSearch from './HeaderSearch.jsx';
-import { SERVICE_CATEGORIES, getDashboardPath, getDashboardLabel } from './navigationData.js';
+import { SERVICE_CATEGORIES, getDashboardPath } from './navigationData.js';
 import { FOCUS_RING } from './shared.js';
 
 // Public information pages never require an account (same rule the search palette uses).
 const PUBLIC_INFO_PATHS = ['/', '/about', '/faq', '/pricing', '/contact', '/services'];
 
+// The full tab row needs ~1280px; below that the compact header + drawer is used.
+const DESKTOP_MEDIA_QUERY = '(min-width: 1280px)';
+
+/**
+ * Site header.
+ *
+ *   [ Logo ]   Home  Startup v  Registrations v  ...  Consultation v  Pricing   [ Search ] [ Log In ] [ Register ]
+ *
+ * Desktop (>= 1280px): one row, every category visible with its own hover dropdown.
+ * Below that: logo + search + hamburger, the same links live in the slide-in drawer.
+ */
 export default function Header() {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
@@ -110,7 +120,7 @@ export default function Header() {
 
   /* ----- drawer must not outlive the mobile breakpoint ----- */
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
+    const mq = window.matchMedia(DESKTOP_MEDIA_QUERY);
     const onChange = (e) => {
       if (e.matches) setMobileOpen(false);
     };
@@ -158,13 +168,14 @@ export default function Header() {
 
   const tabClass = (active) =>
     [
-      'relative inline-flex h-full items-center gap-1 px-2 xl:px-3 text-[13.5px] font-medium whitespace-nowrap transition-colors',
+      'relative inline-flex h-full items-center gap-1 whitespace-nowrap px-1.5 text-[12.5px] font-medium transition-colors',
+      'min-[1366px]:px-2 min-[1366px]:text-[13px]',
       'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#111827]',
-      'after:absolute after:inset-x-2 xl:after:inset-x-3 after:-bottom-px after:h-[2px] after:rounded-full after:bg-[#F26522]',
-      'after:transition-transform after:duration-200',
+      'after:absolute after:inset-x-1.5 after:-bottom-px after:h-[2px] after:rounded-full after:bg-[#F26522]',
+      'min-[1366px]:after:inset-x-2 after:transition-transform after:duration-200',
       active
         ? 'text-[#111827] after:scale-x-100'
-        : 'text-slate-600 hover:text-[#111827] after:scale-x-0 hover:after:scale-x-100',
+        : 'text-slate-700 hover:text-[#111827] after:scale-x-0 hover:after:scale-x-100',
     ].join(' ');
 
   const isHome = pathname === '/';
@@ -180,33 +191,92 @@ export default function Header() {
         Skip to main content
       </a>
 
-      <UtilityBar trackPath={isAuthenticated ? dashboardPath : '/dashboard'} />
-
       <header
         ref={headerRef}
-        className={`sticky top-0 z-40 bg-white font-sans transition-shadow duration-200 print:hidden ${
-          scrolled ? 'shadow-[0_10px_30px_-18px_rgba(15,23,42,0.4)]' : ''
+        className={`sticky top-0 z-40 border-b border-slate-200/80 bg-white font-sans transition-shadow duration-200 print:hidden ${
+          scrolled ? 'shadow-[0_8px_24px_-14px_rgba(15,23,42,0.35)]' : 'shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
         }`}
       >
-        {/* Row 1: brand, search, account */}
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-[68px] w-full max-w-[1600px] items-center gap-3 px-3 sm:px-6 lg:px-8">
           <BrandLogo />
 
-          <div className="ml-auto lg:mx-8 lg:max-w-[560px] lg:flex-1 xl:mx-12">
-            <HeaderSearch variant="bar" />
-          </div>
-
-          {/* Account (desktop) */}
-          <div className="hidden shrink-0 items-center gap-2 lg:flex" onPointerDown={() => setOpenKey(null)}>
-            {isAuthenticated ? (
-              <>
-                <NotificationBell />
+          {/* Primary navigation: every service category is visible (desktop) */}
+          <nav aria-label="Primary" className="hidden h-full min-w-0 flex-1 xl:block">
+            <ul className="flex h-full items-stretch justify-center">
+              <li className="flex">
                 <Link
-                  to={dashboardPath}
-                  className={`inline-flex h-10 items-center gap-2 rounded-full bg-[#111827] px-5 text-[13.5px] font-semibold text-white shadow-sm transition-colors hover:bg-[#1F2937] ${FOCUS_RING}`}
+                  to="/"
+                  onClick={handleHomeClick}
+                  aria-current={isHome ? 'page' : undefined}
+                  className={tabClass(isHome)}
                 >
-                  {getDashboardLabel(user?.role)}
+                  Home
                 </Link>
+              </li>
+
+              {SERVICE_CATEGORIES.map((cat, index) => {
+                const isOpen = openKey === cat.key;
+                const menuId = `nav-menu-${cat.key}`;
+                return (
+                  <li
+                    key={cat.key}
+                    className="relative flex"
+                    onPointerEnter={(e) => e.pointerType === 'mouse' && hoverOpen(cat.key)}
+                    onPointerLeave={(e) => e.pointerType === 'mouse' && hoverClose()}
+                    onBlur={(e) => {
+                      const next = e.relatedTarget;
+                      if (next && !e.currentTarget.contains(next) && openKey === cat.key) setOpenKey(null);
+                    }}
+                  >
+                    <button
+                      ref={(el) => {
+                        tabRefs.current[cat.key] = el;
+                      }}
+                      type="button"
+                      aria-haspopup="true"
+                      aria-expanded={isOpen}
+                      aria-controls={menuId}
+                      onClick={() => toggleMenu(cat.key)}
+                      className={tabClass(isOpen)}
+                    >
+                      {cat.label}
+                      <ChevronDown
+                        className={`h-3 w-3 transition-transform duration-200 ${
+                          isOpen ? 'rotate-180 text-[#111827]' : 'text-slate-400'
+                        }`}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    {isOpen && (
+                      <CategoryDropdown
+                        id={menuId}
+                        category={cat}
+                        alignRight={index >= SERVICE_CATEGORIES.length - 3}
+                        onItemClick={handleServiceClick}
+                      />
+                    )}
+                  </li>
+                );
+              })}
+
+              <li className="flex">
+                <Link to="/pricing" aria-current={isPricing ? 'page' : undefined} className={tabClass(isPricing)}>
+                  Pricing
+                </Link>
+              </li>
+            </ul>
+          </nav>
+
+          {/* Actions */}
+          <div className="ml-auto flex shrink-0 items-center gap-2.5 xl:ml-0" onPointerDown={() => setOpenKey(null)}>
+            <HeaderSearch variant="header" />
+
+            {isAuthenticated && <NotificationBell />}
+
+            {/* Account (desktop) */}
+            <div className="hidden items-center gap-2 xl:flex">
+              {isAuthenticated ? (
                 <UserMenu
                   user={user}
                   open={userMenuOpen}
@@ -218,29 +288,25 @@ export default function Header() {
                   onClose={() => setUserMenuOpen(false)}
                   onLogout={handleLogout}
                 />
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className={`inline-flex h-10 items-center rounded-full px-4 text-[13.5px] font-semibold text-slate-700 transition-colors hover:bg-slate-100 hover:text-[#111827] ${FOCUS_RING}`}
-                >
-                  Log in
-                </Link>
-                <Link
-                  to="/register"
-                  className={`group inline-flex h-10 items-center gap-1.5 rounded-full bg-[#111827] pl-5 pr-4 text-[13.5px] font-semibold text-white shadow-sm transition-colors hover:bg-[#1F2937] ${FOCUS_RING}`}
-                >
-                  Get Started
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-                </Link>
-              </>
-            )}
-          </div>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className={`rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[12.5px] font-semibold text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 ${FOCUS_RING}`}
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    to="/register"
+                    className={`rounded-full bg-[#111827] px-4 py-1.5 text-[12.5px] font-bold text-white shadow-xs transition hover:bg-[#1F2937] hover:shadow ${FOCUS_RING}`}
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
+            </div>
 
-          {/* Mobile / tablet controls */}
-          <div className="ml-1.5 flex items-center gap-1.5 lg:hidden">
-            {isAuthenticated && <NotificationBell />}
+            {/* Menu button (below desktop width) */}
             <button
               ref={hamburgerRef}
               type="button"
@@ -248,80 +314,12 @@ export default function Header() {
               aria-label="Open menu"
               aria-haspopup="dialog"
               aria-expanded={mobileOpen}
-              className={`flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition-colors hover:bg-slate-100 ${FOCUS_RING}`}
+              className={`flex h-10 w-10 items-center justify-center rounded-xl text-slate-700 transition hover:bg-slate-100 xl:hidden ${FOCUS_RING}`}
             >
               <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
         </div>
-
-        {/* Row 2: every service category visible, each with its own dropdown (desktop) */}
-        <nav aria-label="Primary" className="hidden border-y border-slate-200/80 lg:block">
-          <ul className="mx-auto flex h-12 w-full max-w-7xl items-stretch justify-between px-4 sm:px-6 lg:px-8">
-            <li className="flex">
-              <Link
-                to="/"
-                onClick={handleHomeClick}
-                aria-current={isHome ? 'page' : undefined}
-                className={tabClass(isHome)}
-              >
-                Home
-              </Link>
-            </li>
-
-            {SERVICE_CATEGORIES.map((cat, index) => {
-              const isOpen = openKey === cat.key;
-              const menuId = `nav-menu-${cat.key}`;
-              return (
-                <li
-                  key={cat.key}
-                  className="relative flex"
-                  onPointerEnter={(e) => e.pointerType === 'mouse' && hoverOpen(cat.key)}
-                  onPointerLeave={(e) => e.pointerType === 'mouse' && hoverClose()}
-                  onBlur={(e) => {
-                    const next = e.relatedTarget;
-                    if (next && !e.currentTarget.contains(next) && openKey === cat.key) setOpenKey(null);
-                  }}
-                >
-                  <button
-                    ref={(el) => {
-                      tabRefs.current[cat.key] = el;
-                    }}
-                    type="button"
-                    aria-haspopup="true"
-                    aria-expanded={isOpen}
-                    aria-controls={menuId}
-                    onClick={() => toggleMenu(cat.key)}
-                    className={tabClass(isOpen)}
-                  >
-                    {cat.label}
-                    <ChevronDown
-                      className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180 text-[#111827]' : ''
-                      }`}
-                      aria-hidden="true"
-                    />
-                  </button>
-
-                  {isOpen && (
-                    <CategoryDropdown
-                      id={menuId}
-                      category={cat}
-                      alignRight={index >= SERVICE_CATEGORIES.length - 3}
-                      onItemClick={handleServiceClick}
-                    />
-                  )}
-                </li>
-              );
-            })}
-
-            <li className="flex">
-              <Link to="/pricing" aria-current={isPricing ? 'page' : undefined} className={tabClass(isPricing)}>
-                Pricing
-              </Link>
-            </li>
-          </ul>
-        </nav>
       </header>
 
       <MobileDrawer

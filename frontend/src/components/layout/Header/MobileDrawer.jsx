@@ -62,7 +62,7 @@ export default function MobileDrawer({ open, onClose, pathname, user, isAuthenti
     }`;
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] lg:hidden" role="dialog" aria-modal="true" aria-label="Main menu">
+    <div className="fixed inset-0 z-[70] xl:hidden" role="dialog" aria-modal="true" aria-label="Main menu">
       <div className="bf-fade-in absolute inset-0 bg-slate-900/50" onClick={onClose} aria-hidden="true" />
 
       <div

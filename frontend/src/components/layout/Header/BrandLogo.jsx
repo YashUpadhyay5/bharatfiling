@@ -8,19 +8,19 @@ export default function BrandLogo({ onClick, className = '' }) {
       to="/"
       onClick={onClick}
       aria-label="BharatFiling – Home"
-      className={`flex shrink-0 items-center gap-2.5 rounded-lg ${FOCUS_RING} ${className}`}
+      className={`group flex shrink-0 items-center gap-2 rounded-lg transition-transform active:scale-95 ${FOCUS_RING} ${className}`}
     >
       <img
         src="/bharatfiling-brand-icon.png"
         alt=""
         width="50"
         height="36"
-        className="h-9 w-auto shrink-0 object-contain"
+        className="h-8 w-auto shrink-0 object-contain sm:h-9"
         onError={(e) => {
           e.currentTarget.style.display = 'none';
         }}
       />
-      <span className="flex select-none items-baseline text-[21px] font-extrabold leading-none tracking-tight">
+      <span className="flex select-none items-baseline text-lg font-black leading-none tracking-tight sm:text-xl">
         <span className="text-[#111827]">Bharat</span>
         <span className="text-[#F26522]">Filing</span>
       </span>
