@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext.jsx';
-import AuthRequiredModal from './AuthRequiredModal.jsx';
+import { useAuth } from '../../../context/AuthContext.jsx';
+import AuthRequiredModal from '../../common/AuthRequiredModal.jsx';
 import {
   Search,
   X,
@@ -366,8 +366,21 @@ function HighlightMatch({ text, query }) {
   );
 }
 
-export default function NavbarSearch({ className = '', isMobile = false, onCloseMobile }) {
+// Shortcut hint that matches the visitor's platform (⌘K on Apple devices, Ctrl K elsewhere)
+const getShortcutLabel = () =>
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || '')
+    ? '⌘K'
+    : 'Ctrl K';
+
+export default function HeaderSearch({
+  className = '',
+  isMobile = false,
+  onCloseMobile,
+  // 'pill' = original compact pill, 'header' = icon button that grows into a pill on wide screens
+  variant = 'pill',
+}) {
   const { isAuthenticated } = useAuth();
+  const shortcutLabel = useMemo(() => getShortcutLabel(), []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [selectedServiceForAuth, setSelectedServiceForAuth] = useState(null);
@@ -439,6 +452,8 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
 
   // Global keyboard shortcut: Ctrl+K / Cmd+K or '/' anywhere on page opens modal
   useEffect(() => {
+    // The mobile-drawer instance is short-lived; the header instance owns the shortcut.
+    if (isMobile) return undefined;
     const handleGlobalKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -451,7 +466,7 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
+  }, [isMobile]);
 
   // Select service and navigate (requires login/register for services)
   const handleSelect = (item) => {
@@ -511,13 +526,66 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
         TRIGGER IN NAVBAR:
         Compact pill trigger with less length, matching image 1
       */}
-      {!isMobile ? (
+      {isMobile ? (
+        /* Mobile Drawer Trigger */
+        <button
+          type="button"
+          onClick={() => {
+            setIsModalOpen(true);
+            if (onCloseMobile) onCloseMobile();
+          }}
+          className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 text-[13px] font-medium transition cursor-pointer ${className}`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Search className="w-4 h-4 text-slate-400" />
+            <span>Search GST, Trademark, Company...</span>
+          </div>
+        </button>
+      ) : variant === 'bar' ? (
+        /* Header search: round icon button on small screens, full-width search bar from lg */
+        <button
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+          className={`group flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-800 cursor-pointer lg:h-11 lg:w-full lg:justify-between lg:bg-slate-50 lg:pl-4 lg:pr-2 lg:hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827] ${className}`}
+          aria-label={`Search services (${shortcutLabel})`}
+          title={`Search services (${shortcutLabel} or /)`}
+        >
+          <span className="flex min-w-0 items-center gap-2.5">
+            <Search className="h-[18px] w-[18px] shrink-0 text-slate-500" />
+            <span className="hidden truncate text-[14px] font-normal text-slate-500 group-hover:text-slate-700 lg:inline">
+              Search for GST, Trademark, Company Registration…
+            </span>
+          </span>
+          <kbd className="hidden items-center rounded-md border border-slate-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-slate-500 pointer-events-none lg:inline-flex">
+            {shortcutLabel}
+          </kbd>
+        </button>
+      ) : variant === 'header' ? (
+        /* Header trigger: round icon button, grows into a labelled pill from the xl breakpoint */
+        <button
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+          className={`group inline-flex items-center justify-center xl:justify-between h-10 w-10 xl:w-[208px] xl:pl-3.5 xl:pr-2 shrink-0 rounded-full border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827] ${className}`}
+          aria-label={`Search services (${shortcutLabel})`}
+          title={`Search services (${shortcutLabel} or /)`}
+        >
+          <span className="flex items-center gap-2 min-w-0">
+            <Search className="w-[17px] h-[17px] shrink-0" />
+            <span className="hidden xl:inline truncate text-[13px] font-normal text-slate-500 group-hover:text-slate-700">
+              Search services
+            </span>
+          </span>
+          <kbd className="hidden xl:inline-flex items-center text-[10.5px] text-slate-500 bg-slate-100 border border-slate-200 rounded-md px-1.5 py-0.5 font-sans font-medium pointer-events-none">
+            {shortcutLabel}
+          </kbd>
+        </button>
+      ) : (
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
           className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-full border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-all shadow-xs text-xs font-medium w-40 xl:w-44 shrink-0 group cursor-pointer ${className}`}
-          aria-label="Search services (⌘K)"
-          title="Search services (Press ⌘K or /)"
+          aria-label={`Search services (${shortcutLabel})`}
+          title={`Search services (Press ${shortcutLabel} or /)`}
         >
           <div className="flex items-center gap-2 min-w-0">
             <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0" />
@@ -526,25 +594,7 @@ export default function NavbarSearch({ className = '', isMobile = false, onClose
             </span>
           </div>
           <kbd className="hidden sm:inline-flex items-center text-[10px] text-slate-400 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 font-mono pointer-events-none group-hover:border-slate-300">
-            ⌘K
-          </kbd>
-        </button>
-      ) : (
-        /* Mobile Drawer Trigger */
-        <button
-          type="button"
-          onClick={() => {
-            setIsModalOpen(true);
-            if (onCloseMobile) onCloseMobile();
-          }}
-          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-medium transition cursor-pointer ${className}`}
-        >
-          <div className="flex items-center gap-2.5">
-            <Search className="w-4 h-4 text-slate-400" />
-            <span>Search GST, Trademark, Company...</span>
-          </div>
-          <kbd className="text-[10px] text-slate-400 bg-white border border-slate-200 rounded px-1.5 py-0.5 font-mono">
-            ⌘K
+            {shortcutLabel}
           </kbd>
         </button>
       )}

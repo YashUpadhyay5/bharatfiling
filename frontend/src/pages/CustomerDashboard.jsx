@@ -33,7 +33,15 @@ export default function CustomerDashboard() {
   const { socket, joinApplication, joinUser } = useSocket();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'profile', 'businesses', 'applications', 'docs'
+  // 'overview', 'profile', 'businesses', 'applications', 'docs' (deep-linkable via /dashboard?tab=profile)
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const requested = new URLSearchParams(window.location.search).get('tab');
+      return ['overview', 'profile', 'businesses', 'applications', 'docs'].includes(requested) ? requested : 'overview';
+    } catch {
+      return 'overview';
+    }
+  });
   const [profile, setProfile] = useState(null);
   const [applications, setApplications] = useState([]);
   const [businesses, setBusinesses] = useState([]);

@@ -76,14 +76,13 @@ export default function AuthRequiredModal({
   }, [isOpen, onClose]);
 
   // Prevent background scroll when modal is open
+  // (only touches the page while open, so a closed instance can't undo another overlay's lock)
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    if (!isOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
 
