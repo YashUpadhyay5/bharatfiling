@@ -35,21 +35,21 @@ export default function UdyamRegistrationModule() {
       // Ignore
     }
     return {
-      pan: 'AOOPU9849P',
-      aadhaar: '829930219289',
-      nicDivision: 'A - Agriculture, Forestry And Fishing',
-      nicSubDivision: '01 - Crop And Animal Production, Hunting',
-      nicSubClass: '01112 - Growing Of Jowar, Bajra And Millets',
+      pan: '',
+      aadhaar: '',
+      nicDivision: '',
+      nicSubDivision: '',
+      nicSubClass: '',
       name: '',
-      enterpriseName: 'Yash Agro Tech Solutions',
+      enterpriseName: '',
       organizationType: 'Proprietorship',
       majorActivity: 'Services',
-      plantAddress: 'Sector 62, Electronic City',
-      city: 'Bengaluru',
+      plantAddress: '',
+      city: '',
       state: 'Karnataka',
-      pincode: '560100',
-      bankAccountNo: '50100234918231',
-      bankIfsc: 'HDFC0001234',
+      pincode: '',
+      bankAccountNo: '',
+      bankIfsc: '',
     };
   };
 
@@ -62,7 +62,7 @@ export default function UdyamRegistrationModule() {
       setFormData((prev) => ({
         ...prev,
         name: prev.name || user.full_name || '',
-        phone: prev.phone || user.phone || '7668976193',
+        phone: prev.phone || user.phone || '',
       }));
     }
   }, [user]);

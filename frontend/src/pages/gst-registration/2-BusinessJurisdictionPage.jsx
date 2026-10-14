@@ -1,6 +1,7 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { INDIAN_STATES, BUSINESS_NATURES } from './constants.js';
+import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 
 export default function BusinessJurisdictionPage({
   formData,
@@ -68,20 +69,13 @@ export default function BusinessJurisdictionPage({
           <ArrowLeft className="w-4 h-4" />
         </button>
 
-        <button
+        <SplitGradientButton
           type="submit"
-          disabled={isSubmitting}
-          className="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#6366F1] to-[#A855F7] hover:from-[#4F46E5] hover:to-[#9333EA] text-white font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] disabled:opacity-60"
-        >
-          {isSubmitting ? (
-            <span>Generating Quotation...</span>
-          ) : (
-            <>
-              <span>Get a Quote</span>
-              <ArrowRight className="w-4 h-4" />
-            </>
-          )}
-        </button>
+          label="Get a Quote"
+          loading={isSubmitting}
+          loadingText="Generating Quotation..."
+          className="flex-1"
+        />
       </div>
     </form>
   );

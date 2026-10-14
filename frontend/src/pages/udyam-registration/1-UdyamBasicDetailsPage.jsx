@@ -2,6 +2,7 @@ import React from 'react';
 import { Check, Lock } from 'lucide-react';
 import { NIC_HIERARCHY } from './constants.js';
 import SearchableSelect from '../../components/common/SearchableSelect.jsx';
+import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 
 export default function UdyamBasicDetailsPage({
   formData,
@@ -149,15 +150,14 @@ export default function UdyamBasicDetailsPage({
         </div>
       )}
 
-      {/* 6. Action Button: Gradient Purple/Violet Button matching screenshot */}
+      {/* 6. Action Button: Split Gradient + Arrow Button matching reference screenshot */}
       <div className="pt-2 flex justify-end">
-        <button
+        <SplitGradientButton
           type="submit"
-          disabled={isSubmitting}
-          className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#D946EF] hover:from-[#4F46E5] hover:to-[#C026D3] text-white text-sm font-bold shadow-md hover:shadow-lg transition cursor-pointer disabled:opacity-60 text-center"
-        >
-          {isSubmitting ? 'Submitting...' : 'Get a Quote'}
-        </button>
+          label="Get a Quote"
+          loading={isSubmitting}
+          loadingText="Submitting..."
+        />
       </div>
     </form>
   );

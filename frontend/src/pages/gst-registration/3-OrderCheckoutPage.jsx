@@ -17,6 +17,7 @@ import { api } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PaymentModal from '../../components/checkout/PaymentModal.jsx';
+import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 import UdyamCheckoutPage from '../udyam-registration/3-UdyamCheckoutPage.jsx';
 
 export default function OrderCheckoutPage() {
@@ -289,14 +290,11 @@ export default function OrderCheckoutPage() {
               </div>
 
               {/* CTA Button */}
-              <button
-                type="button"
+              <SplitGradientButton
                 onClick={() => setIsPaymentModalOpen(true)}
-                className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-2xl bg-[#111827] hover:bg-[#1F2937] text-white font-black text-xs sm:text-sm shadow-xl transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
-              >
-                <span>Activate Subscription • ₹{order?.amount || 1769} INR</span>
-                <ArrowRight className="w-4 h-4 shrink-0" />
-              </button>
+                label={`Activate Subscription • ₹${order?.amount || 1769} INR`}
+                fullWidth
+              />
 
               <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 text-center">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />

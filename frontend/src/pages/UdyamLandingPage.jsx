@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
+import SplitGradientButton from '../components/common/SplitGradientButton.jsx';
 import {
   FileCheck2,
   CheckCircle2,
@@ -95,13 +96,10 @@ export default function UdyamLandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1">
-                <button
+                <SplitGradientButton
                   onClick={handleStartApplication}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2 cursor-pointer touch-target-safe active:scale-98"
-                >
-                  <span>Apply Udyam Registration</span>
-                  <ArrowRight className="w-4 h-4 shrink-0" />
-                </button>
+                  label="Apply Udyam Registration"
+                />
                 <div className="text-[11px] sm:text-xs text-slate-400 text-center sm:text-left">
                   Starts at <strong className="text-white font-extrabold">₹2,899</strong> + GST | Fast-Track Delivery
                 </div>

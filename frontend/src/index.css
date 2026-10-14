@@ -128,3 +128,39 @@
   animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Split Gradient + Arrow Button Styles */
+.split-gradient-btn {
+  background: linear-gradient(110deg, #5145FF 0%, #8542FA 55%, #D946EF 100%);
+  box-shadow: 0 4px 12px rgba(99, 65, 245, 0.22);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+}
+
+.split-gradient-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 65, 245, 0.30);
+  filter: saturate(1.1);
+}
+
+.split-gradient-btn:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.split-gradient-arrow {
+  background-color: rgba(57, 32, 210, 0.45);
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  transition: background-color 0.2s ease;
+}
+
+.split-gradient-btn:hover:not(:disabled) .split-gradient-arrow {
+  background-color: rgba(48, 26, 190, 0.65);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .split-gradient-btn {
+    transition: none !important;
+  }
+  .split-gradient-btn:hover:not(:disabled) {
+    transform: none !important;
+  }
+}
+

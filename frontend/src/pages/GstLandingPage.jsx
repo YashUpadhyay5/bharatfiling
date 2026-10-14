@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
+import SplitGradientButton from '../components/common/SplitGradientButton.jsx';
 import {
   FileCheck2,
   CheckCircle2,
@@ -120,15 +121,10 @@ export default function GstLandingPage() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 pt-1">
-                <button
-                  type="button"
+                <SplitGradientButton
                   onClick={handleStartApplication}
-                  className="w-full sm:w-auto px-6 sm:px-7 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2 group cursor-pointer touch-target-safe"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
-                  <span>Start GST Registration Now</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition shrink-0" />
-                </button>
+                  label="Start GST Registration"
+                />
 
                 <a
                   href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20help%20with%20GST%20Registration."

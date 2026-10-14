@@ -1,6 +1,7 @@
 import React from 'react';
 import { Building2, Landmark, MapPin, ArrowRight, ArrowLeft } from 'lucide-react';
 import { ORGANIZATION_TYPES, MAJOR_ACTIVITIES, INDIAN_STATES } from './constants.js';
+import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 
 export default function EnterpriseDetailsPage({
   formData,
@@ -20,7 +21,7 @@ export default function EnterpriseDetailsPage({
           type="text"
           value={formData.enterpriseName}
           onChange={(e) => onInputChange('enterpriseName', e.target.value)}
-          placeholder="e.g. Yash Agro Tech Solutions"
+          placeholder="e.g. Acme Enterprise / Apex Retail Solutions"
           className="w-full px-4 py-2.5 text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl focus:border-blue-500 focus:outline-none"
         />
       </div>
@@ -158,14 +159,12 @@ export default function EnterpriseDetailsPage({
           <span>Back</span>
         </button>
 
-        <button
+        <SplitGradientButton
           type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-60"
-        >
-          <span>{isSubmitting ? 'Generating Order...' : 'Proceed to Checkout'}</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
+          label="Proceed to Checkout"
+          loading={isSubmitting}
+          loadingText="Generating Order..."
+        />
       </div>
     </form>
   );
