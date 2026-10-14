@@ -142,8 +142,9 @@ export default function UdyamBasicDetailsPage({
             value={formData.nicSubClass}
             onChange={(val) => onInputChange('nicSubClass', val)}
             options={subClasses}
-            placeholder="Select or search activity (e.g. 01112, jowar, wheat, soft)..."
-            emptyMessage="No matching activities found for your search"
+            placeholder="Select NIC Sub-Class"
+            searchPlaceholder="Search activities..."
+            emptyMessage="No matching activities found"
           />
         </div>
       )}

@@ -8,6 +8,7 @@ export default function SearchableSelect({
   onChange,
   options = [],
   placeholder = 'Select an option',
+  searchPlaceholder = 'Search...',
   disabled = false,
   emptyMessage = 'No matching options found',
   className = '',
@@ -176,7 +177,7 @@ export default function SearchableSelect({
                 setHighlightedIndex(0);
               }}
               onKeyDown={handleKeyDown}
-              placeholder="Type 2-3 letters to filter (e.g. jow, wheat, soft)..."
+              placeholder={searchPlaceholder || 'Search...'}
               className="w-full text-xs font-semibold bg-transparent focus:outline-none text-slate-800 placeholder:text-slate-400"
             />
             {searchQuery && (
