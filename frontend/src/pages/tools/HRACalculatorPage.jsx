@@ -21,6 +21,7 @@ import {
 import Breadcrumbs from '../../components/common/Breadcrumbs.jsx';
 import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 import HRAPrintReport from '../../components/hra/HRAPrintReport.jsx';
+import HRASimpleCalculatorCard from '../../components/hra/HRASimpleCalculatorCard.jsx';
 import { computeClientHraExemption, formatIndianCurrency } from '../../utils/hraTaxEngine.js';
 
 export default function HRACalculatorPage() {
@@ -219,14 +220,23 @@ export default function HRACalculatorPage() {
             </div>
           )}
 
-          {/* Master 2-Column Grid matching BharatFiling layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* LEFT COLUMN: Input Form (7 cols) */}
-            <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 shadow-sm p-5 sm:p-7 space-y-6">
+          {/* DYNAMIC MODE RENDERING */}
+          {calculationMode === 'simple' ? (
+            <HRASimpleCalculatorCard
+              simpleInput={simpleInput}
+              handleSimpleChange={handleSimpleChange}
+              summary={summary}
+              onSwitchToAdvanced={() => setCalculationMode('advanced')}
+            />
+          ) : (
+            /* Master 2-Column Grid for Advanced Multi-Period Mode */
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-in fade-in duration-300">
               
-              {/* 1. Global Tax Profile Controls */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-slate-100">
+              {/* LEFT COLUMN: Input Form (7 cols) */}
+              <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 shadow-sm p-5 sm:p-7 space-y-6">
+                
+                {/* 1. Global Tax Profile Controls */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-slate-100">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-slate-700">
                     Financial Year <span className="text-rose-500">*</span>
@@ -754,6 +764,7 @@ export default function HRACalculatorPage() {
 
             </div>
           </div>
+          )}
 
           {/* Deep Informational Tax Guide Section (SEO & Compliance) */}
           <div className="mt-12 bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-10 space-y-8">

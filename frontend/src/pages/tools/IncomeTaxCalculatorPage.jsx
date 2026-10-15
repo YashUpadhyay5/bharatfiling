@@ -14,6 +14,7 @@ import {
 import Breadcrumbs from '../../components/common/Breadcrumbs.jsx';
 import TaxpayerProfileCard from '../../components/incomeTax/TaxpayerProfileCard.jsx';
 import SimpleTaxForm from '../../components/incomeTax/SimpleTaxForm.jsx';
+import ITRSimpleCalculatorCard from '../../components/incomeTax/ITRSimpleCalculatorCard.jsx';
 import IncomeAccordion from '../../components/incomeTax/IncomeAccordion.jsx';
 import DeductionSelector from '../../components/incomeTax/DeductionSelector.jsx';
 import TaxCreditsCard from '../../components/incomeTax/TaxCreditsCard.jsx';
@@ -295,48 +296,41 @@ export default function IncomeTaxCalculatorPage() {
             </div>
           </div>
 
-          {/* 4. KEY METRICS STATS BAR */}
-          <TaxStatisticsCards comparison={comparison} grossIncome={grossIncome} />
+          {/* DYNAMIC VIEW RENDERING: SIMPLE MODE (MATCHING REFERENCE IMAGE) vs ADVANCED MODE */}
+          {calculatorMode === 'simple' ? (
+            /* SIMPLE MODE: EXACT LAYOUT FROM REFERENCE IMAGE (media_1792059370833_12615ba1.png) */
+            <ITRSimpleCalculatorCard
+              salary={salary}
+              setSalary={setSalary}
+              deductions={deductions}
+              setDeductions={setDeductions}
+              houseProperty={houseProperty}
+              setHouseProperty={setHouseProperty}
+              comparison={comparison}
+              onReset={handleReset}
+              onSwitchToAdvanced={() => setCalculatorMode('advanced')}
+            />
+          ) : (
+            /* ADVANCED MODE: COMPREHENSIVE 5 HEADS, VI-A DEDUCTIONS, AND GRANULAR TABLES */
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* 4. KEY METRICS STATS BAR */}
+              <TaxStatisticsCards comparison={comparison} grossIncome={grossIncome} />
 
-          {/* 5. MASTER 2-COLUMN GRID (7 COLS INPUTS | 5 COLS STICKY RESULT) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* LEFT COLUMN: FORM INPUTS & CHARTS (7 COLS) */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Profile Card (FY, Age Category, Residential Status) */}
-              <TaxpayerProfileCard
-                financialYear={financialYear}
-                setFinancialYear={setFinancialYear}
-                ageCategory={ageCategory}
-                setAgeCategory={setAgeCategory}
-                residentialStatus={residentialStatus}
-                setResidentialStatus={setResidentialStatus}
-              />
-
-              {/* DYNAMIC MODE RENDERING */}
-              {calculatorMode === 'simple' ? (
-                /* SIMPLE MODE: STREAMLINED FOR 90% COMMON SALARIED USERS */
-                <div className="space-y-6">
-                  <SimpleTaxForm
-                    salary={salary}
-                    setSalary={setSalary}
-                    deductions={deductions}
-                    setDeductions={setDeductions}
-                    houseProperty={houseProperty}
-                    setHouseProperty={setHouseProperty}
-                    onSwitchToAdvanced={() => setCalculatorMode('advanced')}
+              {/* 5. MASTER 2-COLUMN GRID (7 COLS INPUTS | 5 COLS STICKY RESULT) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                {/* LEFT COLUMN: FORM INPUTS & CHARTS (7 COLS) */}
+                <div className="lg:col-span-7 space-y-6">
+                  {/* Profile Card (FY, Age Category, Residential Status) */}
+                  <TaxpayerProfileCard
+                    financialYear={financialYear}
+                    setFinancialYear={setFinancialYear}
+                    ageCategory={ageCategory}
+                    setAgeCategory={setAgeCategory}
+                    residentialStatus={residentialStatus}
+                    setResidentialStatus={setResidentialStatus}
                   />
 
-                  {/* Clean Visual Dual-Regime Comparison Chart */}
-                  <TaxRegimeComparisonChart
-                    oldRegime={comparison.oldRegime}
-                    newRegime={comparison.newRegime}
-                    grossIncome={grossIncome}
-                  />
-                </div>
-              ) : (
-                /* ADVANCED MODE: COMPREHENSIVE FOR ALL 5 STATUTORY HEADS & COMPLEX SCENARIOS */
-                <div className="space-y-6 animate-in fade-in duration-300">
                   <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-medium">
                     <strong>Advanced Mode Active:</strong> Configure income across all 5 statutory heads, capital gains, presumptive business, and full Chapter VI-A deductions.
                   </div>
@@ -387,42 +381,42 @@ export default function IncomeTaxCalculatorPage() {
                     newRegime={comparison.newRegime}
                   />
                 </div>
-              )}
-            </div>
 
-            {/* RIGHT COLUMN: STICKY LIVE COMPARISON HERO (5 COLS) */}
-            <div className="lg:col-span-5 space-y-5">
-              <RegimeComparisonHero
-                comparison={comparison}
-                onPrint={handlePrint}
-                onOpenITRAdvisor={() => setShowITRModal(true)}
-              />
+                {/* RIGHT COLUMN: STICKY LIVE COMPARISON HERO (5 COLS) */}
+                <div className="lg:col-span-5 space-y-5">
+                  <RegimeComparisonHero
+                    comparison={comparison}
+                    onPrint={handlePrint}
+                    onOpenITRAdvisor={() => setShowITRModal(true)}
+                  />
 
-              {/* Quick Link Card to HRA Calculator */}
-              <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex items-center justify-between gap-4 transition-all hover:border-orange-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-[#F26522] shrink-0">
-                    <Building2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[#111827]">
-                      Need Dedicated HRA Calculation?
-                    </h4>
-                    <p className="text-[11px] text-slate-500">
-                      Compute Rule 2A 3-limit exemption with metro rules
-                    </p>
+                  {/* Quick Link Card to HRA Calculator */}
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex items-center justify-between gap-4 transition-all hover:border-orange-300">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-[#F26522] shrink-0">
+                        <Building2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-[#111827]">
+                          Need Dedicated HRA Calculation?
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          Compute Rule 2A 3-limit exemption with metro rules
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      to="/tools/hra-calculator"
+                      className="shrink-0 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-1 transition-colors cursor-pointer"
+                    >
+                      HRA Tool <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
                   </div>
                 </div>
-                <Link
-                  to="/tools/hra-calculator"
-                  className="shrink-0 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-1 transition-colors cursor-pointer"
-                >
-                  HRA Tool <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+
               </div>
             </div>
-
-          </div>
+          )}
 
           {/* 6. COMPREHENSIVE TAX FAQ SECTION */}
           <IncomeTaxFAQ />
