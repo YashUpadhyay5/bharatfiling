@@ -139,10 +139,11 @@ export const SERVICE_CATEGORIES = [
     icon: Landmark,
     blurb: 'Returns, TDS and tax planning advisory.',
     col1: [
+      { name: 'Income Tax Calculator & Slab Checker', path: '/tools/income-tax-calculator', isLive: true },
+      { name: 'HRA Tax Calculator (Sec 10(13A))', path: '/tools/hra-calculator', isLive: true },
       { name: 'Income Tax Return (ITR 1–4)', path: '/services/income-tax' },
       { name: 'Business Tax Return (ITR 5–7)', path: '/services/income-tax' },
       { name: 'TDS Return Filing (24Q / 26Q)', path: '/services/income-tax' },
-      { name: 'Tax Planning Consultation', path: '/services/income-tax' },
     ],
     col2: [
       { name: '15CA / 15CB Certification', path: '/services/income-tax' },

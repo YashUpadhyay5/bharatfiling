@@ -21,6 +21,7 @@ import supportRoutes from './routes/support.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import serviceRoutes from './routes/service.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
+import toolsRoutes from './routes/tools.routes.js';
 
 const app = express();
 
@@ -131,6 +132,7 @@ app.use('/api/v1/support', supportRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/services', serviceRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/tools', toolsRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

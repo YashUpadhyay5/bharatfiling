@@ -23,6 +23,7 @@ import {
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 import IndustrySolutionsCarousel from '../components/home/IndustrySolutionsCarousel.jsx';
+import FrontpageTaxTools from '../components/tools/FrontpageTaxTools.jsx';
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(0);
@@ -223,6 +224,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* 2.5 INTERACTIVE COMPLIANCE & TAX TOOLS (DUAL CARDS) */}
+      <FrontpageTaxTools />
 
       {/* 3. POPULAR SERVICES GRID */}
       <section className="py-16 md:py-20 bg-white border-b border-slate-200/80">
