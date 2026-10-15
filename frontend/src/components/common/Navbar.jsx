@@ -184,6 +184,7 @@ export default function Navbar() {
       key: 'income-tax',
       label: 'Income Tax',
       col1: [
+        { name: 'HRA Tax Calculator (Sec 10(13A))', path: '/tools/hra-calculator', isLive: true },
         { name: 'Income Tax Return (ITR 1–4)', path: '/services/income-tax' },
         { name: 'Business Tax Return (ITR 5–7)', path: '/services/income-tax' },
         { name: 'TDS Return Filing (24Q / 26Q)', path: '/services/income-tax' },

@@ -512,4 +512,14 @@ export const api = {
     });
     return handleResponse(res);
   },
+
+  // Financial & Tax Tools
+  calculateHra: async (payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/tools/hra/calculate`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
 };

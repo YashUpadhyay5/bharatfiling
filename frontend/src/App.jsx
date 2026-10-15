@@ -31,6 +31,7 @@ const UdyamCheckoutPage = lazy(() =>
 );
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
+const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
 
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 
@@ -91,6 +92,7 @@ export default function App() {
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/faq" element={<FaqPage />} />
+                  <Route path="/tools/hra-calculator" element={<HRACalculatorPage />} />
 
                   {/* Authentication */}
                   <Route path="/login" element={<AuthPages defaultMode="login" />} />

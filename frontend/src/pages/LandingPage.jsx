@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
+import HRAQuickEstimator from '../components/hra/HRAQuickEstimator.jsx';
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(0);
@@ -212,6 +213,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* 2.5 HRA TAX CALCULATOR QUICK ESTIMATOR */}
+      <HRAQuickEstimator />
 
       {/* 3. POPULAR SERVICES GRID */}
       <section className="py-16 md:py-20 bg-white border-b border-slate-200/80">
