@@ -6,26 +6,31 @@ import {
   RotateCcw,
   Printer,
   Sparkles,
-  Info,
-  ArrowRight,
-  HelpCircle,
-  FileText,
+  Zap,
+  Sliders,
   Building2,
+  ArrowRight,
 } from 'lucide-react';
 import Breadcrumbs from '../../components/common/Breadcrumbs.jsx';
-import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 import TaxpayerProfileCard from '../../components/incomeTax/TaxpayerProfileCard.jsx';
+import SimpleTaxForm from '../../components/incomeTax/SimpleTaxForm.jsx';
 import IncomeAccordion from '../../components/incomeTax/IncomeAccordion.jsx';
 import DeductionSelector from '../../components/incomeTax/DeductionSelector.jsx';
 import TaxCreditsCard from '../../components/incomeTax/TaxCreditsCard.jsx';
+import TaxStatisticsCards from '../../components/incomeTax/TaxStatisticsCards.jsx';
+import TaxRegimeComparisonChart from '../../components/incomeTax/TaxRegimeComparisonChart.jsx';
+import TaxSlabVisualizer from '../../components/incomeTax/TaxSlabVisualizer.jsx';
 import RegimeComparisonHero from '../../components/incomeTax/RegimeComparisonHero.jsx';
 import TaxSlabBreakdownTable from '../../components/incomeTax/TaxSlabBreakdownTable.jsx';
 import IncomeTaxPrintReport from '../../components/incomeTax/IncomeTaxPrintReport.jsx';
 import ITRFormAdvisorModal from '../../components/incomeTax/ITRFormAdvisorModal.jsx';
 import IncomeTaxFAQ from '../../components/incomeTax/IncomeTaxFAQ.jsx';
-import { calculateIncomeTaxComparison, formatIndianCurrency } from '../../utils/incomeTaxEngine.js';
+import { calculateIncomeTaxComparison } from '../../utils/incomeTaxEngine.js';
 
 export default function IncomeTaxCalculatorPage() {
+  // Mode: 'simple' (90% common salaried) | 'advanced' (all 5 heads & capital gains)
+  const [calculatorMode, setCalculatorMode] = useState('simple');
+
   // Assessment Profile State
   const [financialYear, setFinancialYear] = useState('2025-26');
   const [ageCategory, setAgeCategory] = useState('individual');
@@ -119,6 +124,8 @@ export default function IncomeTaxCalculatorPage() {
     deductions,
     taxCredits,
   ]);
+
+  const grossIncome = comparison.newRegime?.grossSalary || Number(salary.grossSalary) || 0;
 
   const handlePrint = () => {
     window.print();
@@ -229,7 +236,7 @@ export default function IncomeTaxCalculatorPage() {
                 </h1>
 
                 <p className="mt-3 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
-                  Compare Old vs New Tax Regime (Section 115BAC) side-by-side. Calculate exact Section 87A Marginal Relief, optimize Chapter VI-A deductions, and identify which regime saves you more money.
+                  Compare Old vs New Tax Regime (Section 115BAC) side-by-side with live visual charts. Calculate exact Section 87A Marginal Relief, optimize Chapter VI-A deductions, and see your exact take-home pay.
                 </p>
               </div>
 
@@ -240,7 +247,7 @@ export default function IncomeTaxCalculatorPage() {
                   onClick={handleReset}
                   className="px-4 py-2.5 rounded-xl border border-slate-700 hover:border-slate-500 bg-slate-800/80 hover:bg-slate-800 text-slate-300 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
-                  <RotateCcw className="w-4 h-4" /> Reset Values
+                  <RotateCcw className="w-4 h-4" /> Reset
                 </button>
                 <button
                   type="button"
@@ -256,8 +263,53 @@ export default function IncomeTaxCalculatorPage() {
 
         {/* MAIN BODY CONTENT */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+          {/* 1. INTERACTIVE KEY STATISTICS CARDS */}
+          <TaxStatisticsCards comparison={comparison} grossIncome={grossIncome} />
+
+          {/* 2. MODE SWITCHER: SIMPLE VS ADVANCED */}
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/90 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Calculator View:
+              </span>
+              <div className="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setCalculatorMode('simple')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
+                    calculatorMode === 'simple'
+                      ? 'bg-white text-[#111827] shadow-xs ring-1 ring-slate-200 font-extrabold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Zap className={`w-3.5 h-3.5 ${calculatorMode === 'simple' ? 'text-[#F26522]' : 'text-slate-400'}`} />
+                  <span>Simple Mode (Salaried / Most Common)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCalculatorMode('advanced')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
+                    calculatorMode === 'advanced'
+                      ? 'bg-white text-[#111827] shadow-xs ring-1 ring-slate-200 font-extrabold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Sliders className={`w-3.5 h-3.5 ${calculatorMode === 'advanced' ? 'text-indigo-600' : 'text-slate-400'}`} />
+                  <span>Advanced Mode (Capital Gains, Business, All Heads)</span>
+                </button>
+              </div>
+            </div>
+
+            <span className="text-[11px] text-slate-500">
+              {calculatorMode === 'simple'
+                ? '⚡ Showing clean, streamlined inputs for salaried employees'
+                : '⚙️ Showing comprehensive inputs across all 5 statutory heads'}
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* LEFT COLUMN: INPUTS & BREAKDOWNS (7 COLUMNS) */}
+            {/* LEFT COLUMN: INPUTS & CHARTS (7 COLUMNS) */}
             <div className="lg:col-span-7 space-y-6">
               {/* Profile Card */}
               <TaxpayerProfileCard
@@ -269,31 +321,63 @@ export default function IncomeTaxCalculatorPage() {
                 setResidentialStatus={setResidentialStatus}
               />
 
-              {/* 5 Heads of Income Accordion */}
-              <IncomeAccordion
-                salary={salary}
-                setSalary={setSalary}
-                houseProperty={houseProperty}
-                setHouseProperty={setHouseProperty}
-                capitalGains={capitalGains}
-                setCapitalGains={setCapitalGains}
-                businessProfession={businessProfession}
-                setBusinessProfession={setBusinessProfession}
-                otherSources={otherSources}
-                setOtherSources={setOtherSources}
+              {/* DYNAMIC MODE RENDERING WITH TRANSITIONS */}
+              <div className="transition-all duration-300">
+                {calculatorMode === 'simple' ? (
+                  <SimpleTaxForm
+                    salary={salary}
+                    setSalary={setSalary}
+                    deductions={deductions}
+                    setDeductions={setDeductions}
+                    houseProperty={houseProperty}
+                    setHouseProperty={setHouseProperty}
+                    otherSources={otherSources}
+                    setOtherSources={setOtherSources}
+                    ageCategory={ageCategory}
+                  />
+                ) : (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    {/* 5 Heads of Income Accordion */}
+                    <IncomeAccordion
+                      salary={salary}
+                      setSalary={setSalary}
+                      houseProperty={houseProperty}
+                      setHouseProperty={setHouseProperty}
+                      capitalGains={capitalGains}
+                      setCapitalGains={setCapitalGains}
+                      businessProfession={businessProfession}
+                      setBusinessProfession={setBusinessProfession}
+                      otherSources={otherSources}
+                      setOtherSources={setOtherSources}
+                    />
+
+                    {/* Chapter VI-A Deductions */}
+                    <DeductionSelector
+                      deductions={deductions}
+                      setDeductions={setDeductions}
+                      ageCategory={ageCategory}
+                    />
+
+                    {/* Taxes Paid & TDS Credits */}
+                    <TaxCreditsCard
+                      taxCredits={taxCredits}
+                      setTaxCredits={setTaxCredits}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Visual Dual-Regime Comparison Chart */}
+              <TaxRegimeComparisonChart
+                oldRegime={comparison.oldRegime}
+                newRegime={comparison.newRegime}
+                grossIncome={grossIncome}
               />
 
-              {/* Chapter VI-A Deductions */}
-              <DeductionSelector
-                deductions={deductions}
-                setDeductions={setDeductions}
-                ageCategory={ageCategory}
-              />
-
-              {/* Taxes Paid & TDS Credits */}
-              <TaxCreditsCard
-                taxCredits={taxCredits}
-                setTaxCredits={setTaxCredits}
+              {/* Interactive Color-Coded Slab Visualizer */}
+              <TaxSlabVisualizer
+                newRegime={comparison.newRegime}
+                oldRegime={comparison.oldRegime}
               />
 
               {/* Slab-by-Slab Calculation Table */}
@@ -312,7 +396,7 @@ export default function IncomeTaxCalculatorPage() {
               />
 
               {/* Quick Link Card to HRA Calculator */}
-              <div className="mt-6 p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex items-center justify-between gap-4">
+              <div className="mt-6 p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex items-center justify-between gap-4 transition-all hover:border-orange-300">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-[#F26522]">
                     <Building2 className="w-5 h-5" />
@@ -328,7 +412,7 @@ export default function IncomeTaxCalculatorPage() {
                 </div>
                 <Link
                   to="/tools/hra-calculator"
-                  className="shrink-0 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+                  className="shrink-0 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   HRA Tool <ArrowRight className="w-3.5 h-3.5" />
                 </Link>

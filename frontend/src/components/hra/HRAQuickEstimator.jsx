@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calculator, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { computeClientHraExemption, formatIndianCurrency } from '../../utils/hraTaxEngine.js';
 
-export default function HRAQuickEstimator() {
+export default function HRAQuickEstimator({ isEmbedded = false }) {
   const [basicSalary, setBasicSalary] = useState('50000');
   const [hraReceived, setHraReceived] = useState('20000');
   const [rentPaid, setRentPaid] = useState('18000');
@@ -28,26 +28,8 @@ export default function HRAQuickEstimator() {
 
   const { summary } = result;
 
-  return (
-    <section className="py-14 sm:py-18 bg-gradient-to-b from-white via-slate-50/70 to-white border-b border-slate-200/80">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span>FREE INCOME TAX TOOL (SEC 10(13A))</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Calculate Your House Rent Allowance (HRA) Exemption
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
-            Estimate your annual tax-free HRA and tax savings in 30 seconds according to Income Tax Rule 2A.
-          </p>
-        </div>
-
-        {/* Interactive Estimator Card */}
-        <div className="max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden">
+  const cardContent = (
+    <div className="max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden transition-all duration-300">
           <div className="grid grid-cols-1 lg:grid-cols-12">
             
             {/* Left Inputs (7 cols) */}
@@ -209,7 +191,31 @@ export default function HRAQuickEstimator() {
             </div>
 
           </div>
+    </div>
+  );
+
+  if (isEmbedded) {
+    return cardContent;
+  }
+
+  return (
+    <section className="py-14 sm:py-18 bg-gradient-to-b from-white via-slate-50/70 to-white border-b border-slate-200/80">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>FREE INCOME TAX TOOL (SEC 10(13A))</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Calculate Your House Rent Allowance (HRA) Exemption
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600">
+            Estimate your annual tax-free HRA and tax savings in 30 seconds according to Income Tax Rule 2A.
+          </p>
         </div>
+
+        {cardContent}
 
         {/* Cross-Link to Income Tax Calculator */}
         <div className="mt-6 text-center">
@@ -224,7 +230,6 @@ export default function HRAQuickEstimator() {
             <ArrowRight className="w-3.5 h-3.5 text-[#F26522]" />
           </Link>
         </div>
-
       </div>
     </section>
   );
