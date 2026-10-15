@@ -36,7 +36,7 @@ function Caret({ open }) {
 /**
  * Site header (navy bar).
  *
- *   [Logo] [Consult an Expert v]   Startup v  Registrations v  Trademark v  Tax & Compliance v  Pricing   [search] [Login] [=]
+ *   [Logo] [Consult an Expert v]   Startup v  Registrations v  Trademark v  Tax & Compliance v  Pricing   [Login] [=]
  *
  * Desktop (>= 1280px): one row, every category visible with its own hover dropdown; the hamburger
  * opens a small white list of secondary links.
@@ -313,7 +313,9 @@ export default function Header() {
 
           {/* Actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2.5 xl:ml-0" onPointerDown={() => setOpenKey(null)}>
-            <HeaderSearch variant="header" />
+            {/* Search lives in the home hero now; this keeps the search dialog + Ctrl K shortcut site-wide
+                (also opened from the hamburger list and the mobile drawer). */}
+            <HeaderSearch variant="none" />
 
             {isAuthenticated && <NotificationBell />}
 
