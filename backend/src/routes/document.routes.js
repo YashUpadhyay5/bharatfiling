@@ -3,12 +3,32 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../database/db.js';
-import { authenticate } from '../middleware/auth.js';
-import { upload } from '../middleware/upload.js';
+import { authenticate, requireRole } from '../middleware/auth.js';
+import { upload, verifyUploadedFileSignature } from '../middleware/upload.js';
+import { ENV } from '../config/env.js';
+import { canAccessApplication, canAccessByApplicationId, publicDocument } from '../middleware/ownership.js';
 import { processDocumentOCR } from '../services/ocrPipeline.js';
 import { createAndDispatchNotification } from '../services/notification.service.js';
 
 const router = express.Router();
+
+const DOCUMENT_TYPE_REGEX = /^[A-Za-z0-9 _-]{1,60}$/;
+const DOCUMENT_STATUS_REGEX = /^[A-Z_]{3,40}$/;
+
+// Only ever delete files that live inside the configured upload directory.
+const isInsideStorageDir = (filePath) => {
+  if (!filePath) return false;
+  const rel = path.relative(ENV.STORAGE_DIR, path.resolve(filePath));
+  return rel !== '' && !rel.startsWith('..') && !path.isAbsolute(rel);
+};
+
+const discardUpload = (file) => {
+  try {
+    if (file?.path && isInsideStorageDir(file.path)) fs.unlinkSync(file.path);
+  } catch {
+    // best effort
+  }
+};
 
 // Upload document for an application
 router.post('/upload', authenticate, upload.single('file'), async (req, res) => {
@@ -20,12 +40,31 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
 
     const { application_id, document_type } = req.body;
     if (!application_id || !document_type) {
+      discardUpload(file);
       return res.status(400).json({ success: false, message: 'application_id and document_type are required.' });
+    }
+    if (typeof document_type !== 'string' || !DOCUMENT_TYPE_REGEX.test(document_type)) {
+      discardUpload(file);
+      return res.status(400).json({ success: false, message: 'Invalid document_type.' });
     }
 
     const app = db.getApplications().find((a) => a.id === application_id);
     if (!app) {
+      discardUpload(file);
       return res.status(404).json({ success: false, message: 'Application not found.' });
+    }
+    if (!canAccessApplication(req.user, app)) {
+      discardUpload(file);
+      return res.status(403).json({ success: false, message: 'You do not have access to this application.' });
+    }
+
+    // The client-declared mimetype/extension is not trustworthy: check the real file signature.
+    if (!verifyUploadedFileSignature(file.path)) {
+      discardUpload(file);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file content. Only genuine PDF, JPG and PNG files are accepted.',
+      });
     }
 
     // Process AI / OCR
@@ -37,7 +76,6 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
     });
 
     const docId = `doc_${uuidv4().slice(0, 8)}`;
-    const relativeUrl = `/uploads/${file.filename}`;
 
     const newDoc = {
       id: docId,
@@ -47,7 +85,7 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
       original_name: file.originalname,
       file_name: file.filename,
       file_path: file.path,
-      file_url: relativeUrl,
+      file_url: `/api/v1/documents/${docId}/file`,
       mime_type: file.mimetype,
       file_size: file.size,
       status: (ocrResult.confidence < 0.6 || (ocrResult.mismatch_warnings && ocrResult.mismatch_warnings.length > 0)) ? 'FLAGGED_MISMATCH' : 'AI_CHECKED',
@@ -99,7 +137,7 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
     res.status(201).json({
       success: true,
       message: 'Document uploaded and verified by AI pipeline successfully.',
-      document: newDoc,
+      document: publicDocument(newDoc),
       ocr: ocrResult,
     });
   } catch (err) {
@@ -107,14 +145,40 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
   }
 });
 
+// Download / view a document (authenticated; owner, CA or admin only)
+router.get('/:id/file', authenticate, (req, res) => {
+  try {
+    const doc = db.getDocuments().find((d) => d.id === req.params.id);
+    if (!doc || (doc.user_id !== req.user.id && !canAccessByApplicationId(req.user, doc.application_id))) {
+      return res.status(404).json({ success: false, message: 'Document not found.' });
+    }
+    const fileName = path.basename(String(doc.file_name || ''));
+    const absolute = path.join(ENV.STORAGE_DIR, fileName);
+    if (!fileName || !isInsideStorageDir(absolute) || !fs.existsSync(absolute)) {
+      return res.status(404).json({ success: false, message: 'File not found.' });
+    }
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    return res.sendFile(absolute, {
+      headers: { 'Content-Type': doc.mime_type || 'application/octet-stream' },
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Failed to retrieve document.' });
+  }
+});
+
 // List documents for an application
 router.get('/application/:appId', authenticate, (req, res) => {
   try {
     const { appId } = req.params;
+    if (!canAccessByApplicationId(req.user, appId)) {
+      return res.status(403).json({ success: false, message: 'You do not have access to this application.' });
+    }
     const docs = db.getDocuments().filter((d) => d.application_id === appId);
     res.json({
       success: true,
-      documents: docs,
+      documents: docs.map(publicDocument),
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to retrieve documents.', error: err.message });
@@ -133,8 +197,11 @@ router.delete('/:id', authenticate, (req, res) => {
     }
 
     const doc = docs[index];
+    if (doc.user_id !== req.user.id && !canAccessByApplicationId(req.user, doc.application_id)) {
+      return res.status(403).json({ success: false, message: 'You do not have access to this document.' });
+    }
     // Remove local file if exists
-    if (fs.existsSync(doc.file_path)) {
+    if (isInsideStorageDir(doc.file_path) && fs.existsSync(doc.file_path)) {
       try {
         fs.unlinkSync(doc.file_path);
       } catch (e) {}
@@ -153,10 +220,17 @@ router.delete('/:id', authenticate, (req, res) => {
 });
 
 // CA status update on document (Approve, Reject, Request Correction)
-router.put('/:id/status', authenticate, (req, res) => {
+router.put('/:id/status', authenticate, requireRole(['CA', 'ADMIN']), (req, res) => {
   try {
     const { id } = req.params;
     const { status, ca_notes } = req.body;
+
+    if (status !== undefined && (typeof status !== 'string' || !DOCUMENT_STATUS_REGEX.test(status))) {
+      return res.status(400).json({ success: false, message: 'Invalid document status.' });
+    }
+    if (ca_notes !== undefined && (typeof ca_notes !== 'string' || ca_notes.length > 2000)) {
+      return res.status(400).json({ success: false, message: 'Invalid notes.' });
+    }
 
     const docs = db.getDocuments();
     const doc = docs.find((d) => d.id === id);
@@ -173,7 +247,7 @@ router.put('/:id/status', authenticate, (req, res) => {
     res.json({
       success: true,
       message: `Document status updated to ${status}.`,
-      document: doc,
+      document: publicDocument(doc),
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Status update failed.', error: err.message });

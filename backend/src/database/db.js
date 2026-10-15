@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const DB_FILE_PATH = fs.existsSync(path.resolve(process.cwd(), 'backend/data'))
   ? path.resolve(process.cwd(), 'backend/data/db.json')
@@ -64,8 +65,14 @@ class DatabaseStore {
   }
 
   seedInitialData() {
+    // Demo ADMIN / CA / CUSTOMER accounts are only created when a seed password is explicitly
+    // supplied (SEED_ADMIN_PASSWORD) or when running outside production. A well-known default
+    // password must never exist on a production deployment.
+    const seedPassword =
+      process.env.SEED_ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : 'Password@123');
+    const seedDemoData = Boolean(seedPassword);
     const salt = bcrypt.genSaltSync(10);
-    const demoPasswordHash = bcrypt.hashSync('Password@123', salt);
+    const demoPasswordHash = bcrypt.hashSync(seedPassword || crypto.randomBytes(24).toString('hex'), salt);
 
     // 1. Seed Users (Admin, CA, Customer)
     const adminUser = {
@@ -286,6 +293,16 @@ class DatabaseStore {
         updated_at: new Date(Date.now() - 86400000 + 7200000).toISOString(),
       },
     ];
+
+    if (!seedDemoData) {
+      console.warn('Seed: no SEED_ADMIN_PASSWORD set in production - demo accounts and sample data were NOT created.');
+      this.data.users = [];
+      this.data.customer_profiles = [];
+      this.data.businesses = [];
+      this.data.gst_applications = [];
+      this.data.case_events = [];
+      this.data.orders = [];
+    }
 
     this.persist();
     console.log('✅ BharatFiling Database initialized with seed data.');

@@ -155,15 +155,20 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Quick switcher for demo review (Customer, CA, Admin)
+  // Quick switcher for local demo review (Customer, CA, Admin). Disabled in production builds;
+  // it signs in with the local seed accounts using the normal login endpoint.
   const quickSwitchAccount = async (targetRole) => {
+    if (!import.meta.env.DEV) {
+      return { success: false, message: 'Demo accounts are not available.' };
+    }
+    const seedPassword = import.meta.env.VITE_DEMO_PASSWORD || 'Password@123';
     try {
       if (targetRole === 'CA') {
-        return await login('ca.sharma@taxveda.com', 'Test@123');
+        return await login('ca.sharma@taxveda.com', seedPassword);
       } else if (targetRole === 'ADMIN') {
-        return await login('admin@taxveda.com', 'Test@123');
+        return await login('admin@taxveda.com', seedPassword);
       } else {
-        return await login('customer@bharatfiling.com', 'Test@123');
+        return await login('rahul.verma@example.com', seedPassword);
       }
     } catch (err) {
       console.error('Quick switch failed:', err);

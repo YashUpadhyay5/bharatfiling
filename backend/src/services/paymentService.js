@@ -58,7 +58,7 @@ export const createRazorpayOrder = async ({ amount, receipt, notes = {} }) => {
   // Amount in Paise (INR * 100)
   const amountInPaise = amount * 100;
 
-  if (razorpayClient && !ENV.RAZORPAY_KEY_ID.includes('Demo')) {
+  if (razorpayClient) {
     try {
       const order = await razorpayClient.orders.create({
         amount: amountInPaise,
@@ -88,28 +88,25 @@ export const createRazorpayOrder = async ({ amount, receipt, notes = {} }) => {
 };
 
 export const verifyRazorpaySignature = ({ order_id, payment_id, signature }) => {
-  if (!order_id || !payment_id) {
+  if (!order_id || !payment_id || typeof signature !== 'string' || !signature) {
     return false;
   }
 
-  // If in sandbox mode or test demo keys
-  if (order_id.startsWith('order_') && (signature === 'sandbox_valid_signature' || !signature)) {
-    return true;
-  }
-
+  // Without a configured gateway secret nothing can be proven, so nothing is accepted
+  // (previously a missing secret / missing signature was treated as "valid").
   if (!ENV.RAZORPAY_KEY_SECRET) {
-    return true; // Allow sandbox verification
+    return false;
   }
 
   try {
-    const generatedSignature = crypto
+    const generated = crypto
       .createHmac('sha256', ENV.RAZORPAY_KEY_SECRET)
       .update(`${order_id}|${payment_id}`)
-      .digest('hex');
-
-    return generatedSignature === signature;
+      .digest();
+    const provided = Buffer.from(signature, 'hex');
+    return provided.length === generated.length && crypto.timingSafeEqual(generated, provided);
   } catch (err) {
-    console.error('Error verifying Razorpay signature:', err);
+    console.error('Error verifying Razorpay signature:', err.message);
     return false;
   }
 };

@@ -4,7 +4,7 @@ export const devEmailProvider = {
     console.log('📨 [DEV EMAIL DISPATCH] (Simulated Mail Delivery)');
     console.log(`To:      ${to}`);
     console.log(`Subject: ${subject}`);
-    if (data.otp) {
+    if (data.otp && process.env.NODE_ENV !== 'production') {
       console.log('------------------------------------------------------------');
       console.log(`🔑 VERIFICATION CODE (OTP): [ ${data.otp} ]`);
       console.log('------------------------------------------------------------');

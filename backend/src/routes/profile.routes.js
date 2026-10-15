@@ -44,7 +44,20 @@ router.put('/', authenticate, async (req, res) => {
     }
 
     const currentProfile = profiles[index];
-    const { personal_info, identity_info, contact_info, address_info } = req.body;
+    const body = req.body || {};
+    const asObject = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? { ...v } : {});
+    const personal_info = asObject(body.personal_info);
+    const identity_info = asObject(body.identity_info);
+    const contact_info = asObject(body.contact_info);
+    const address_info = asObject(body.address_info);
+
+    // Verification flags are set by the server only - a client must not be able to self-certify.
+    delete identity_info.pan_verified;
+    delete identity_info.aadhaar_verified;
+    delete contact_info.mobile_verified;
+    delete contact_info.email_verified;
+    // Contact e-mail is the verified login identity; changing it here would desync the account.
+    delete contact_info.email;
 
     // Validate identity fields if provided
     let pan_verified = currentProfile.identity_info?.pan_verified || false;

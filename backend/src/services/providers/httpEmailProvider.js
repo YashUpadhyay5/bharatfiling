@@ -34,7 +34,7 @@ export const httpEmailProvider = {
         // We route the message cleanly without modifying the subject line or injecting developer banners.
         if (!res.ok && data.message && data.message.includes('own email address')) {
           const ownerMatch = data.message.match(/\(([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\)/);
-          const ownerEmail = ownerMatch ? ownerMatch[1] : (ENV.SMTP_USER || 'yashupdhyay486@gmail.com');
+          const ownerEmail = ownerMatch ? ownerMatch[1] : (ENV.SMTP_USER || '');
 
           console.warn(`[Resend Trial Forward]: Delivering cleanly to verified account ${ownerEmail}...`);
 
@@ -79,7 +79,7 @@ export const httpEmailProvider = {
     // 2. Brevo (Sendinblue) API
     if (ENV.BREVO_API_KEY) {
       try {
-        const senderEmail = ENV.SMTP_USER || 'yashupdhyay486@gmail.com';
+        const senderEmail = ENV.SMTP_USER || '';
         const senderName = 'BharatFiling';
 
         const res = await fetch('https://api.brevo.com/v3/smtp/email', {

@@ -53,7 +53,7 @@ export const smtpEmailProvider = {
     }
 
     const mailOptions = {
-      from: ENV.SMTP_FROM,
+      from: ENV.SMTP_FROM || ENV.SMTP_USER,
       to,
       subject,
       text,

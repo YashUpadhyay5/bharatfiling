@@ -195,13 +195,13 @@ export default function NotificationBell() {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="View notifications"
-        className={`relative p-2 rounded-full border transition-all duration-200 flex items-center justify-center ${
+        className={`relative w-10 h-10 rounded-full border transition-all duration-200 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827] ${
           isOpen
             ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
             : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
         }`}
       >
-        <Bell className="w-4 h-4 transition-transform active:scale-90" />
+        <Bell className="w-[18px] h-[18px] transition-transform active:scale-90" />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-600 text-[9px] font-black text-white ring-2 ring-white animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}

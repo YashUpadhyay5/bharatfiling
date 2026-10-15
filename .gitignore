@@ -12,3 +12,8 @@ venv/
 *.exe
 cloudflared.exe
 *.log
+
+# Local JSON datastore (contains user PII / password hashes)
+backend/data/
+backend/uploads/
+uploads/

@@ -3,6 +3,15 @@ import { devEmailProvider } from './providers/devEmailProvider.js';
 import { smtpEmailProvider } from './providers/smtpEmailProvider.js';
 import { httpEmailProvider } from './providers/httpEmailProvider.js';
 
+// User-controlled values (e.g. full name) are interpolated into HTML emails sent to arbitrary addresses.
+const escapeHtml = (value) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 function getActiveProvider() {
   if (ENV.RESEND_API_KEY || ENV.BREVO_API_KEY) {
     return httpEmailProvider;
@@ -66,7 +75,7 @@ export const emailService = {
           <tr>
             <td style="padding: 32px;">
               <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 24px;">
-                Hello <strong>${name}</strong>,
+                Hello <strong>${escapeHtml(name)}</strong>,
               </p>
               <p style="margin: 0 0 24px 0; font-size: 14px; color: #475569; line-height: 22px;">
                 Thank you for creating an account with BharatFiling. Enter the 6-digit verification code below to verify your email address and activate your Master Customer Profile:
@@ -140,7 +149,7 @@ export const emailService = {
           <tr>
             <td style="padding: 32px;">
               <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 24px;">
-                Hello <strong>${name}</strong>,
+                Hello <strong>${escapeHtml(name)}</strong>,
               </p>
               <p style="margin: 0 0 24px 0; font-size: 14px; color: #475569; line-height: 22px;">
                 A request was received to reset your BharatFiling account password. Enter this 6-digit recovery code to authorize your password update:

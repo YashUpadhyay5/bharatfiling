@@ -1,7 +1,9 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../../database/db.js';
+import crypto from 'crypto';
 import { authenticate, optionalAuth } from '../../middleware/auth.js';
+import { canAccessApplication, GUEST_USER_ID } from '../../middleware/ownership.js';
 
 const router = express.Router();
 
@@ -11,11 +13,11 @@ const router = express.Router();
  */
 router.get('/applications', authenticate, (req, res) => {
   try {
-    const isDemoCustomer = req.user.id === 'usr_cust_001' || req.user.id === 'usr_cust_demo_bf' || req.user.email?.includes('customer');
     const apps = db.getApplications().filter((a) => {
       if (req.user.role === 'ADMIN') return true;
       if (a.user_id === req.user.id) return a.payment_completed === true;
       if (
+        a.user_id === GUEST_USER_ID &&
         a.fields_data?.email &&
         a.fields_data.email.toLowerCase() === req.user.email?.toLowerCase() &&
         a.payment_completed === true
@@ -23,7 +25,6 @@ router.get('/applications', authenticate, (req, res) => {
         a.user_id = req.user.id;
         return true;
       }
-      if (isDemoCustomer && (a.user_id === 'usr_cust_001' || a.user_id === 'usr_cust_demo_bf')) return a.payment_completed === true;
       return false;
     });
     res.json({
@@ -39,11 +40,15 @@ router.get('/applications', authenticate, (req, res) => {
  * GET /applications/:id
  * Retrieves a single compliance application.
  */
-router.get('/applications/:id', optionalAuth, (req, res) => {
+router.get('/applications/:id', authenticate, (req, res) => {
   try {
     const { id } = req.params;
     const app = db.getApplications().find((a) => a.id === id || a.application_number === id);
     if (!app) {
+      return res.status(404).json({ success: false, message: 'Application not found.' });
+    }
+    if (!canAccessApplication(req.user, app)) {
+      // Same response as 'not found' so application numbers cannot be enumerated
       return res.status(404).json({ success: false, message: 'Application not found.' });
     }
     res.json({
@@ -130,8 +135,8 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
     }
 
     // Unique order ID e.g. est1791262...d
-    const orderId = `est${Date.now()}${Math.floor(1000 + Math.random() * 9000)}d`;
-    const appId = `app_${moduleType.toLowerCase()}_${uuidv4().slice(0, 8)}`;
+    const orderId = `est${Date.now()}${crypto.randomBytes(8).toString('hex')}`;
+    const appId = `app_${moduleType.toLowerCase()}_${uuidv4().replace(/-/g, '').slice(0, 20)}`;
     const allApps = db.getApplications();
     const appSeq = String(allApps.length + 1).padStart(6, '0');
     const appNumber = `${prefix}${appSeq}`;
