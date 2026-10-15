@@ -22,6 +22,7 @@ export const INDUSTRY_SOLUTIONS = [
     number: '01',
     category: 'Social Sector',
     title: 'NGO & Non-Profit Hub',
+    short: 'NGO & Non-Profit', // label on the hero deck's side rail
     description:
       'Trust, Society & Section 8 registration, 12A, 80G, FCRA and annual compliance.',
     icon: HeartHandshake,
@@ -38,6 +39,7 @@ export const INDUSTRY_SOLUTIONS = [
     number: '02',
     category: 'Infrastructure',
     title: 'Contractors & Infrastructure Hub',
+    short: 'Contractors',
     description:
       'GST, tenders, government vendor compliance, contractor taxation and project accounting.',
     icon: HardHat,
@@ -54,6 +56,7 @@ export const INDUSTRY_SOLUTIONS = [
     number: '03',
     category: 'Commerce',
     title: 'D2C, E-Commerce & Retail Sellers',
+    short: 'D2C & E-Commerce',
     description:
       'Marketplace GST, e-commerce reconciliation, inventory accounting and taxation.',
     icon: ShoppingBag,
@@ -70,6 +73,7 @@ export const INDUSTRY_SOLUTIONS = [
     number: '04',
     category: 'Digital Professionals',
     title: 'Creators & Freelancers',
+    short: 'Creators',
     description:
       'Professional income taxation, GST, foreign income, invoicing and contracts.',
     icon: Clapperboard,
@@ -86,6 +90,7 @@ export const INDUSTRY_SOLUTIONS = [
     number: '05',
     category: 'Technology',
     title: 'Tech Startups & SaaS Hub',
+    short: 'Startups & SaaS',
     description:
       'Startup incorporation, DPIIT, ESOP, funding documentation, ROC and compliance.',
     icon: Rocket,
@@ -102,6 +107,7 @@ export const INDUSTRY_SOLUTIONS = [
     number: '06',
     category: 'Real Estate',
     title: 'Real Estate Builders',
+    short: 'Real Estate',
     description:
       'RERA compliance, GST, TDS, property taxation and business accounting.',
     icon: Building2,
@@ -118,6 +124,7 @@ export const INDUSTRY_SOLUTIONS = [
     number: '07',
     category: 'Healthcare',
     title: 'Doctors & Healthcare',
+    short: 'Healthcare',
     description:
       'Clinic registration guidance, professional taxation, GST, capitalization, payroll, accounting and healthcare business.',
     icon: Stethoscope,

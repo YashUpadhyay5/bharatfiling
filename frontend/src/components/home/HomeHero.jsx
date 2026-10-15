@@ -32,7 +32,7 @@ export default function HomeHero() {
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
       </div>
 
-      <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:py-8 xl:gap-16 3xl:max-w-[1760px] 3xl:gap-24">
+      <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:py-8 xl:gap-16 3xl:max-w-[1760px] 3xl:gap-24">
       <div className="hero-copy flex flex-col items-center text-center lg:items-start lg:text-left">
         <p
           className="bf-rise bf-ring inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur 3xl:px-5 3xl:py-2 3xl:text-[13.5px] [--bf-ring-opacity:0.55] [--bf-ring-width:1px]"

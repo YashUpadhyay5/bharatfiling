@@ -231,7 +231,7 @@ export default function HeroSearch() {
             key={id}
             type="button"
             onClick={() => select(findService(id))}
-            className={`bf-sheen rounded-full border border-slate-300 bg-white/70 px-4 py-1.5 text-[13px] text-slate-700 backdrop-blur transition duration-200 lg:px-3.5 lg:text-[13px] 3xl:px-5 3xl:py-2 3xl:text-[15px] hover:-translate-y-0.5 hover:border-[#062A4D] hover:bg-white hover:text-[#062A4D] hover:shadow-[0_8px_18px_-10px_rgba(6,42,77,0.5)] sm:text-sm ${focusRing}`}
+            className={`bf-sheen rounded-full border border-slate-300 bg-white/70 px-4 py-1.5 text-[13px] text-slate-700 backdrop-blur transition duration-200 lg:px-2.5 lg:text-[13px] 3xl:px-5 3xl:py-2 3xl:text-[15px] hover:-translate-y-0.5 hover:border-[#062A4D] hover:bg-white hover:text-[#062A4D] hover:shadow-[0_8px_18px_-10px_rgba(6,42,77,0.5)] sm:text-sm ${focusRing}`}
           >
             {label}
           </button>
@@ -239,7 +239,7 @@ export default function HeroSearch() {
         <button
           type="button"
           onClick={() => navigate('/services')}
-          className={`group inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-semibold lg:px-2 text-[#062A4D] transition hover:text-[#F26522] sm:text-sm ${focusRing}`}
+          className={`group inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-semibold lg:pl-2 lg:pr-0.5 text-[#062A4D] transition hover:text-[#F26522] sm:text-sm ${focusRing}`}
         >
           All services
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
