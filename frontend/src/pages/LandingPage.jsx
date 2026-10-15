@@ -229,7 +229,10 @@ export default function LandingPage() {
       </section>
 
       {/* 3b. INDUSTRY SOLUTIONS CAROUSEL */}
-      <IndustrySolutionsCarousel onExplore={handleExploreIndustry} />
+      {/* On laptops the industry solutions live in the hero deck; smaller screens get the full section here */}
+      <div className="lg:hidden">
+        <IndustrySolutionsCarousel onExplore={handleExploreIndustry} />
+      </div>
 
       {/* 4. HOW IT WORKS */}
       <section className="py-12 sm:py-16 md:py-20 bg-slate-50/60 border-b border-slate-200/80">

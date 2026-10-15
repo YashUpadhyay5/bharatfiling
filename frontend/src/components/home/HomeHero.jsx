@@ -1,17 +1,21 @@
 import React from 'react';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 import HeroSearch from './HeroSearch.jsx';
+import IndustryDeck from './IndustryDeck.jsx';
 
 // Scales with BOTH width and height, so the whole hero fits the first screen on short laptops.
+// Phones/tablets use the centred stack; from lg the text column is ~55% wide, so the size is capped lower.
 const HEADLINE_SIZE = 'clamp(2rem, min(4.6vw, 7.4vh) + 0.25rem, 4.5rem)';
+const HEADLINE_SIZE_LG = 'clamp(2.25rem, min(3.5vw, 6.6vh) + 0.2rem, 3.4rem)';
 
 const TRUST_POINTS = ['40+ CA & Legal Services', '100% Online & Paperless', 'Licensed CA Verification', 'Bank-Grade 256-Bit Security'];
 
 const rise = (ms) => ({ '--bf-delay': `${ms}ms` });
 
 /**
- * Home hero - one focal point: a confident headline, a short line of copy, the service search with
- * quick picks, and a quiet trust line. Everything sits inside the first screen below the 68px header.
+ * Home hero. Left: headline, copy, service search with quick picks, trust line. Right (lg+): the
+ * industry solutions as a 3D card deck. Everything sits inside the first screen below the 68px header.
+ * Below lg the deck is hidden (the full carousel section follows the hero on small screens).
  */
 export default function HomeHero() {
   return (
@@ -26,7 +30,8 @@ export default function HomeHero() {
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
       </div>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-col items-center px-5 py-12 text-center sm:px-8 sm:py-16 lg:py-10">
+      <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:py-8 xl:gap-16">
+      <div className="hero-copy flex flex-col items-center text-center lg:items-start lg:text-left">
         <p
           className="bf-rise bf-ring inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur [--bf-ring-opacity:0.55] [--bf-ring-width:1px]"
           style={rise(0)}
@@ -36,8 +41,8 @@ export default function HomeHero() {
         </p>
 
         <h1
-          className="bf-rise mt-[clamp(18px,3.2vh,30px)] text-balance font-extrabold leading-[1.04] tracking-[-0.035em] text-[#0B1B2B]"
-          style={{ ...rise(80), fontSize: HEADLINE_SIZE }}
+          className="bf-rise mt-[clamp(18px,3.2vh,30px)] text-balance text-[length:var(--hl)] font-extrabold lg:text-[length:var(--hl-lg)] leading-[1.04] tracking-[-0.035em] text-[#0B1B2B]"
+          style={{ ...rise(80), '--hl': HEADLINE_SIZE, '--hl-lg': HEADLINE_SIZE_LG }}
         >
           Complete CA, Finance &amp;
           <br className="hidden sm:inline" /> Legal Advisory
@@ -58,19 +63,19 @@ export default function HomeHero() {
         </h1>
 
         <p
-          className="bf-rise mt-[clamp(14px,2.6vh,24px)] max-w-2xl text-balance text-base leading-relaxed text-slate-600 sm:text-lg"
+          className="bf-rise mt-[clamp(14px,2.6vh,24px)] max-w-2xl text-balance text-base leading-relaxed text-slate-600 sm:text-lg lg:max-w-xl lg:text-[17px]"
           style={rise(160)}
         >
           Company registration, GST &amp; ITR filing, bookkeeping and MCA compliance — handled end-to-end by
           licensed Chartered Accountants, 100% online.
         </p>
 
-        <div className="bf-rise mt-[clamp(20px,3.6vh,34px)] flex w-full justify-center" style={rise(240)}>
+        <div className="bf-rise mt-[clamp(20px,3.6vh,32px)] flex w-full justify-center lg:justify-start" style={rise(240)}>
           <HeroSearch />
         </div>
 
         <ul
-          className="bf-rise mt-[clamp(20px,3.6vh,34px)] flex flex-wrap justify-center gap-x-4 gap-y-2 text-[12px] text-slate-500 sm:gap-x-7 sm:text-[13px]"
+          className="bf-rise mt-[clamp(18px,3.2vh,30px)] flex flex-wrap justify-center gap-x-4 gap-y-2 text-[12px] text-slate-500 sm:gap-x-7 sm:text-[13px] lg:grid lg:grid-cols-2 lg:justify-items-start lg:gap-x-10 lg:gap-y-2 lg:text-[12.5px]"
           style={rise(320)}
         >
           {TRUST_POINTS.map((label) => (
@@ -80,6 +85,12 @@ export default function HomeHero() {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* industry solutions deck (laptops and up) */}
+      <div className="bf-rise hidden justify-center lg:flex lg:justify-end" style={rise(300)}>
+        <IndustryDeck />
+      </div>
       </div>
     </section>
   );

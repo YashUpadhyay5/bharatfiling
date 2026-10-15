@@ -225,13 +225,13 @@ export default function HeroSearch() {
       </div>
 
       {/* quick picks */}
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 lg:justify-start lg:gap-1.5">
         {QUICK_PICKS.map(({ id, label }) => (
           <button
             key={id}
             type="button"
             onClick={() => select(findService(id))}
-            className={`bf-sheen rounded-full border border-slate-300 bg-white/70 px-4 py-1.5 text-[13px] text-slate-700 backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-[#062A4D] hover:bg-white hover:text-[#062A4D] hover:shadow-[0_8px_18px_-10px_rgba(6,42,77,0.5)] sm:text-sm ${focusRing}`}
+            className={`bf-sheen rounded-full border border-slate-300 bg-white/70 px-4 py-1.5 text-[13px] text-slate-700 backdrop-blur transition duration-200 lg:px-3.5 lg:text-[13px] hover:-translate-y-0.5 hover:border-[#062A4D] hover:bg-white hover:text-[#062A4D] hover:shadow-[0_8px_18px_-10px_rgba(6,42,77,0.5)] sm:text-sm ${focusRing}`}
           >
             {label}
           </button>
@@ -239,9 +239,9 @@ export default function HeroSearch() {
         <button
           type="button"
           onClick={() => navigate('/services')}
-          className={`group inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-semibold text-[#062A4D] transition hover:text-[#F26522] sm:text-sm ${focusRing}`}
+          className={`group inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-semibold lg:px-2 text-[#062A4D] transition hover:text-[#F26522] sm:text-sm ${focusRing}`}
         >
-          All 40+ services
+          All services
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         </button>
       </div>
