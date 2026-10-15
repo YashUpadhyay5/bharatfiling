@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, LogOut } from 'lucide-react';
 import { getDashboardPath, getDashboardLabel, getRoleLabel } from './navigationData.js';
-import { FOCUS_RING } from './shared.js';
+import { FOCUS_RING, FOCUS_RING_ON_DARK } from './shared.js';
 
 export default function UserMenu({ user, open, onToggle, onClose, onLogout, triggerRef }) {
   const role = user?.role;
@@ -17,19 +17,19 @@ export default function UserMenu({ user, open, onToggle, onClose, onLogout, trig
         onClick={onToggle}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`flex items-center gap-2.5 rounded-full border border-slate-200 px-2 py-1.5 transition hover:border-slate-300 hover:bg-slate-50 min-[1366px]:px-3 ${FOCUS_RING}`}
+        className={`flex items-center gap-2.5 rounded-md border border-white/70 px-2 py-1.5 text-white transition hover:bg-white/10 min-[1600px]:px-3 ${FOCUS_RING_ON_DARK}`}
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-[#111827]">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
           {(user?.full_name || 'U').trim().charAt(0).toUpperCase()}
         </span>
-        <span className="hidden text-left min-[1366px]:block">
-          <span className="block max-w-[96px] truncate text-xs font-bold text-slate-800">
+        <span className="hidden text-left min-[1600px]:block">
+          <span className="block max-w-[96px] truncate text-xs font-bold text-white">
             {user?.full_name?.split(' ')[0]}
           </span>
-          <span className="block text-[10px] capitalize text-slate-500">{getRoleLabel(role)}</span>
+          <span className="block text-[10px] capitalize text-white/70">{getRoleLabel(role)}</span>
         </span>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`h-3.5 w-3.5 text-white/70 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           aria-hidden="true"
         />
       </button>

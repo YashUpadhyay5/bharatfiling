@@ -464,8 +464,15 @@ export default function HeaderSearch({
       }
     };
 
+    // The hamburger list asks for the search dialog through this event.
+    const handleExternalOpen = () => setIsModalOpen(true);
+
     window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    window.addEventListener('bf:open-search', handleExternalOpen);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+      window.removeEventListener('bf:open-search', handleExternalOpen);
+    };
   }, [isMobile]);
 
   // Select service and navigate (requires login/register for services)
@@ -542,21 +549,21 @@ export default function HeaderSearch({
           </div>
         </button>
       ) : variant === 'header' ? (
-        /* Header trigger: round icon button that grows into the labelled pill on very wide screens */
+        /* Header trigger for the navy bar: round icon button, labelled pill on very wide screens */
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className={`group inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 shadow-xs transition-all hover:border-slate-400 hover:bg-slate-50 hover:text-slate-800 cursor-pointer min-[1600px]:h-9 min-[1600px]:w-[192px] min-[1600px]:justify-between min-[1600px]:px-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827] ${className}`}
+          className={`group inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/40 text-white transition-colors hover:bg-white/10 cursor-pointer min-[1700px]:w-[188px] min-[1700px]:justify-between min-[1700px]:px-3.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFC21A] ${className}`}
           aria-label={`Search services (${shortcutLabel})`}
           title={`Search services (Press ${shortcutLabel} or /)`}
         >
           <span className="flex min-w-0 items-center gap-2">
-            <Search className="h-4 w-4 shrink-0 text-slate-500 group-hover:text-slate-700 min-[1600px]:h-3.5 min-[1600px]:w-3.5" />
-            <span className="hidden truncate text-xs font-normal text-slate-400 group-hover:text-slate-600 min-[1600px]:inline">
-              Search services...
+            <Search className="h-[18px] w-[18px] shrink-0" />
+            <span className="hidden truncate text-[13px] font-normal text-white/75 min-[1700px]:inline">
+              Search services
             </span>
           </span>
-          <kbd className="pointer-events-none hidden shrink-0 items-center whitespace-nowrap rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 group-hover:border-slate-300 min-[1600px]:inline-flex">
+          <kbd className="pointer-events-none hidden shrink-0 items-center whitespace-nowrap rounded border border-white/25 bg-white/10 px-1.5 py-0.5 font-sans text-[10px] text-white/80 min-[1700px]:inline-flex">
             {shortcutLabel}
           </kbd>
         </button>
