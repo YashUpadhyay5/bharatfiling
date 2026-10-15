@@ -193,23 +193,17 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Home hero: staggered entrance + gentle float (reduced-motion safe)  */
+/* Home hero: staggered entrance (reduced-motion safe)                */
 /* ------------------------------------------------------------------ */
 @keyframes bf-rise {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes bf-float {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-8px); }
-}
 /* `backwards` hides items during their delay; nothing is held after the animation ends */
 .bf-rise  { animation: bf-rise 640ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards; animation-delay: var(--bf-delay, 0ms); }
-.bf-float { animation: bf-float 3.6s ease-in-out infinite alternate; animation-delay: var(--bf-delay, 0ms); }
 
 @media (prefers-reduced-motion: reduce) {
-  .bf-rise,
-  .bf-float {
+  .bf-rise {
     animation: none;
   }
 }
