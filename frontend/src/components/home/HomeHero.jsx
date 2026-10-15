@@ -18,12 +18,17 @@ export default function HomeHero() {
     <section className="relative isolate z-10 border-b border-slate-100 bg-gradient-to-b from-[#F4F7FC] to-white lg:flex lg:min-h-[calc(100svh-68px)] lg:items-center">
       {/* one soft colour wash behind the headline - nothing else competes with the copy */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-1/2 top-[38%] h-[520px] w-[min(1100px,120vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(242,101,34,0.10),rgba(37,99,235,0.07)_55%,transparent)] blur-2xl" />
+        <div className="bf-parallax absolute inset-0">
+          <div className="bf-drift-a absolute left-[4%] top-[2%] h-[520px] w-[680px] rounded-full bg-[radial-gradient(closest-side,rgba(37,99,235,0.14),transparent)]" />
+          <div className="bf-drift-b absolute right-[2%] top-[18%] h-[500px] w-[660px] rounded-full bg-[radial-gradient(closest-side,rgba(242,101,34,0.14),transparent)]" />
+        </div>
+        {/* fine top highlight so the hero meets the navy header crisply */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
       </div>
 
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center px-5 py-12 text-center sm:px-8 sm:py-16 lg:py-10">
         <p
-          className="bf-rise inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm"
+          className="bf-rise bf-ring inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur [--bf-ring-opacity:0.55] [--bf-ring-width:1px]"
           style={rise(0)}
         >
           <Sparkles className="h-3.5 w-3.5 text-amber-500" aria-hidden="true" />
@@ -38,7 +43,7 @@ export default function HomeHero() {
           <br className="hidden sm:inline" /> Legal Advisory
           <br className="hidden sm:inline" />{' '}
           <span className="relative inline-block whitespace-nowrap">
-            <span className="bg-gradient-to-r from-[#F26522] to-[#F59E0B] bg-clip-text pb-[0.08em] text-transparent">
+            <span className="bf-text-shine pb-[0.08em]">
               All in One Platform
             </span>
             <svg

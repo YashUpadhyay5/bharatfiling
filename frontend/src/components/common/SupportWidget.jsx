@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -19,6 +19,16 @@ import {
 export default function SupportWidget({ currentStep, businessType, applicationId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('ai'); // 'ai', 'whatsapp', 'call', 'callback'
+  // Launcher label briefly "peeks" after arrival so visitors learn what the orb is, then tucks away
+  const [peek, setPeek] = useState(false);
+  useEffect(() => {
+    const show = setTimeout(() => setPeek(true), 1400);
+    const hide = setTimeout(() => setPeek(false), 6400);
+    return () => {
+      clearTimeout(show);
+      clearTimeout(hide);
+    };
+  }, []);
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
 
@@ -112,23 +122,40 @@ export default function SupportWidget({ currentStep, businessType, applicationId
 
   return (
     <>
-      {/* Floating Launcher Button */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 mb-[env(safe-area-inset-bottom)] mr-[env(safe-area-inset-right)]">
+      {/* Floating Launcher: compact orb with a rotating gradient ring, glow and live status */}
+      <div className="fixed bottom-5 right-5 z-40 mb-[env(safe-area-inset-bottom)] mr-[env(safe-area-inset-right)] sm:bottom-7 sm:right-7">
         {!isOpen && (
           <button
+            type="button"
             onClick={() => setIsOpen(true)}
-            className="flex items-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-2xl border border-slate-700 hover:scale-105 active:scale-95 transition-all group cursor-pointer touch-target-safe"
-            aria-label="Open support and AI assistant"
+            aria-label="Open CA & Compliance AI support"
+            data-peek={peek || undefined}
+            className="bf-pop group relative flex items-center rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F26522] cursor-pointer"
+            style={{ '--bf-delay': '700ms' }}
           >
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-              <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 group-hover:rotate-12 transition" />
-            </div>
-            <div className="text-left hidden sm:block">
-              <div className="text-xs font-bold leading-none flex items-center gap-1">
-                CA & Compliance AI <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">AI + CA Support Available</div>
-            </div>
+            {/* label: peeks once, then on hover / keyboard focus (desktop only) */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-[calc(100%+14px)] top-1/2 hidden origin-right -translate-y-1/2 translate-x-2 scale-95 whitespace-nowrap rounded-2xl bg-white/90 px-4 py-2.5 text-left opacity-0 shadow-[0_18px_40px_-16px_rgba(6,42,77,0.45)] ring-1 ring-slate-200/90 backdrop-blur-xl transition duration-300 ease-out group-hover:translate-x-0 group-hover:scale-100 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:scale-100 group-focus-visible:opacity-100 group-data-[peek]:translate-x-0 group-data-[peek]:scale-100 group-data-[peek]:opacity-100 sm:block"
+            >
+              <span className="block text-[13px] font-bold text-slate-900">CA &amp; Compliance AI</span>
+              <span className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-slate-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                AI + CA support · Online
+              </span>
+            </span>
+
+            {/* orb */}
+            <span className="bf-ring bf-ring--spin bf-glow relative flex h-14 w-14 items-center justify-center rounded-full p-[3px] [--bf-glow-opacity:0.32] [--bf-ring-width:2px] group-hover:[--bf-glow-opacity:0.55]">
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_25%,#1E5A96,#062A4D_70%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_14px_30px_-10px_rgba(6,42,77,0.75)] transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+                <Bot className="h-6 w-6 transition-transform duration-300 group-hover:-rotate-6" />
+              </span>
+              {/* live status */}
+              <span className="absolute right-0 top-0 flex h-3.5 w-3.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:animate-none" />
+                <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
+              </span>
+            </span>
           </button>
         )}
       </div>

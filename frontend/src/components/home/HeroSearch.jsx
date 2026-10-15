@@ -134,11 +134,16 @@ export default function HeroSearch() {
 
   return (
     <div className="w-full max-w-3xl">
-      <div ref={boxRef} className="relative">
+      <div ref={boxRef} className="group/search relative">
+        {/* focus glow - a separate layer behind the bar */}
+        <div
+          aria-hidden="true"
+          className="bf-glow-layer pointer-events-none absolute -inset-1.5 -z-10 rounded-full opacity-0 transition-opacity duration-300 group-focus-within/search:opacity-30"
+        />
         <form
           role="search"
           onSubmit={submit}
-          className="flex h-14 items-center rounded-full bg-white pl-5 pr-1.5 shadow-[0_22px_50px_-26px_rgba(6,42,77,0.55)] ring-1 ring-slate-200 transition focus-within:ring-2 focus-within:ring-[#062A4D]/35 sm:h-16 sm:pl-7 sm:pr-2"
+          className="bf-ring bf-ring--focus-spin flex h-14 items-center rounded-full bg-white/85 pl-5 pr-1.5 shadow-[0_22px_50px_-26px_rgba(6,42,77,0.55),inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-slate-200/90 backdrop-blur-xl backdrop-saturate-150 transition-shadow duration-300 [--bf-ring-opacity:0] [--bf-ring-width:2px] focus-within:bg-white focus-within:ring-transparent focus-within:[--bf-ring-opacity:1] hover:shadow-[0_26px_60px_-26px_rgba(6,42,77,0.65),inset_0_1px_0_rgba(255,255,255,0.9)] sm:h-16 sm:pl-7 sm:pr-2"
         >
           <label htmlFor={`${listId}-input`} className="sr-only">
             Search services
@@ -171,9 +176,9 @@ export default function HeroSearch() {
           <button
             type="submit"
             aria-label="Search"
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#062A4D] text-white transition hover:bg-[#0B3A66] sm:h-12 sm:w-12 ${focusRing}`}
+            className={`group/btn flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_25%,#1E5A96,#062A4D_70%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_18px_-8px_rgba(6,42,77,0.8)] transition duration-300 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_12px_26px_-8px_rgba(6,42,77,0.9)] active:scale-95 sm:h-12 sm:w-12 ${focusRing}`}
           >
-            <Search className="h-5 w-5" aria-hidden="true" />
+            <Search className="h-5 w-5 transition-transform duration-300 group-hover/btn:scale-110" aria-hidden="true" />
           </button>
         </form>
 
@@ -226,7 +231,7 @@ export default function HeroSearch() {
             key={id}
             type="button"
             onClick={() => select(findService(id))}
-            className={`rounded-full border border-slate-300 bg-white/70 px-4 py-1.5 text-[13px] text-slate-700 transition hover:border-[#062A4D] hover:text-[#062A4D] sm:text-sm ${focusRing}`}
+            className={`bf-sheen rounded-full border border-slate-300 bg-white/70 px-4 py-1.5 text-[13px] text-slate-700 backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-[#062A4D] hover:bg-white hover:text-[#062A4D] hover:shadow-[0_8px_18px_-10px_rgba(6,42,77,0.5)] sm:text-sm ${focusRing}`}
           >
             {label}
           </button>

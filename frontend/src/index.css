@@ -207,3 +207,117 @@
     animation: none;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Advanced effects: hero + support launcher                           */
+/* ------------------------------------------------------------------ */
+
+/* Typed custom property -> the conic-gradient angle itself can be animated */
+@property --bf-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes bf-spin-angle { to { --bf-angle: 360deg; } }
+@keyframes bf-shine      { to { background-position: 200% center; } }
+@keyframes bf-drift-a    { from { transform: translate3d(-4%, -3%, 0) scale(1); }    to { transform: translate3d(6%, 5%, 0) scale(1.1); } }
+@keyframes bf-drift-b    { from { transform: translate3d(5%, 3%, 0) scale(1.06); }  to { transform: translate3d(-6%, -4%, 0) scale(1); } }
+@keyframes bf-sweep      { from { transform: translateX(-130%) skewX(-20deg); }     to { transform: translateX(260%) skewX(-20deg); } }
+@keyframes bf-pop        { from { opacity: 0; transform: translateY(14px) scale(0.8); } to { opacity: 1; transform: none; } }
+
+/* Gradient text with a slow, seamless shimmer */
+.bf-text-shine {
+  background-image: linear-gradient(90deg, #F26522 0%, #F59E0B 25%, #F26522 50%, #F59E0B 75%, #F26522 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: bf-shine 8s linear infinite;
+}
+
+/* Gradient border (masked conic ring) - width/opacity tunable per element */
+/* (no isolation here: a .bf-glow halo must paint *behind* the element's own background) */
+.bf-ring { position: relative; }
+.bf-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: var(--bf-ring-width, 1.5px);
+  border-radius: inherit;
+  background: conic-gradient(from var(--bf-angle), #F26522, #FFC928, #22C55E, #2563EB, #062A4D, #F26522);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: var(--bf-ring-opacity, 1);
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.bf-ring--spin::before,
+.bf-ring--focus-spin:focus-within::before { animation: bf-spin-angle 4s linear infinite; }
+
+/* Soft coloured glow behind a .bf-ring element */
+.bf-glow::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(from var(--bf-angle), #F26522, #FFC928, #22C55E, #2563EB, #F26522);
+  filter: blur(16px);
+  opacity: var(--bf-glow-opacity, 0.35);
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.bf-ring--spin.bf-glow::after,
+.bf-ring--focus-spin:focus-within.bf-glow::after { animation: bf-spin-angle 4s linear infinite; }
+
+/* Standalone glow layer: a sibling placed *behind* an element (immune to the element's own stacking context) */
+.bf-glow-layer {
+  background: conic-gradient(from var(--bf-angle), #F26522, #FFC928, #22C55E, #2563EB, #F26522);
+  filter: blur(18px);
+  animation: bf-spin-angle 4s linear infinite;
+}
+
+/* One-shot light sweep on hover */
+.bf-sheen { position: relative; overflow: hidden; }
+.bf-sheen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+  transform: translateX(-130%) skewX(-20deg);
+  pointer-events: none;
+}
+.bf-sheen:hover::after { animation: bf-sweep 0.75s ease; }
+
+.bf-drift-a { animation: bf-drift-a 16s ease-in-out infinite alternate; }
+.bf-drift-b { animation: bf-drift-b 19s ease-in-out infinite alternate; }
+.bf-pop     { animation: bf-pop 520ms cubic-bezier(0.2, 0.9, 0.2, 1.1) backwards; animation-delay: var(--bf-delay, 0ms); }
+
+/* Scroll-driven parallax for decorative layers (progressive enhancement) */
+@supports (animation-timeline: scroll()) {
+  @keyframes bf-parallax { to { transform: translate3d(0, 16vh, 0); } }
+  .bf-parallax {
+    animation: bf-parallax linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 100vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bf-text-shine,
+  .bf-ring--spin::before,
+  .bf-ring--focus-spin:focus-within::before,
+  .bf-ring--spin.bf-glow::after,
+  .bf-ring--focus-spin:focus-within.bf-glow::after,
+  .bf-glow-layer,
+  .bf-sheen:hover::after,
+  .bf-drift-a,
+  .bf-drift-b,
+  .bf-pop,
+  .bf-parallax {
+    animation: none;
+  }
+}
