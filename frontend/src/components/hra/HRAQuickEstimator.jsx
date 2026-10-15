@@ -211,6 +211,20 @@ export default function HRAQuickEstimator() {
           </div>
         </div>
 
+        {/* Cross-Link to Income Tax Calculator */}
+        <div className="mt-6 text-center">
+          <Link
+            to="/tools/income-tax-calculator"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-xs hover:border-orange-300 text-xs text-slate-600 hover:text-slate-900 transition-all"
+          >
+            <span className="font-bold text-[#F26522] uppercase tracking-wider text-[10px] bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200">
+              New
+            </span>
+            <span>Planning full tax return? Try our <strong>Income Tax Calculator & ITR Slab Checker (Old vs New)</strong></span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#F26522]" />
+          </Link>
+        </div>
+
       </div>
     </section>
   );

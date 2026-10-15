@@ -30,6 +30,7 @@ const UdyamCheckoutPage = lazy(() =>
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
+const IncomeTaxCalculatorPage = lazy(() => import('./pages/tools/IncomeTaxCalculatorPage.jsx'));
 
 function ApplicationRedirect() {
   const { appId } = useParams();
@@ -69,6 +70,7 @@ export default function App() {
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/faq" element={<FaqPage />} />
                 <Route path="/tools/hra-calculator" element={<HRACalculatorPage />} />
+                <Route path="/tools/income-tax-calculator" element={<IncomeTaxCalculatorPage />} />
 
                 {/* Authentication */}
                 <Route path="/login" element={<AuthPages defaultMode="login" />} />
