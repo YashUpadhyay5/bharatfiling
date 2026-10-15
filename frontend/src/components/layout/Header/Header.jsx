@@ -173,9 +173,12 @@ export default function Header() {
 
   const tabClass = (active) =>
     [
-      'relative inline-flex h-full items-center gap-1 whitespace-nowrap px-1.5 text-[12.5px] font-medium transition-colors',
+      'relative isolate inline-flex h-full items-center gap-1 whitespace-nowrap px-1.5 text-[12.5px] font-medium transition-colors',
       'min-[1366px]:px-2 min-[1366px]:text-[13px]',
-      'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#111827]',
+      // Keyboard focus: a soft rounded pill + the accent underline (never a boxed black outline).
+      // outline-hidden still draws a visible outline in Windows high-contrast mode.
+      'focus-visible:outline-hidden focus-visible:text-[#111827] focus-visible:after:scale-x-100',
+      'before:absolute before:inset-x-0 before:inset-y-3.5 before:-z-10 before:rounded-lg before:bg-slate-100 before:opacity-0 before:transition-opacity focus-visible:before:opacity-100',
       'after:absolute after:inset-x-1.5 after:-bottom-px after:h-[2px] after:rounded-full after:bg-[#F26522]',
       'min-[1366px]:after:inset-x-2 after:transition-transform after:duration-200',
       active
@@ -219,7 +222,7 @@ export default function Header() {
                 </Link>
               </li>
 
-              {SERVICE_CATEGORIES.map((cat, index) => {
+              {SERVICE_CATEGORIES.map((cat) => {
                 const isOpen = openKey === cat.key;
                 const menuId = `nav-menu-${cat.key}`;
                 return (
@@ -257,7 +260,6 @@ export default function Header() {
                       <CategoryDropdown
                         id={menuId}
                         category={cat}
-                        alignRight={index >= SERVICE_CATEGORIES.length - 3}
                         onItemClick={handleServiceClick}
                       />
                     )}
