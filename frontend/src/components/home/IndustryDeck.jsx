@@ -80,7 +80,7 @@ export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
       role="region"
       aria-roledescription="carousel"
       aria-label="Industry-specific solutions"
-      className="relative w-full max-w-[420px]"
+      className="relative w-full max-w-[420px] 3xl:max-w-[540px]"
       onPointerEnter={(e) => e.pointerType === 'mouse' && setPaused(true)}
       onPointerLeave={() => {
         setPaused(false);
@@ -93,13 +93,13 @@ export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
         if (e.key === 'ArrowLeft') go(-1);
       }}
     >
-      <p className="mb-14 flex items-center gap-2 pl-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
+      <p className="mb-14 flex items-center gap-2 pl-1 text-[11px] 3xl:text-[12.5px] font-bold uppercase tracking-[0.16em] text-slate-500">
         <span className="h-1.5 w-1.5 rounded-full bg-[#F26522]" aria-hidden="true" />
         Solutions for every industry
       </p>
 
       {/* deck */}
-      <div className="relative h-[318px] [perspective:1400px]" onPointerMove={onPointerMove}>
+      <div className="relative h-[318px] [perspective:1400px] 3xl:h-[372px]" onPointerMove={onPointerMove}>
         <div
           className="relative h-full w-full [transform-style:preserve-3d]"
           style={{
@@ -118,7 +118,7 @@ export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
                 aria-roledescription="slide"
                 aria-label={`${i + 1} of ${count}`}
                 aria-hidden={!isFront}
-                className="absolute inset-0 flex flex-col rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[0_30px_70px_-34px_rgba(6,42,77,0.55)] backdrop-blur-xl"
+                className="absolute inset-0 flex flex-col rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[0_30px_70px_-34px_rgba(6,42,77,0.55)] backdrop-blur-xl 3xl:p-9"
                 style={{
                   transform: `translate3d(${pos.x}px, ${pos.y}px, 0) scale(${pos.s})`,
                   opacity: pos.o,
@@ -129,25 +129,25 @@ export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
               >
                 <span aria-hidden="true" className={`absolute inset-x-6 top-0 h-[3px] rounded-b-full ${item.accent.bar}`} />
                 <div className="flex items-start justify-between">
-                  <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ring-1 ${item.accent.tile}`}>
-                    <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+                  <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ring-1 3xl:h-14 3xl:w-14 ${item.accent.tile}`}>
+                    <Icon className="h-6 w-6 3xl:h-7 3xl:w-7" strokeWidth={1.75} aria-hidden="true" />
                   </span>
-                  <span className="text-[30px] font-extrabold leading-none tracking-tight text-slate-200 tabular-nums" aria-hidden="true">
+                  <span className="text-[30px] 3xl:text-[40px] font-extrabold leading-none tracking-tight text-slate-200 tabular-nums" aria-hidden="true">
                     {item.number}
                   </span>
                 </div>
-                <p className={`mt-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] ${item.accent.label}`}>
+                <p className={`mt-5 flex items-center gap-2 text-[11px] 3xl:mt-6 3xl:text-[12.5px] font-bold uppercase tracking-[0.14em] ${item.accent.label}`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${item.accent.dot}`} aria-hidden="true" />
                   {item.category}
                 </p>
-                <h3 className="mt-2 text-[20px] font-bold leading-snug tracking-tight text-slate-900">{item.title}</h3>
-                <p className="mt-2 line-clamp-3 text-[14px] leading-relaxed text-slate-600">{item.description}</p>
-                <div className="mt-auto border-t border-slate-100 pt-4">
+                <h3 className="mt-2 text-[20px] 3xl:mt-3 3xl:text-[26px] font-bold leading-snug tracking-tight text-slate-900">{item.title}</h3>
+                <p className="mt-2 line-clamp-3 text-[14px] 3xl:mt-3 3xl:text-[16.5px] leading-relaxed text-slate-600">{item.description}</p>
+                <div className="mt-auto border-t border-slate-100 pt-4 3xl:pt-5">
                   <Link
                     to={item.path}
                     tabIndex={isFront ? undefined : -1}
                     onClick={(e) => explore(e, item)}
-                    className="group/l inline-flex items-center gap-1.5 rounded-md text-[14px] font-semibold text-blue-700 hover:text-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    className="group/l inline-flex items-center gap-1.5 rounded-md text-[14px] 3xl:text-[15.5px] font-semibold text-blue-700 hover:text-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   >
                     Explore Solutions
                     <ArrowRight className="h-4 w-4 transition-transform group-hover/l:translate-x-1" aria-hidden="true" />

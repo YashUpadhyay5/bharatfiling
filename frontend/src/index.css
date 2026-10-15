@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* wide desktops at 100% zoom (1920px screens) - sorts after 2xl so it wins over lg / xl rules */
+@theme {
+  --breakpoint-3xl: 106.25rem; /* 1700px - rem like the defaults, so it orders after them */
+}
+
 @layer base {
   :root {
     --color-primary: #111827;       /* Gray 900 / Charcoal */

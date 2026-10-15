@@ -133,7 +133,7 @@ export default function HeroSearch() {
   const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#062A4D]';
 
   return (
-    <div className="w-full max-w-3xl">
+    <div className="w-full max-w-3xl 3xl:max-w-[860px]">
       <div ref={boxRef} className="group/search relative">
         {/* focus glow - a separate layer behind the bar */}
         <div
@@ -143,7 +143,7 @@ export default function HeroSearch() {
         <form
           role="search"
           onSubmit={submit}
-          className="bf-ring bf-ring--focus-spin flex h-14 items-center rounded-full bg-white/85 pl-5 pr-1.5 shadow-[0_22px_50px_-26px_rgba(6,42,77,0.55),inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-slate-200/90 backdrop-blur-xl backdrop-saturate-150 transition-shadow duration-300 [--bf-ring-opacity:0] [--bf-ring-width:2px] focus-within:bg-white focus-within:ring-transparent focus-within:[--bf-ring-opacity:1] hover:shadow-[0_26px_60px_-26px_rgba(6,42,77,0.65),inset_0_1px_0_rgba(255,255,255,0.9)] sm:h-16 sm:pl-7 sm:pr-2"
+          className="bf-ring bf-ring--focus-spin flex h-14 items-center rounded-full bg-white/85 pl-5 pr-1.5 shadow-[0_22px_50px_-26px_rgba(6,42,77,0.55),inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-slate-200/90 backdrop-blur-xl backdrop-saturate-150 transition-shadow duration-300 [--bf-ring-opacity:0] [--bf-ring-width:2px] focus-within:bg-white focus-within:ring-transparent focus-within:[--bf-ring-opacity:1] hover:shadow-[0_26px_60px_-26px_rgba(6,42,77,0.65),inset_0_1px_0_rgba(255,255,255,0.9)] sm:h-16 sm:pl-7 sm:pr-2 3xl:h-[72px] 3xl:pl-8"
         >
           <label htmlFor={`${listId}-input`} className="sr-only">
             Search services
@@ -171,7 +171,7 @@ export default function HeroSearch() {
             onBlur={() => setFocused(false)}
             onKeyDown={onKeyDown}
             placeholder={`Try '${EXAMPLES[example]}'`}
-            className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-[17px]"
+            className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-[17px] 3xl:text-[19px]"
           />
           <button
             type="submit"
@@ -231,7 +231,7 @@ export default function HeroSearch() {
             key={id}
             type="button"
             onClick={() => select(findService(id))}
-            className={`bf-sheen rounded-full border border-slate-300 bg-white/70 px-4 py-1.5 text-[13px] text-slate-700 backdrop-blur transition duration-200 lg:px-3.5 lg:text-[13px] hover:-translate-y-0.5 hover:border-[#062A4D] hover:bg-white hover:text-[#062A4D] hover:shadow-[0_8px_18px_-10px_rgba(6,42,77,0.5)] sm:text-sm ${focusRing}`}
+            className={`bf-sheen rounded-full border border-slate-300 bg-white/70 px-4 py-1.5 text-[13px] text-slate-700 backdrop-blur transition duration-200 lg:px-3.5 lg:text-[13px] 3xl:px-5 3xl:py-2 3xl:text-[15px] hover:-translate-y-0.5 hover:border-[#062A4D] hover:bg-white hover:text-[#062A4D] hover:shadow-[0_8px_18px_-10px_rgba(6,42,77,0.5)] sm:text-sm ${focusRing}`}
           >
             {label}
           </button>

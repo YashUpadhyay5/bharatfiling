@@ -7,6 +7,8 @@ import IndustryDeck from './IndustryDeck.jsx';
 // Phones/tablets use the centred stack; from lg the text column is ~55% wide, so the size is capped lower.
 const HEADLINE_SIZE = 'clamp(2rem, min(4.6vw, 7.4vh) + 0.25rem, 4.5rem)';
 const HEADLINE_SIZE_LG = 'clamp(2.25rem, min(3.5vw, 6.6vh) + 0.2rem, 3.4rem)';
+// Wide screens at 100% zoom (1700px+): the hero spans the header's width, so type scales up too.
+const HEADLINE_SIZE_XL = 'clamp(3.4rem, min(3.5vw, 7vh), 4.5rem)';
 
 const TRUST_POINTS = ['40+ CA & Legal Services', '100% Online & Paperless', 'Licensed CA Verification', 'Bank-Grade 256-Bit Security'];
 
@@ -30,10 +32,10 @@ export default function HomeHero() {
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
       </div>
 
-      <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:py-8 xl:gap-16">
+      <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:py-8 xl:gap-16 3xl:max-w-[1760px] 3xl:gap-24">
       <div className="hero-copy flex flex-col items-center text-center lg:items-start lg:text-left">
         <p
-          className="bf-rise bf-ring inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur [--bf-ring-opacity:0.55] [--bf-ring-width:1px]"
+          className="bf-rise bf-ring inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur 3xl:px-5 3xl:py-2 3xl:text-[13.5px] [--bf-ring-opacity:0.55] [--bf-ring-width:1px]"
           style={rise(0)}
         >
           <Sparkles className="h-3.5 w-3.5 text-amber-500" aria-hidden="true" />
@@ -41,8 +43,8 @@ export default function HomeHero() {
         </p>
 
         <h1
-          className="bf-rise mt-[clamp(18px,3.2vh,30px)] text-balance text-[length:var(--hl)] font-extrabold lg:text-[length:var(--hl-lg)] leading-[1.04] tracking-[-0.035em] text-[#0B1B2B]"
-          style={{ ...rise(80), '--hl': HEADLINE_SIZE, '--hl-lg': HEADLINE_SIZE_LG }}
+          className="bf-rise mt-[clamp(18px,3.2vh,30px)] text-balance text-[length:var(--hl)] font-extrabold lg:text-[length:var(--hl-lg)] 3xl:text-[length:var(--hl-xl)] leading-[1.04] tracking-[-0.035em] text-[#0B1B2B]"
+          style={{ ...rise(80), '--hl': HEADLINE_SIZE, '--hl-lg': HEADLINE_SIZE_LG, '--hl-xl': HEADLINE_SIZE_XL }}
         >
           Complete CA, Finance &amp;
           <br className="hidden sm:inline" /> Legal Advisory
@@ -63,7 +65,7 @@ export default function HomeHero() {
         </h1>
 
         <p
-          className="bf-rise mt-[clamp(14px,2.6vh,24px)] max-w-2xl text-balance text-base leading-relaxed text-slate-600 sm:text-lg lg:max-w-xl lg:text-[17px]"
+          className="bf-rise mt-[clamp(14px,2.6vh,24px)] max-w-2xl text-balance text-base leading-relaxed text-slate-600 sm:text-lg lg:max-w-xl lg:text-[17px] 3xl:max-w-2xl 3xl:text-[20px]"
           style={rise(160)}
         >
           Company registration, GST &amp; ITR filing, bookkeeping and MCA compliance — handled end-to-end by
@@ -75,7 +77,7 @@ export default function HomeHero() {
         </div>
 
         <ul
-          className="bf-rise mt-[clamp(18px,3.2vh,30px)] flex flex-wrap justify-center gap-x-4 gap-y-2 text-[12px] text-slate-500 sm:gap-x-7 sm:text-[13px] lg:grid lg:grid-cols-2 lg:justify-items-start lg:gap-x-10 lg:gap-y-2 lg:text-[12.5px]"
+          className="bf-rise mt-[clamp(18px,3.2vh,30px)] flex flex-wrap justify-center gap-x-4 gap-y-2 text-[12px] text-slate-500 sm:gap-x-7 sm:text-[13px] lg:grid lg:grid-cols-2 lg:justify-items-start lg:gap-x-10 lg:gap-y-2 lg:text-[12.5px] 3xl:gap-x-14 3xl:gap-y-3 3xl:text-[15px]"
           style={rise(320)}
         >
           {TRUST_POINTS.map((label) => (
