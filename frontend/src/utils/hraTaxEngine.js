@@ -24,14 +24,15 @@ export function calculateHraForPeriod({
   months = 1,
   basicSalary = 0,
   da = 0,
-  daFormsRetirement = false,
+  daFormsRetirement = true,
   commission = 0,
   hraReceived = 0,
   rentPaid = 0,
   isMetro = false,
   frequency = 'monthly',
 }) {
-  const multiplier = frequency === 'annual' ? 1 : Math.max(1, months);
+  const numMonths = Math.max(1, Number(months) || 1);
+  const multiplier = frequency === 'annual' ? 1 : numMonths;
 
   const periodBasic = (Number(basicSalary) || 0) * (frequency === 'annual' ? 1 : multiplier);
   const periodDa = daFormsRetirement ? (Number(da) || 0) * (frequency === 'annual' ? 1 : multiplier) : 0;
@@ -61,8 +62,14 @@ export function calculateHraForPeriod({
     governingLimitDesc = `${isMetro ? '50%' : '40%'} of Eligible Salary (Limit C)`;
   }
 
+  const effectiveMonths = frequency === 'annual' ? 12 : numMonths;
+  const monthlyExemptHra = Math.round(exemptHra / effectiveMonths);
+  const monthlyTaxableHra = Math.round(taxableHra / effectiveMonths);
+  const monthlyHraReceived = Math.round(actualHra / effectiveMonths);
+
   return {
     multiplier,
+    effectiveMonths,
     eligibleSalary,
     actualHra,
     actualRent,
@@ -73,6 +80,9 @@ export function calculateHraForPeriod({
     salaryPercentage: isMetro ? 50 : 40,
     exemptHra,
     taxableHra,
+    monthlyExemptHra,
+    monthlyTaxableHra,
+    monthlyHraReceived,
     governingLimit,
     governingLimitDesc,
   };
@@ -219,7 +229,17 @@ export function computeClientHraExemption({
     );
   }
 
-  const estimatedTaxSaved = Math.round(totalExemptHra * 0.312);
+  // Estimated Tax Saved across tax brackets
+  const taxSavedAt30Percent = Math.round(totalExemptHra * 0.312);
+  const taxSavedAt20Percent = Math.round(totalExemptHra * 0.208);
+  const taxSavedAt10Percent = Math.round(totalExemptHra * 0.104);
+  const minRentForExemption = Math.round(totalEligibleSalary * 0.1);
+
+  const totalMonths = processedPeriods.reduce((sum, p) => sum + (p.effectiveMonths || p.multiplier || 12), 0) || 12;
+  const avgMonths = Math.min(12, Math.max(1, totalMonths));
+  const monthlyExemptHra = Math.round(totalExemptHra / avgMonths);
+  const monthlyTaxableHra = Math.round(totalTaxableHra / avgMonths);
+  const monthlyHraReceived = Math.round(totalHraReceived / avgMonths);
 
   return {
     financialYear,
@@ -235,7 +255,14 @@ export function computeClientHraExemption({
       totalLimitC: Math.round(totalLimitC),
       totalExemptHra: Math.round(totalExemptHra),
       totalTaxableHra: Math.round(totalTaxableHra),
-      estimatedTaxSaved,
+      monthlyExemptHra,
+      monthlyTaxableHra,
+      monthlyHraReceived,
+      estimatedTaxSaved: taxSavedAt30Percent,
+      taxSavedAt30Percent,
+      taxSavedAt20Percent,
+      taxSavedAt10Percent,
+      minRentForExemption,
       limitingFactor: overallGoverningLimit,
     },
     breakdown: processedPeriods,

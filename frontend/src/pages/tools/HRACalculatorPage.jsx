@@ -35,7 +35,7 @@ export default function HRACalculatorPage() {
     frequency: 'monthly',
     basicSalary: '50000',
     da: '0',
-    daFormsRetirement: false,
+    daFormsRetirement: true,
     commission: '0',
     hraReceived: '20000',
     rentPaid: '18000',
