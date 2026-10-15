@@ -288,7 +288,7 @@ export default function FrontpageTaxTools() {
       ],
       featureColor: 'purple',
       buttonStyle: 'solid-purple',
-      linkTo: '/services/company-registration',
+      linkTo: '/tools/firm-name-checker',
       borderColor: 'border-purple-100/90 hover:border-purple-300',
       hoverTitleColor: 'group-hover:text-purple-600',
       illustration: (

@@ -522,4 +522,22 @@ export const api = {
     });
     return handleResponse(res);
   },
+
+  calculateIncomeTax: async (payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/tools/income-tax/calculate`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  checkFirmName: async (payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/tools/firm-name/check`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
 };
