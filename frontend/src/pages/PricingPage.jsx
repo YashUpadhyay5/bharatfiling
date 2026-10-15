@@ -170,43 +170,43 @@ export default function PricingPage() {
     <div className="min-h-screen bg-slate-50 font-sans">
       <Breadcrumbs items={[{ label: 'Transparent Pricing' }]} />
       
-      <div className="py-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-14">
+      <div className="py-4 sm:py-5 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#111827] bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+        <div className="text-center max-w-3xl mx-auto space-y-2">
+          <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-[#111827] bg-slate-100 px-3 py-0.5 rounded-full border border-slate-200">
             Fair & Transparent
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-slate-900">
             Straightforward CA & Compliance Pricing
           </h1>
-          <p className="text-sm sm:text-base text-slate-600">
+          <p className="text-sm text-slate-600 leading-relaxed">
             We believe in 100% upfront clarity with zero hidden surprises. Every plan includes certified Chartered Accountant review and direct government portal filing.
           </p>
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {pricingPlans.map((plan) => {
             const IconComp = plan.icon;
             return (
               <div
                 key={plan.title}
-                className={`bg-white rounded-3xl p-5 sm:p-7 border transition-all duration-300 flex flex-col justify-between relative shadow-xs hover:shadow-xl hover:-translate-y-1.5 ${
+                className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all duration-300 flex flex-col justify-between relative shadow-xs hover:shadow-lg hover:-translate-y-1 ${
                   plan.popular
                     ? 'border-[#111827] ring-2 ring-[#111827]/10'
                     : 'border-slate-200/90'
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3.5 right-6 bg-[#111827] text-white text-[11px] font-black px-3.5 py-1 rounded-full shadow-md">
+                  <div className="absolute -top-3.5 right-5 bg-[#111827] text-white text-[11px] font-black px-3 py-0.5 rounded-full shadow-md">
                     {plan.tag}
                   </div>
                 )}
 
-                <div className="space-y-5">
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#111827] flex items-center justify-center">
-                      <IconComp className="w-5 h-5" />
+                    <div className="w-9 h-9 rounded-lg bg-slate-100 text-[#111827] flex items-center justify-center">
+                      <IconComp className="w-[18px] h-[18px]" />
                     </div>
                     {!plan.popular && (
                       <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
@@ -216,54 +216,54 @@ export default function PricingPage() {
                   </div>
 
                   <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider leading-none">
                       {plan.category}
                     </span>
-                    <h3 className="text-lg font-extrabold text-slate-900 mt-0.5">
+                    <h3 className="text-xl font-extrabold leading-snug text-slate-900 mt-1">
                       {plan.title}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    <p className="text-sm text-slate-500 mt-1 leading-snug">
                       {plan.desc}
                     </p>
                   </div>
 
-                  <div className="py-2 border-y border-slate-100">
+                  <div className="py-1 border-y border-slate-100">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl sm:text-3xl font-black text-slate-900">
+                      <span className="text-2xl font-black leading-none text-slate-900">
                         {plan.price}
                       </span>
-                      <span className="text-xs text-slate-500 font-medium">
+                      <span className="text-[13px] text-slate-500 font-medium">
                         {plan.period}
                       </span>
                     </div>
                   </div>
 
                   {/* Fee Breakdown */}
-                  <div className="bg-slate-50/70 rounded-xl p-3 space-y-1.5 text-xs text-slate-600">
+                  <div className="bg-slate-50/70 rounded-lg px-3 py-1.5 space-y-0.5 text-[13px] leading-snug text-slate-600">
                     {plan.breakdown.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between">
+                      <div key={idx} className="flex items-center justify-between gap-3">
                         <span>{item.label}</span>
-                        <span className="font-bold text-slate-900">{item.val}</span>
+                        <span className="font-bold text-slate-900 whitespace-nowrap text-right">{item.val}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Features */}
-                  <div className="space-y-2 text-xs text-slate-700 pt-1">
+                  <div className="space-y-1 text-[13px] leading-snug text-slate-700">
                     {plan.features.map((feat, idx) => (
-                      <div key={idx} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <div key={idx} className="flex items-start gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-px" />
                         <span>{feat}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="pt-6 mt-6 border-t border-slate-100">
+                <div className="pt-2.5 mt-2.5 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => handleSelectPlan(plan)}
-                    className={`w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer ${
+                    className={`w-full py-2 rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer ${
                       plan.popular
                         ? 'bg-[#111827] hover:bg-[#1F2937] text-white shadow-md'
                         : 'bg-slate-100 hover:bg-[#111827] text-slate-800 hover:text-white'
@@ -279,8 +279,8 @@ export default function PricingPage() {
         </div>
 
         {/* Custom Quote & Consultation Banner */}
-        <div className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="space-y-1.5 text-center md:text-left">
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
               Need a Custom Corporate Advisory Package?
             </h2>
