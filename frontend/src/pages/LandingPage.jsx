@@ -23,6 +23,7 @@ import {
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 import IndustrySolutionsCarousel from '../components/home/IndustrySolutionsCarousel.jsx';
+import HomeHero from '../components/home/HomeHero.jsx';
 import FrontpageTaxTools from '../components/tools/FrontpageTaxTools.jsx';
 
 export default function LandingPage() {
@@ -128,78 +129,8 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans">
-      {/* 1. HERO SECTION (Clean, Centered, High-Converting Hero) */}
-      <section className="relative overflow-hidden pt-10 pb-14 sm:pt-16 sm:pb-20 md:pt-20 md:pb-24 bg-gradient-to-b from-slate-50/60 via-white to-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-7">
-          
-          {/* Trust Kicker */}
-          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-[11px] sm:text-xs font-semibold shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span>India's Premier CA, Finance & Legal Advisory Platform</span>
-          </div>
-
-          {/* Main Headline */}
-          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.18] sm:leading-[1.15]">
-            Complete CA, Finance & Legal Advisory <br className="hidden sm:inline" />
-            <span className="text-[#111827]">All in One Platform</span>
-          </h1>
-
-          {/* Subheading */}
-          <p className="text-xs sm:text-base md:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal px-2">
-            Incorporate companies, manage corporate tax advisory, file GST & ITR returns, streamline bookkeeping, and maintain MCA compliance with AI-powered speed backed by licensed Chartered Accountants.
-          </p>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
-            <Link
-              to="/services"
-              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2 group cursor-pointer"
-            >
-              <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
-              <span>Explore All 40+ CA & Tax Services</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition shrink-0" />
-            </Link>
-
-            <a
-              href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20professional%20CA%20and%20business%20compliance%20advisory."
-              target="_blank"
-              rel="noreferrer"
-              className="w-full sm:w-auto px-5 sm:px-7 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm border border-slate-200 shadow-xs hover:border-slate-300 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Talk to CA on WhatsApp</span>
-            </a>
-
-            <Link
-              to="/contact"
-              className="w-full sm:w-auto px-5 sm:px-6 py-3.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs sm:text-sm active:scale-98 transition text-center"
-            >
-              Book Free CA Consultation
-            </Link>
-          </div>
-
-          {/* Trust Guarantees */}
-          <div className="pt-6 grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-3 sm:gap-6 text-[11px] sm:text-xs text-slate-500 border-t border-slate-100 max-w-2xl mx-auto text-left sm:text-center">
-            <div className="flex items-center gap-1.5 font-medium">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>40+ CA & Legal Services</span>
-            </div>
-            <div className="flex items-center gap-1.5 font-medium">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>100% Online & Paperless</span>
-            </div>
-            <div className="flex items-center gap-1.5 font-medium">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Licensed CA Verification</span>
-            </div>
-            <div className="flex items-center gap-1.5 font-medium">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Bank-Grade 256-Bit</span>
-            </div>
-          </div>
-
-        </div>
-      </section>
+      {/* 1. HERO SECTION - fills the first screen below the header */}
+      <HomeHero />
 
       {/* 2. TRUST STATS STRIP */}
       <section className="py-7 sm:py-8 bg-slate-50/70 border-b border-slate-200/80">
