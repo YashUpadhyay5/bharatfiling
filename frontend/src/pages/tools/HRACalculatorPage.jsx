@@ -823,27 +823,6 @@ export default function HRACalculatorPage() {
               </p>
             </div>
 
-            {/* Link to Income Tax Calculator & ITR Slab Checker */}
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 border border-orange-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="space-y-1 text-center sm:text-left">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#F26522] bg-white px-2 py-0.5 rounded-full border border-orange-200">
-                  Dual-Regime Tax Planning
-                </span>
-                <h4 className="text-base font-extrabold text-[#111827]">
-                  Want to see if your HRA is enough to beat the New Tax Regime?
-                </h4>
-                <p className="text-xs text-slate-600 max-w-xl">
-                  Use our comprehensive Income Tax Calculator to compare Old vs New (Section 115BAC), calculate 87A Marginal Relief, and see your exact breakeven.
-                </p>
-              </div>
-              <Link
-                to="/tools/income-tax-calculator"
-                className="shrink-0 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-2 shadow-sm transition-all"
-              >
-                <span>Income Tax Calculator</span>
-                <ArrowRight className="w-4 h-4 text-[#F26522]" />
-              </Link>
-            </div>
           </div>
 
         </div>
