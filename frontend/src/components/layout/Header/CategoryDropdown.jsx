@@ -5,11 +5,14 @@ import { FOCUS_RING } from './shared.js';
 const VIEWPORT_MARGIN = 12;
 
 /**
- * Two-column hover dropdown for one service category.
+ * Floating dropdown for one header menu.
  *
- * Width follows the longest service name (no wrapping, no dead space). Horizontal placement is
- * measured, not hard-coded: the panel is centred under its own tab and then clamped so it can never
- * cross the viewport edges, at any width.
+ *  - A plain category renders its links in two balanced columns.
+ *  - A grouped menu (`category.groups`, e.g. "Tax & Compliance") renders one headed column per
+ *    group: the group name is the header, its links are the sub-headers - everything visible at once.
+ *
+ * Width follows the content. Horizontal placement is measured: the panel is centred under its own
+ * tab and clamped so it can never cross the viewport edges, at any width.
  */
 export default function CategoryDropdown({ id, category, onItemClick }) {
   const ref = useRef(null);
@@ -32,13 +35,13 @@ export default function CategoryDropdown({ id, category, onItemClick }) {
     return () => window.removeEventListener('resize', place);
   }, [category.key]);
 
-  const renderColumn = (items) => (
+  const renderLinks = (items, label, keyPrefix) => (
     <ul className="space-y-1">
       {items.map((item) => (
-        <li key={`${category.key}-${item.name}`}>
+        <li key={`${keyPrefix}-${item.name}`}>
           <Link
             to={item.path}
-            onClick={(e) => onItemClick(e, item, category.label)}
+            onClick={(e) => onItemClick(e, item, label)}
             className={`flex items-center justify-between gap-3 whitespace-nowrap rounded-lg px-2 py-1.5 text-[12.5px] font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#111827] ${FOCUS_RING}`}
           >
             <span>{item.name}</span>
@@ -53,12 +56,30 @@ export default function CategoryDropdown({ id, category, onItemClick }) {
     </ul>
   );
 
+  const shell = 'rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_16px_45px_rgba(17,24,39,0.12)]';
+
   return (
     <div ref={ref} id={id} className="bf-menu-in absolute top-full z-50 pt-1" style={{ left }}>
-      <div className="grid w-max min-w-[420px] max-w-[calc(100vw-24px)] grid-cols-2 gap-x-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_16px_45px_rgba(17,24,39,0.12)]">
-        {renderColumn(category.col1)}
-        {renderColumn(category.col2)}
-      </div>
+      {category.groups ? (
+        <div className={`grid w-max max-w-[calc(100vw-24px)] grid-flow-col gap-x-7 ${shell}`}>
+          {category.groups.map((group) => (
+            <section key={group.key} aria-labelledby={`${id}-${group.key}`}>
+              <h3
+                id={`${id}-${group.key}`}
+                className="mb-2 border-b border-slate-100 px-2 pb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400"
+              >
+                {group.label}
+              </h3>
+              {renderLinks([...group.col1, ...group.col2], group.label, group.key)}
+            </section>
+          ))}
+        </div>
+      ) : (
+        <div className={`grid w-max min-w-[420px] max-w-[calc(100vw-24px)] grid-cols-2 gap-x-6 ${shell}`}>
+          {renderLinks(category.col1, category.label, category.key)}
+          {renderLinks(category.col2, category.label, category.key)}
+        </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   Building2,
   ClipboardCheck,
   Headset,
+  Scale,
 } from 'lucide-react';
 
 /**
@@ -208,3 +209,27 @@ export const SERVICE_CATEGORIES = [
     ],
   },
 ];
+
+/* -------------------------------------------------------------------------- */
+/* Header menu structure                                                       */
+/* -------------------------------------------------------------------------- */
+
+const byKey = (key) => SERVICE_CATEGORIES.find((c) => c.key === key);
+
+/**
+ * "Tax & Compliance" - one header menu that takes over these four categories. Each category stays a
+ * headed group (the "header") with its own links (the "sub-headers"); nothing is duplicated, the
+ * categories are no longer separate tabs.
+ */
+export const TAX_COMPLIANCE = {
+  key: 'tax-compliance',
+  label: 'Tax & Compliance',
+  icon: Scale,
+  blurb: 'GST, income tax, company-law and ongoing compliance.',
+  groups: ['gst', 'income-tax', 'mca', 'compliance'].map(byKey),
+};
+
+/** Tabs of the main header row, in order. (Consultation is the yellow call-to-action button.) */
+export const HEADER_MENUS = [byKey('startup'), byKey('registrations'), byKey('trademark'), TAX_COMPLIANCE];
+
+export const CONSULT_CATEGORY = byKey('consultation');

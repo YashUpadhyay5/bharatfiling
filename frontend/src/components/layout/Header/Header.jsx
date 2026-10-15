@@ -10,7 +10,7 @@ import UserMenu from './UserMenu.jsx';
 import MoreMenu from './MoreMenu.jsx';
 import MobileDrawer from './MobileDrawer.jsx';
 import HeaderSearch from './HeaderSearch.jsx';
-import { SERVICE_CATEGORIES, getDashboardPath } from './navigationData.js';
+import { HEADER_MENUS, CONSULT_CATEGORY, getDashboardPath } from './navigationData.js';
 import { FOCUS_RING_ON_DARK, HEADER_NAVY } from './shared.js';
 
 // Public information pages never require an account (same rule the search palette uses).
@@ -19,9 +19,6 @@ const PUBLIC_INFO_PATHS = ['/', '/about', '/faq', '/pricing', '/contact', '/serv
 // The full tab row needs ~1280px; below that the compact header + drawer is used.
 const DESKTOP_MEDIA_QUERY = '(min-width: 1280px)';
 
-// "Consult an Expert" is the Consultation category, promoted to the yellow call-to-action.
-const NAV_CATEGORIES = SERVICE_CATEGORIES.filter((c) => c.key !== 'consultation');
-const CONSULT_CATEGORY = SERVICE_CATEGORIES.find((c) => c.key === 'consultation');
 
 /** Small filled caret used on the yellow button (matches the reference). */
 function Caret({ open }) {
@@ -39,7 +36,7 @@ function Caret({ open }) {
 /**
  * Site header (navy bar).
  *
- *   [Logo] [Consult an Expert v]   Home  Startup v  Registrations v ... Compliance v  Pricing   [search] [Login] [=]
+ *   [Logo] [Consult an Expert v]   Startup v  Registrations v  Trademark v  Tax & Compliance v  Pricing   [search] [Login] [=]
  *
  * Desktop (>= 1280px): one row, every category visible with its own hover dropdown; the hamburger
  * opens a small white list of secondary links.
@@ -204,18 +201,17 @@ export default function Header() {
 
   const tabClass = (active) =>
     [
-      'relative isolate inline-flex h-full items-center gap-1 whitespace-nowrap px-1 text-[12.5px] font-medium transition-colors',
-      'min-[1366px]:px-1.5 min-[1366px]:text-[13px] min-[1440px]:px-2 min-[1440px]:text-[14px]',
+      'relative isolate inline-flex h-full items-center gap-1 whitespace-nowrap px-2.5 text-[14px] font-medium transition-colors',
+      'min-[1440px]:px-3.5 min-[1440px]:text-[15px]',
       // Keyboard focus: a soft pill + the accent underline (never a boxed outline).
       // outline-hidden still draws a visible outline in Windows high-contrast mode.
       'focus-visible:outline-hidden focus-visible:text-white focus-visible:after:scale-x-100',
       'before:absolute before:inset-x-0 before:inset-y-3.5 before:-z-10 before:rounded-lg before:bg-white/10 before:opacity-0 before:transition-opacity focus-visible:before:opacity-100',
-      'after:absolute after:inset-x-1 after:-bottom-px after:h-[2px] after:rounded-full after:bg-[#F26522]',
-      'min-[1366px]:after:inset-x-1.5 min-[1440px]:after:inset-x-2 after:transition-transform after:duration-200',
+      'after:absolute after:inset-x-2.5 after:-bottom-px after:h-[2px] after:rounded-full after:bg-[#F26522]',
+      'min-[1440px]:after:inset-x-3.5 after:transition-transform after:duration-200',
       active ? 'text-white after:scale-x-100' : 'text-white/85 hover:text-white after:scale-x-0 hover:after:scale-x-100',
     ].join(' ');
 
-  const isHome = pathname === '/';
   const isPricing = pathname.startsWith('/pricing');
 
   /** A tab (or the CTA) that owns a hover/click dropdown. */
@@ -257,7 +253,7 @@ export default function Header() {
         }`}
       >
         <div className="mx-auto flex h-[68px] w-full max-w-[1760px] items-center gap-3 px-3 sm:px-6 lg:px-8">
-          <BrandLogo onDark />
+          <BrandLogo onDark onClick={handleHomeClick} />
 
           {/* Consult an Expert (yellow call-to-action = the Consultation menu) */}
           <ul className="hidden items-center sm:flex">
@@ -282,18 +278,7 @@ export default function Header() {
           {/* Primary navigation: every other service category is visible (desktop) */}
           <nav aria-label="Primary" className="hidden h-full min-w-0 flex-1 xl:block">
             <ul className="flex h-full items-stretch justify-center">
-              <li className="flex">
-                <Link
-                  to="/"
-                  onClick={handleHomeClick}
-                  aria-current={isHome ? 'page' : undefined}
-                  className={tabClass(isHome)}
-                >
-                  Home
-                </Link>
-              </li>
-
-              {NAV_CATEGORIES.map((cat) =>
+              {HEADER_MENUS.map((cat) =>
                 renderMenuItem(cat, (isOpen, menuId) => (
                   <button
                     ref={(el) => {
