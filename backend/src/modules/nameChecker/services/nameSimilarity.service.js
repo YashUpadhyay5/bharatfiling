@@ -12,6 +12,7 @@ export function normalizeName(name = '') {
   if (typeof name !== 'string') return '';
   return name
     .toLowerCase()
+    .replace(/&/g, ' and ')
     .replace(/[^\w\s]/g, ' ') // Replace punctuation with space
     .replace(/\s+/g, ' ')      // Collapse multiple spaces
     .trim();

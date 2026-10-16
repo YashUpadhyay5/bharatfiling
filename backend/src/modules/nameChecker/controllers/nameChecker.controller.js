@@ -47,7 +47,7 @@ export async function autocompleteFirmName(req, res) {
     }
 
     const limit = Math.min(20, Math.max(1, parseInt(req.query.limit, 10) || 8));
-    const results = searchMcaAutocomplete(q.trim(), limit);
+    const results = await searchMcaAutocomplete(q.trim(), limit);
 
     return res.status(200).json({
       success: true,

@@ -267,6 +267,9 @@ export default function FirmNameCheckerPage() {
                     className="w-full h-11 bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-400 placeholder:font-normal outline-none"
                     autoComplete="off"
                   />
+                  {autocompleteLoading && (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-500 mr-1.5 shrink-0" />
+                  )}
                   {proposedName && (
                     <button
                       type="button"
@@ -276,7 +279,7 @@ export default function FirmNameCheckerPage() {
                         setShowSuggestions(false);
                         searchInputRef.current?.focus();
                       }}
-                      className="p-1 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer transition"
+                      className="p-1 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer transition shrink-0"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -306,34 +309,38 @@ export default function FirmNameCheckerPage() {
               {/* LIVE AUTOCOMPLETE DROPDOWN (IndiaFilings / Vakilsearch Feature) */}
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 divide-y divide-slate-100 text-slate-900 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="p-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold px-4">
-                    <span>MATCHING REGISTERED ENTITIES ({suggestions.length})</span>
+                  <div className="p-2.5 bg-slate-50/90 border-b border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold px-4">
+                    <span className="flex items-center gap-1.5 font-bold text-slate-700">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      MATCHING REGISTERED ENTITIES ({suggestions.length})
+                    </span>
                     <span className="text-[10px] text-blue-600 font-bold">Click any record to inspect</span>
                   </div>
-                  <div className="max-h-72 overflow-y-auto">
+                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
                     {suggestions.map((comp, idx) => (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => handleSuggestionClick(comp)}
-                        className="w-full px-4 py-3 text-left hover:bg-blue-50/70 transition flex items-center justify-between gap-3 cursor-pointer group"
+                        className="w-full px-4 py-3 text-left hover:bg-blue-50/80 transition flex items-center justify-between gap-3 cursor-pointer group"
                       >
-                        <div className="space-y-0.5">
-                          <p className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-700 transition">
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-700 transition uppercase tracking-tight truncate">
                             {comp.name}
                           </p>
                           <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 font-mono">
                             <span className="text-slate-700 font-semibold">CIN: {comp.identifier}</span>
-                            <span>•</span>
-                            <span className="text-slate-600">ROC: {comp.roc} ({comp.state})</span>
+                            {comp.roc && (
+                              <>
+                                <span>•</span>
+                                <span className="text-slate-600">ROC {comp.roc} {comp.state ? `(${comp.state})` : ''}</span>
+                              </>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                            {comp.status || 'Active'}
-                          </span>
-                          <span className="text-[11px] text-blue-600 font-semibold opacity-0 group-hover:opacity-100 transition">
-                            Inspect →
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            {comp.entityType || 'Company'}
                           </span>
                         </div>
                       </button>

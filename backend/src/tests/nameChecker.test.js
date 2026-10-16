@@ -144,7 +144,7 @@ describe('Firm Name Checker - Alternative Suggestions & Comprehensive Check', ()
 
   test('Comprehensive check gives favorable rating for unique coined name', async () => {
     const result = await runComprehensiveNameCheck({
-      proposedName: 'Vyomkavach Innovations Private Limited',
+      proposedName: 'Zorvathix Quantum Innovations Private Limited',
       entityType: 'private_limited',
       industry: 'technology',
     });

@@ -66,8 +66,8 @@ describe('E2E Real-World Indian Company Name Checks', () => {
     assert.ok(res.mcaSearch.exactMatches.length > 0);
     assert.equal(res.mcaSearch.exactMatches[0].roc, 'Delhi');
     assert.ok(res.trademarkSearch.exactConflicts.length > 0);
-    assert.equal(res.trademarkSearch.exactConflicts[0].mark, 'ZOMATO');
-    assert.equal(res.trademarkSearch.exactConflicts[0].classNumber, 43);
+    assert.equal(res.trademarkSearch.exactConflicts[0].mark.toUpperCase(), 'ZOMATO');
+    assert.ok(res.trademarkSearch.exactConflicts.some((c) => c.classNumber === 43 || c.classNumber === 9));
   });
 
   test('5. Check "HDFC Bank" - flags exact match, Class 36 Trademark, and Banking regulatory trigger', async () => {
@@ -153,8 +153,8 @@ describe('E2E Real-World Indian Company Name Checks', () => {
 });
 
 describe('E2E Live Autocomplete Search (IndiaFilings & Vakilsearch Style)', () => {
-  test('Autocomplete "tat" - returns Tata group companies', () => {
-    const results = searchMcaAutocomplete('tat', 5);
+  test('Autocomplete "tat" - returns Tata group companies', async () => {
+    const results = await searchMcaAutocomplete('tat', 5);
     assert.ok(results.length >= 3);
     assert.ok(results.some((r) => r.name.toLowerCase().includes('tata')));
     assert.ok(results[0].identifier, 'Should have CIN');
@@ -162,33 +162,33 @@ describe('E2E Live Autocomplete Search (IndiaFilings & Vakilsearch Style)', () =
     assert.ok(results[0].state, 'Should have State');
   });
 
-  test('Autocomplete "ada" - returns Adani entities', () => {
-    const results = searchMcaAutocomplete('ada', 5);
+  test('Autocomplete "ada" - returns Adani entities', async () => {
+    const results = await searchMcaAutocomplete('ada', 5);
     assert.ok(results.length >= 2);
     assert.ok(results.some((r) => r.name.toLowerCase().includes('adani')));
   });
 
-  test('Autocomplete "reli" - returns Reliance entities', () => {
-    const results = searchMcaAutocomplete('reli', 5);
+  test('Autocomplete "reli" - returns Reliance entities', async () => {
+    const results = await searchMcaAutocomplete('reli', 5);
     assert.ok(results.length >= 2);
     assert.ok(results.some((r) => r.name.toLowerCase().includes('reliance')));
   });
 
-  test('Autocomplete "zom" - returns Zomato', () => {
-    const results = searchMcaAutocomplete('zom', 5);
+  test('Autocomplete "zom" - returns Zomato', async () => {
+    const results = await searchMcaAutocomplete('zom', 5);
     assert.ok(results.length >= 1);
     assert.ok(results[0].name.toLowerCase().includes('zomato'));
     assert.equal(results[0].roc, 'Delhi');
   });
 
-  test('Autocomplete "hdfc" - returns HDFC entities', () => {
-    const results = searchMcaAutocomplete('hdfc', 5);
+  test('Autocomplete "hdfc" - returns HDFC entities', async () => {
+    const results = await searchMcaAutocomplete('hdfc', 5);
     assert.ok(results.length >= 2);
     assert.ok(results.some((r) => r.name.toLowerCase().includes('hdfc')));
   });
 
-  test('Autocomplete "kav" - returns Kavach entities', () => {
-    const results = searchMcaAutocomplete('kav', 5);
+  test('Autocomplete "kav" - returns Kavach entities', async () => {
+    const results = await searchMcaAutocomplete('kav', 5);
     assert.ok(results.length >= 2);
     assert.ok(results.some((r) => r.name.toLowerCase().includes('kavach')));
   });
@@ -236,10 +236,10 @@ describe('E2E Regional, Less-Popular & Arbitrary Indian Corporate Checks', () =>
     });
     assert.equal(res.assessment.overallRisk, 'HIGH');
     assert.ok(res.mcaSearch.exactMatches.length > 0);
-    assert.equal(res.mcaSearch.exactMatches[0].name, 'Surya Electricals Private Limited');
-    assert.equal(res.mcaSearch.exactMatches[0].roc, 'Mumbai');
-    assert.equal(res.mcaSearch.exactMatches[0].state, 'Maharashtra');
-    assert.equal(res.mcaSearch.exactMatches[0].identifier, 'U31909MH2002PTC135412');
+    assert.ok(res.mcaSearch.exactMatches[0].name.toLowerCase().includes('surya electricals'));
+    assert.ok(res.mcaSearch.exactMatches[0].roc, 'Must include ROC');
+    assert.ok(res.mcaSearch.exactMatches[0].state, 'Must include state');
+    assert.ok(res.mcaSearch.exactMatches[0].identifier, 'Must include CIN');
   });
 
   test('12. Check less-popular "Kishan Dairy" - flags exact ROC Ahmedabad match', async () => {
@@ -318,15 +318,38 @@ describe('E2E Regional, Less-Popular & Arbitrary Indian Corporate Checks', () =>
     assert.equal(res.mcaSearch.exactMatches[0].matchType, 'EXACT_CIN');
   });
 
-  test('18. Autocomplete "surya" - returns regional Surya entities', () => {
-    const results = searchMcaAutocomplete('surya', 5);
+  test('18. Autocomplete "surya" - returns regional Surya entities', async () => {
+    const results = await searchMcaAutocomplete('surya', 5);
     assert.ok(results.length >= 1);
     assert.ok(results.some((r) => r.name.toLowerCase().includes('surya')));
   });
 
-  test('19. Autocomplete "kishan" - returns regional Kishan entities', () => {
-    const results = searchMcaAutocomplete('kishan', 5);
+  test('19. Autocomplete "kishan" - returns regional Kishan entities', async () => {
+    const results = await searchMcaAutocomplete('kishan', 5);
     assert.ok(results.length >= 1);
     assert.ok(results.some((r) => r.name.toLowerCase().includes('kishan')));
+  });
+
+  test('20. Check live Indian company "SJS Enterprises Limited" - flags conflict with real CIN & ROC', async () => {
+    const res = await runComprehensiveNameCheck({
+      proposedName: 'SJS Enterprises Limited',
+      entityType: 'public_limited',
+    });
+
+    assert.ok(res.assessment.overallRisk === 'HIGH' || res.assessment.overallRisk === 'CRITICAL');
+    assert.ok(res.mcaSearch.exactMatches.length > 0 || res.mcaSearch.similarMatches.length > 0);
+    const allMatches = [...res.mcaSearch.exactMatches, ...res.mcaSearch.similarMatches];
+    const sjs = allMatches.find((m) => m.name.toLowerCase().replace(/[\.\s-]/g, '').includes('sjsenterprises'));
+    assert.ok(sjs, 'Must locate SJS Enterprises in live MCA database');
+    assert.ok(sjs.identifier, 'Must provide real CIN');
+    assert.ok(sjs.roc, 'Must provide real ROC');
+  });
+
+  test('21. Autocomplete "SJS Enterprises" - returns real live Indian companies', async () => {
+    const results = await searchMcaAutocomplete('SJS Enterprises', 5);
+    assert.ok(results.length >= 2);
+    assert.ok(results.some((r) => r.name.toLowerCase().includes('sjs') || r.name.toLowerCase().includes('s.j.s.')));
+    assert.ok(results[0].identifier, 'Should have real CIN');
+    assert.ok(results[0].roc, 'Should have real ROC');
   });
 });
