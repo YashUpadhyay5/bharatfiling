@@ -165,9 +165,14 @@ export async function getCompanyByExactName(name) {
   if (!name) return null;
   const norm = normalizeString(name);
   if (!norm) return null;
+  const normNoThe = norm.replace(/^THE/, '');
 
   for (let i = 0; i < allRecords.length; i++) {
-    if (allRecords[i].normalizedName === norm) {
+    const recNorm = allRecords[i].normalizedName;
+    if (recNorm === norm) {
+      return { ...allRecords[i], name: formatCompanyName(allRecords[i].name) };
+    }
+    if (normNoThe.length > 5 && recNorm.replace(/^THE/, '') === normNoThe) {
       return { ...allRecords[i], name: formatCompanyName(allRecords[i].name) };
     }
   }

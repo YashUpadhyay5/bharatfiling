@@ -103,6 +103,23 @@ export const BENCHMARK_COMPANY_REGISTRY = [
   { name: 'ANI Technologies Private Limited (Ola Cabs)', cin: 'U72900KA2010PTC086204', roc: 'Bangalore', state: 'Karnataka', status: 'Active', entityType: 'Company', classType: 'Private', incYear: 2010 },
   { name: 'Ather Energy Limited', cin: 'U40100KA2013PLC071618', roc: 'Bangalore', state: 'Karnataka', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 2013 },
   { name: 'Fashnear Technologies Private Limited (Meesho)', cin: 'U74900KA2015PTC082263', roc: 'Bangalore', state: 'Karnataka', status: 'Active', entityType: 'Company', classType: 'Private', incYear: 2015 },
+  { name: 'Meesho Limited', cin: 'U74900KA2015PLC082263', roc: 'Bangalore', state: 'Karnataka', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 2015 },
+  { name: 'OfBusiness Private Limited', cin: 'U74140DL2015PTC284484', roc: 'Delhi', state: 'Delhi', status: 'Active', entityType: 'Company', classType: 'Private', incYear: 2015 },
+  { name: 'Zepto Private Limited', cin: 'U74999MH2021PTC368420', roc: 'Mumbai', state: 'Maharashtra', status: 'Active', entityType: 'Company', classType: 'Private', incYear: 2021 },
+  { name: 'Infra.Market Limited', cin: 'U51496MH2016PLC283641', roc: 'Mumbai', state: 'Maharashtra', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 2016 },
+  { name: 'Bombay Dyeing and Manufacturing Company Limited', cin: 'L17120MH1879PLC000037', roc: 'Mumbai', state: 'Maharashtra', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 1879 },
+  { name: 'Dr. Reddys Laboratories Limited', cin: 'L85195TG1984PLC004507', roc: 'Hyderabad', state: 'Telangana', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 1984 },
+  { name: 'CarTrade Tech Limited', cin: 'L74900MH2000PLC126237', roc: 'Mumbai', state: 'Maharashtra', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 2000 },
+  { name: 'Tracxn Technologies Limited', cin: 'L72200KA2012PLC065294', roc: 'Bangalore', state: 'Karnataka', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 2012 },
+  { name: 'Avalon Technologies Limited', cin: 'L31401TN2012PLC089188', roc: 'Chennai', state: 'Tamil Nadu', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 2012 },
+  { name: 'Hindustan Aeronautics Limited', cin: 'L35301KA1963GOI001622', roc: 'Bangalore', state: 'Karnataka', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 1963 },
+  { name: 'PB Fintech Limited', cin: 'L51909HR2008PLC037998', roc: 'Delhi', state: 'Haryana', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 2008 },
+  { name: 'The Indian Hotels Company Limited', cin: 'L74999MH1902PLC000183', roc: 'Mumbai', state: 'Maharashtra', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 1902 },
+  { name: 'Indian Hotels Company Limited', cin: 'L74999MH1902PLC000183', roc: 'Mumbai', state: 'Maharashtra', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 1902 },
+  { name: 'Jindal Steel & Power Limited', cin: 'L27105HR1979PLC009913', roc: 'Delhi', state: 'Haryana', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 1979 },
+  { name: 'Jindal Steel Limited', cin: 'L27105HR1979PLC009913', roc: 'Delhi', state: 'Haryana', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 1979 },
+  { name: 'Eternal Corporation Limited', cin: 'U99999MH1954PLC009270', roc: 'Mumbai', state: 'Maharashtra', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 1954 },
+  { name: 'Eternal Limited', cin: 'U99999MH1954PLC009270', roc: 'Mumbai', state: 'Maharashtra', status: 'Active', entityType: 'Company', classType: 'Public', incYear: 1954 },
   { name: 'UrbanClap Technologies India Private Limited (Urban Company)', cin: 'U74140DL2014PTC274413', roc: 'Delhi', state: 'Delhi', status: 'Active', entityType: 'Company', classType: 'Private', incYear: 2014 },
   { name: 'Supermarket Grocery Supplies Private Limited (BigBasket)', cin: 'U51109KA2011PTC060953', roc: 'Bangalore', state: 'Karnataka', status: 'Active', entityType: 'Company', classType: 'Private', incYear: 2011 },
   { name: 'Cars24 Services Private Limited', cin: 'U74999HR2015PTC056454', roc: 'Delhi', state: 'Haryana', status: 'Active', entityType: 'Company', classType: 'Private', incYear: 2015 },
@@ -971,9 +988,15 @@ export async function searchMcaRegistry(proposedName = '') {
     if (cinKey && cinKey !== 'CIN PENDING') seenCins.add(cinKey);
     seenNames.add(nameKey);
 
-    if (record.isExact || record.similarityScore === 100) {
+    const cleanNorm = cleanInput.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&#39;/g, '').replace(/[']/g, '').replace(/&(?:amp;)?/g, 'and').replace(/^(the|a|an)\s+/i, '').replace(/[^a-z0-9]/g, '');
+    const recNorm = record.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&#39;/g, '').replace(/[']/g, '').replace(/&(?:amp;)?/g, 'and').replace(/^(the|a|an)\s+/i, '').replace(/[^a-z0-9]/g, '');
+    const isExactNorm = cleanNorm.length > 3 && cleanNorm === recNorm;
+
+    const formattedName = record.name.replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+
+    if (record.isExact || record.similarityScore === 100 || isExactNorm) {
       exactMatches.push({
-        name: record.name,
+        name: formattedName,
         identifier: record.identifier || record.cin,
         roc: record.roc,
         state: record.state,
@@ -1017,8 +1040,10 @@ export async function searchMcaRegistry(proposedName = '') {
     let finalScore = similarity.score;
     let isExact = similarity.isExact || similarity.score === 100;
 
-    // Check if stripped inputs match exactly
-    if (strippedInput && recStripped && strippedInput.toLowerCase() === recStripped) {
+    // Check if stripped inputs match exactly (including normalized and ignoring leading "The")
+    const cleanNorm = (strippedInput || cleanInput).toLowerCase().replace(/^the\s+/i, '').replace(/[^a-z0-9]/g, '');
+    const recNorm = (recStripped || record.name).toLowerCase().replace(/^the\s+/i, '').replace(/[^a-z0-9]/g, '');
+    if ((strippedInput && recStripped && strippedInput.toLowerCase() === recStripped) || cleanNorm === recNorm) {
       isExact = true;
       finalScore = 100;
     }
