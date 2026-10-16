@@ -2,7 +2,7 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.js';
 import { canAccessByApplicationId } from '../middleware/ownership.js';
-import { getAllowedOrigins } from '../config/cors.js';
+import { isOriginAllowed } from '../config/cors.js';
 
 let ioInstance = null;
 
@@ -14,13 +14,11 @@ let ioInstance = null;
  * rooms that user is entitled to.
  */
 export function initSocketServer(httpServer) {
-  const allowedOrigins = getAllowedOrigins();
-
   ioInstance = new Server(httpServer, {
     cors: {
       origin: (origin, cb) => {
         // Non-browser clients send no Origin header
-        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+        if (isOriginAllowed(origin)) return cb(null, true);
         return cb(null, false);
       },
       methods: ['GET', 'POST'],
