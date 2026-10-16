@@ -296,3 +296,55 @@ function formatAutocompleteItem(rec) {
 export function getTotalMasterRecordCount() {
   return allRecords.length;
 }
+
+/**
+ * Force reload & reindex company master data (e.g. after a daily sync script runs)
+ */
+export async function reloadCompanyMasterData() {
+  isLoaded = false;
+  isLoading = false;
+  cinIndex.clear();
+  allRecords.length = 0;
+  return initCompanyMasterData();
+}
+
+/**
+ * Append one or more new company records directly into memory and CSV
+ */
+export async function appendNewCompanyRecord(newRecord) {
+  if (!isLoaded) await initCompanyMasterData();
+  const cin = (newRecord.cin || newRecord.identifier || '').toUpperCase();
+  if (!cin || cinIndex.has(cin)) return false;
+
+  const name = (newRecord.name || newRecord.companyName || '').toUpperCase();
+  const normName = normalizeString(name);
+
+  const formattedRecord = {
+    cin,
+    name,
+    normalizedName: normName,
+    roc: newRecord.roc || 'Central ROC',
+    state: newRecord.state || 'India',
+    status: newRecord.status || 'Active',
+    classType: newRecord.classType || 'Private Limited',
+    entityType: newRecord.entityType || 'Company',
+    incYear: newRecord.incYear || new Date().getFullYear().toString(),
+    authCap: newRecord.authCap || '1000000',
+    paidCap: newRecord.paidCap || '100000',
+    address: newRecord.address || '',
+  };
+
+  cinIndex.set(cin, formattedRecord);
+  allRecords.push(formattedRecord);
+
+  // Append line to CSV file safely
+  const safeAddress = formattedRecord.address.replace(/"/g, '""');
+  const csvLine = `\n${cin},"${name}","${formattedRecord.roc}","${formattedRecord.state}","${formattedRecord.status}","${formattedRecord.classType}","${formattedRecord.entityType}",${formattedRecord.incYear},${formattedRecord.authCap},${formattedRecord.paidCap},"${safeAddress}"`;
+  try {
+    fs.appendFileSync(CSV_PATH, csvLine, 'utf8');
+    return true;
+  } catch (err) {
+    console.error('[CompanyMasterCsv] Error appending to CSV:', err.message);
+    return false;
+  }
+}
