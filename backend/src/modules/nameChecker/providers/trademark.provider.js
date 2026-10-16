@@ -101,8 +101,9 @@ export async function searchTrademarkRegistry(proposedName = '', industry = 'gen
     const strippedLower = strippedInput.toLowerCase();
     const distinctiveLower = (distinctiveWord || '').toLowerCase();
 
-    // Check direct equality
-    const isExactMark = strippedLower === markLower || distinctiveLower === markLower;
+    const distinctiveTokens = distinctiveLower.split(/\s+/).filter(Boolean);
+    const isTokenExact = distinctiveTokens.includes(markLower) || (distinctiveTokens.length > 0 && distinctiveTokens[0] === markLower);
+    const isExactMark = strippedLower === markLower || distinctiveLower === markLower || isTokenExact;
 
     // Compare full stripped name as well as distinctive word against the mark
     const fullSimilarity = computeNameSimilarity(strippedInput, record.mark);
