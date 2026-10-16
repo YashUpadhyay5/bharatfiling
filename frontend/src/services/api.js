@@ -18,7 +18,7 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const fetchWithRetry = async (url, options = {}, retries = 2, delay = 800) => {
   const method = (options.method || 'GET').toUpperCase();
-  const isRetryable = method === 'GET' || method === 'HEAD' || url.includes('/auth/login') || url.includes('/auth/me');
+  const isRetryable = method === 'GET' || method === 'HEAD' || url.includes('/auth/login') || url.includes('/auth/me') || url.includes('/tools/');
 
   try {
     const res = await fetch(url, options);

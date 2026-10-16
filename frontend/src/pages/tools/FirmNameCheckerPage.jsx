@@ -111,7 +111,8 @@ export default function FirmNameCheckerPage() {
       }
     } catch (err) {
       console.warn('[FirmNameChecker] Search error:', err);
-      setErrorMessage('Unable to retrieve company master data. Please try again.');
+      const msg = err?.data?.error?.message || err?.message || 'Unable to retrieve company master data. Please verify your connection and try again.';
+      setErrorMessage(msg);
     } finally {
       setLoading(false);
     }
@@ -290,8 +291,16 @@ export default function FirmNameCheckerPage() {
 
             {/* Error banner if any */}
             {errorMessage && (
-              <div className="mt-2 text-xs sm:text-sm text-red-600 bg-red-50 py-1.5 px-3 rounded-lg border border-red-200 inline-block">
-                {errorMessage}
+              <div className="mt-3 text-xs sm:text-sm text-red-600 bg-red-50 py-2 px-4 rounded-xl border border-red-200 inline-flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 text-red-500" />
+                <span>{errorMessage}</span>
+                <button
+                  type="button"
+                  onClick={() => executeSearch()}
+                  className="underline font-semibold ml-2 hover:text-red-800 cursor-pointer"
+                >
+                  Retry
+                </button>
               </div>
             )}
 

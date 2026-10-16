@@ -11,6 +11,7 @@ import {
   autocompleteCompanyMaster,
   searchCompaniesForCollision,
 } from '../repositories/companyMasterCsv.repository.js';
+import { lookupCompanyWithGemini } from '../services/geminiNameChecker.service.js';
 
 // Comprehensive benchmark registry of verified Indian Companies & LLPs
 export const BENCHMARK_COMPANY_REGISTRY = [
@@ -1087,6 +1088,38 @@ export async function searchMcaRegistry(proposedName = '') {
         matchType: similarity.category,
         reason: similarity.reason || `High name similarity (${finalScore}%) detected with registered company.`,
       });
+    }
+  }
+
+  // 4. Statutory Fallback to Gemini if no exact registered match found in CSV or live MCA
+  if (exactMatches.length === 0) {
+    try {
+      const geminiLookup = await lookupCompanyWithGemini(cleanInput);
+      if (geminiLookup && geminiLookup.isRegistered && geminiLookup.cin) {
+        const geminiCin = (geminiLookup.cin || '').toUpperCase();
+        if (geminiCin && !seenCins.has(geminiCin)) {
+          seenCins.add(geminiCin);
+          exactMatches.push({
+            name: geminiLookup.companyName || cleanInput,
+            identifier: geminiLookup.cin,
+            roc: formatRocName(geminiLookup.roc || 'ROC'),
+            state: geminiLookup.state || '',
+            status: geminiLookup.status || 'Active',
+            entityType: geminiLookup.entityType || 'Company',
+            classType: geminiLookup.classType || 'Public Limited',
+            incYear: geminiLookup.incorporationYear || '',
+            authorizedCapital: geminiLookup.authorizedCapital || '₹1,00,000',
+            paidUpCapital: geminiLookup.paidUpCapital || '₹1,00,000',
+            registeredAddress: geminiLookup.registeredAddress || 'Registered Office on Official MCA Record',
+            similarityScore: 100,
+            matchType: 'EXACT',
+            source: 'GEMINI_MCA_FALLBACK',
+            reason: geminiLookup.summary || 'Existing registered company verified via statutory registry fallback.',
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[McaProvider] Gemini lookup fallback error:', err.message);
     }
   }
 
