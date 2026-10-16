@@ -5,6 +5,12 @@
  */
 
 import { computeNameSimilarity, stripEntitySuffixes, extractDistinctiveWords } from '../services/nameSimilarity.service.js';
+import {
+  getCompanyByCin,
+  getCompanyByExactName,
+  autocompleteCompanyMaster,
+  searchCompaniesForCollision,
+} from '../repositories/companyMasterCsv.repository.js';
 
 // Comprehensive benchmark registry of verified Indian Companies & LLPs
 export const BENCHMARK_COMPANY_REGISTRY = [
@@ -639,7 +645,43 @@ export async function searchMcaAutocomplete(query = '', limit = 8) {
   const strippedQuery = stripEntitySuffixes(q);
   const qTokens = (strippedQuery || q).split(/\s+/).filter(Boolean);
 
-  // 1. Fetch live MCA companies from national corporate registry
+  const seenCins = new Set();
+  const seenNames = new Set();
+  const combined = [];
+
+  const csvScored = [];
+  // 1. Query official MCA CSV Master Data first (130,000+ real registered records)
+  try {
+    const csvMatches = await autocompleteCompanyMaster(query.trim(), limit * 2);
+    for (const item of csvMatches) {
+      const nameLower = (item.companyName || item.name || '').toLowerCase();
+      let score = 88;
+      if (nameLower.startsWith(q) || (strippedQuery && nameLower.startsWith(strippedQuery))) {
+        score = 96;
+      } else if (item.cin && item.cin.toLowerCase().startsWith(q)) {
+        score = 100;
+      }
+      csvScored.push({
+        name: item.companyName || item.name,
+        identifier: item.cin,
+        roc: formatRocName(item.roc),
+        state: item.state,
+        status: item.status || 'Active',
+        entityType: item.entityType || 'Company',
+        classType: item.classType || 'Private Limited',
+        incYear: item.incorporationYear || null,
+        authorizedCapital: item.authorizedCapital,
+        paidUpCapital: item.paidUpCapital,
+        registeredAddress: item.registeredAddress,
+        source: 'Official MCA Corporate Master Data',
+        score,
+      });
+    }
+  } catch (err) {
+    console.warn('[McaProvider] CSV autocomplete fallback:', err.message);
+  }
+
+  // 2. Fetch live MCA companies from national corporate registry
   let liveMatches = [];
   try {
     liveMatches = await fetchLiveMcaCompanies(query.trim(), limit * 2);
@@ -647,7 +689,7 @@ export async function searchMcaAutocomplete(query = '', limit = 8) {
     // Graceful fallback if offline
   }
 
-  // 2. Score benchmark registry
+  // 3. Score benchmark registry
   const benchmarkScored = [];
   for (const record of BENCHMARK_COMPANY_REGISTRY) {
     const recordNameLower = record.name.toLowerCase();
@@ -661,7 +703,7 @@ export async function searchMcaAutocomplete(query = '', limit = 8) {
 
     // Name exact prefix
     if (recordNameLower.startsWith(q) || (strippedQuery && recordNameLower.startsWith(strippedQuery))) {
-      benchmarkScored.push({ record, score: 95 });
+      benchmarkScored.push({ record, score: 98 });
       continue;
     }
 
@@ -709,15 +751,12 @@ export async function searchMcaAutocomplete(query = '', limit = 8) {
       source: 'MCA Corporate Master Data Benchmark',
       score: b.score,
     })),
+    ...csvScored,
     ...liveScored,
   ];
 
   // Sort pool by score descending
   candidatePool.sort((a, b) => b.score - a.score);
-
-  const seenCins = new Set();
-  const seenNames = new Set();
-  const combined = [];
 
   for (const item of candidatePool) {
     const cinKey = (item.identifier || item.cin || '').toUpperCase();
@@ -762,10 +801,45 @@ export async function searchMcaRegistry(proposedName = '') {
   const strippedInput = stripEntitySuffixes(cleanInput);
   const distinctiveWord = extractDistinctiveWords(cleanInput).toLowerCase();
 
-  // Check if user entered a CIN directly
+  // 1. Check if user entered a CIN directly - check official CSV master dataset first
   const isCinQuery = /^[A-Z0-9]{7,21}$/i.test(cleanInput.replace(/\s+/g, ''));
   if (isCinQuery) {
     const cinNormalized = cleanInput.replace(/\s+/g, '').toUpperCase();
+    try {
+      const csvCinMatch = await getCompanyByCin(cinNormalized);
+      if (csvCinMatch) {
+        exactMatches.push({
+          name: csvCinMatch.name,
+          identifier: csvCinMatch.cin,
+          roc: formatRocName(csvCinMatch.roc),
+          state: csvCinMatch.state,
+          status: csvCinMatch.status || 'Active',
+          entityType: csvCinMatch.entityType || 'Company',
+          classType: csvCinMatch.classType || 'Private Limited',
+          incYear: csvCinMatch.incYear,
+          authorizedCapital: csvCinMatch.authCap,
+          paidUpCapital: csvCinMatch.paidCap,
+          registeredAddress: csvCinMatch.address,
+          similarityScore: 100,
+          matchType: 'EXACT_CIN',
+          reason: 'Matched exact Corporate Identification Number (CIN) in official MCA Master Dataset.',
+        });
+        return {
+          provider: 'Official MCA Corporate Master Data',
+          sourceUrl: officialSourceUrl,
+          status: 'SUCCESS',
+          searchedAt: timestamp,
+          coverage: 'Official MCA Corporate Master Dataset (130,000+ Registered Companies)',
+          exactMatches,
+          similarMatches: [],
+          totalChecked: 131913,
+          officialVerificationUrl: `https://www.mca.gov.in/mcafoportal/showCheckCompanyName.do?name=${encodeURIComponent(csvCinMatch.name)}`,
+        };
+      }
+    } catch (err) {
+      console.warn('[McaProvider] CSV CIN lookup error:', err.message);
+    }
+
     const foundByCin = BENCHMARK_COMPANY_REGISTRY.find(
       (r) => (r.cin || r.llpin || '').toUpperCase() === cinNormalized
     );
@@ -826,7 +900,63 @@ export async function searchMcaRegistry(proposedName = '') {
     }
   }
 
-  // 1. Fetch live MCA companies from national corporate registry
+  // 2. Check exact and collision matches in official MCA CSV Master Data (130,000+ records)
+  try {
+    const csvExact = (await getCompanyByExactName(cleanInput)) || (strippedInput ? await getCompanyByExactName(strippedInput) : null);
+    if (csvExact) {
+      const cinKey = (csvExact.cin || '').toUpperCase();
+      if (cinKey) seenCins.add(cinKey);
+      seenNames.add(csvExact.name.toLowerCase().replace(/[\.\s-]/g, ''));
+      exactMatches.push({
+        name: csvExact.name,
+        identifier: csvExact.cin,
+        roc: formatRocName(csvExact.roc),
+        state: csvExact.state,
+        status: csvExact.status || 'Active',
+        entityType: csvExact.entityType || 'Company',
+        classType: csvExact.classType || 'Private Limited',
+        incYear: csvExact.incYear,
+        authorizedCapital: csvExact.authCap,
+        paidUpCapital: csvExact.paidCap,
+        registeredAddress: csvExact.address,
+        similarityScore: 100,
+        matchType: 'EXACT',
+        reason: 'Existing company with identical registered corporate name found in official MCA Master Dataset.',
+      });
+    }
+
+    // Check collision / similar records from CSV
+    const { similarMatches: csvSimilar } = await searchCompaniesForCollision(cleanInput, 5);
+    for (const sim of csvSimilar) {
+      const cinKey = (sim.cin || '').toUpperCase();
+      const nameKey = sim.name.toLowerCase().replace(/[\.\s-]/g, '');
+      if (cinKey && seenCins.has(cinKey)) continue;
+      if (seenNames.has(nameKey)) continue;
+      if (cinKey) seenCins.add(cinKey);
+      seenNames.add(nameKey);
+
+      similarMatches.push({
+        name: sim.name,
+        identifier: sim.cin,
+        roc: formatRocName(sim.roc),
+        state: sim.state,
+        status: sim.status || 'Active',
+        entityType: sim.entityType || 'Company',
+        classType: sim.classType || 'Private Limited',
+        incYear: sim.incYear,
+        authorizedCapital: sim.authCap,
+        paidUpCapital: sim.paidCap,
+        registeredAddress: sim.address,
+        similarityScore: 85,
+        matchType: 'SIMILAR',
+        reason: 'Similar registered corporate name found in official MCA Master Dataset.',
+      });
+    }
+  } catch (err) {
+    console.warn('[McaProvider] CSV name search error:', err.message);
+  }
+
+  // 3. Fetch live MCA companies from national corporate registry
   let liveCompanies = [];
   try {
     liveCompanies = await fetchLiveMcaCompanies(cleanInput, 15);
