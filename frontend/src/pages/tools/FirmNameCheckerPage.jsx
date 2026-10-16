@@ -32,6 +32,7 @@ import {
   stripEntitySuffixes,
   extractDistinctiveWord,
   validateProposedNameInput,
+  evaluateProposedFirmNameClientSide,
 } from '../../utils/firmNameEngine.js';
 import { api } from '../../services/api.js';
 
@@ -137,112 +138,8 @@ export default function FirmNameCheckerPage() {
       }
     } catch (err) {
       console.warn('Backend API unavailable, using client evaluation heuristics:', err);
-      const stripped = stripEntitySuffixes(trimmed);
-      const distinctive = extractDistinctiveWord(trimmed);
-      const isBenchmarkExact = stripped.includes('bharat technologies') || stripped.includes('bharat tech');
-
-      setSearchResult({
-        query: {
-          proposedName: trimmed,
-          normalizedName: stripped,
-          strippedName: stripped,
-          distinctiveWord: distinctive,
-          entityType: type,
-          industry: ind,
-          timestamp: new Date().toISOString(),
-        },
-        assessment: {
-          overallRisk: isBenchmarkExact ? 'HIGH' : 'LOW',
-          riskScore: isBenchmarkExact ? 80 : 15,
-          probabilityRating: isBenchmarkExact ? 'UNLIKELY' : 'HIGH_VIABILITY',
-          summaryHeadline: isBenchmarkExact
-            ? 'Conflict Detected With Existing Corporate Entity'
-            : 'Favorable Preliminary Availability Screen',
-          summaryDescription: isBenchmarkExact
-            ? 'A registered company with an identical or virtually identical base name already exists in the MCA corporate registry.'
-            : 'No identical conflicts detected against benchmark corporate records and trademark classifications.',
-          distinctiveWordIdentified: distinctive,
-        },
-        rulesCheck: {
-          warnings: isBenchmarkExact
-            ? [
-                {
-                  code: 'RULE_8_SIMILARITY',
-                  severity: 'HIGH',
-                  title: 'Name Resembles Existing Company',
-                  message: 'Under Rule 8(1), names too nearly resembling an existing company will be rejected by CRC.',
-                  legalReference: 'Companies Act 2013 Rule 8(1)',
-                },
-              ]
-            : [],
-          clearances: [{ code: 'CLEAR', title: 'Rules Satisfied', message: 'No statutory bar detected.' }],
-        },
-        mcaSearch: {
-          provider: 'MCA Corporate Central Registry',
-          status: 'SUCCESS',
-          exactMatches: isBenchmarkExact
-            ? [
-                {
-                  name: 'Bharat Technologies Private Limited',
-                  identifier: 'U72200DL2018PTC334512',
-                  roc: 'Delhi',
-                  state: 'Delhi',
-                  status: 'Active',
-                  entityType: 'Company',
-                  similarityScore: 100,
-                },
-              ]
-            : [],
-          similarMatches: [
-            {
-              name: 'Bharat Tech Solutions Limited',
-              identifier: 'L72900MH2015PLC261290',
-              roc: 'Mumbai',
-              state: 'Maharashtra',
-              status: 'Active',
-              similarityScore: 78,
-            },
-            {
-              name: 'Bharat Innovations LLP',
-              identifier: 'AAB-1923',
-              roc: 'Bangalore',
-              state: 'Karnataka',
-              status: 'Active',
-              similarityScore: 65,
-            },
-          ],
-        },
-        trademarkSearch: {
-          provider: 'IP India Trademark Registry',
-          status: 'SUCCESS',
-          recommendedClasses: [{ classNumber: 9, description: 'Software & Electronics' }, { classNumber: 42, description: 'IT & Cloud Services' }],
-          exactConflicts: [],
-          similarConflicts: [],
-        },
-        alternativeSuggestions: [
-          {
-            name: `Nex ${distinctive || 'Astra'} Technologies Private Limited`,
-            strategy: 'Coined Prefix Addition',
-            rationale: 'Satisfies Rule 8(2)(b) distinctiveness test.',
-          },
-          {
-            name: `Vyom ${distinctive || 'Astra'} Infotech Private Limited`,
-            strategy: 'Hybrid Coined Distinctiveness',
-            rationale: 'Unique coined base minimizes trademark overlap.',
-          },
-          {
-            name: `${distinctive || 'Astra'} Systems Private Limited`,
-            strategy: 'Activity Alignment',
-            rationale: 'Clear statutory main business activity description.',
-          },
-        ],
-        officialVerificationLinks: {
-          mcaCheckUrl: 'https://www.mca.gov.in/mcafoportal/showCheckCompanyName.do',
-          ipIndiaSearchUrl: 'https://tmrsearch.ipindia.gov.in/tmrpublicsearch/',
-        },
-        disclaimer:
-          'IMPORTANT LEGAL NOTICE: This search is a preliminary computerized screening tool based on statutory heuristic algorithms, benchmark company registries, and Nice Classification mappings. It does not constitute a guaranteed name reservation or legal advice. Final name approval rests solely with the Registrar of Companies (ROC), Central Registration Centre (CRC), Ministry of Corporate Affairs (MCA), and Trade Marks Registry (CGPDTM), Government of India.',
-      });
+      const fallbackResult = evaluateProposedFirmNameClientSide(trimmed, type, ind);
+      setSearchResult(fallbackResult);
     } finally {
       setLoading(false);
     }

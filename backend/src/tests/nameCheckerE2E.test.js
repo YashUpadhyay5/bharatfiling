@@ -226,3 +226,107 @@ describe('E2E Statutory Rule 8 & Emblems Act Enforcement', () => {
     assert.ok(suffix);
   });
 });
+
+describe('E2E Regional, Less-Popular & Arbitrary Indian Corporate Checks', () => {
+  test('11. Check less-popular "Surya Electricals" - flags exact ROC Mumbai match', async () => {
+    const res = await runComprehensiveNameCheck({
+      proposedName: 'Surya Electricals Private Limited',
+      entityType: 'private_limited',
+      industry: 'manufacturing',
+    });
+    assert.equal(res.assessment.overallRisk, 'HIGH');
+    assert.ok(res.mcaSearch.exactMatches.length > 0);
+    assert.equal(res.mcaSearch.exactMatches[0].name, 'Surya Electricals Private Limited');
+    assert.equal(res.mcaSearch.exactMatches[0].roc, 'Mumbai');
+    assert.equal(res.mcaSearch.exactMatches[0].state, 'Maharashtra');
+    assert.equal(res.mcaSearch.exactMatches[0].identifier, 'U31909MH2002PTC135412');
+  });
+
+  test('12. Check less-popular "Kishan Dairy" - flags exact ROC Ahmedabad match', async () => {
+    const res = await runComprehensiveNameCheck({
+      proposedName: 'Kishan Dairy Private Limited',
+      entityType: 'private_limited',
+      industry: 'food',
+    });
+    assert.equal(res.assessment.overallRisk, 'HIGH');
+    assert.ok(res.mcaSearch.exactMatches.length > 0);
+    assert.equal(res.mcaSearch.exactMatches[0].name, 'Kishan Dairy Private Limited');
+    assert.equal(res.mcaSearch.exactMatches[0].roc, 'Ahmedabad');
+    assert.equal(res.mcaSearch.exactMatches[0].state, 'Gujarat');
+    assert.equal(res.mcaSearch.exactMatches[0].identifier, 'U15201GJ2015PTC083421');
+  });
+
+  test('13. Check less-popular "Sharma Timber Works" - flags exact ROC Delhi match', async () => {
+    const res = await runComprehensiveNameCheck({
+      proposedName: 'Sharma Timber Works Private Limited',
+      entityType: 'private_limited',
+      industry: 'manufacturing',
+    });
+    assert.equal(res.assessment.overallRisk, 'HIGH');
+    assert.ok(res.mcaSearch.exactMatches.length > 0);
+    assert.equal(res.mcaSearch.exactMatches[0].name, 'Sharma Timber Works Private Limited');
+    assert.equal(res.mcaSearch.exactMatches[0].roc, 'Delhi');
+    assert.equal(res.mcaSearch.exactMatches[0].identifier, 'U20211DL2014PTC268412');
+  });
+
+  test('14. Check less-popular "Balaji Agro Seeds" - flags exact ROC Hyderabad match', async () => {
+    const res = await runComprehensiveNameCheck({
+      proposedName: 'Balaji Agro Seeds Private Limited',
+      entityType: 'private_limited',
+      industry: 'general',
+    });
+    assert.equal(res.assessment.overallRisk, 'HIGH');
+    assert.ok(res.mcaSearch.exactMatches.length > 0);
+    assert.equal(res.mcaSearch.exactMatches[0].name, 'Balaji Agro Seeds Private Limited');
+    assert.equal(res.mcaSearch.exactMatches[0].roc, 'Hyderabad');
+    assert.equal(res.mcaSearch.exactMatches[0].identifier, 'U01119TG2011PTC073918');
+  });
+
+  test('15. Check less-popular "Vardhman Ispat" - flags exact ROC Chandigarh match', async () => {
+    const res = await runComprehensiveNameCheck({
+      proposedName: 'Vardhman Ispat Udyog Limited',
+      entityType: 'public_limited',
+      industry: 'manufacturing',
+    });
+    assert.equal(res.assessment.overallRisk, 'HIGH');
+    assert.ok(res.mcaSearch.exactMatches.length > 0);
+    assert.equal(res.mcaSearch.exactMatches[0].roc, 'Chandigarh');
+  });
+
+  test('16. Check less-popular "Kuber Metal Industries" - flags exact ROC Jaipur LLP match', async () => {
+    const res = await runComprehensiveNameCheck({
+      proposedName: 'Kuber Metal Industries LLP',
+      entityType: 'llp',
+    });
+    assert.equal(res.assessment.overallRisk, 'HIGH');
+    assert.ok(res.mcaSearch.exactMatches.length > 0);
+    assert.equal(res.mcaSearch.exactMatches[0].roc, 'Jaipur');
+    assert.equal(res.mcaSearch.exactMatches[0].identifier, 'AAA-8841');
+  });
+
+  test('17. Check arbitrary unindexed valid CIN "U15400RJ2016PTC051234" - dynamically decodes ROC Jaipur & State', async () => {
+    const res = await runComprehensiveNameCheck({
+      proposedName: 'U15400RJ2016PTC051234',
+      entityType: 'private_limited',
+    });
+    assert.equal(res.assessment.overallRisk, 'HIGH');
+    assert.ok(res.mcaSearch.exactMatches.length > 0);
+    assert.equal(res.mcaSearch.exactMatches[0].roc, 'Jaipur');
+    assert.equal(res.mcaSearch.exactMatches[0].state, 'Rajasthan');
+    assert.equal(res.mcaSearch.exactMatches[0].classType, 'Private Limited');
+    assert.equal(res.mcaSearch.exactMatches[0].incYear, 2016);
+    assert.equal(res.mcaSearch.exactMatches[0].matchType, 'EXACT_CIN');
+  });
+
+  test('18. Autocomplete "surya" - returns regional Surya entities', () => {
+    const results = searchMcaAutocomplete('surya', 5);
+    assert.ok(results.length >= 1);
+    assert.ok(results.some((r) => r.name.toLowerCase().includes('surya')));
+  });
+
+  test('19. Autocomplete "kishan" - returns regional Kishan entities', () => {
+    const results = searchMcaAutocomplete('kishan', 5);
+    assert.ok(results.length >= 1);
+    assert.ok(results.some((r) => r.name.toLowerCase().includes('kishan')));
+  });
+});

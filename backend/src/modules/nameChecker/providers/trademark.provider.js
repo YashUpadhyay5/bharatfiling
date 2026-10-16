@@ -80,6 +80,31 @@ export const BENCHMARK_TRADEMARK_REGISTRY = [
   { mark: 'NOVA', classNumber: 42, applicationNumber: '3810987', status: 'Registered', goodsServices: 'Software development, SaaS cloud platforms' },
   { mark: 'APEX', classNumber: 35, applicationNumber: '2910987', status: 'Registered', goodsServices: 'Business advisory, marketing consultancy' },
   { mark: 'ZENITH', classNumber: 36, applicationNumber: '3110987', status: 'Registered', goodsServices: 'Financial portfolio management, investment advisory' },
+
+  // --- Regional & Industrial Indian Trademarks ---
+  { mark: 'SURYA', classNumber: 11, applicationNumber: '891021', status: 'Registered', goodsServices: 'Lighting apparatus, LED bulbs, luminaires, electrical appliances' },
+  { mark: 'SURYA', classNumber: 9, applicationNumber: '891022', status: 'Registered', goodsServices: 'Electrical wires, cables, switches and apparatus' },
+  { mark: 'KISHAN', classNumber: 29, applicationNumber: '1902831', status: 'Registered', goodsServices: 'Milk and dairy products, ghee, butter, paneer' },
+  { mark: 'KISHAN', classNumber: 31, applicationNumber: '1902832', status: 'Registered', goodsServices: 'Agricultural seeds, live plants, grains, cattle feed' },
+  { mark: 'BALAJI', classNumber: 29, applicationNumber: '1410981', status: 'Registered', goodsServices: 'Processed foods, wafers, snacks, edible oils' },
+  { mark: 'BALAJI', classNumber: 31, applicationNumber: '1410982', status: 'Registered', goodsServices: 'Agricultural hybrid seeds, natural plants, grains' },
+  { mark: 'SHARMA', classNumber: 19, applicationNumber: '2109871', status: 'Registered', goodsServices: 'Timber, wood boards, veneers, building construction materials' },
+  { mark: 'VARDHMAN', classNumber: 24, applicationNumber: '681021', status: 'Registered', goodsServices: 'Textile fabrics, cotton yarn, threads, suiting materials' },
+  { mark: 'VARDHMAN', classNumber: 6, applicationNumber: '681022', status: 'Registered', goodsServices: 'Steel bars, ingots, alloy rods, metal sheets' },
+  { mark: 'KUBER', classNumber: 35, applicationNumber: '2410981', status: 'Registered', goodsServices: 'Commercial trading, retail distribution of metal and consumer goods' },
+  { mark: 'ANAND', classNumber: 30, applicationNumber: '1310981', status: 'Registered', goodsServices: 'Confectionery, bakery items, spices, food preparations' },
+  { mark: 'POLYCAB', classNumber: 9, applicationNumber: '1190281', status: 'Registered', goodsServices: 'Electric wires, power cables, switchgear, conduit pipes' },
+  { mark: 'KAJARIA', classNumber: 19, applicationNumber: '791028', status: 'Registered', goodsServices: 'Ceramic tiles, vitrified floor tiles, bathroom wall tiles' },
+  { mark: 'ASTRAL', classNumber: 19, applicationNumber: '1210981', status: 'Registered', goodsServices: 'CPVC pipes, drainage pipes, plumbing fittings' },
+  { mark: 'CENTURY', classNumber: 19, applicationNumber: '691021', status: 'Registered', goodsServices: 'Plywood, marine blockboard, decorative laminates' },
+  { mark: 'GREENLAM', classNumber: 19, applicationNumber: '2190181', status: 'Registered', goodsServices: 'Laminates, compact panels, decorative veneers' },
+  { mark: 'AMBUJA', classNumber: 19, applicationNumber: '781021', status: 'Registered', goodsServices: 'Portland cement, hydraulic cement, construction aggregates' },
+  { mark: 'V-GUARD', classNumber: 9, applicationNumber: '1109281', status: 'Registered', goodsServices: 'Voltage stabilizers, digital inverters, domestic pumps' },
+  { mark: 'HALDIRAM', classNumber: 30, applicationNumber: '891028', status: 'Registered', goodsServices: 'Traditional Indian sweets, namkeens, papad, savories' },
+  { mark: 'BIKAJI', classNumber: 30, applicationNumber: '1210988', status: 'Registered', goodsServices: 'Bikaneri bhujia, namkeens, sweets, packaged snacks' },
+  { mark: 'AGARWAL', classNumber: 39, applicationNumber: '1810281', status: 'Registered', goodsServices: 'Packing and moving services, household transportation, freight logistics' },
+  { mark: 'PATEL', classNumber: 37, applicationNumber: '1710981', status: 'Registered', goodsServices: 'Infrastructure development, highway building, civil construction' },
+  { mark: 'GUPTA', classNumber: 9, applicationNumber: '910281', status: 'Registered', goodsServices: 'Overhead power transmission conductors, electrical cables' },
 ];
 
 export async function searchTrademarkRegistry(proposedName = '', industry = 'general') {
