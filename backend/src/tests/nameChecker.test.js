@@ -152,4 +152,21 @@ describe('Firm Name Checker - Alternative Suggestions & Comprehensive Check', ()
     assert.equal(result.assessment.probabilityRating, 'HIGH_VIABILITY');
     assert.ok(result.assessment.riskScore < 30);
   });
+
+  test('Accurately matches major Indian brands (Adani, Tata, HDFC, Zomato)', async () => {
+    const adaniCheck = await runComprehensiveNameCheck({
+      proposedName: 'Adani Enterprises Limited',
+      entityType: 'public_limited',
+    });
+    assert.equal(adaniCheck.assessment.overallRisk, 'HIGH');
+    assert.ok(adaniCheck.mcaSearch.exactMatches.length > 0);
+    assert.equal(adaniCheck.mcaSearch.exactMatches[0].roc, 'Ahmedabad');
+
+    const hdfcCheck = await runComprehensiveNameCheck({
+      proposedName: 'HDFC Bank Limited',
+      entityType: 'public_limited',
+    });
+    assert.equal(hdfcCheck.assessment.overallRisk, 'HIGH');
+    assert.ok(hdfcCheck.mcaSearch.exactMatches.length > 0);
+  });
 });

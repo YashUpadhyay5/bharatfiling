@@ -6,7 +6,7 @@
 import { Router } from 'express';
 import { calculateHra } from '../controllers/hra.controller.js';
 import { calculateIncomeTax } from '../controllers/incomeTax.controller.js';
-import { checkFirmNameAvailability } from '../modules/nameChecker/controllers/nameChecker.controller.js';
+import { checkFirmNameAvailability, autocompleteFirmName } from '../modules/nameChecker/controllers/nameChecker.controller.js';
 
 const router = Router();
 
@@ -18,5 +18,8 @@ router.post('/income-tax/calculate', calculateIncomeTax);
 
 // POST /api/v1/tools/firm-name/check
 router.post('/firm-name/check', checkFirmNameAvailability);
+
+// GET /api/v1/tools/firm-name/autocomplete
+router.get('/firm-name/autocomplete', autocompleteFirmName);
 
 export default router;

@@ -540,4 +540,16 @@ export const api = {
     });
     return handleResponse(res);
   },
+
+  autocompleteFirmName: async (query) => {
+    try {
+      const res = await fetchWithRetry(`${API_BASE}/tools/firm-name/autocomplete?q=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+      return handleResponse(res);
+    } catch {
+      return { success: false, data: [] };
+    }
+  },
 };

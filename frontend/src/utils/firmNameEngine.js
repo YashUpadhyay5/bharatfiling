@@ -10,7 +10,7 @@ export const COMMON_GENERIC_WORDS = [
   'consulting', 'associates', 'international', 'global', 'digital', 'systems',
   'software', 'labs', 'lab', 'innovations', 'innovation', 'management', 'advisory',
   'finance', 'financial', 'traders', 'trading', 'agency', 'infra', 'infrastructure',
-  'logistics', 'media', 'holdings', 'group', 'corp', 'corporation', 'india', 'bharat',
+  'logistics', 'media', 'holdings', 'group', 'corp', 'corporation',
   'private', 'limited', 'pvt', 'ltd', 'llp',
 ];
 
@@ -116,6 +116,7 @@ export function stripEntitySuffixes(name = '') {
     'one person company',
     'limited liability partnership',
     'llp',
+    'public limited',
     'limited',
     'ltd',
     'ltd.',
@@ -137,7 +138,7 @@ export function extractDistinctiveWord(name = '') {
   const stripped = stripEntitySuffixes(name);
   const tokens = stripped.split(/[\s-]+/).filter(Boolean);
   const distinctive = tokens.filter((t) => !COMMON_GENERIC_WORDS.includes(t));
-  return distinctive.length > 0 ? distinctive[0] : '';
+  return distinctive.length > 0 ? distinctive[0] : (tokens[0] || '');
 }
 
 export function validateProposedNameInput(rawName = '') {
