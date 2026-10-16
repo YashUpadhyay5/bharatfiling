@@ -50,7 +50,12 @@ app.use(
 
 // CORS: explicit allowlist with credentials, pattern matching, and preflight handling
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 // JSON bodies are small forms; documents go through multipart upload (10 MB cap in multer)
 app.use(express.json({ limit: '1mb' }));
