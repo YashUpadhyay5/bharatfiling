@@ -229,4 +229,41 @@ describe('HRA Calculation Engine - Unit & Formula Tests', () => {
 
     assert.ok(res.calculationWarnings.some((w) => w.includes('Form 12BB') || w.includes('landlord\'s PAN')));
   });
+
+  test('Scenario 9: Monthly rent > ₹50,000 warns about Section 194-IB 2% TDS and Form 26QC', () => {
+    const res = computeHraExemption({
+      taxRegime: 'old',
+      simpleInput: {
+        basicSalary: 150000,
+        hraReceived: 60000,
+        rentPaid: 55000, // Monthly > 50,000
+        isMetro: true,
+      },
+    });
+
+    assert.equal(res.summary.requiresSection194IB, true);
+    assert.equal(res.summary.monthlyTds194IB, 1100); // 2% of 55,000
+    assert.equal(res.summary.annualTds194IB, 13200);
+    assert.ok(res.calculationWarnings.some((w) => w.includes('Section 194-IB') && w.includes('Form 26QC')));
+  });
+
+  test('Scenario 10: Zero HRA with Rent Paid provides Section 80GG fallback deduction', () => {
+    const res = computeHraExemption({
+      taxRegime: 'old',
+      simpleInput: {
+        basicSalary: 60000,
+        hraReceived: 0, // No HRA received
+        rentPaid: 20000,
+        isMetro: false,
+      },
+    });
+
+    assert.equal(res.summary.totalExemptHra, 0);
+    assert.ok(res.summary.section80GGEstimate);
+    assert.equal(res.summary.section80GGEstimate.isEligible, true);
+    // Max annual cap under 80GG is 60,000 (5,000/mo)
+    assert.equal(res.summary.section80GGEstimate.annualDeduction, 60000);
+    assert.equal(res.summary.section80GGEstimate.monthlyDeduction, 5000);
+    assert.ok(res.calculationWarnings.some((w) => w.includes('Section 80GG')));
+  });
 });
