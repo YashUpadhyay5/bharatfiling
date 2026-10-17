@@ -36,8 +36,8 @@ export default function IncomeTaxCalculatorPage() {
   const [financialYear, setFinancialYear] = useState('2025-26');
   const [ageCategory, setAgeCategory] = useState('individual');
   const [residentialStatus, setResidentialStatus] = useState('resident');
-  // Income Mode: 'gross' (CTC with auto standard deduction) | 'taxable' (Direct Net Taxable Income matching ITD portal)
-  const [incomeMode, setIncomeMode] = useState('gross');
+  // Income Mode: 'taxable' (Direct Net Taxable Income matching ITD portal) | 'gross' (CTC with auto standard deduction)
+  const [incomeMode, setIncomeMode] = useState('taxable');
 
   // Income Heads State (Clean, transparent defaults for Simple & Advanced Mode)
   const [salary, setSalary] = useState({
@@ -79,7 +79,7 @@ export default function IncomeTaxCalculatorPage() {
 
   // Deductions State
   const [deductions, setDeductions] = useState({
-    sec80C: '150000',
+    sec80C: '',
     sec80CCD1B: '',
     sec80CCD2: '',
     sec80D: '',
