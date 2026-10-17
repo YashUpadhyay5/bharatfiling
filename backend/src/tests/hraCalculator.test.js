@@ -266,4 +266,46 @@ describe('HRA Calculation Engine - Unit & Formula Tests', () => {
     assert.equal(res.summary.section80GGEstimate.monthlyDeduction, 5000);
     assert.ok(res.calculationWarnings.some((w) => w.includes('Section 80GG')));
   });
+
+  test('Scenario 11: Expanded Metro Classification for FY 2026-27 (Bengaluru/Hyderabad/Pune/Ahmedabad)', () => {
+    // FY 2025-26: Bangalore is non-metro (40%)
+    assert.equal(isMetroCity('Bangalore', '2025-26'), false);
+    assert.equal(isMetroCity('Bengaluru', '2025-26'), false);
+    assert.equal(isMetroCity('Hyderabad', '2025-26'), false);
+    assert.equal(isMetroCity('Delhi', '2025-26'), true);
+
+    // FY 2026-27 onwards: Bangalore, Hyderabad, Pune, Ahmedabad are metro (50%)
+    assert.equal(isMetroCity('Bangalore', '2026-27'), true);
+    assert.equal(isMetroCity('Bengaluru', '2026-27'), true);
+    assert.equal(isMetroCity('Hyderabad', '2026-27'), true);
+    assert.equal(isMetroCity('Pune', '2026-27'), true);
+    assert.equal(isMetroCity('Ahmedabad', '2026-27'), true);
+  });
+
+  test('Scenario 12: Exact Verification of User Uploaded Dataset (ClearTax Reference)', () => {
+    // Input: Basic ₹6,00,000, DA ₹20,000, HRA ₹2,40,000, Rent ₹1,80,000, Metro (50%)
+    const res = computeHraExemption({
+      financialYear: '2026-27',
+      taxRegime: 'old',
+      calculationMode: 'simple',
+      simpleInput: {
+        frequency: 'annual',
+        basicSalary: '600000',
+        da: '20000',
+        daFormsRetirement: true,
+        hraReceived: '240000',
+        rentPaid: '180000',
+        isMetro: true,
+      },
+    });
+
+    assert.equal(res.summary.totalEligibleSalary, 620000);
+    assert.equal(res.summary.totalHraReceived, 240000);
+    assert.equal(res.summary.totalRentPaid, 180000);
+    assert.equal(res.summary.totalLimitA, 240000);
+    assert.equal(res.summary.totalLimitB, 118000); // 1,80,000 - 62,000
+    assert.equal(res.summary.totalLimitC, 310000); // 50% of 6,20,000
+    assert.equal(res.summary.totalExemptHra, 118000);
+    assert.equal(res.summary.totalTaxableHra, 122000);
+  });
 });

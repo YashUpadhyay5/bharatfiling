@@ -33,6 +33,8 @@ export default function HRASimpleCalculatorCard({
   const [copiedEmbed, setCopiedEmbed] = useState(false);
 
   const isMonthly = (simpleInput.frequency || 'monthly') === 'monthly';
+  const startYear = parseInt(String(financialYear).split('-')[0], 10) || 2026;
+  const isFY26OrLater = startYear >= 2026;
 
   // Toggle Monthly vs Annually with automatic scale adjustment
   const handleFrequencyToggle = (newFreq) => {
@@ -121,8 +123,20 @@ export default function HRASimpleCalculatorCard({
         : `Total Rent Paid (${isMonthly ? 'Monthly' : 'Annually'})`,
     metroQuestion:
       lang === 'hi'
-        ? 'क्या आप दिल्ली, मुंबई, कोलकाता या चेन्नई में रहते हैं?'
-        : 'Do You Live In Delhi, Mumbai, Kolkata or Chennai?',
+        ? (isFY26OrLater
+            ? 'क्या आप पात्र मेट्रो शहर में रहते हैं? (दिल्ली, मुंबई, कोलकाता, चेन्नई, बेंगलुरु, हैदराबाद, पुणे, अहमदाबाद)'
+            : 'क्या आप दिल्ली, मुंबई, कोलकाता या चेन्नई में रहते हैं?')
+        : (isFY26OrLater
+            ? 'Do you live in an eligible Metro City? (Delhi, Mumbai, Kolkata, Chennai, Bengaluru, Hyderabad, Pune, Ahmedabad)'
+            : 'Do You Live In Delhi, Mumbai, Kolkata or Chennai?'),
+    metroNote:
+      lang === 'hi'
+        ? (isFY26OrLater
+            ? '*वित्तीय वर्ष 2026-27 से: दिल्ली, मुंबई, कोलकाता और चेन्नई के साथ बेंगलुरु, हैदराबाद, पुणे और अहमदाबाद भी 50% वेतन सीमा के पात्र हैं (अन्य सभी शहरों के लिए 40% लागू होता है)।'
+            : '*वित्तीय वर्ष 2025-26 तक: नियम 2A के तहत केवल दिल्ली, मुंबई, कोलकाता और चेन्नई 50% वेतन सीमा के पात्र हैं। अन्य सभी शहरों के लिए 40% लागू होता है।')
+        : (isFY26OrLater
+            ? '*FY 2026–27 onwards: Bengaluru, Hyderabad, Pune, and Ahmedabad qualify for the 50% salary ceiling under expanded metro provisions alongside Delhi, Mumbai, Kolkata, and Chennai. (40% applies for all other locations).'
+            : '*Till FY 2025–26: Under Rule 2A, only Delhi, Mumbai, Kolkata, and Chennai qualify for the 50% salary ceiling. Non-metro cities qualify for 40%.'),
     metroYes: lang === 'hi' ? 'हाँ (मेट्रो - 50%)' : 'Yes (Metro - 50%)',
     metroNo: lang === 'hi' ? 'नहीं (अन्य शहर - 40%)' : 'No (Non-Metro - 40%)',
     taxableHra: lang === 'hi' ? 'कर योग्य एचआरए' : 'Taxable HRA',
@@ -300,6 +314,21 @@ export default function HRASimpleCalculatorCard({
                 className="w-full h-11 pl-9 pr-3 text-sm font-semibold text-slate-900 bg-slate-50/50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
               />
             </div>
+            {isMonthly && Number(simpleInput.basicSalary) >= 200000 && (
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50/90 border border-blue-200 text-xs text-blue-950 mt-1.5 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  {lang === 'hi' ? 'क्या आपने वार्षिक वेतन दर्ज किया है?' : 'Entering annual basic salary?'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleSimpleChange('frequency', 'annual')}
+                  className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] transition cursor-pointer shadow-2xs"
+                >
+                  {lang === 'hi' ? 'वार्षिक पर स्विच करें' : 'Switch to Annually'}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* 2. Dearness Allowance (DA) Received */}
@@ -470,8 +499,8 @@ export default function HRASimpleCalculatorCard({
                 {simpleInput.isMetro === false && <Check className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-[10px] text-slate-500 mt-2">
-              Note: Under Indian Tax Law, only Delhi, Mumbai, Kolkata, and Chennai qualify for the 50% salary ceiling. Bengaluru, Hyderabad, Pune, and Gurugram qualify for 40%.
+            <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
+              {t.metroNote}
             </p>
           </div>
 

@@ -3,12 +3,26 @@
  * Instant reactive calculation with Rule 2A and Section 10(13A) compliance.
  */
 
-export const METRO_CITIES = ['delhi', 'mumbai', 'kolkata', 'chennai'];
+export const TRADITIONAL_METRO_CITIES = ['delhi', 'mumbai', 'kolkata', 'chennai'];
+export const EXPANDED_METRO_CITIES = [
+  'delhi',
+  'mumbai',
+  'kolkata',
+  'chennai',
+  'bangalore',
+  'bengaluru',
+  'hyderabad',
+  'pune',
+  'ahmedabad',
+];
+export const METRO_CITIES = TRADITIONAL_METRO_CITIES;
 
-export function isMetroCity(cityName) {
+export function isMetroCity(cityName, financialYear = '2025-26') {
   if (!cityName || typeof cityName !== 'string') return false;
   const normalized = cityName.trim().toLowerCase();
-  return METRO_CITIES.some((metro) => normalized.includes(metro));
+  const startYear = parseInt(String(financialYear).split('-')[0], 10) || 2026;
+  const metroList = startYear >= 2026 ? EXPANDED_METRO_CITIES : TRADITIONAL_METRO_CITIES;
+  return metroList.some((metro) => normalized.includes(metro));
 }
 
 export function formatIndianCurrency(amount) {
@@ -166,7 +180,7 @@ export function computeClientHraExemption({
 
   if (calculationMode === 'advanced' && Array.isArray(periods) && periods.length > 0) {
     processedPeriods = periods.map((period, idx) => {
-      const isMetro = Boolean(period.isMetro || isMetroCity(period.city));
+      const isMetro = Boolean(period.isMetro || isMetroCity(period.city, financialYear));
       const res = calculateHraForPeriod({
         months: Number(period.months) || 1,
         basicSalary: Number(period.basicSalary) || 0,
@@ -188,7 +202,7 @@ export function computeClientHraExemption({
       };
     });
   } else {
-    const isMetro = Boolean(simpleInput.isMetro || isMetroCity(simpleInput.city));
+    const isMetro = Boolean(simpleInput.isMetro || isMetroCity(simpleInput.city, financialYear));
     const res = calculateHraForPeriod({
       months: Number(simpleInput.tenureMonths) || 12,
       basicSalary: Number(simpleInput.basicSalary) || 0,
