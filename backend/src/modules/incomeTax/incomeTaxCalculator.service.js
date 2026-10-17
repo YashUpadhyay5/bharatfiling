@@ -368,8 +368,8 @@ export function computeRegimeTax({
   let totalTaxableIncome = 0;
 
   if (isDirectTaxable) {
-    allowableDeductions = 0;
-    netOrdinaryTaxable = roundSection288A(directTaxableAmount);
+    allowableDeductions = Math.min(directTaxableAmount, totalDeductions);
+    netOrdinaryTaxable = roundSection288A(Math.max(0, directTaxableAmount - allowableDeductions));
     totalTaxableIncome = roundSection288A(netOrdinaryTaxable + specialRateTotal);
   } else {
     allowableDeductions = Math.min(ordinaryIncome, totalDeductions);

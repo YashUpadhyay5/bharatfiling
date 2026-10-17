@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   Info,
   ChevronDown,
+  ChevronUp,
   TrendingDown,
   Sparkles,
   BarChart3,
@@ -32,8 +33,9 @@ export default function ITRSimpleCalculatorCard({
   setIncomeMode,
   onReset,
 }) {
-  // Opting out of Section 115BAC (1A): 'no' = New Regime, 'yes' = Old Regime
-  const [optOut115BAC, setOptOut115BAC] = useState('yes'); // Default 'yes' aligns with ITD portal screenshot
+  // Opting out of Section 115BAC (1A): 'yes' = Old Regime, 'no' = New Regime
+  const [optOut115BAC, setOptOut115BAC] = useState('yes');
+  const [showOldDeductions, setShowOldDeductions] = useState(false);
   const [calculatedPulse, setCalculatedPulse] = useState(false);
 
   const isOldRegime = optOut115BAC === 'yes';
@@ -58,6 +60,10 @@ export default function ITRSimpleCalculatorCard({
     setSalary((prev) => ({ ...prev, grossSalary: val === '' ? '' : Math.max(0, Number(val)) }));
   };
 
+  const handleDedChange = (field, val) => {
+    setDeductions((prev) => ({ ...prev, [field]: val === '' ? '' : Math.max(0, Number(val)) }));
+  };
+
   const handleCalculateClick = () => {
     setCalculatedPulse(true);
     setTimeout(() => setCalculatedPulse(false), 600);
@@ -65,6 +71,7 @@ export default function ITRSimpleCalculatorCard({
 
   const handleLocalReset = () => {
     setOptOut115BAC('yes');
+    setShowOldDeductions(false);
     if (setFinancialYear) setFinancialYear('2025-26');
     if (setAgeCategory) setAgeCategory('individual');
     if (setResidentialStatus) setResidentialStatus('resident');
@@ -112,6 +119,35 @@ export default function ITRSimpleCalculatorCard({
           {/* LEFT COLUMN: FORM INPUTS (7 COLS) */}
           <div className="lg:col-span-7 space-y-4">
             
+            {/* Quick 1-Click Regime Selection Pills */}
+            <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+              <span className="text-xs font-bold text-slate-700">Choose Tax Regime:</span>
+              <div className="inline-flex p-0.5 bg-white border border-slate-200 rounded-lg shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setOptOut115BAC('yes')}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                    isOldRegime
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>🏛️ Old Tax Regime</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOptOut115BAC('no')}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                    !isOldRegime
+                      ? 'bg-orange-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>⚡ New Tax Regime (115BAC)</span>
+                </button>
+              </div>
+            </div>
+
             {/* Field 1: Assessment Year */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 sm:items-center">
               <label className="sm:col-span-6 text-xs font-semibold text-slate-800">
@@ -210,7 +246,7 @@ export default function ITRSimpleCalculatorCard({
                   <span>Net taxable income</span>
                   <span className="text-rose-500">*</span>
                   <span
-                    title="Enter your taxable income after all deductions. The calculator directly applies progressive tax slabs."
+                    title="Enter your taxable income. The calculator applies statutory progressive tax slabs."
                     className="text-slate-400 hover:text-slate-600 cursor-help"
                   >
                     <Info className="w-3.5 h-3.5" />
@@ -252,6 +288,75 @@ export default function ITRSimpleCalculatorCard({
                 </button>
               ))}
             </div>
+
+            {/* FUNCTION: DEDICATED OLD REGIME DEDUCTIONS (OPTIONAL CLAIM FOR ANY TAXPAYER) */}
+            {isOldRegime && (
+              <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl space-y-3 transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    <div>
+                      <span className="text-xs font-bold text-blue-950 block">
+                        Old Regime Deductions (Chapter VI-A)
+                      </span>
+                      <span className="text-[10px] text-blue-700">
+                        Claim 80C & 80D deductions to lower Old Regime tax
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowOldDeductions(!showOldDeductions)}
+                    className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>{showOldDeductions ? 'Hide' : '+ Claim Deductions'}</span>
+                    {showOldDeductions ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+
+                {showOldDeductions && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-blue-200/60 text-xs animate-in fade-in duration-200">
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">
+                        80C Deductions (Max ₹1.5 Lakhs)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="150000"
+                          value={deductions.sec80C || ''}
+                          onChange={(e) => handleDedChange('sec80C', e.target.value)}
+                          placeholder="150000"
+                          className="w-full h-8 pl-6 pr-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500">PPF, ELSS, EPF, Life Insurance</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">
+                        80D Health Insurance (Max ₹25K - ₹50K)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100000"
+                          value={deductions.sec80D || ''}
+                          onChange={(e) => handleDedChange('sec80D', e.target.value)}
+                          placeholder="25000"
+                          className="w-full h-8 pl-6 pr-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500">Mediclaim premiums</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Action Buttons: Calculate & Reset (Matching ITD Portal) */}
             <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
@@ -405,7 +510,7 @@ export default function ITRSimpleCalculatorCard({
                 <span className="font-semibold text-blue-900">Net Taxable Income</span>
               </div>
               <span className="font-mono font-bold text-blue-700">
-                {formatIndianCurrency(enteredIncome)}
+                {formatIndianCurrency(activeRegime.netTaxableIncome ?? enteredIncome)}
               </span>
             </div>
           </div>
@@ -536,7 +641,7 @@ export default function ITRSimpleCalculatorCard({
               Tax Slab Calculation Breakdown ({isOldRegime ? 'Old Regime' : 'New Regime - Section 115BAC'})
             </h3>
             <p className="text-[11px] text-slate-500">
-              Itemized bracket breakdown on Net Taxable Income of ₹{enteredIncome.toLocaleString('en-IN')}
+              Itemized bracket breakdown on Net Taxable Income of ₹{(activeRegime.netTaxableIncome ?? enteredIncome).toLocaleString('en-IN')}
             </p>
           </div>
           <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 self-start sm:self-auto">
