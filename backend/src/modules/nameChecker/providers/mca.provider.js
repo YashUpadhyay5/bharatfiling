@@ -10,8 +10,10 @@ import {
   getCompanyByExactName,
   autocompleteCompanyMaster,
   searchCompaniesForCollision,
+  appendNewCompanyRecord,
 } from '../repositories/companyMasterCsv.repository.js';
 import { lookupCompanyWithGemini } from '../services/geminiNameChecker.service.js';
+import { queryLiveMcaCorporateGateway } from './mcaGateway.provider.js';
 
 // Comprehensive benchmark registry of verified Indian Companies & LLPs
 export const BENCHMARK_COMPANY_REGISTRY = [
@@ -1013,6 +1015,18 @@ export async function searchMcaRegistry(proposedName = '') {
         matchType: 'EXACT',
         reason: record.reason || 'Existing registered company with identical name found in live MCA records.',
       });
+
+      // Automatically auto-cache newly discovered live MCA record to local CSV & memory index in the background
+      appendNewCompanyRecord({
+        cin: record.identifier || record.cin,
+        name: formattedName,
+        roc: record.roc,
+        state: record.state,
+        status: record.status || 'Active',
+        classType: record.classType || 'Private Limited',
+        entityType: record.entityType || 'Company',
+        incYear: record.incYear,
+      }).catch(() => {});
     } else if (record.similarityScore >= 55) {
       similarMatches.push({
         name: record.name,
@@ -1095,7 +1109,39 @@ export async function searchMcaRegistry(proposedName = '') {
     }
   }
 
-  // 4. Statutory Fallback to Gemini if no exact registered match found in CSV or live MCA
+  // 4. Live Gateway Query across 2.6M companies (Sandbox API or live open gateway)
+  if (exactMatches.length === 0) {
+    try {
+      const gwResult = await queryLiveMcaCorporateGateway(cleanInput);
+      if (gwResult && gwResult.cin) {
+        const gwCin = gwResult.cin.toUpperCase();
+        if (!seenCins.has(gwCin)) {
+          seenCins.add(gwCin);
+          exactMatches.push({
+            name: gwResult.companyName,
+            identifier: gwResult.cin,
+            roc: formatRocName(gwResult.roc),
+            state: gwResult.state,
+            status: gwResult.status || 'Active',
+            entityType: gwResult.entityType || 'Company',
+            classType: gwResult.classType || 'Private Limited',
+            incYear: gwResult.incorporationYear,
+            authorizedCapital: gwResult.authorizedCapital || '₹1,00,000',
+            paidUpCapital: gwResult.paidUpCapital || '₹1,00,000',
+            registeredAddress: gwResult.registeredAddress || 'Registered Office on Official MCA Record',
+            similarityScore: 100,
+            matchType: 'EXACT',
+            source: gwResult.source || 'LIVE_MCA_GATEWAY',
+            reason: 'Existing registered company verified via Live MCA Corporate Registry Gateway.',
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[McaProvider] Live MCA gateway query fallback:', err.message);
+    }
+  }
+
+  // 5. Statutory Fallback to Gemini if no exact registered match found in CSV, live MCA, or gateway
   let isOnlineVerified = true;
   if (exactMatches.length === 0) {
     try {
@@ -1126,6 +1172,21 @@ export async function searchMcaRegistry(proposedName = '') {
             source: 'GEMINI_MCA_FALLBACK',
             reason: geminiLookup.summary || 'Existing registered company verified via statutory registry fallback.',
           });
+
+          // Auto-cache discovered entity to local dataset in background
+          appendNewCompanyRecord({
+            cin: geminiCin,
+            name: geminiLookup.companyName || cleanInput,
+            roc: geminiLookup.roc || 'Central ROC',
+            state: geminiLookup.state || 'India',
+            status: geminiLookup.status || 'Active',
+            classType: geminiLookup.classType || 'Private Limited',
+            entityType: geminiLookup.entityType || 'Company',
+            incYear: geminiLookup.incorporationYear || '',
+            authCap: geminiLookup.authorizedCapital || '100000',
+            paidCap: geminiLookup.paidUpCapital || '100000',
+            address: geminiLookup.registeredAddress || '',
+          }).catch(() => {});
         }
       } else if (!geminiLookup) {
         isOnlineVerified = false;
