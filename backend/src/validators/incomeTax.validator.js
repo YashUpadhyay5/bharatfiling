@@ -10,12 +10,18 @@ export function validateIncomeTaxPayload(body) {
     return { isValid: false, errors: ['Request body must be a valid JSON object.'] };
   }
 
-  const { financialYear, ageCategory, residentialStatus } = body;
+  const { financialYear, taxPayer, ageCategory, residentialStatus } = body;
 
   // Validate FY
-  const validFYs = ['2024-25', '2025-26', '2026-27'];
+  const validFYs = ['2023-24', '2024-25', '2025-26', '2026-27'];
   if (financialYear && !validFYs.includes(financialYear.trim())) {
     errors.push(`Invalid financial year: ${financialYear}. Supported years: ${validFYs.join(', ')}.`);
+  }
+
+  // Validate Tax Payer
+  const validTaxPayers = ['individual', 'huf', 'firm_llp', 'domestic_company', 'foreign_company'];
+  if (taxPayer && !validTaxPayers.includes(taxPayer.trim())) {
+    errors.push(`Invalid tax payer: ${taxPayer}. Supported types: ${validTaxPayers.join(', ')}.`);
   }
 
   // Validate Age Category

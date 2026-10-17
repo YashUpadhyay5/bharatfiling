@@ -18,7 +18,6 @@ import {
   CheckCircle2,
   Info,
 } from 'lucide-react';
-import Breadcrumbs from '../../components/common/Breadcrumbs.jsx';
 import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 import HRAPrintReport from '../../components/hra/HRAPrintReport.jsx';
 import HRASimpleCalculatorCard from '../../components/hra/HRASimpleCalculatorCard.jsx';
@@ -157,13 +156,6 @@ export default function HRACalculatorPage() {
 
         {/* Main Content Container */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-8 space-y-6">
-          {/* Breadcrumbs */}
-          <Breadcrumbs
-            items={[
-              { label: 'Financial Tools', path: '/services' },
-              { label: 'HRA Tax Exemption Calculator' },
-            ]}
-          />
 
           {/* Page Title & Subtitle */}
           <div className="space-y-2">

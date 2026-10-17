@@ -4,7 +4,6 @@ import {
   Printer,
   ShieldCheck,
 } from 'lucide-react';
-import Breadcrumbs from '../../components/common/Breadcrumbs.jsx';
 import ITRSimpleCalculatorCard from '../../components/incomeTax/ITRSimpleCalculatorCard.jsx';
 import IncomeTaxPrintReport from '../../components/incomeTax/IncomeTaxPrintReport.jsx';
 import IncomeTaxFAQ from '../../components/incomeTax/IncomeTaxFAQ.jsx';
@@ -13,6 +12,7 @@ import { calculateIncomeTaxComparison } from '../../utils/incomeTaxEngine.js';
 export default function IncomeTaxCalculatorPage() {
   // Assessment Profile State
   const [financialYear, setFinancialYear] = useState('2025-26');
+  const [taxPayer, setTaxPayer] = useState('individual');
   const [ageCategory, setAgeCategory] = useState('individual');
   const [residentialStatus, setResidentialStatus] = useState('resident');
   // Income Mode: 'taxable' (Direct Net Taxable Income matching ITD portal)
@@ -87,6 +87,7 @@ export default function IncomeTaxCalculatorPage() {
   const comparison = useMemo(() => {
     return calculateIncomeTaxComparison({
       financialYear,
+      taxPayer,
       ageCategory,
       residentialStatus,
       incomeMode,
@@ -100,6 +101,7 @@ export default function IncomeTaxCalculatorPage() {
     });
   }, [
     financialYear,
+    taxPayer,
     ageCategory,
     residentialStatus,
     incomeMode,
@@ -120,6 +122,7 @@ export default function IncomeTaxCalculatorPage() {
     try {
       sessionStorage.removeItem('bf_itr_taxable_income');
     } catch {}
+    setTaxPayer('individual');
     setSalary({
       grossSalary: '',
       hraExemption: '',
@@ -198,13 +201,6 @@ export default function IncomeTaxCalculatorPage() {
           </div>
         </div>
 
-        {/* 2. BREADCRUMBS */}
-        <Breadcrumbs
-          items={[
-            { label: 'Financial Tools', path: '/services' },
-            { label: 'Income Tax & ITR Slab Checker' },
-          ]}
-        />
 
         {/* 3. MAIN PAGE CONTAINER */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-8 space-y-6">
@@ -253,6 +249,8 @@ export default function IncomeTaxCalculatorPage() {
             comparison={comparison}
             financialYear={financialYear}
             setFinancialYear={setFinancialYear}
+            taxPayer={taxPayer}
+            setTaxPayer={setTaxPayer}
             ageCategory={ageCategory}
             setAgeCategory={setAgeCategory}
             residentialStatus={residentialStatus}

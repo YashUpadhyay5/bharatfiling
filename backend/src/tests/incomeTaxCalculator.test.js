@@ -229,4 +229,86 @@ describe('Income Tax Calculator Engine Tests', () => {
     assert.equal(res.slabs.length, res.slabBreakdown.length);
     assert.ok(res.slabs[0].slab); // Has readable slab label
   });
+
+  test('Scenario 11: Partnership Firm / LLP taxed at flat 30% + 4% cess', () => {
+    const res = computeRegimeTax({
+      isNewRegime: false,
+      financialYear: '2025-26',
+      taxPayer: 'firm_llp',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 1000000 },
+    });
+
+    // 10,00,000 @ 30% = 3,00,000 + 4% cess = 3,12,000
+    assert.equal(res.normalSlabTax, 300000);
+    assert.equal(res.cess, 12000);
+    assert.equal(res.totalTaxLiability, 312000);
+    assert.equal(res.rebate87A, 0);
+  });
+
+  test('Scenario 12: Domestic Company taxed at flat 22% + 10% surcharge + 4% cess', () => {
+    const res = computeRegimeTax({
+      isNewRegime: false,
+      financialYear: '2025-26',
+      taxPayer: 'domestic_company',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 1000000 },
+    });
+
+    // 10,00,000 @ 22% = 2,20,000
+    // Surcharge 10% = 22,000 -> 2,42,000
+    // Cess 4% = 9,680 -> Total = 2,51,680
+    assert.equal(res.normalSlabTax, 220000);
+    assert.equal(res.netSurcharge, 22000);
+    assert.equal(res.cess, 9680);
+    assert.equal(res.totalTaxLiability, 251680);
+    assert.equal(res.rebate87A, 0);
+  });
+
+  test('Scenario 13: HUF with ₹7,00,000 taxable income in New Regime pays ₹26,000 (no 87A rebate)', () => {
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2025-26',
+      taxPayer: 'huf',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 700000 },
+    });
+
+    // 0-3L: 0, 3-7L: 20,000 -> Slab Tax = 20,000
+    // HUF is NOT eligible for 87A rebate!
+    // Cess 4% = 800 -> Total Tax = 20,800
+    assert.equal(res.rebate87A, 0);
+    assert.equal(res.normalSlabTax, 20000);
+    assert.equal(res.totalTaxLiability, 20800);
+  });
+
+  test('Scenario 14: Non-Resident (NRI) with ₹7,00,000 in New Regime pays tax (no 87A rebate)', () => {
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2025-26',
+      residentialStatus: 'nonResident',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 700000 },
+    });
+
+    // Non-Resident is NOT eligible for 87A rebate!
+    assert.equal(res.rebate87A, 0);
+    assert.equal(res.normalSlabTax, 20000);
+    assert.equal(res.totalTaxLiability, 20800);
+  });
+
+  test('Scenario 15: AY 2024-25 (FY 2023-24) New Regime slab calculation', () => {
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2023-24',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 900000 },
+    });
+
+    // FY 2023-24 slabs: 0-3L 0%, 3-6L 5% (15k), 6-9L 10% (30k) -> 45,000
+    // Cess 4% = 1,800 -> 46,800
+    assert.equal(res.normalSlabTax, 45000);
+    assert.equal(res.cess, 1800);
+    assert.equal(res.totalTaxLiability, 46800);
+  });
 });

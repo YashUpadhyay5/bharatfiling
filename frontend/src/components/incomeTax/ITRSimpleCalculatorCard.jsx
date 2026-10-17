@@ -25,6 +25,8 @@ export default function ITRSimpleCalculatorCard({
   comparison,
   financialYear = '2025-26',
   setFinancialYear,
+  taxPayer = 'individual',
+  setTaxPayer,
   ageCategory = 'individual',
   setAgeCategory,
   residentialStatus = 'resident',
@@ -84,6 +86,7 @@ export default function ITRSimpleCalculatorCard({
     setOptOut115BAC('yes');
     setShowOldDeductions(false);
     if (setFinancialYear) setFinancialYear('2025-26');
+    if (setTaxPayer) setTaxPayer('individual');
     if (setAgeCategory) setAgeCategory('individual');
     if (setResidentialStatus) setResidentialStatus('resident');
     if (setIncomeMode) setIncomeMode('taxable');
@@ -170,9 +173,9 @@ export default function ITRSimpleCalculatorCard({
                   onChange={(e) => setFinancialYear && setFinancialYear(e.target.value)}
                   className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
                 >
-                  <option value="2025-26">2026-27</option>
+                  <option value="2025-26">2026-27 (Current)</option>
                   <option value="2024-25">2025-26</option>
-                  <option value="2026-27">2027-28</option>
+                  <option value="2023-24">2024-25</option>
                 </select>
               </div>
             </div>
@@ -184,16 +187,15 @@ export default function ITRSimpleCalculatorCard({
               </label>
               <div className="sm:col-span-6">
                 <select
-                  defaultValue="Individual"
-                  disabled
-                  className="w-full h-10 px-3 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 cursor-not-allowed"
+                  value={taxPayer}
+                  onChange={(e) => setTaxPayer && setTaxPayer(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
                 >
-                  <option value="Individual">Individual</option>
-                  <option value="HUF">HUF</option>
-                  <option value="AOPs/BOI">AOPs/BOI</option>
-                  <option value="Firms/LLP">Firms/LLP</option>
-                  <option value="Domestic Company">Domestic Company</option>
-                  <option value="Foreign Company">Foreign Company</option>
+                  <option value="individual">Individual</option>
+                  <option value="huf">HUF (Hindu Undivided Family)</option>
+                  <option value="firm_llp">Firms / LLP (Flat 30%)</option>
+                  <option value="domestic_company">Domestic Company (Flat 22%)</option>
+                  <option value="foreign_company">Foreign Company (Flat 40%)</option>
                 </select>
               </div>
             </div>
@@ -204,15 +206,26 @@ export default function ITRSimpleCalculatorCard({
                 Category (age) <span className="text-rose-500">*</span>
               </label>
               <div className="sm:col-span-6">
-                <select
-                  value={ageCategory}
-                  onChange={(e) => setAgeCategory && setAgeCategory(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
-                >
-                  <option value="individual">Less than 60 years</option>
-                  <option value="senior">Equal to 60 years or more but less than 80 years</option>
-                  <option value="superSenior">Equal to 80 years or more</option>
-                </select>
+                {taxPayer === 'individual' ? (
+                  <select
+                    value={ageCategory}
+                    onChange={(e) => setAgeCategory && setAgeCategory(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
+                  >
+                    <option value="individual">Less than 60 years</option>
+                    <option value="senior">Equal to 60 years or more but less than 80 years</option>
+                    <option value="superSenior">Equal to 80 years or more</option>
+                  </select>
+                ) : (
+                  <select
+                    disabled
+                    value="individual"
+                    className="w-full h-10 px-3 bg-slate-100 border border-slate-300 rounded-lg text-xs font-semibold text-slate-500 cursor-not-allowed"
+                    title="Age categories only apply to Individual tax payers"
+                  >
+                    <option value="individual">Not Applicable (Non-Individual)</option>
+                  </select>
+                )}
               </div>
             </div>
 
@@ -228,7 +241,7 @@ export default function ITRSimpleCalculatorCard({
                   className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
                 >
                   <option value="resident">Resident</option>
-                  <option value="nonResident">Non-Resident</option>
+                  <option value="nonResident">Non-Resident (NRI)</option>
                 </select>
               </div>
             </div>
@@ -239,14 +252,24 @@ export default function ITRSimpleCalculatorCard({
                 Whether opting out of new tax regime under section 115BAC (1A)? <span className="text-rose-500">*</span>
               </label>
               <div className="sm:col-span-6">
-                <select
-                  value={optOut115BAC}
-                  onChange={(e) => setOptOut115BAC(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
-                >
-                  <option value="yes">Yes (Old Tax Regime)</option>
-                  <option value="no">No (New Tax Regime)</option>
-                </select>
+                {taxPayer === 'firm_llp' || taxPayer === 'domestic_company' || taxPayer === 'foreign_company' ? (
+                  <select
+                    disabled
+                    value="no"
+                    className="w-full h-10 px-3 bg-slate-100 border border-slate-300 rounded-lg text-xs font-semibold text-slate-500 cursor-not-allowed"
+                  >
+                    <option value="no">Not Applicable (Entity Flat Rate Applies)</option>
+                  </select>
+                ) : (
+                  <select
+                    value={optOut115BAC}
+                    onChange={(e) => setOptOut115BAC(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
+                  >
+                    <option value="yes">Yes (Old Tax Regime)</option>
+                    <option value="no">No (New Tax Regime)</option>
+                  </select>
+                )}
               </div>
             </div>
 
@@ -649,7 +672,15 @@ export default function ITRSimpleCalculatorCard({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
           <div>
             <h3 className="text-sm font-bold text-slate-900">
-              Tax Slab Calculation Breakdown ({isOldRegime ? 'Old Regime' : 'New Regime - Section 115BAC'})
+              {taxPayer === 'firm_llp'
+                ? 'Tax Computation Breakdown (Partnership Firm / LLP)'
+                : taxPayer === 'domestic_company'
+                ? 'Tax Computation Breakdown (Domestic Company - Section 115BAA)'
+                : taxPayer === 'foreign_company'
+                ? 'Tax Computation Breakdown (Foreign Company)'
+                : taxPayer === 'huf'
+                ? `Tax Slab Calculation Breakdown (HUF - ${isOldRegime ? 'Old Regime' : 'New Regime'})`
+                : `Tax Slab Calculation Breakdown (${isOldRegime ? 'Old Regime' : 'New Regime - Section 115BAC'})`}
             </h3>
             <p className="text-[11px] text-slate-500">
               Itemized bracket breakdown on Net Taxable Income of ₹{(activeRegime.netTaxableIncome ?? enteredIncome).toLocaleString('en-IN')}

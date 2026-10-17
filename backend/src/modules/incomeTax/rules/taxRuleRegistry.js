@@ -3,6 +3,7 @@
  * Resolves tax rules based on Financial Year with safe fallback.
  */
 
+import { FY_2023_24 } from './fy2023_24.js';
 import { FY_2024_25 } from './fy2024_25.js';
 import { FY_2025_26 } from './fy2025_26.js';
 import { FY_2026_27 } from './fy2026_27.js';
@@ -11,6 +12,7 @@ export const SUPPORTED_FINANCIAL_YEARS = [
   { id: '2026-27', label: 'FY 2026-27 (AY 2027-28)', rules: FY_2026_27 },
   { id: '2025-26', label: 'FY 2025-26 (AY 2026-27)', rules: FY_2025_26 },
   { id: '2024-25', label: 'FY 2024-25 (AY 2025-26)', rules: FY_2024_25 },
+  { id: '2023-24', label: 'FY 2023-24 (AY 2024-25)', rules: FY_2023_24 },
 ];
 
 export function getTaxRulesForYear(fy) {
