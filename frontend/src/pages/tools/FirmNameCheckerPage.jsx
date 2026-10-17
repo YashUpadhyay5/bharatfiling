@@ -173,9 +173,15 @@ export default function FirmNameCheckerPage() {
     registeredAddress: similarMatch.registeredAddress
   } : null));
 
+  const exactTm = searchResult?.trademarkSearch?.exactConflicts?.[0];
+  const similarTm = searchResult?.trademarkSearch?.similarConflicts?.[0];
+
   const isRegistered = !!masterData || (searchResult?.mcaSearch?.exactMatches?.length > 0);
-  const isConflict = !isRegistered && (searchResult?.mcaSearch?.similarMatches?.length > 0) && (searchResult?.assessment?.overallRisk === 'HIGH' || searchResult?.assessment?.overallRisk === 'CRITICAL');
-  const isAvailable = !isRegistered && !isConflict && (searchResult?.assessment?.overallRisk === 'LOW' || searchResult?.assessment?.isAvailable);
+  const hasTmConflict = (searchResult?.trademarkSearch?.exactConflicts?.length > 0) || (searchResult?.trademarkSearch?.similarConflicts?.length > 0 && searchResult?.assessment?.overallRisk === 'HIGH');
+  const hasRulesViolation = searchResult?.rulesCheck?.hasCriticalWarnings || searchResult?.rulesCheck?.hasHighWarnings;
+  const isUnavailable = !isRegistered && (hasTmConflict || hasRulesViolation || searchResult?.assessment?.overallRisk === 'HIGH' || searchResult?.assessment?.overallRisk === 'CRITICAL');
+  const isPreliminary = searchResult?.assessment?.isPreliminaryClearance || searchResult?.assessment?.probabilityRating === 'PRELIMINARY_CLEARANCE';
+  const isAvailable = !isRegistered && !isUnavailable && (searchResult?.assessment?.overallRisk === 'LOW' || searchResult?.assessment?.isAvailable || isPreliminary);
   const aiCompliance = searchResult?.aiCompliance;
   const suggestionsList = searchResult?.alternativeSuggestions || [];
 
@@ -469,36 +475,113 @@ export default function FirmNameCheckerPage() {
                       </p>
                     </div>
                   </div>
+
+                  {exactTm && (
+                    <div className="mt-3 bg-red-50 border border-red-200 rounded-xl p-3.5 flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-xs font-bold text-red-900 uppercase tracking-wide">Registered Trademark Conflict</h4>
+                        <p className="text-xs text-red-800 mt-0.5 leading-relaxed">
+                          Mark &ldquo;<strong>{exactTm.mark}</strong>&rdquo; is also actively registered with IP India in Class {exactTm.classNumber} ({exactTm.goodsServices || 'Goods & Services'}). CRC officers will cite Section 11 of the Trade Marks Act 1999.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Case B: Name Available for Registration */}
-            {isAvailable && (
-              <div className="bg-white rounded-2xl border border-emerald-200 shadow-sm overflow-hidden p-6 sm:p-8">
+            {/* Case B: Name Unavailable Due to Trademark or Statutory Conflict */}
+            {isUnavailable && (
+              <div className="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center flex-shrink-0">
-                      <CheckCircle2 className="w-7 h-7" />
+                    <div className="w-12 h-12 bg-red-100 text-red-700 rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <X className="w-7 h-7" />
                     </div>
                     <div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wide">
-                        Available for Reservation
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 uppercase tracking-wide">
+                        Not Available for Reservation
                       </span>
                       <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 uppercase">
                         {searchResult.query?.proposedName}
                       </h2>
                       <p className="text-sm text-slate-600 mt-0.5">
-                        High viability screen: Zero identical corporate records or registered trademark conflicts detected.
+                        {hasTmConflict
+                          ? `Direct conflict: "${searchResult.query?.proposedName}" conflicts with registered trademark "${exactTm?.mark || similarTm?.mark}" in Class ${exactTm?.classNumber || similarTm?.classNumber || '1'}.`
+                          : searchResult?.assessment?.summaryHeadline || 'Substantial conflict detected under Companies Act Rule 8 / Emblems Act.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <a
+                    href="#ai-suggestions"
+                    className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition-all text-sm whitespace-nowrap"
+                  >
+                    <span>View Coined Alternatives</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-xs text-slate-500 font-medium">MCA Company Match</span>
+                    <span className="text-sm font-bold text-slate-700 mt-1 block">
+                      {searchResult?.mcaSearch?.similarMatches?.length > 0
+                        ? `${searchResult.mcaSearch.similarMatches.length} Similar Entities`
+                        : '0 Direct Matches'}
+                    </span>
+                  </div>
+                  <div className="p-3.5 bg-red-50 rounded-xl border border-red-200">
+                    <span className="text-xs text-red-600 font-medium">Trademark Conflict</span>
+                    <span className="text-sm font-bold text-red-700 mt-1 block flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4" /> {exactTm ? `Class ${exactTm.classNumber} (${exactTm.mark})` : 'Conflicting Mark Flagged'}
+                    </span>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-xs text-slate-500 font-medium">Approval Likelihood</span>
+                    <span className="text-sm font-bold text-red-600 mt-1 block">
+                      &lt; 10% (High Rejection Probability)
+                    </span>
+                  </div>
+                </div>
+
+                {hasTmConflict && exactTm && (
+                  <div className="mt-4 p-4 bg-red-50/70 rounded-xl border border-red-200 text-xs text-red-800 leading-relaxed">
+                    <span className="font-semibold">IP India Trademark Examiner Finding:</span> Registered under application #{exactTm.applicationNumber || 'TM-REG'} in Class {exactTm.classNumber} ({exactTm.goodsServices || 'Proprietary classification'}). Under Section 11 of Trade Marks Act 1999 and Rule 8(2)(b) of Companies Rules, Central Registration Centre (CRC) rejects names that incorporate registered proprietary trademarks without written NOC.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Case C: Name Available for Registration */}
+            {isAvailable && (
+              <div className={`bg-white rounded-2xl border ${isPreliminary ? 'border-amber-300' : 'border-emerald-200'} shadow-sm overflow-hidden p-6 sm:p-8`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-12 h-12 ${isPreliminary ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} rounded-2xl flex items-center justify-center flex-shrink-0`}>
+                      {isPreliminary ? <Info className="w-7 h-7" /> : <CheckCircle2 className="w-7 h-7" />}
+                    </div>
+                    <div>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${isPreliminary ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'} uppercase tracking-wide`}>
+                        {isPreliminary ? 'Preliminary Clearance (Offline Database Verified)' : 'Available for Reservation'}
+                      </span>
+                      <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 uppercase">
+                        {searchResult.query?.proposedName}
+                      </h2>
+                      <p className="text-sm text-slate-600 mt-0.5">
+                        {isPreliminary
+                          ? 'Zero collisions detected across 131,000+ indexed MCA companies. Live online sync was unreachable; final verification via MCA RUN recommended.'
+                          : 'High viability screen: Zero identical corporate records or registered trademark conflicts detected.'}
                       </p>
                     </div>
                   </div>
 
                   <Link
                     to="/services/pvt-ltd-company-registration"
-                    className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md shadow-emerald-700/10 transition-all text-sm whitespace-nowrap"
+                    className={`inline-flex items-center justify-center gap-2 ${isPreliminary ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white font-semibold px-6 py-3 rounded-xl shadow-md transition-all text-sm whitespace-nowrap`}
                   >
-                    <span>Reserve & Incorporate Now</span>
+                    <span>{isPreliminary ? 'Proceed with RUN Reservation' : 'Reserve & Incorporate Now'}</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
@@ -506,20 +589,20 @@ export default function FirmNameCheckerPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
                   <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                     <span className="text-xs text-slate-500 font-medium">MCA Collision Check</span>
-                    <span className="text-sm font-bold text-emerald-700 mt-1 block flex items-center gap-1.5">
+                    <span className={`text-sm font-bold ${isPreliminary ? 'text-amber-700' : 'text-emerald-700'} mt-1 block flex items-center gap-1.5`}>
                       <Check className="w-4 h-4" /> 0 Identical Records
                     </span>
                   </div>
                   <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                     <span className="text-xs text-slate-500 font-medium">Trademark Conflict</span>
-                    <span className="text-sm font-bold text-emerald-700 mt-1 block flex items-center gap-1.5">
+                    <span className={`text-sm font-bold ${isPreliminary ? 'text-amber-700' : 'text-emerald-700'} mt-1 block flex items-center gap-1.5`}>
                       <Check className="w-4 h-4" /> Clear in Nice Classes
                     </span>
                   </div>
                   <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                     <span className="text-xs text-slate-500 font-medium">Approval Likelihood</span>
-                    <span className="text-sm font-bold text-emerald-700 mt-1 block">
-                      95%+ (High Rule 8 Viability)
+                    <span className={`text-sm font-bold ${isPreliminary ? 'text-amber-700' : 'text-emerald-700'} mt-1 block`}>
+                      {isPreliminary ? '80%+ (Preliminary Database Clearance)' : '95%+ (High Rule 8 Viability)'}
                     </span>
                   </div>
                 </div>
@@ -527,7 +610,7 @@ export default function FirmNameCheckerPage() {
             )}
 
             {/* AI Rule 8 Statutory Scrutiny & Brand Alternatives */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-7">
+            <div id="ai-suggestions" className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-7">
               <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">

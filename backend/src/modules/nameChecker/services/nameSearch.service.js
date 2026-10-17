@@ -87,12 +87,22 @@ export async function runComprehensiveNameCheck({
       ? 'The name appears descriptive or generic. Adding a coined prefix or distinctive trademark word improves approval probability.'
       : 'Moderate phonetic overlap detected with existing records. Review similar marks before submitting RUN / SPICe+ Part A.';
   } else {
-    overallRisk = 'LOW';
-    riskScore = 15;
-    probabilityRating = 'HIGH_VIABILITY';
-    summaryHeadline = 'Favorable Preliminary Availability Screen';
-    summaryDescription =
-      'No identical matches or high-risk similarities were detected against the corporate registry and trademark benchmarks. Proceed with official MCA RUN / SPICe+ Part A reservation.';
+    const isOnlineVerified = mcaResult.isOnlineVerified !== false && tmResult.isOnlineVerified !== false;
+    if (!isOnlineVerified) {
+      overallRisk = 'MEDIUM';
+      riskScore = 40;
+      probabilityRating = 'PRELIMINARY_CLEARANCE';
+      summaryHeadline = 'Preliminary Clearance (Offline Database Verified)';
+      summaryDescription =
+        'Name is clear in indexed corporate database (130,000+ records), but real-time online MCA CRC & IP India verification was unavailable. Final verification via MCA RUN / SPICe+ Part A recommended.';
+    } else {
+      overallRisk = 'LOW';
+      riskScore = 15;
+      probabilityRating = 'HIGH_VIABILITY';
+      summaryHeadline = 'Favorable Preliminary Availability Screen';
+      summaryDescription =
+        'No identical matches or high-risk similarities were detected against the corporate registry and trademark benchmarks. Proceed with official MCA RUN / SPICe+ Part A reservation.';
+    }
   }
 
   // 5. Master Company Data extraction if exact company matched
@@ -160,6 +170,8 @@ export async function runComprehensiveNameCheck({
       distinctiveWordIdentified: distinctiveWord,
       isRegisteredCompany: !!masterCompanyData,
       isAvailable: overallRisk === 'LOW',
+      isPreliminaryClearance: probabilityRating === 'PRELIMINARY_CLEARANCE',
+      isOnlineVerified: mcaResult.isOnlineVerified !== false && tmResult.isOnlineVerified !== false,
     },
     masterCompanyData,
     aiCompliance: geminiAnalysis

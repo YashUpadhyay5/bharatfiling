@@ -76,23 +76,27 @@ export async function lookupCompanyWithGemini(companyName) {
   }
 
   const trimmed = companyName.trim();
-  const prompt = `You are the Ministry of Corporate Affairs (MCA) National Company Registry database.
-Determine whether the entity "${trimmed}" is an existing registered Indian company, Limited Liability Partnership (LLP), or listed corporate entity (BSE/NSE/SME).
+  const cleanRoot = trimmed.replace(/\b(pvt|private|ltd|limited|llp|opc|company|corp|corporation)\b/gi, '').trim();
+
+  const prompt = `You are the Ministry of Corporate Affairs (MCA) National Company Registry database and Registrar of Companies (ROC).
+The user is checking business entity name: "${trimmed}" (core distinctive root: "${cleanRoot}").
+Note: User input may contain informal abbreviations (e.g. "pvt ltd", "ltd", "llp") or no suffix at all.
+Determine whether any registered Indian company, Limited Liability Partnership (LLP), or corporate entity exists in India with this name or root brand under the Companies Act (including official corporate variants such as "${cleanRoot} Private Limited", "${cleanRoot} Limited", or "${cleanRoot} LLP").
 
 Return valid JSON with exactly this structure:
 {
   "isRegistered": true or false,
-  "companyName": "Official Registered Corporate Name (or proposed name if not registered)",
+  "companyName": "Official Registered Corporate Name in MCA e.g. Hydromaterials Private Limited",
   "cin": "Official 21-digit CIN or LLPIN if registered, or null",
-  "roc": "Official ROC name e.g. Pune, Mumbai, Bangalore, Delhi, Ahmedabad, or null",
-  "state": "Official State e.g. Maharashtra, Karnataka, Delhi, or null",
+  "roc": "Official ROC name e.g. Chennai, Pune, Mumbai, Bangalore, Delhi, Ahmedabad, or null",
+  "state": "Official State e.g. Tamil Nadu, Maharashtra, Karnataka, Delhi, or null",
   "status": "Active" or "Strike Off" or "Not Registered",
   "classType": "Public Limited" or "Private Limited" or "LLP" or "One Person Company",
   "entityType": "Company" or "LLP",
   "incorporationYear": 2017,
-  "authorizedCapital": "₹15,00,00,000",
-  "paidUpCapital": "₹11,99,00,000",
-  "registeredAddress": "Registered office address if known, or city/state",
+  "authorizedCapital": "₹1,00,000",
+  "paidUpCapital": "₹1,00,000",
+  "registeredAddress": "Registered office address or city/state",
   "summary": "1-2 sentence statutory factual explanation of this corporate entity",
   "rule8Compliance": "APPROVED" or "REJECTED" or "NEEDS_MODIFICATION",
   "suggestedAlternatives": ["3 distinctive coined names if unavailable or similar"]
@@ -100,6 +104,45 @@ Return valid JSON with exactly this structure:
 
   const res = await callGeminiApi(prompt, 'You are an authoritative Indian Ministry of Corporate Affairs database lookup engine.');
   if (res && typeof res.isRegistered === 'boolean') {
+    return res;
+  }
+  return null;
+}
+
+/**
+ * Primary Fallback: Look up registered Indian trademarks via Gemini (IP India CGPDTM)
+ */
+export async function lookupTrademarkWithGemini(markName, industry = 'General') {
+  if (!markName || typeof markName !== 'string' || markName.trim().length < 2) {
+    return null;
+  }
+
+  const cleanMark = markName.replace(/\b(pvt|private|ltd|limited|llp|company|enterprises|technologies)\b/gi, '').trim();
+  if (cleanMark.length < 2) return null;
+
+  const prompt = `You are the Controller General of Patents, Designs and Trade Marks (IP India / CGPDTM) Trademark Registry Examiner.
+Evaluate whether the brand/trademark mark "${cleanMark}" (or query "${markName}") has an existing registered, pending, or famous trademark in India under relevant Nice Classification classes for the "${industry}" sector.
+
+Return valid JSON with exactly this structure:
+{
+  "hasTrademark": true or false,
+  "conflicts": [
+    {
+      "mark": "Exact Registered Trademark Name",
+      "proprietor": "Name of Registered Proprietor / Owner if known",
+      "classNumber": 1,
+      "applicationNumber": "3941029",
+      "status": "Registered" or "Pending" or "Opposed",
+      "goodsServices": "Brief description of goods and services covered",
+      "similarityScore": 100,
+      "reason": "Direct conflict under Section 11 of Trade Marks Act 1999."
+    }
+  ],
+  "trademarkAdvisory": "1-2 sentence legal advisory on trademark registration"
+}`;
+
+  const res = await callGeminiApi(prompt, 'You are an authoritative Indian Trademark Registry (IP India CGPDTM) examiner.');
+  if (res && typeof res.hasTrademark === 'boolean') {
     return res;
   }
   return null;

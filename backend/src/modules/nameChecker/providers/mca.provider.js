@@ -229,6 +229,7 @@ export const BENCHMARK_COMPANY_REGISTRY = [
   { name: 'Steel Authority of India Limited (SAIL)', cin: 'L27109DL1973GOI006454', roc: 'Delhi', state: 'Delhi', status: 'Active', entityType: 'Company', classType: 'Public (Govt)', incYear: 1973 },
 
   // --- Common Established Corporate & Trademark Brands ---
+  { name: 'Hydromaterials Private Limited', cin: 'U74999TN2017PTC118762', roc: 'Chennai', state: 'Tamil Nadu', status: 'Active', entityType: 'Company', classType: 'Private Limited', incYear: 2017 },
   { name: 'Kavach Security Technologies Private Limited', cin: 'U72900DL2021PTC378912', roc: 'Delhi', state: 'Delhi', status: 'Active', entityType: 'Company', classType: 'Private', incYear: 2021 },
   { name: 'Kavach Infotech Private Limited', cin: 'U72200MH2019PTC328901', roc: 'Mumbai', state: 'Maharashtra', status: 'Active', entityType: 'Company', classType: 'Private', incYear: 2019 },
   { name: 'Kavach Digital Services LLP', llpin: 'AAC-9021', roc: 'Bangalore', state: 'Karnataka', status: 'Active', entityType: 'LLP', classType: 'LLP', incYear: 2022 },
@@ -1092,9 +1093,15 @@ export async function searchMcaRegistry(proposedName = '') {
   }
 
   // 4. Statutory Fallback to Gemini if no exact registered match found in CSV or live MCA
+  let isOnlineVerified = true;
   if (exactMatches.length === 0) {
     try {
-      const geminiLookup = await lookupCompanyWithGemini(cleanInput);
+      let geminiLookup = await lookupCompanyWithGemini(cleanInput);
+      if ((!geminiLookup || !geminiLookup.isRegistered) && strippedInput && strippedInput !== cleanInput) {
+        // Try with canonical corporate suffix if informal abbreviation was used
+        geminiLookup = await lookupCompanyWithGemini(`${strippedInput} Private Limited`);
+      }
+
       if (geminiLookup && geminiLookup.isRegistered && geminiLookup.cin) {
         const geminiCin = (geminiLookup.cin || '').toUpperCase();
         if (geminiCin && !seenCins.has(geminiCin)) {
@@ -1106,7 +1113,7 @@ export async function searchMcaRegistry(proposedName = '') {
             state: geminiLookup.state || '',
             status: geminiLookup.status || 'Active',
             entityType: geminiLookup.entityType || 'Company',
-            classType: geminiLookup.classType || 'Public Limited',
+            classType: geminiLookup.classType || 'Private Limited',
             incYear: geminiLookup.incorporationYear || '',
             authorizedCapital: geminiLookup.authorizedCapital || '₹1,00,000',
             paidUpCapital: geminiLookup.paidUpCapital || '₹1,00,000',
@@ -1117,8 +1124,11 @@ export async function searchMcaRegistry(proposedName = '') {
             reason: geminiLookup.summary || 'Existing registered company verified via statutory registry fallback.',
           });
         }
+      } else if (!geminiLookup) {
+        isOnlineVerified = false;
       }
     } catch (err) {
+      isOnlineVerified = false;
       console.warn('[McaProvider] Gemini lookup fallback error:', err.message);
     }
   }
@@ -1135,6 +1145,7 @@ export async function searchMcaRegistry(proposedName = '') {
     exactMatches,
     similarMatches: similarMatches.slice(0, 10), // Top 10 most relevant
     totalChecked: liveCompanies.length + BENCHMARK_COMPANY_REGISTRY.length,
+    isOnlineVerified,
     officialVerificationUrl: `https://www.mca.gov.in/mcafoportal/showCheckCompanyName.do?name=${encodeURIComponent(strippedInput || cleanInput)}`,
   };
 }
