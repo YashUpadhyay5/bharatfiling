@@ -294,7 +294,7 @@ export default function ITRSimpleCalculatorCard({
                     <span className="font-semibold text-blue-900">Taxable Income</span>
                   </div>
                   <span className="font-mono font-bold text-blue-700">
-                    {formatIndianCurrency(activeRegime.taxableIncome)}
+                    {formatIndianCurrency(activeRegime.netTaxableIncome ?? activeRegime.taxableIncome ?? 0)}
                   </span>
                 </div>
               </div>
@@ -327,14 +327,14 @@ export default function ITRSimpleCalculatorCard({
                   <div className="flex justify-between text-slate-600">
                     <span>Total Deductions:</span>
                     <span className="font-mono font-semibold text-emerald-600">
-                      -{formatIndianCurrency(activeRegime.totalDeductions + activeRegime.hraExemption)}
+                      -{formatIndianCurrency((activeRegime.totalDeductions || 0) + (activeRegime.hraExemption || 0))}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold text-slate-900 pt-1 border-t border-slate-100">
                   <span>Taxable Income:</span>
                   <span className="font-mono">
-                    {formatIndianCurrency(activeRegime.taxableIncome)}
+                    {formatIndianCurrency(activeRegime.netTaxableIncome ?? activeRegime.taxableIncome ?? 0)}
                   </span>
                 </div>
               </div>
@@ -344,27 +344,52 @@ export default function ITRSimpleCalculatorCard({
                 <span className="font-bold text-slate-700 block pb-1 border-b border-slate-100 text-[11px] uppercase tracking-wider">
                   Tax Slabs
                 </span>
-                {activeRegime.slabs?.map((slab, idx) => (
-                  <div key={idx} className="flex justify-between text-[11px] text-slate-600">
-                    <span>{slab.slab}:</span>
-                    <span className="font-mono font-semibold text-slate-900">
-                      {formatIndianCurrency(slab.tax)}
-                    </span>
-                  </div>
-                ))}
-                {activeRegime.healthAndEducationCess > 0 && (
-                  <div className="flex justify-between text-[11px] text-slate-600 pt-1 border-t border-slate-100">
-                    <span>Health & Education Cess (4%):</span>
-                    <span className="font-mono font-semibold text-slate-900">
-                      {formatIndianCurrency(activeRegime.healthAndEducationCess)}
-                    </span>
-                  </div>
-                )}
+                {(activeRegime.slabs || activeRegime.slabBreakdown)?.map((slab, idx) => {
+                  const slabLabel =
+                    slab.slab ||
+                    slab.label ||
+                    (slab.max === Infinity
+                      ? `Above ₹${Number(slab.min || 0).toLocaleString('en-IN')}`
+                      : `₹${Number(slab.min || 0).toLocaleString('en-IN')} to ₹${Number(slab.max || 0).toLocaleString('en-IN')}`);
+                  const slabTax = slab.tax ?? slab.taxAmount ?? 0;
+                  return (
+                    <div key={idx} className="flex justify-between text-[11px] text-slate-600">
+                      <span>{slabLabel}:</span>
+                      <span className="font-mono font-semibold text-slate-900">
+                        {formatIndianCurrency(slabTax)}
+                      </span>
+                    </div>
+                  );
+                })}
                 {activeRegime.rebate87A > 0 && (
                   <div className="flex justify-between text-[11px] text-emerald-700 font-semibold">
                     <span>Section 87A Rebate:</span>
                     <span className="font-mono">
                       -{formatIndianCurrency(activeRegime.rebate87A)}
+                    </span>
+                  </div>
+                )}
+                {activeRegime.marginalRelief87A > 0 && (
+                  <div className="flex justify-between text-[11px] text-emerald-700 font-semibold">
+                    <span>Section 87A Marginal Relief:</span>
+                    <span className="font-mono">
+                      -{formatIndianCurrency(activeRegime.marginalRelief87A)}
+                    </span>
+                  </div>
+                )}
+                {activeRegime.netSurcharge > 0 && (
+                  <div className="flex justify-between text-[11px] text-amber-800 font-semibold">
+                    <span>Surcharge:</span>
+                    <span className="font-mono">
+                      +{formatIndianCurrency(activeRegime.netSurcharge)}
+                    </span>
+                  </div>
+                )}
+                {(activeRegime.cess || activeRegime.healthAndEducationCess) > 0 && (
+                  <div className="flex justify-between text-[11px] text-slate-600 pt-1 border-t border-slate-100">
+                    <span>Health & Education Cess (4%):</span>
+                    <span className="font-mono font-semibold text-slate-900">
+                      {formatIndianCurrency(activeRegime.cess ?? activeRegime.healthAndEducationCess)}
                     </span>
                   </div>
                 )}
