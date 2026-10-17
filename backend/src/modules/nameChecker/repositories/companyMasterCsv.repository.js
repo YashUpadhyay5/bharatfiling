@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { fileURLToPath } from 'url';
-import { computeNameSimilarity, extractDistinctiveWords } from '../services/nameSimilarity.service.js';
+import { computeNameSimilarity, extractDistinctiveWords, stripEntitySuffixes } from '../services/nameSimilarity.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -167,6 +167,9 @@ export async function getCompanyByExactName(name) {
   if (!norm) return null;
   const normNoThe = norm.replace(/^THE/, '');
 
+  const stripped = stripEntitySuffixes(name).trim();
+  const strippedNorm = normalizeString(stripped);
+
   for (let i = 0; i < allRecords.length; i++) {
     const recNorm = allRecords[i].normalizedName;
     if (recNorm === norm) {
@@ -174,6 +177,14 @@ export async function getCompanyByExactName(name) {
     }
     if (normNoThe.length > 5 && recNorm.replace(/^THE/, '') === normNoThe) {
       return { ...allRecords[i], name: formatCompanyName(allRecords[i].name) };
+    }
+    // Match when distinctive corporate roots match (e.g. "hydromaterials pvt ltd" vs "HYDROMATERIALS PRIVATE LIMITED")
+    if (strippedNorm && strippedNorm.length >= 3) {
+      const recStripped = stripEntitySuffixes(allRecords[i].name).trim();
+      const recStrippedNorm = normalizeString(recStripped);
+      if (recStrippedNorm === strippedNorm) {
+        return { ...allRecords[i], name: formatCompanyName(allRecords[i].name) };
+      }
     }
   }
   return null;

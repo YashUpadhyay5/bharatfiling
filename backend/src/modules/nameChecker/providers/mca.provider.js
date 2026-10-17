@@ -987,6 +987,9 @@ export async function searchMcaRegistry(proposedName = '') {
     const cinKey = (record.identifier || record.cin || '').toUpperCase();
     const nameKey = record.name.toLowerCase().replace(/[\.\s-]/g, '');
 
+    if (cinKey && cinKey !== 'CIN PENDING' && seenCins.has(cinKey)) continue;
+    if (seenNames.has(nameKey)) continue;
+
     if (cinKey && cinKey !== 'CIN PENDING') seenCins.add(cinKey);
     seenNames.add(nameKey);
 
