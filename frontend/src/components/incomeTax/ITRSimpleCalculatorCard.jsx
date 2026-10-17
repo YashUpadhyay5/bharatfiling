@@ -57,7 +57,15 @@ export default function ITRSimpleCalculatorCard({
     enteredIncome > 0 ? ((activeTax / enteredIncome) * 100).toFixed(2) : '0.00';
 
   const handleIncomeChange = (val) => {
-    setSalary((prev) => ({ ...prev, grossSalary: val === '' ? '' : Math.max(0, Number(val)) }));
+    const cleanVal = val === '' ? '' : Math.max(0, Number(val));
+    setSalary((prev) => ({ ...prev, grossSalary: cleanVal }));
+    try {
+      if (cleanVal === '') {
+        sessionStorage.removeItem('bf_itr_taxable_income');
+      } else {
+        sessionStorage.setItem('bf_itr_taxable_income', String(cleanVal));
+      }
+    } catch {}
   };
 
   const handleDedChange = (field, val) => {
@@ -70,6 +78,9 @@ export default function ITRSimpleCalculatorCard({
   };
 
   const handleLocalReset = () => {
+    try {
+      sessionStorage.removeItem('bf_itr_taxable_income');
+    } catch {}
     setOptOut115BAC('yes');
     setShowOldDeductions(false);
     if (setFinancialYear) setFinancialYear('2025-26');
@@ -264,7 +275,7 @@ export default function ITRSimpleCalculatorCard({
                     step="50000"
                     value={salary.grossSalary}
                     onChange={(e) => handleIncomeChange(e.target.value)}
-                    placeholder="1200000"
+                    placeholder="Enter Net Taxable Income (e.g. 1200000)"
                     className="w-full h-10 pl-7 pr-3 text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
                   />
                 </div>

@@ -18,14 +18,20 @@ export default function IncomeTaxCalculatorPage() {
   // Income Mode: 'taxable' (Direct Net Taxable Income matching ITD portal)
   const [incomeMode, setIncomeMode] = useState('taxable');
 
-  // Income & Deductions State
-  const [salary, setSalary] = useState({
-    grossSalary: '1200000',
-    hraExemption: '',
-    ltaExemption: '',
-    professionalTax: '',
-    otherAllowancesExempt: '',
-    familyPension: '',
+  // Income & Deductions State (Persists on refresh, blank for new users)
+  const [salary, setSalary] = useState(() => {
+    let saved = '';
+    try {
+      saved = sessionStorage.getItem('bf_itr_taxable_income') || '';
+    } catch {}
+    return {
+      grossSalary: saved,
+      hraExemption: '',
+      ltaExemption: '',
+      professionalTax: '',
+      otherAllowancesExempt: '',
+      familyPension: '',
+    };
   });
 
   const [houseProperty, setHouseProperty] = useState({
@@ -111,8 +117,11 @@ export default function IncomeTaxCalculatorPage() {
   };
 
   const handleReset = () => {
+    try {
+      sessionStorage.removeItem('bf_itr_taxable_income');
+    } catch {}
     setSalary({
-      grossSalary: '1200000',
+      grossSalary: '',
       hraExemption: '',
       ltaExemption: '',
       professionalTax: '',
