@@ -36,11 +36,13 @@ export default function IncomeTaxCalculatorPage() {
   const [financialYear, setFinancialYear] = useState('2025-26');
   const [ageCategory, setAgeCategory] = useState('individual');
   const [residentialStatus, setResidentialStatus] = useState('resident');
+  // Income Mode: 'gross' (CTC with auto standard deduction) | 'taxable' (Direct Net Taxable Income matching ITD portal)
+  const [incomeMode, setIncomeMode] = useState('gross');
 
-  // Income Heads State (Realistic salaried defaults for clean Simple Mode)
+  // Income Heads State (Clean, transparent defaults for Simple & Advanced Mode)
   const [salary, setSalary] = useState({
     grossSalary: '1200000',
-    hraExemption: '120000',
+    hraExemption: '',
     ltaExemption: '',
     professionalTax: '',
     otherAllowancesExempt: '',
@@ -80,7 +82,7 @@ export default function IncomeTaxCalculatorPage() {
     sec80C: '150000',
     sec80CCD1B: '',
     sec80CCD2: '',
-    sec80D: '25000',
+    sec80D: '',
     sec80E: '',
     sec80G: '',
     sec80TTA_TTB: '',
@@ -105,6 +107,7 @@ export default function IncomeTaxCalculatorPage() {
       financialYear,
       ageCategory,
       residentialStatus,
+      incomeMode,
       salary,
       houseProperty,
       capitalGains,
@@ -117,6 +120,7 @@ export default function IncomeTaxCalculatorPage() {
     financialYear,
     ageCategory,
     residentialStatus,
+    incomeMode,
     salary,
     houseProperty,
     capitalGains,
@@ -307,6 +311,14 @@ export default function IncomeTaxCalculatorPage() {
               houseProperty={houseProperty}
               setHouseProperty={setHouseProperty}
               comparison={comparison}
+              financialYear={financialYear}
+              setFinancialYear={setFinancialYear}
+              ageCategory={ageCategory}
+              setAgeCategory={setAgeCategory}
+              residentialStatus={residentialStatus}
+              setResidentialStatus={setResidentialStatus}
+              incomeMode={incomeMode}
+              setIncomeMode={setIncomeMode}
               onReset={handleReset}
               onSwitchToAdvanced={() => setCalculatorMode('advanced')}
             />

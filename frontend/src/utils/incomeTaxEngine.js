@@ -230,6 +230,7 @@ export function computeRegimeTax({
   financialYear = '2025-26',
   ageCategory = 'individual',
   residentialStatus = 'resident',
+  incomeMode = 'gross',
   salary = {},
   houseProperty = {},
   capitalGains = {},
@@ -241,33 +242,43 @@ export function computeRegimeTax({
   const fyKey = String(financialYear).trim().replace(/^FY\s*/i, '');
   const rules = TAX_RULES_BY_YEAR[fyKey] || TAX_RULES_BY_YEAR['2025-26'];
   const isResident = residentialStatus !== 'nonResident';
+  const isDirectTaxable = incomeMode === 'taxable';
+  const directTaxableAmount = Math.max(0, Number(salary.netTaxableIncome ?? salary.grossSalary ?? 0));
 
   // 1. SALARY HEAD COMPUTATION
-  const grossSalary = Math.max(0, Number(salary.grossSalary) || 0);
-  const standardDedLimit = isNewRegime ? rules.standardDeduction.newRegime : rules.standardDeduction.oldRegime;
-  const standardDeduction = grossSalary > 0 ? Math.min(grossSalary, standardDedLimit) : 0;
-
+  let grossSalary = Math.max(0, Number(salary.grossSalary) || 0);
+  let standardDeduction = 0;
   let hraExempt = 0;
   let ltaExempt = 0;
   let profTax = 0;
   let otherExempt = 0;
+  let netSalary = 0;
 
-  if (!isNewRegime) {
-    hraExempt = Math.min(grossSalary, Math.max(0, Number(salary.hraExemption) || 0));
-    ltaExempt = Math.min(grossSalary, Math.max(0, Number(salary.ltaExemption) || 0));
-    profTax = Math.min(grossSalary, Math.max(0, Number(salary.professionalTax) || 0));
-    otherExempt = Math.min(grossSalary, Math.max(0, Number(salary.otherAllowancesExempt) || 0));
+  if (isDirectTaxable) {
+    grossSalary = directTaxableAmount;
+    standardDeduction = 0;
+    netSalary = directTaxableAmount;
+  } else {
+    const standardDedLimit = isNewRegime ? rules.standardDeduction.newRegime : rules.standardDeduction.oldRegime;
+    standardDeduction = grossSalary > 0 ? Math.min(grossSalary, standardDedLimit) : 0;
+
+    if (!isNewRegime) {
+      hraExempt = Math.min(grossSalary, Math.max(0, Number(salary.hraExemption) || 0));
+      ltaExempt = Math.min(grossSalary, Math.max(0, Number(salary.ltaExemption) || 0));
+      profTax = Math.min(grossSalary, Math.max(0, Number(salary.professionalTax) || 0));
+      otherExempt = Math.min(grossSalary, Math.max(0, Number(salary.otherAllowancesExempt) || 0));
+    }
+
+    const familyPension = Math.max(0, Number(salary.familyPension) || 0);
+    const fpLimit = isNewRegime ? rules.familyPensionDeduction.newRegime : rules.familyPensionDeduction.oldRegime;
+    const familyPensionDeduction = familyPension > 0 ? Math.min(familyPension / 3, fpLimit) : 0;
+    const netFamilyPension = Math.max(0, familyPension - familyPensionDeduction);
+
+    netSalary = Math.max(
+      0,
+      grossSalary - standardDeduction - hraExempt - ltaExempt - profTax - otherExempt + netFamilyPension
+    );
   }
-
-  const familyPension = Math.max(0, Number(salary.familyPension) || 0);
-  const fpLimit = isNewRegime ? rules.familyPensionDeduction.newRegime : rules.familyPensionDeduction.oldRegime;
-  const familyPensionDeduction = familyPension > 0 ? Math.min(familyPension / 3, fpLimit) : 0;
-  const netFamilyPension = Math.max(0, familyPension - familyPensionDeduction);
-
-  const netSalary = Math.max(
-    0,
-    grossSalary - standardDeduction - hraExempt - ltaExempt - profTax - otherExempt + netFamilyPension
-  );
 
   // 2. HOUSE PROPERTY
   const rentalIncome = Math.max(0, Number(houseProperty.rentalIncome) || 0);
@@ -365,10 +376,20 @@ export function computeRegimeTax({
       sec80C + sec80CCD1B + sec80D + sec80E + sec80G + sec80TTA_TTB + sec80U_DD + otherChapter6;
   }
 
-  const allowableDeductions = Math.min(ordinaryIncome, totalDeductions);
-  const rawOrdinaryTaxable = Math.max(0, ordinaryIncome - allowableDeductions);
-  const netOrdinaryTaxable = roundSection288A(rawOrdinaryTaxable);
-  const totalTaxableIncome = roundSection288A(netOrdinaryTaxable + specialRateTotal);
+  let allowableDeductions = 0;
+  let netOrdinaryTaxable = 0;
+  let totalTaxableIncome = 0;
+
+  if (isDirectTaxable) {
+    allowableDeductions = 0;
+    netOrdinaryTaxable = roundSection288A(directTaxableAmount);
+    totalTaxableIncome = roundSection288A(netOrdinaryTaxable + specialRateTotal);
+  } else {
+    allowableDeductions = Math.min(ordinaryIncome, totalDeductions);
+    const rawOrdinaryTaxable = Math.max(0, ordinaryIncome - allowableDeductions);
+    netOrdinaryTaxable = roundSection288A(rawOrdinaryTaxable);
+    totalTaxableIncome = roundSection288A(netOrdinaryTaxable + specialRateTotal);
+  }
 
   // 7. TAX COMPUTATION BY SLABS & SPECIAL RATES
   let slabs = rules.newRegimeSlabs;
