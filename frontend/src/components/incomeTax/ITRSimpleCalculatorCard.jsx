@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { BarChart3, Zap, ArrowRight, RotateCcw } from 'lucide-react';
+import {
+  RotateCcw,
+  CheckCircle2,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  TrendingDown,
+  Sparkles,
+  BarChart3,
+  PieChart as PieIcon,
+  ShieldCheck,
+  Calculator,
+} from 'lucide-react';
 import SimpleDonutChart from '../common/SimpleDonutChart.jsx';
 import { formatIndianCurrency } from '../../utils/incomeTaxEngine.js';
 
@@ -11,382 +23,763 @@ export default function ITRSimpleCalculatorCard({
   houseProperty,
   setHouseProperty,
   comparison,
+  financialYear = '2025-26',
+  setFinancialYear,
+  taxPayer = 'individual',
+  setTaxPayer,
+  ageCategory = 'individual',
+  setAgeCategory,
+  residentialStatus = 'resident',
+  setResidentialStatus,
+  incomeMode = 'taxable',
+  setIncomeMode,
   onReset,
-  onSwitchToAdvanced,
 }) {
-  // Toggle between Old and New Regime view
-  const [selectedRegime, setSelectedRegime] = useState('new');
+  // Opting out of Section 115BAC (1A): 'yes' = Old Regime, 'no' = New Regime
+  const [optOut115BAC, setOptOut115BAC] = useState('yes');
+  const [showOldDeductions, setShowOldDeductions] = useState(false);
+  const [calculatedPulse, setCalculatedPulse] = useState(false);
 
-  const { winner, savings, oldRegime, newRegime } = comparison;
-  const isNewWinner = winner === 'new';
+  const isOldRegime = optOut115BAC === 'yes';
+  const activeRegime = isOldRegime ? comparison.oldRegime : comparison.newRegime;
+  const otherRegime = isOldRegime ? comparison.newRegime : comparison.oldRegime;
 
-  const activeRegime = selectedRegime === 'new' ? newRegime : oldRegime;
-  const grossSalaryNum = Number(salary.grossSalary) || 0;
-  const activeTax = activeRegime.totalTaxLiability || 0;
-  const takeHomeIncome = Math.max(0, grossSalaryNum - activeTax);
-  const effectiveRate = grossSalaryNum > 0 ? ((activeTax / grossSalaryNum) * 100).toFixed(2) : '0.00';
+  const enteredIncome = Number(salary.grossSalary) || 0;
+  const activeTax = activeRegime?.totalTaxLiability || 0;
+  const otherTax = otherRegime?.totalTaxLiability || 0;
 
-  const handleSalaryChange = (field, val) => {
-    setSalary((prev) => ({ ...prev, [field]: val === '' ? '' : Math.max(0, Number(val)) }));
+  const oldTax = comparison.oldRegime?.totalTaxLiability || 0;
+  const newTax = comparison.newRegime?.totalTaxLiability || 0;
+  const taxDiff = oldTax - newTax;
+  const isNewCheaper = taxDiff > 0;
+  const savings = Math.abs(taxDiff);
+
+  const takeHomeIncome = Math.max(0, enteredIncome - activeTax);
+  const effectiveRate =
+    enteredIncome > 0 ? ((activeTax / enteredIncome) * 100).toFixed(2) : '0.00';
+
+  const handleIncomeChange = (val) => {
+    const cleanVal = val === '' ? '' : Math.max(0, Number(val));
+    setSalary((prev) => ({ ...prev, grossSalary: cleanVal }));
+    try {
+      if (cleanVal === '') {
+        sessionStorage.removeItem('bf_itr_taxable_income');
+      } else {
+        sessionStorage.setItem('bf_itr_taxable_income', String(cleanVal));
+      }
+    } catch {}
   };
 
   const handleDedChange = (field, val) => {
     setDeductions((prev) => ({ ...prev, [field]: val === '' ? '' : Math.max(0, Number(val)) }));
   };
 
-  const handleOtherDedChange = (val) => {
-    // Stores in otherDeductions
-    setDeductions((prev) => ({ ...prev, otherDeductions: val === '' ? '' : Math.max(0, Number(val)) }));
+  const handleCalculateClick = () => {
+    setCalculatedPulse(true);
+    setTimeout(() => setCalculatedPulse(false), 600);
   };
 
+  const handleLocalReset = () => {
+    try {
+      sessionStorage.removeItem('bf_itr_taxable_income');
+    } catch {}
+    setOptOut115BAC('yes');
+    setShowOldDeductions(false);
+    if (setFinancialYear) setFinancialYear('2025-26');
+    if (setTaxPayer) setTaxPayer('individual');
+    if (setAgeCategory) setAgeCategory('individual');
+    if (setResidentialStatus) setResidentialStatus('resident');
+    if (setIncomeMode) setIncomeMode('taxable');
+    if (onReset) onReset();
+  };
+
+  // Quick preset incomes for rapid checking
+  const quickIncomePresets = [
+    { label: '₹5,00,000', value: 500000 },
+    { label: '₹7,50,000', value: 750000 },
+    { label: '₹10,00,000', value: 1000000 },
+    { label: '₹12,00,000', value: 1200000 },
+    { label: '₹15,00,000', value: 1500000 },
+    { label: '₹20,00,000', value: 2000000 },
+  ];
+
+  // Visual bar percentages
+  const maxIncomeVal = Math.max(enteredIncome, 100000);
+  const newTaxPct = Math.min(100, Math.round((newTax / maxIncomeVal) * 100));
+  const newTakeHomePct = Math.max(0, 100 - newTaxPct);
+  const oldTaxPct = Math.min(100, Math.round((oldTax / maxIncomeVal) * 100));
+  const oldTakeHomePct = Math.max(0, 100 - oldTaxPct);
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      {/* 1. TOP DUAL REGIME SELECTOR CARDS (EXACT MATCH TO REFERENCE IMAGE) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* OLD TAX REGIME CARD */}
-        <div
-          onClick={() => setSelectedRegime('old')}
-          className={`bg-white rounded-2xl p-5 border cursor-pointer transition-all duration-200 relative text-center ${
-            selectedRegime === 'old'
-              ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-md bg-blue-50/10'
-              : 'border-slate-200 hover:border-slate-300 shadow-xs'
-          }`}
-        >
-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-2">
-            <BarChart3 className="w-4 h-4" />
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {/* 1. OFFICIAL INCOME TAX DEPARTMENT CALCULATOR CARD (EXACT REPLICA) */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+        {/* Top Info Notice Banner (Matches Official ITD Portal) */}
+        <div className="px-5 sm:px-6 py-3 bg-[#F0F5FF] border-b border-blue-100 flex items-center justify-between text-xs text-blue-900">
+          <div className="flex items-center gap-2">
+            <Info className="w-4 h-4 text-blue-600 shrink-0" />
+            <span className="font-semibold">
+              As per Income-tax Act, 1961 (Amended by Finance Act, 2026)
+            </span>
           </div>
-          <h3 className="text-base font-bold text-slate-900">Old Tax Regime</h3>
-          <p className="text-xs text-slate-500 mb-3">With Deductions & Exemptions</p>
-          <ul className="text-[11px] text-slate-500 space-y-1 text-center font-medium">
-            <li>• 80C, 80D, HRA deductions available</li>
-            <li>• Standard deduction: ₹50,000</li>
-            <li>• Higher tax rates but more deductions</li>
-          </ul>
+          <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-white border border-blue-200 text-blue-700 font-bold text-[11px]">
+            Official ITD AY 2026-27 Parity
+          </span>
         </div>
 
-        {/* NEW TAX REGIME CARD */}
-        <div
-          onClick={() => setSelectedRegime('new')}
-          className={`bg-white rounded-2xl p-5 border cursor-pointer transition-all duration-200 relative text-center ${
-            selectedRegime === 'new'
-              ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-md bg-orange-50/10'
-              : 'border-slate-200 hover:border-slate-300 shadow-xs'
-          }`}
-        >
-          <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#F26522] flex items-center justify-center mx-auto mb-2">
-            <Zap className="w-4 h-4" />
+        {/* Main 2-Column Section: Form (Left) vs Output Boxes (Right) */}
+        <div className="p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* LEFT COLUMN: FORM INPUTS (7 COLS) */}
+          <div className="lg:col-span-7 space-y-4">
+            
+            {/* Quick 1-Click Regime Selection Pills */}
+            <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+              <span className="text-xs font-bold text-slate-700">Choose Tax Regime:</span>
+              <div className="inline-flex p-0.5 bg-white border border-slate-200 rounded-lg shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setOptOut115BAC('yes')}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                    isOldRegime
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>🏛️ Old Tax Regime</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOptOut115BAC('no')}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                    !isOldRegime
+                      ? 'bg-orange-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>⚡ New Tax Regime (115BAC)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Field 1: Assessment Year */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 sm:items-center">
+              <label className="sm:col-span-6 text-xs font-semibold text-slate-800">
+                Assessment year <span className="text-rose-500">*</span>
+              </label>
+              <div className="sm:col-span-6">
+                <select
+                  value={financialYear}
+                  onChange={(e) => setFinancialYear && setFinancialYear(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
+                >
+                  <option value="2025-26">2026-27 (Current)</option>
+                  <option value="2024-25">2025-26</option>
+                  <option value="2023-24">2024-25</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Field 2: Tax Payer */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 sm:items-center">
+              <label className="sm:col-span-6 text-xs font-semibold text-slate-800">
+                Tax payer <span className="text-rose-500">*</span>
+              </label>
+              <div className="sm:col-span-6">
+                <select
+                  value={taxPayer}
+                  onChange={(e) => setTaxPayer && setTaxPayer(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
+                >
+                  <option value="individual">Individual</option>
+                  <option value="huf">HUF (Hindu Undivided Family)</option>
+                  <option value="firm_llp">Firms / LLP (Flat 30%)</option>
+                  <option value="domestic_company">Domestic Company (Flat 22%)</option>
+                  <option value="foreign_company">Foreign Company (Flat 40%)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Field 3: Category (Age) */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 sm:items-center">
+              <label className="sm:col-span-6 text-xs font-semibold text-slate-800">
+                Category (age) <span className="text-rose-500">*</span>
+              </label>
+              <div className="sm:col-span-6">
+                {taxPayer === 'individual' ? (
+                  <select
+                    value={ageCategory}
+                    onChange={(e) => setAgeCategory && setAgeCategory(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
+                  >
+                    <option value="individual">Less than 60 years</option>
+                    <option value="senior">Equal to 60 years or more but less than 80 years</option>
+                    <option value="superSenior">Equal to 80 years or more</option>
+                  </select>
+                ) : (
+                  <select
+                    disabled
+                    value="individual"
+                    className="w-full h-10 px-3 bg-slate-100 border border-slate-300 rounded-lg text-xs font-semibold text-slate-500 cursor-not-allowed"
+                    title="Age categories only apply to Individual tax payers"
+                  >
+                    <option value="individual">Not Applicable (Non-Individual)</option>
+                  </select>
+                )}
+              </div>
+            </div>
+
+            {/* Field 4: Residential Status */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 sm:items-center">
+              <label className="sm:col-span-6 text-xs font-semibold text-slate-800">
+                Residential status <span className="text-rose-500">*</span>
+              </label>
+              <div className="sm:col-span-6">
+                <select
+                  value={residentialStatus}
+                  onChange={(e) => setResidentialStatus && setResidentialStatus(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
+                >
+                  <option value="resident">Resident</option>
+                  <option value="nonResident">Non-Resident (NRI)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Field 5: Opting Out of Section 115BAC (1A)? */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 sm:items-center">
+              <label className="sm:col-span-6 text-xs font-semibold text-slate-800 leading-snug">
+                Whether opting out of new tax regime under section 115BAC (1A)? <span className="text-rose-500">*</span>
+              </label>
+              <div className="sm:col-span-6">
+                {taxPayer === 'firm_llp' || taxPayer === 'domestic_company' || taxPayer === 'foreign_company' ? (
+                  <select
+                    disabled
+                    value="no"
+                    className="w-full h-10 px-3 bg-slate-100 border border-slate-300 rounded-lg text-xs font-semibold text-slate-500 cursor-not-allowed"
+                  >
+                    <option value="no">Not Applicable (Entity Flat Rate Applies)</option>
+                  </select>
+                ) : (
+                  <select
+                    value={optOut115BAC}
+                    onChange={(e) => setOptOut115BAC(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer"
+                  >
+                    <option value="yes">Yes (Old Tax Regime)</option>
+                    <option value="no">No (New Tax Regime)</option>
+                  </select>
+                )}
+              </div>
+            </div>
+
+            {/* Field 6: Net Taxable Income */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 sm:items-center pt-1">
+              <div className="sm:col-span-6">
+                <label className="text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5">
+                  <span>Net taxable income</span>
+                  <span className="text-rose-500">*</span>
+                  <span
+                    title="Enter your taxable income. The calculator applies statutory progressive tax slabs."
+                    className="text-slate-400 hover:text-slate-600 cursor-help"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </span>
+                </label>
+              </div>
+              <div className="sm:col-span-6">
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="50000"
+                    value={salary.grossSalary}
+                    onChange={(e) => handleIncomeChange(e.target.value)}
+                    placeholder="Enter Net Taxable Income (e.g. 1200000)"
+                    className="w-full h-10 pl-7 pr-3 text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Income Preset Chips */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1 sm:pl-[50%]">
+              {quickIncomePresets.map((preset) => (
+                <button
+                  key={preset.value}
+                  type="button"
+                  onClick={() => handleIncomeChange(preset.value)}
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded border transition cursor-pointer ${
+                    Number(salary.grossSalary) === preset.value
+                      ? 'bg-[#132f58] text-white border-[#132f58]'
+                      : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+
+            {/* FUNCTION: DEDICATED OLD REGIME DEDUCTIONS (OPTIONAL CLAIM FOR ANY TAXPAYER) */}
+            {isOldRegime && (
+              <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl space-y-3 transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    <div>
+                      <span className="text-xs font-bold text-blue-950 block">
+                        Old Regime Deductions (Chapter VI-A)
+                      </span>
+                      <span className="text-[10px] text-blue-700">
+                        Claim 80C & 80D deductions to lower Old Regime tax
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowOldDeductions(!showOldDeductions)}
+                    className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>{showOldDeductions ? 'Hide' : '+ Claim Deductions'}</span>
+                    {showOldDeductions ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+
+                {showOldDeductions && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-blue-200/60 text-xs animate-in fade-in duration-200">
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">
+                        80C Deductions (Max ₹1.5 Lakhs)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="150000"
+                          value={deductions.sec80C || ''}
+                          onChange={(e) => handleDedChange('sec80C', e.target.value)}
+                          placeholder="150000"
+                          className="w-full h-8 pl-6 pr-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500">PPF, ELSS, EPF, Life Insurance</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-slate-700">
+                        80D Health Insurance (Max ₹25K - ₹50K)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100000"
+                          value={deductions.sec80D || ''}
+                          onChange={(e) => handleDedChange('sec80D', e.target.value)}
+                          placeholder="25000"
+                          className="w-full h-8 pl-6 pr-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500">Mediclaim premiums</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons: Calculate & Reset (Matching ITD Portal) */}
+            <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleCalculateClick}
+                className="px-6 py-2 rounded-lg bg-[#132f58] hover:bg-[#0f2546] text-white text-xs font-bold shadow-xs transition active:scale-98 cursor-pointer flex items-center gap-1.5"
+              >
+                <Calculator className="w-3.5 h-3.5" />
+                <span>Calculate</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleLocalReset}
+                className="text-xs font-semibold text-blue-700 hover:text-blue-900 transition cursor-pointer flex items-center gap-1"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset</span>
+              </button>
+            </div>
           </div>
-          <h3 className="text-base font-bold text-slate-900">New Tax Regime</h3>
-          <p className="text-xs text-slate-500 mb-3">Lower Rates, No Deductions</p>
-          <ul className="text-[11px] text-slate-500 space-y-1 text-center font-medium">
-            <li>• Standard deduction: ₹75,000</li>
-            <li>• Lower tax slab rates (0% up to ₹3L/₹4L)</li>
-            <li>• Simplified tax calculation</li>
-          </ul>
+
+          {/* RIGHT COLUMN: OFFICIAL RESULT BOXES (5 COLS - EXACT ITD STACK) */}
+          <div
+            className={`lg:col-span-5 space-y-3 transition-all duration-300 ${
+              calculatedPulse ? 'scale-[1.01] ring-2 ring-blue-500/30 rounded-xl' : ''
+            }`}
+          >
+            {/* Box 1: Income Tax */}
+            <div className="p-3 bg-white border border-slate-300 rounded-lg flex flex-col justify-between">
+              <span className="text-[11px] font-semibold text-slate-600">Income tax</span>
+              <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                {activeRegime.normalSlabTax ?? activeRegime.totalTaxBeforeRebate ?? 0}
+              </div>
+            </div>
+
+            {/* Box 2: Rebate under section 87A */}
+            <div className="p-3 bg-white border border-slate-300 rounded-lg flex flex-col justify-between">
+              <span className="text-[11px] font-semibold text-slate-600">
+                Rebate under section 87A
+              </span>
+              <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                {activeRegime.rebate87A || 0}
+              </div>
+            </div>
+
+            {/* Box 3: Income tax after rebate under section 87A */}
+            <div className="p-3 bg-white border border-slate-300 rounded-lg flex flex-col justify-between">
+              <span className="text-[11px] font-semibold text-slate-600">
+                Income tax after rebate under section 87A
+              </span>
+              <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                {activeRegime.taxAfterRebateAndRelief ??
+                  Math.max(
+                    0,
+                    (activeRegime.normalSlabTax || 0) -
+                      (activeRegime.rebate87A || 0) -
+                      (activeRegime.marginalRelief87A || 0)
+                  )}
+              </div>
+            </div>
+
+            {/* Box 4: Surcharge */}
+            <div className="p-3 bg-white border border-slate-300 rounded-lg flex flex-col justify-between">
+              <span className="text-[11px] font-semibold text-slate-600">Surcharge</span>
+              <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                {activeRegime.netSurcharge || 0}
+              </div>
+            </div>
+
+            {/* Box 5: Health and education cess */}
+            <div className="p-3 bg-white border border-slate-300 rounded-lg flex flex-col justify-between">
+              <span className="text-[11px] font-semibold text-slate-600">
+                Health and education cess
+              </span>
+              <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                {activeRegime.cess ?? activeRegime.healthAndEducationCess ?? 0}
+              </div>
+            </div>
+
+            {/* Box 6: Total Tax Liability (Highlighted Final Card) */}
+            <div className="p-4 bg-[#F0FDF4] border-2 border-emerald-400 rounded-xl flex items-center justify-between shadow-2xs">
+              <div>
+                <span className="text-xs font-bold text-emerald-950 block">Total tax liability</span>
+                <span className="text-[11px] text-emerald-700 font-medium">
+                  {effectiveRate}% effective tax rate
+                </span>
+              </div>
+              <div className="text-2xl font-black font-mono text-emerald-800">
+                ₹{(activeTax).toLocaleString('en-IN')}
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </div>
 
-      {/* 2. MAIN 2-COLUMN SECTION: INPUTS (LEFT) vs DASHBOARD (RIGHT) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* 2. ATTRACTIVE VISUAL STATISTICS (BAR CHART & PIE CHART ONLY) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        {/* LEFT COLUMN: INCOME & DEDUCTIONS CARD (5 COLS) */}
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 sm:p-6 space-y-4">
-          <h3 className="text-base font-bold text-slate-900 pb-2 border-b border-slate-100">
-            Income & Deductions
-          </h3>
-
-          {/* Annual Gross Income */}
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold text-slate-700">
-              Annual Gross Income:
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
-                ₹
+        {/* LEFT STAT: PIE / DONUT BREAKDOWN (5 COLS) */}
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                <PieIcon className="w-4 h-4 text-blue-600" />
+                <span>Income vs Tax Breakdown</span>
+              </h3>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                Pie Chart
               </span>
-              <input
-                type="number"
-                min="0"
-                step="50000"
-                value={salary.grossSalary}
-                onChange={(e) => handleSalaryChange('grossSalary', e.target.value)}
-                placeholder="1200000"
-                className="w-full h-10 pl-8 pr-3 text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
+            </div>
+
+            <div className="my-5 flex items-center justify-center">
+              <SimpleDonutChart
+                takeHome={takeHomeIncome}
+                tax={activeTax}
+                size={160}
+                strokeWidth={24}
               />
             </div>
           </div>
 
-          {/* Section Divider: Tax Deductions */}
-          <div className="pt-2">
-            <span className="text-xs font-bold text-slate-800 block mb-2">Tax Deductions</span>
-
-            {/* 80C Deductions */}
-            <div className="space-y-1 mb-3">
-              <label className="block text-[11px] font-semibold text-slate-700">
-                80C Deductions (Max ₹1.5L)
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  max="150000"
-                  value={deductions.sec80C}
-                  onChange={(e) => handleDedChange('sec80C', e.target.value)}
-                  placeholder="150000"
-                  className="w-full h-10 pl-8 pr-3 text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
-                />
+          {/* Legend Pills */}
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-100">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                <span className="font-semibold text-emerald-900">Take-Home (In Hand)</span>
               </div>
-              <p className="text-[10px] text-slate-400">PPF, ELSS, Life Insurance, etc.</p>
-            </div>
-
-            {/* 80D Health Insurance */}
-            <div className="space-y-1 mb-3">
-              <label className="block text-[11px] font-semibold text-slate-700">
-                80D Health Insurance (Max ₹25K)
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  max="100000"
-                  value={deductions.sec80D}
-                  onChange={(e) => handleDedChange('sec80D', e.target.value)}
-                  placeholder="25000"
-                  className="w-full h-10 pl-8 pr-3 text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
-                />
-              </div>
-            </div>
-
-            {/* HRA Exemption */}
-            <div className="space-y-1 mb-3">
-              <label className="block text-[11px] font-semibold text-slate-700">
-                HRA Exemption
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  value={salary.hraExemption}
-                  onChange={(e) => handleSalaryChange('hraExemption', e.target.value)}
-                  placeholder="200000"
-                  className="w-full h-10 pl-8 pr-3 text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
-                />
-              </div>
-            </div>
-
-            {/* Other Deductions */}
-            <div className="space-y-1 mb-4">
-              <label className="block text-[11px] font-semibold text-slate-700">
-                Other Deductions
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  value={deductions.otherDeductions || ''}
-                  onChange={(e) => handleOtherDedChange(e.target.value)}
-                  placeholder="0"
-                  className="w-full h-10 pl-8 pr-3 text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
-                />
-              </div>
-              <p className="text-[10px] text-slate-400">80CCD, 80G, 24B, etc.</p>
-            </div>
-
-            {/* Reset Button (Red / Coral Pill matching Reference Image) */}
-            <button
-              type="button"
-              onClick={onReset}
-              className="w-full py-2.5 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white font-bold text-xs transition duration-200 active:scale-98 shadow-xs cursor-pointer"
-            >
-              Reset Calculator
-            </button>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: METRICS + BREAKDOWN DONUT + CALCULATION (7 COLS) */}
-        <div className="lg:col-span-7 space-y-4">
-          
-          {/* TOP 3 METRIC CARDS (MATCHING REFERENCE IMAGE) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Card 1: Total Tax Payable (Red/Coral background) */}
-            <div className="bg-[#EF4444] text-white rounded-2xl p-4 shadow-sm flex flex-col justify-between">
-              <span className="text-xs font-semibold text-rose-100">Total Tax Payable</span>
-              <div className="text-xl sm:text-2xl font-black font-mono my-1">
-                {formatIndianCurrency(activeTax)}
-              </div>
-              <span className="text-[11px] text-rose-100">{effectiveRate}% effective rate</span>
-            </div>
-
-            {/* Card 2: Tax Saved (White background) */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
-              <span className="text-xs font-semibold text-slate-500">Tax Saved</span>
-              <div className="text-xl sm:text-2xl font-black font-mono text-slate-900 my-1">
-                {formatIndianCurrency(savings)}
-              </div>
-              <span className="text-[11px] text-slate-400">vs. the other regime</span>
-            </div>
-
-            {/* Card 3: Take Home Income (White background with Emerald green number) */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
-              <span className="text-xs font-semibold text-slate-500">Take Home Income</span>
-              <div className="text-xl sm:text-2xl font-black font-mono text-emerald-600 my-1">
+              <span className="font-mono font-bold text-emerald-700">
                 {formatIndianCurrency(takeHomeIncome)}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-rose-50/80 border border-rose-100">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                <span className="font-semibold text-rose-900">Total Income Tax</span>
               </div>
-              <span className="text-[11px] text-slate-400">After tax deduction</span>
+              <span className="font-mono font-bold text-rose-700">
+                {formatIndianCurrency(activeTax)}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50/80 border border-blue-100">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                <span className="font-semibold text-blue-900">Net Taxable Income</span>
+              </div>
+              <span className="font-mono font-bold text-blue-700">
+                {formatIndianCurrency(activeRegime.netTaxableIncome ?? enteredIncome)}
+              </span>
             </div>
           </div>
-
-          {/* TAX BREAKDOWN DONUT CHART CARD (MATCHING REFERENCE IMAGE) */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 sm:p-6 space-y-3">
-            <h4 className="text-sm font-bold text-slate-900">Tax Breakdown</h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-              {/* Donut Chart (Left 5 cols) */}
-              <div className="sm:col-span-5 flex items-center justify-center">
-                <SimpleDonutChart
-                  takeHome={takeHomeIncome}
-                  tax={activeTax}
-                  size={150}
-                  strokeWidth={22}
-                />
-              </div>
-
-              {/* 3 Colored Legend Pills (Right 7 cols) */}
-              <div className="sm:col-span-7 space-y-2 text-xs">
-                {/* Take Home Pill */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#ECFDF5] border border-emerald-100">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                    <span className="font-semibold text-emerald-900">Take Home</span>
-                  </div>
-                  <span className="font-mono font-bold text-emerald-700">
-                    {formatIndianCurrency(takeHomeIncome)}
-                  </span>
-                </div>
-
-                {/* Income Tax Pill */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FEF2F2] border border-rose-100">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                    <span className="font-semibold text-rose-900">Income Tax</span>
-                  </div>
-                  <span className="font-mono font-bold text-rose-700">
-                    {formatIndianCurrency(activeTax)}
-                  </span>
-                </div>
-
-                {/* Taxable Income Pill */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#EFF6FF] border border-blue-100">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                    <span className="font-semibold text-blue-900">Taxable Income</span>
-                  </div>
-                  <span className="font-mono font-bold text-blue-700">
-                    {formatIndianCurrency(activeRegime.taxableIncome)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* DETAILED TAX CALCULATION CARD (MATCHING REFERENCE IMAGE) */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 sm:p-6 space-y-3">
-            <h4 className="text-sm font-bold text-slate-900">Detailed Tax Calculation</h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
-              {/* Left Column: Income Details */}
-              <div className="space-y-2 border-b sm:border-b-0 sm:border-r border-slate-100 pb-3 sm:pb-0 sm:pr-4">
-                <span className="font-bold text-slate-700 block pb-1 border-b border-slate-100 text-[11px] uppercase tracking-wider">
-                  Income Details
-                </span>
-                <div className="flex justify-between text-slate-600">
-                  <span>Gross Annual Income:</span>
-                  <span className="font-mono font-semibold text-slate-900">
-                    {formatIndianCurrency(grossSalaryNum)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>Standard Deduction:</span>
-                  <span className="font-mono font-semibold text-emerald-600">
-                    -{formatIndianCurrency(activeRegime.standardDeduction)}
-                  </span>
-                </div>
-                {selectedRegime === 'old' && (
-                  <div className="flex justify-between text-slate-600">
-                    <span>Total Deductions:</span>
-                    <span className="font-mono font-semibold text-emerald-600">
-                      -{formatIndianCurrency(activeRegime.totalDeductions + activeRegime.hraExemption)}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between font-bold text-slate-900 pt-1 border-t border-slate-100">
-                  <span>Taxable Income:</span>
-                  <span className="font-mono">
-                    {formatIndianCurrency(activeRegime.taxableIncome)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Right Column: Tax Calculation */}
-              <div className="space-y-1.5 sm:pl-2">
-                <span className="font-bold text-slate-700 block pb-1 border-b border-slate-100 text-[11px] uppercase tracking-wider">
-                  Tax Slabs
-                </span>
-                {activeRegime.slabs?.map((slab, idx) => (
-                  <div key={idx} className="flex justify-between text-[11px] text-slate-600">
-                    <span>{slab.slab}:</span>
-                    <span className="font-mono font-semibold text-slate-900">
-                      {formatIndianCurrency(slab.tax)}
-                    </span>
-                  </div>
-                ))}
-                {activeRegime.healthAndEducationCess > 0 && (
-                  <div className="flex justify-between text-[11px] text-slate-600 pt-1 border-t border-slate-100">
-                    <span>Health & Education Cess (4%):</span>
-                    <span className="font-mono font-semibold text-slate-900">
-                      {formatIndianCurrency(activeRegime.healthAndEducationCess)}
-                    </span>
-                  </div>
-                )}
-                {activeRegime.rebate87A > 0 && (
-                  <div className="flex justify-between text-[11px] text-emerald-700 font-semibold">
-                    <span>Section 87A Rebate:</span>
-                    <span className="font-mono">
-                      -{formatIndianCurrency(activeRegime.rebate87A)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Switch to Advanced Mode Footer */}
-          <div className="p-3 bg-slate-100/70 rounded-xl flex items-center justify-between text-xs text-slate-600">
-            <span>Need capital gains, business turnover, or all 5 heads?</span>
-            <button
-              type="button"
-              onClick={onSwitchToAdvanced}
-              className="text-[#F26522] font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
-            >
-              <span>Switch to Advanced Mode</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
         </div>
 
+        {/* RIGHT STAT: COMPARATIVE BAR CHART (OLD vs NEW REGIME) (7 COLS) */}
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2 mb-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <BarChart3 className="w-4 h-4 text-emerald-600" />
+                  <span>Old Regime vs New Regime Comparison</span>
+                </h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Side-by-side tax burden comparison for ₹{enteredIncome.toLocaleString('en-IN')}
+                </p>
+              </div>
+
+              {savings > 0 && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 self-start sm:self-auto shadow-2xs">
+                  <TrendingDown className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{isNewCheaper ? 'New Regime' : 'Old Regime'} saves {formatIndianCurrency(savings)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Visual Bars Container */}
+            <div className="space-y-6 pt-2">
+              {/* 1. New Tax Regime Bar */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span>New Tax Regime (Section 115BAC)</span>
+                    {isNewCheaper && (
+                      <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-extrabold uppercase">
+                        Recommended
+                      </span>
+                    )}
+                  </span>
+                  <div className="text-right font-mono font-bold">
+                    <span className="text-rose-600">Tax: {formatIndianCurrency(newTax)}</span>
+                    <span className="text-slate-300 mx-1.5">|</span>
+                    <span className="text-emerald-600">In Hand: {formatIndianCurrency(Math.max(0, enteredIncome - newTax))}</span>
+                  </div>
+                </div>
+
+                <div className="h-6 w-full bg-slate-100 rounded-xl overflow-hidden flex shadow-inner">
+                  <div
+                    style={{ width: `${newTaxPct}%` }}
+                    className="h-full bg-gradient-to-r from-rose-500 to-rose-400 flex items-center justify-end pr-2 text-[10px] font-bold text-white transition-all duration-500"
+                    title={`New Regime Tax: ${formatIndianCurrency(newTax)}`}
+                  >
+                    {newTaxPct > 12 && <span>{newTaxPct}%</span>}
+                  </div>
+                  <div
+                    style={{ width: `${newTakeHomePct}%` }}
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-end pr-2 text-[10px] font-bold text-white transition-all duration-500"
+                    title={`New Regime Take-Home: ${formatIndianCurrency(Math.max(0, enteredIncome - newTax))}`}
+                  >
+                    {newTakeHomePct > 18 && <span>Take-Home ({newTakeHomePct}%)</span>}
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Old Tax Regime Bar */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                    <span>Old Tax Regime (Opt-Out)</span>
+                    {!isNewCheaper && taxDiff !== 0 && (
+                      <span className="text-[9px] bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded font-extrabold uppercase">
+                        Recommended
+                      </span>
+                    )}
+                  </span>
+                  <div className="text-right font-mono font-bold">
+                    <span className="text-rose-600">Tax: {formatIndianCurrency(oldTax)}</span>
+                    <span className="text-slate-300 mx-1.5">|</span>
+                    <span className="text-emerald-600">In Hand: {formatIndianCurrency(Math.max(0, enteredIncome - oldTax))}</span>
+                  </div>
+                </div>
+
+                <div className="h-6 w-full bg-slate-100 rounded-xl overflow-hidden flex shadow-inner">
+                  <div
+                    style={{ width: `${oldTaxPct}%` }}
+                    className="h-full bg-gradient-to-r from-rose-500 to-rose-400 flex items-center justify-end pr-2 text-[10px] font-bold text-white transition-all duration-500"
+                    title={`Old Regime Tax: ${formatIndianCurrency(oldTax)}`}
+                  >
+                    {oldTaxPct > 12 && <span>{oldTaxPct}%</span>}
+                  </div>
+                  <div
+                    style={{ width: `${oldTakeHomePct}%` }}
+                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-end pr-2 text-[10px] font-bold text-white transition-all duration-500"
+                    title={`Old Regime Take-Home: ${formatIndianCurrency(Math.max(0, enteredIncome - oldTax))}`}
+                  >
+                    {oldTakeHomePct > 18 && <span>Take-Home ({oldTakeHomePct}%)</span>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Note */}
+          <div className="mt-5 p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 flex items-center justify-between">
+            <span className="text-[11px]">
+              Active calculation based on: <strong>{isOldRegime ? 'Old Tax Regime' : 'New Tax Regime (Sec 115BAC)'}</strong>
+            </span>
+            <button
+              type="button"
+              onClick={() => setOptOut115BAC(isOldRegime ? 'no' : 'yes')}
+              className="text-blue-600 hover:text-blue-800 font-bold text-[11px] underline cursor-pointer"
+            >
+              Switch to {isOldRegime ? 'New Regime' : 'Old Regime'}
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* 3. ITEMIZED TAX SLAB PROGRESSION TABLE (PURE ITR SLAB BREAKDOWN) */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              {taxPayer === 'firm_llp'
+                ? 'Tax Computation Breakdown (Partnership Firm / LLP)'
+                : taxPayer === 'domestic_company'
+                ? 'Tax Computation Breakdown (Domestic Company - Section 115BAA)'
+                : taxPayer === 'foreign_company'
+                ? 'Tax Computation Breakdown (Foreign Company)'
+                : taxPayer === 'huf'
+                ? `Tax Slab Calculation Breakdown (HUF - ${isOldRegime ? 'Old Regime' : 'New Regime'})`
+                : `Tax Slab Calculation Breakdown (${isOldRegime ? 'Old Regime' : 'New Regime - Section 115BAC'})`}
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              Itemized bracket breakdown on Net Taxable Income of ₹{(activeRegime.netTaxableIncome ?? enteredIncome).toLocaleString('en-IN')}
+            </p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 self-start sm:self-auto">
+            AY {activeRegime.assessmentYear || '2026-27'}
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <th className="py-2.5 px-3">Tax Slab Range</th>
+                <th className="py-2.5 px-3">Income Tax Rate</th>
+                <th className="py-2.5 px-3 text-right">Taxable Amount in Slab</th>
+                <th className="py-2.5 px-3 text-right">Tax Amount</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              {(activeRegime.slabs || activeRegime.slabBreakdown)?.map((slab, idx) => {
+                const slabLabel =
+                  slab.slab ||
+                  slab.label ||
+                  (slab.max === Infinity
+                    ? `Above ₹${Number(slab.min || 0).toLocaleString('en-IN')}`
+                    : `₹${Number(slab.min || 0).toLocaleString('en-IN')} to ₹${Number(slab.max || 0).toLocaleString('en-IN')}`);
+                const rateLabel =
+                  slab.rate !== undefined
+                    ? typeof slab.rate === 'number'
+                      ? `${Math.round(slab.rate * 100)}%`
+                      : slab.rate
+                    : '—';
+                const taxableAmt = slab.taxableInSlab ?? slab.taxableAmount ?? 0;
+                const slabTax = slab.tax ?? slab.taxAmount ?? 0;
+
+                return (
+                  <tr key={idx} className="hover:bg-slate-50/50">
+                    <td className="py-2.5 px-3 font-semibold text-slate-900">{slabLabel}</td>
+                    <td className="py-2.5 px-3 font-mono">{rateLabel}</td>
+                    <td className="py-2.5 px-3 text-right font-mono text-slate-600">
+                      ₹{taxableAmt.toLocaleString('en-IN')}
+                    </td>
+                    <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
+                      ₹{slabTax.toLocaleString('en-IN')}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="bg-slate-50/80 font-bold text-slate-900 border-t-2 border-slate-200">
+                <td colSpan={3} className="py-2.5 px-3 text-right">
+                  Income Tax before Rebate:
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
+                  ₹{(activeRegime.normalSlabTax ?? activeRegime.totalTaxBeforeRebate ?? 0).toLocaleString('en-IN')}
+                </td>
+              </tr>
+              {activeRegime.rebate87A > 0 && (
+                <tr className="font-semibold text-emerald-700">
+                  <td colSpan={3} className="py-2 px-3 text-right">
+                    Less: Rebate under section 87A:
+                  </td>
+                  <td className="py-2 px-3 text-right font-mono">
+                    -₹{activeRegime.rebate87A.toLocaleString('en-IN')}
+                  </td>
+                </tr>
+              )}
+              {activeRegime.netSurcharge > 0 && (
+                <tr className="font-semibold text-amber-800">
+                  <td colSpan={3} className="py-2 px-3 text-right">
+                    Add: Surcharge:
+                  </td>
+                  <td className="py-2 px-3 text-right font-mono">
+                    +₹{activeRegime.netSurcharge.toLocaleString('en-IN')}
+                  </td>
+                </tr>
+              )}
+              <tr className="font-semibold text-slate-700">
+                <td colSpan={3} className="py-2 px-3 text-right">
+                  Add: Health and Education Cess (4%):
+                </td>
+                <td className="py-2 px-3 text-right font-mono text-slate-900">
+                  +₹{(activeRegime.cess ?? activeRegime.healthAndEducationCess ?? 0).toLocaleString('en-IN')}
+                </td>
+              </tr>
+              <tr className="bg-emerald-50 text-emerald-950 font-black border-t-2 border-emerald-300">
+                <td colSpan={3} className="py-3 px-3 text-right text-xs">
+                  Total Tax Liability (rounded u/s 288B):
+                </td>
+                <td className="py-3 px-3 text-right font-mono text-sm text-emerald-800">
+                  ₹{activeTax.toLocaleString('en-IN')}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
     </div>
   );

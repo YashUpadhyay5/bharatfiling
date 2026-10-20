@@ -6,6 +6,10 @@
 import { extractDistinctiveWords, stripEntitySuffixes } from './nameSimilarity.service.js';
 import { MANDATORY_ENTITY_SUFFIXES, PROHIBITED_EMBLEMS_WORDS } from '../config/namingRules.js';
 
+function toTitleCase(str = '') {
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+}
+
 // Creative coined and aspirational prefixes suitable for Indian companies
 const COINED_PREFIXES = [
   'Nex',
@@ -41,7 +45,8 @@ const INDUSTRY_DESCRIPTORS = {
 
 export function generateAlternativeSuggestions(proposedName = '', entityType = 'private_limited', industry = 'general') {
   const stripped = stripEntitySuffixes(proposedName);
-  const distinctive = extractDistinctiveWords(proposedName) || stripped.split(' ')[0] || 'Bharat';
+  const rawDistinctive = extractDistinctiveWords(proposedName) || stripped.split(' ')[0] || 'Bharat';
+  const distinctive = toTitleCase(rawDistinctive);
   const entityConfig = MANDATORY_ENTITY_SUFFIXES[entityType] || MANDATORY_ENTITY_SUFFIXES.private_limited;
   const canonicalSuffix = entityConfig.canonicalSuffix ? ` ${entityConfig.canonicalSuffix}` : '';
 

@@ -1,81 +1,107 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ShieldCheck,
   Search,
   Building2,
   CheckCircle2,
   AlertTriangle,
-  XCircle,
   ExternalLink,
-  Printer,
   Sparkles,
   ArrowRight,
-  Info,
-  Scale,
-  RefreshCw,
-  HelpCircle,
-  Sliders,
+  ChevronDown,
+  X,
   Check,
+  Copy,
+  MapPin,
+  Calendar,
+  Layers,
+  Coins,
+  ShieldCheck,
+  Building,
+  Info,
 } from 'lucide-react';
 import Breadcrumbs from '../../components/common/Breadcrumbs.jsx';
-import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
-import FirmNamePrintReport from '../../components/nameChecker/FirmNamePrintReport.jsx';
-import FirmNameFAQ from '../../components/nameChecker/FirmNameFAQ.jsx';
-import {
-  ENTITY_TYPES,
-  INDUSTRY_OPTIONS,
-  stripEntitySuffixes,
-  extractDistinctiveWord,
-  validateProposedNameInput,
-} from '../../utils/firmNameEngine.js';
 import { api } from '../../services/api.js';
 
 export default function FirmNameCheckerPage() {
-  const [proposedName, setProposedName] = useState('Bharat Technologies');
-  const [entityType, setEntityType] = useState('private_limited');
-  const [industry, setIndustry] = useState('technology');
-
-  // Advanced toggles
-  const [searchOptions, setSearchOptions] = useState({
-    checkMca: true,
-    checkTrademark: true,
-    checkRules: true,
-    generateSuggestions: true,
-  });
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [proposedName, setProposedName] = useState('');
+  const [entityType, setEntityType] = useState('Company'); // Company | LLP | OPC
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
 
   // Search execution state
   const [loading, setLoading] = useState(false);
   const [searchResult, setSearchResult] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [copiedCin, setCopiedCin] = useState(false);
 
-  // Initial auto-check on mount
+  // Live Autocomplete state (Exact IndiaFilings experience)
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [autocompleteLoading, setAutocompleteLoading] = useState(false);
+  const autocompleteRef = useRef(null);
+  const typeDropdownRef = useRef(null);
+
+  // Close dropdowns on click outside
   useEffect(() => {
-    executeSearch('Bharat Technologies', 'private_limited', 'technology');
+    function handleClickOutside(e) {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+      if (typeDropdownRef.current && !typeDropdownRef.current.contains(e.target)) {
+        setShowTypeDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const executeSearch = async (nameToSearch, typeToSearch, indToSearch) => {
-    const trimmed = (nameToSearch || proposedName).trim();
-    const type = typeToSearch || entityType;
-    const ind = indToSearch || industry;
+  // Debounced Autocomplete Handler (like IndiaFilings)
+  useEffect(() => {
+    const query = proposedName.trim();
+    if (query.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
 
-    const validation = validateProposedNameInput(trimmed);
-    if (!validation.isValid) {
-      setErrorMessage(validation.errors[0]);
+    const timer = setTimeout(async () => {
+      setAutocompleteLoading(true);
+      try {
+        const res = await api.autocompleteFirmName(query);
+        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setSuggestions(res.data);
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      } catch (err) {
+        console.warn('[FirmNameChecker] Autocomplete fetch error:', err);
+      } finally {
+        setAutocompleteLoading(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [proposedName]);
+
+  const executeSearch = async (nameToSearch, typeToSearch) => {
+    const trimmed = (nameToSearch !== undefined ? nameToSearch : proposedName).trim();
+    const type = typeToSearch || entityType;
+
+    if (!trimmed || trimmed.length < 2) {
+      setErrorMessage('Please enter at least 2 characters to search.');
       return;
     }
 
     setErrorMessage('');
+    setShowSuggestions(false);
     setLoading(true);
 
     try {
-      // Call backend API
       const res = await api.checkFirmName({
         proposedName: trimmed,
-        entityType: type,
-        industry: ind,
-        searchOptions,
+        entityType: type === 'Company' ? 'private_limited' : type === 'LLP' ? 'llp' : 'opc',
       });
 
       if (res && res.success && res.data) {
@@ -84,111 +110,9 @@ export default function FirmNameCheckerPage() {
         throw new Error(res?.error?.message || 'Failed to complete name check.');
       }
     } catch (err) {
-      console.warn('Backend API unavailable, falling back to client evaluation heuristics:', err);
-      // Client-side fallback heuristic
-      const stripped = stripEntitySuffixes(trimmed);
-      const distinctive = extractDistinctiveWord(trimmed);
-      const isBenchmarkExact = stripped.includes('bharat technologies') || stripped.includes('bharat tech');
-
-      setSearchResult({
-        query: {
-          proposedName: trimmed,
-          normalizedName: stripped,
-          strippedName: stripped,
-          distinctiveWord: distinctive,
-          entityType: type,
-          industry: ind,
-          timestamp: new Date().toISOString(),
-        },
-        assessment: {
-          overallRisk: isBenchmarkExact ? 'HIGH' : 'LOW',
-          riskScore: isBenchmarkExact ? 80 : 20,
-          probabilityRating: isBenchmarkExact ? 'UNLIKELY' : 'HIGH_VIABILITY',
-          summaryHeadline: isBenchmarkExact
-            ? 'Conflict Detected With Existing Corporate Entity'
-            : 'Favorable Preliminary Availability Screen',
-          summaryDescription: isBenchmarkExact
-            ? 'A registered company with an identical or virtually identical base name already exists in the MCA corporate registry.'
-            : 'No identical conflicts detected against benchmark corporate records and trademark classifications.',
-          distinctiveWordIdentified: distinctive,
-        },
-        rulesCheck: {
-          warnings: isBenchmarkExact
-            ? [
-                {
-                  code: 'RULE_8_SIMILARITY',
-                  severity: 'HIGH',
-                  title: 'Name Resembles Existing Company',
-                  message: 'Under Rule 8(1), names too nearly resembling an existing company will be rejected by CRC.',
-                  legalReference: 'Companies Act 2013 Rule 8(1)',
-                },
-              ]
-            : [],
-          clearances: [{ code: 'CLEAR', title: 'Rules Satisfied', message: 'No statutory bar detected.' }],
-        },
-        mcaSearch: {
-          provider: 'MCA Corporate Central Registry',
-          status: 'SUCCESS',
-          exactMatches: isBenchmarkExact
-            ? [
-                {
-                  name: 'Bharat Technologies Private Limited',
-                  identifier: 'U72200DL2018PTC334512',
-                  roc: 'Delhi',
-                  status: 'Active',
-                  entityType: 'Company',
-                  similarityScore: 100,
-                },
-              ]
-            : [],
-          similarMatches: [
-            {
-              name: 'Bharat Tech Solutions Limited',
-              identifier: 'L72900MH2015PLC261290',
-              roc: 'Mumbai',
-              status: 'Active',
-              similarityScore: 78,
-            },
-            {
-              name: 'Bharat Innovations LLP',
-              identifier: 'AAB-1923',
-              roc: 'Bangalore',
-              status: 'Active',
-              similarityScore: 65,
-            },
-          ],
-        },
-        trademarkSearch: {
-          provider: 'IP India Trademark Registry',
-          status: 'SUCCESS',
-          recommendedClasses: [{ classNumber: 9, description: 'Software & Electronics' }, { classNumber: 42, description: 'IT & Cloud Services' }],
-          exactConflicts: [],
-          similarConflicts: [],
-        },
-        alternativeSuggestions: [
-          {
-            name: `Nex ${distinctive || 'Astra'} Technologies Private Limited`,
-            strategy: 'Coined Prefix Addition',
-            rationale: 'Satisfies Rule 8(2)(b) distinctiveness test.',
-          },
-          {
-            name: `Vyom ${distinctive || 'Astra'} Infotech Private Limited`,
-            strategy: 'Hybrid Coined Distinctiveness',
-            rationale: 'Unique coined base minimizes trademark overlap.',
-          },
-          {
-            name: `${distinctive || 'Astra'} Systems Private Limited`,
-            strategy: 'Activity Alignment',
-            rationale: 'Clear statutory main business activity description.',
-          },
-        ],
-        officialVerificationLinks: {
-          mcaCheckUrl: 'https://www.mca.gov.in/mcafoportal/showCheckCompanyName.do',
-          ipIndiaSearchUrl: 'https://tmrsearch.ipindia.gov.in/tmrpublicsearch/',
-        },
-        disclaimer:
-          'IMPORTANT LEGAL NOTICE: This search is a preliminary computerized screening tool based on statutory heuristic algorithms, benchmark company registries, and Nice Classification mappings. It does not constitute a guaranteed name reservation or legal advice. Final name approval rests solely with the Registrar of Companies (ROC), Central Registration Centre (CRC), Ministry of Corporate Affairs (MCA), and Trade Marks Registry (CGPDTM), Government of India.',
-      });
+      console.warn('[FirmNameChecker] Search error:', err);
+      const msg = err?.data?.error?.message || err?.message || 'Unable to retrieve company master data. Please verify your connection and try again.';
+      setErrorMessage(msg);
     } finally {
       setLoading(false);
     }
@@ -199,686 +123,653 @@ export default function FirmNameCheckerPage() {
     executeSearch();
   };
 
-  const handleSuggestionSelect = (suggestedName) => {
+  const handleSuggestionClick = (company) => {
+    const companyTitle = company.companyName || company.name || '';
+    setProposedName(companyTitle);
+    setShowSuggestions(false);
+    executeSearch(companyTitle);
+  };
+
+  const handleAlternativeSelect = (suggestedName) => {
     setProposedName(suggestedName);
-    executeSearch(suggestedName, entityType, industry);
-    window.scrollTo({ top: 380, behavior: 'smooth' });
+    window.scrollTo({ top: 120, behavior: 'smooth' });
+    executeSearch(suggestedName);
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleCopyCin = (cin) => {
+    if (!cin) return;
+    navigator.clipboard.writeText(cin);
+    setCopiedCin(true);
+    setTimeout(() => setCopiedCin(false), 2000);
   };
 
-  const selectedEntityConfig = ENTITY_TYPES.find((e) => e.id === entityType) || ENTITY_TYPES[0];
-  const selectedIndustryConfig = INDUSTRY_OPTIONS.find((i) => i.id === industry) || INDUSTRY_OPTIONS[0];
+  // Resolve Master Data & Matches
+  const exactMatch = searchResult?.mcaSearch?.exactMatches?.[0];
+  const similarMatch = searchResult?.mcaSearch?.similarMatches?.[0];
+  
+  const masterData = searchResult?.masterCompanyData || (exactMatch ? {
+    companyName: exactMatch.name,
+    cin: exactMatch.identifier,
+    roc: exactMatch.roc,
+    state: exactMatch.state,
+    status: exactMatch.status || 'Active',
+    classType: exactMatch.classType || 'Company',
+    entityType: exactMatch.entityType || 'Company',
+    incorporationYear: exactMatch.incYear,
+    authorizedCapital: exactMatch.authorizedCapital,
+    paidUpCapital: exactMatch.paidUpCapital,
+    registeredAddress: exactMatch.registeredAddress
+  } : (similarMatch && searchResult?.assessment?.overallRisk === 'HIGH' ? {
+    companyName: similarMatch.name,
+    cin: similarMatch.identifier,
+    roc: similarMatch.roc,
+    state: similarMatch.state,
+    status: similarMatch.status || 'Active',
+    classType: similarMatch.classType || 'Company',
+    entityType: similarMatch.entityType || 'Company',
+    incorporationYear: similarMatch.incYear,
+    authorizedCapital: similarMatch.authorizedCapital,
+    paidUpCapital: similarMatch.paidUpCapital,
+    registeredAddress: similarMatch.registeredAddress
+  } : null));
+
+  const exactTm = searchResult?.trademarkSearch?.exactConflicts?.[0];
+  const similarTm = searchResult?.trademarkSearch?.similarConflicts?.[0];
+
+  const isRegistered = !!masterData || (searchResult?.mcaSearch?.exactMatches?.length > 0);
+  const hasTmConflict = (searchResult?.trademarkSearch?.exactConflicts?.length > 0) || (searchResult?.trademarkSearch?.similarConflicts?.length > 0 && searchResult?.assessment?.overallRisk === 'HIGH');
+  const hasRulesViolation = searchResult?.rulesCheck?.hasCriticalWarnings || searchResult?.rulesCheck?.hasHighWarnings;
+  const isUnavailable = !isRegistered && (hasTmConflict || hasRulesViolation || searchResult?.assessment?.overallRisk === 'HIGH' || searchResult?.assessment?.overallRisk === 'CRITICAL');
+  const isPreliminary = searchResult?.assessment?.isPreliminaryClearance || searchResult?.assessment?.probabilityRating === 'PRELIMINARY_CLEARANCE';
+  const isAvailable = !isRegistered && !isUnavailable && (searchResult?.assessment?.overallRisk === 'LOW' || searchResult?.assessment?.isAvailable || isPreliminary);
+  const aiCompliance = searchResult?.aiCompliance;
+  const suggestionsList = searchResult?.alternativeSuggestions || [];
 
   return (
-    <div className="min-h-screen bg-slate-50/60 font-sans pb-20">
-      {/* Hidden A4 Printable Report Component */}
-      <FirmNamePrintReport result={searchResult} />
-
-      {/* Screen Interactive View */}
-      <div className="print:hidden">
-        {/* Top Trust Ribbon */}
-        <div className="bg-[#EBF3FF] border-b border-blue-100 py-2.5 px-4 text-center">
-          <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs text-slate-700">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-blue-200 text-[#111827] font-bold text-[11px] shadow-2xs">
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-              MCA & TRADEMARK SEARCH
-            </span>
-            <span className="font-medium">
-              Check company, LLP, and business name availability in real time
-            </span>
-            <span className="hidden sm:inline text-slate-300">•</span>
-            <span className="text-blue-700 font-semibold">100% Free Preliminary Check</span>
-          </div>
-        </div>
-
-        {/* Main Content Container */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-8 space-y-6">
-          {/* Breadcrumbs */}
-          <Breadcrumbs
-            items={[
-              { label: 'Tools', path: '/services' },
-              { label: 'Business & Company Name Checker' },
-            ]}
-          />
-
-          {/* Page Header */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Business & Company Name Checker
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
-                Check your proposed business name across MCA company records, registered trademarks, and official naming rules before incorporating.
-              </p>
-            </div>
-
-            {/* Quick Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handlePrint}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs transition cursor-pointer"
-                title="Print or Save PDF Report"
-              >
-                <Printer className="w-3.5 h-3.5 text-slate-600" />
-                <span>Print Report</span>
-              </button>
-              <a
-                href="https://www.mca.gov.in/mcafoportal/showCheckCompanyName.do"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 shadow-2xs transition"
-              >
-                <Building2 className="w-3.5 h-3.5" />
-                <span>MCA Portal</span>
-                <ExternalLink className="w-3 h-3 text-blue-400" />
-              </a>
-              <a
-                href="https://tmrsearch.ipindia.gov.in/tmrpublicsearch/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 shadow-2xs transition"
-              >
-                <Scale className="w-3.5 h-3.5" />
-                <span>IP India Trademark</span>
-                <ExternalLink className="w-3 h-3 text-purple-400" />
-              </a>
-            </div>
+    <div className="min-h-screen bg-[#F8FAFC]">
+      {/* Hero Section - Matching IndiaFilings Clean Aesthetic */}
+      <section className="bg-gradient-to-b from-[#EBF5FB] via-[#F2F8FD] to-[#F8FAFC] pt-8 pb-12 border-b border-slate-200/60">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+          <div className="flex justify-center mb-4">
+            <Breadcrumbs
+              items={[
+                { label: 'Home', href: '/' },
+                { label: 'Free Compliance Tools', href: '/tools' },
+                { label: 'Company Name Search' },
+              ]}
+            />
           </div>
 
-          {/* MAIN INTERACTIVE FORM CARD */}
-          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 sm:p-8">
-            <form onSubmit={handleFormSubmit} className="space-y-6">
-              {/* Step 1: Proposed Name Input */}
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold flex items-center justify-center">
-                      1
-                    </span>
-                    Proposed Business or Company Name
-                  </label>
-                  <span className="text-[11px] font-mono text-slate-400">
-                    {proposedName.length}/120
-                  </span>
-                </div>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={proposedName}
-                    onChange={(e) => {
-                      setProposedName(e.target.value);
-                      if (errorMessage) setErrorMessage('');
-                    }}
-                    placeholder="e.g., Bharat Technologies, Zenith Finserve"
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-300 text-sm font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                    {proposedName.trim().length >= 2 && (
-                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-200/80 text-slate-700 font-mono">
-                        Base: {stripEntitySuffixes(proposedName) || '—'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {errorMessage ? (
-                  <p className="text-xs text-rose-600 mt-1.5 flex items-center gap-1 font-medium">
-                    <AlertTriangle className="w-3.5 h-3.5" /> {errorMessage}
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-slate-500 mt-1.5">
-                    Enter the name without legal suffixes like Pvt Ltd or LLP.
-                  </p>
-                )}
-              </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+            Business Information Platform
+          </h1>
+          <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Your One-Stop Solution: Instantly verify Company, Trademark, and CIN details of any business in India across 130,000+ official MCA records.
+          </p>
 
-              {/* Step 2: Entity Type Selector (Clean, Uncluttered Tiles) */}
-              <div>
-                <label className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2 mb-2">
-                  <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold flex items-center justify-center">
-                    2
-                  </span>
-                  Select Entity Type
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {ENTITY_TYPES.map((et) => {
-                    const isSelected = entityType === et.id;
-                    return (
-                      <button
-                        key={et.id}
-                        type="button"
-                        onClick={() => setEntityType(et.id)}
-                        className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between min-h-[68px] ${
-                          isSelected
-                            ? 'bg-blue-50/70 border-blue-600 text-blue-950 ring-2 ring-blue-500/20 shadow-xs'
-                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50/60'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-1 w-full">
-                          <span className="text-xs font-bold tracking-tight text-slate-900 leading-snug">
-                            {et.name}
-                          </span>
-                          {isSelected && (
-                            <Check className="w-4 h-4 text-blue-600 shrink-0" />
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
-                          <span className="font-medium">Suffix:</span>
-                          <span className="font-semibold text-slate-700">
-                            {et.suffix || 'None'}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Step 3: Target Industry Selector (Clean & Compact) */}
-              <div>
-                <label className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2 mb-1.5">
-                  <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold flex items-center justify-center">
-                    3
-                  </span>
-                  Industry / Business Activity
-                </label>
-                <div className="relative">
-                  <select
-                    value={industry}
-                    onChange={(e) => setIndustry(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-300 text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
-                  >
-                    {INDUSTRY_OPTIONS.map((ind) => (
-                      <option key={ind.id} value={ind.id}>
-                        {ind.icon} {ind.label} (Nice Classes: {ind.classes.join(', ')})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Searches IP India trademark classes: <strong className="text-slate-700">Nice Class {selectedIndustryConfig.classes.join(' & ')}</strong>
-                </p>
-              </div>
-
-              {/* Step 4: Search Options Collapsible */}
-              <div className="border-t border-slate-100 pt-3">
+          {/* Capsule Search Bar - Exact IndiaFilings Layout */}
+          <div className="mt-8 max-w-3xl mx-auto relative" ref={autocompleteRef}>
+            <form
+              onSubmit={handleFormSubmit}
+              className="bg-white rounded-full shadow-lg shadow-blue-900/5 border border-slate-300/80 p-1.5 flex items-center transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100"
+            >
+              {/* Type Dropdown Trigger (Company ▾) */}
+              <div className="relative" ref={typeDropdownRef}>
                 <button
                   type="button"
-                  onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer"
+                  onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+                  className="flex items-center gap-1.5 px-4 py-2 text-slate-700 text-sm font-semibold hover:bg-slate-100/70 rounded-full transition-colors whitespace-nowrap"
                 >
-                  <Sliders className="w-3.5 h-3.5 text-slate-500" />
-                  <span>{showAdvancedOptions ? 'Hide Search Filters' : 'Configure Search Filters'}</span>
-                  <span className="text-[10px] text-slate-400 font-normal">
-                    ({Object.values(searchOptions).filter(Boolean).length}/4 active)
-                  </span>
+                  <span>{entityType}</span>
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
                 </button>
 
-                {showAdvancedOptions && (
-                  <div className="mt-2.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
-                      <input
-                        type="checkbox"
-                        checked={searchOptions.checkMca}
-                        onChange={(e) => setSearchOptions({ ...searchOptions, checkMca: e.target.checked })}
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span>MCA Registry</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
-                      <input
-                        type="checkbox"
-                        checked={searchOptions.checkTrademark}
-                        onChange={(e) => setSearchOptions({ ...searchOptions, checkTrademark: e.target.checked })}
-                        className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
-                      />
-                      <span>IP India Trademarks</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
-                      <input
-                        type="checkbox"
-                        checked={searchOptions.checkRules}
-                        onChange={(e) => setSearchOptions({ ...searchOptions, checkRules: e.target.checked })}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>Naming Rules (Rule 8)</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
-                      <input
-                        type="checkbox"
-                        checked={searchOptions.generateSuggestions}
-                        onChange={(e) => setSearchOptions({ ...searchOptions, generateSuggestions: e.target.checked })}
-                        className="rounded border-slate-300 text-amber-600 focus:ring-amber-500"
-                      />
-                      <span>Alternative Ideas</span>
-                    </label>
+                {showTypeDropdown && (
+                  <div className="absolute top-full left-0 mt-2 w-44 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-50 text-left">
+                    {['Company', 'LLP', 'OPC'].map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => {
+                          setEntityType(t);
+                          setShowTypeDropdown(false);
+                        }}
+                        className={`w-full px-4 py-2 text-sm text-left flex items-center justify-between hover:bg-slate-50 transition-colors ${
+                          entityType === t ? 'text-blue-600 font-semibold bg-blue-50/50' : 'text-slate-700'
+                        }`}
+                      >
+                        <span>{t}</span>
+                        {entityType === t && <Check className="w-4 h-4 text-blue-600" />}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Submit CTA */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Checks official MCA records & trademark registry</span>
-                </div>
+              {/* Subtle vertical separator */}
+              <div className="h-6 w-px bg-slate-200 mx-1" />
 
+              {/* Main Search Input */}
+              <div className="flex-1 flex items-center px-3 relative">
+                <Search className="w-5 h-5 text-slate-400 mr-2 flex-shrink-0" />
+                <input
+                  type="text"
+                  value={proposedName}
+                  onChange={(e) => setProposedName(e.target.value)}
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowSuggestions(true);
+                  }}
+                  placeholder="Enter Company Name or CIN Number (e.g. Adani, Tata, Zomato...)"
+                  className="w-full bg-transparent text-slate-900 placeholder-slate-400 font-medium text-sm sm:text-base outline-none pr-8"
+                  autoComplete="off"
+                />
+                {proposedName && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProposedName('');
+                      setSuggestions([]);
+                      setShowSuggestions(false);
+                    }}
+                    className="absolute right-3 p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Blue Search Action Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white px-6 sm:px-7 py-2.5 rounded-full font-semibold text-sm flex items-center gap-2 shadow-sm transition-all flex-shrink-0 disabled:opacity-60"
+              >
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Search className="w-4 h-4" />
+                    <span>Search</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Error banner if any */}
+            {errorMessage && (
+              <div className="mt-3 text-xs sm:text-sm text-red-600 bg-red-50 py-2 px-4 rounded-xl border border-red-200 inline-flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 text-red-500" />
+                <span>{errorMessage}</span>
                 <button
-                  type="submit"
-                  disabled={loading || !proposedName.trim()}
-                  className="px-6 py-2.5 rounded-xl bg-[#111827] hover:bg-black text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  type="button"
+                  onClick={() => executeSearch()}
+                  className="underline font-semibold ml-2 hover:text-red-800 cursor-pointer"
                 >
-                  {loading ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin text-blue-400" />
-                      <span>Checking Availability...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Search className="w-4 h-4 text-blue-400" />
-                      <span>Check Name Availability</span>
-                      <ArrowRight className="w-4 h-4 text-slate-400" />
-                    </>
-                  )}
+                  Retry
                 </button>
               </div>
-            </form>
+            )}
+
+            {/* Autocomplete Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden z-50 text-left divide-y divide-slate-100 animate-in fade-in slide-in-from-top-2 duration-150">
+                {suggestions.map((item, idx) => (
+                  <div
+                    key={item.identifier || item.cin || idx}
+                    onClick={() => handleSuggestionClick(item)}
+                    className="p-3.5 sm:px-4 sm:py-3 hover:bg-slate-50 cursor-pointer transition-colors flex items-center justify-between group"
+                  >
+                    <div className="flex-1 pr-3">
+                      <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 tracking-tight uppercase">
+                        {item.companyName || item.name}
+                      </div>
+                      <div className="text-xs text-slate-500 font-mono mt-0.5">
+                        {item.identifier || item.cin || 'CIN Pending'} • {item.roc || item.state || 'MCA'}
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Company
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* RESULTS DISPLAY SECTION */}
-          {searchResult && (
-            <div className="space-y-6">
-              {/* Overall Assessment Hero Card */}
-              <div
-                className={`rounded-3xl border p-6 sm:p-7 transition-all ${
-                  searchResult.assessment.overallRisk === 'LOW'
-                    ? 'bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/30 border-emerald-200'
-                    : searchResult.assessment.overallRisk === 'MEDIUM'
-                    ? 'bg-gradient-to-br from-blue-50/90 via-white to-blue-50/30 border-blue-200'
-                    : searchResult.assessment.overallRisk === 'HIGH'
-                    ? 'bg-gradient-to-br from-amber-50/90 via-white to-amber-50/30 border-amber-200'
-                    : 'bg-gradient-to-br from-rose-50/90 via-white to-rose-50/30 border-rose-200'
-                }`}
+          {/* Quick popular entity chips */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500">
+            <span className="font-medium text-slate-400">Popular Searches:</span>
+            {['Adani Enterprises', 'Tata Consultancy Services', 'Reliance Industries', 'Zomato', 'HDFC Bank', 'Infosys'].map((brand) => (
+              <button
+                key={brand}
+                type="button"
+                onClick={() => {
+                  setProposedName(brand);
+                  executeSearch(brand);
+                }}
+                className="bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-full transition-colors font-medium shadow-2xs"
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="space-y-2 max-w-2xl">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide ${
-                          searchResult.assessment.overallRisk === 'LOW'
-                            ? 'bg-emerald-600 text-white'
-                            : searchResult.assessment.overallRisk === 'MEDIUM'
-                            ? 'bg-blue-600 text-white'
-                            : searchResult.assessment.overallRisk === 'HIGH'
-                            ? 'bg-amber-600 text-white'
-                            : 'bg-rose-600 text-white'
-                        }`}
-                      >
-                        {searchResult.assessment.overallRisk === 'LOW'
-                          ? 'Available • High Likelihood'
-                          : searchResult.assessment.overallRisk === 'MEDIUM'
-                          ? 'Moderate Similarity'
-                          : searchResult.assessment.overallRisk === 'HIGH'
-                          ? 'Conflict Found • Low Likelihood'
-                          : 'Statutory Bar Detected'}
+                {brand}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Main Results Container */}
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {loading && (
+          <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
+            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <h3 className="text-base font-semibold text-slate-800">Searching Official MCA Corporate Master Records...</h3>
+            <p className="text-sm text-slate-500 mt-1">Verifying CIN, ROC jurisdiction, and Rule 8 statutory compliance across 130,000+ companies.</p>
+          </div>
+        )}
+
+        {/* State A: Result Available */}
+        {!loading && searchResult && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Registered Entity Card */}
+            {masterData && (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                {/* Header Banner */}
+                <div className="bg-slate-900 text-white p-6 sm:p-7 flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        (masterData.status || '').toLowerCase().includes('strike')
+                          ? 'bg-red-400/20 text-red-300 border border-red-400/30'
+                          : 'bg-emerald-400/20 text-emerald-300 border border-emerald-400/30'
+                      }`}>
+                        ● {masterData.status?.toUpperCase() || 'ACTIVE'}
                       </span>
-                      {searchResult.assessment.distinctiveWordIdentified && (
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700">
-                          Coined Word: <strong>"{searchResult.assessment.distinctiveWordIdentified}"</strong>
-                        </span>
-                      )}
+                      <span className="text-xs text-slate-400">Official MCA Corporate Master Data</span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                      {searchResult.assessment.summaryHeadline}
+                    <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase">
+                      {masterData.companyName}
                     </h2>
-                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                      {searchResult.assessment.summaryDescription}
+                    <p className="text-xs sm:text-sm text-slate-300 mt-1 flex items-center gap-1.5">
+                      <Building2 className="w-4 h-4 text-blue-400" />
+                      Registered under {masterData.roc || 'ROC'} {masterData.state ? `(${masterData.state})` : ''}
                     </p>
                   </div>
 
-                  {/* Viability Gauge / Score Box */}
-                  <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-center min-w-[140px]">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      Likelihood
-                    </span>
-                    <div className="text-3xl font-black text-slate-900 my-0.5">
-                      {100 - searchResult.assessment.riskScore}%
-                    </div>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block ${
-                        searchResult.assessment.overallRisk === 'LOW'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : searchResult.assessment.overallRisk === 'MEDIUM'
-                          ? 'bg-blue-100 text-blue-800'
-                          : searchResult.assessment.overallRisk === 'HIGH'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-rose-100 text-rose-800'
-                      }`}
+                  <div className="flex items-center gap-2">
+                    {masterData.cin && (
+                      <button
+                        type="button"
+                        onClick={() => handleCopyCin(masterData.cin)}
+                        className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-slate-700"
+                        title="Copy CIN to clipboard"
+                      >
+                        {copiedCin ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedCin ? 'Copied!' : 'Copy CIN'}</span>
+                      </button>
+                    )}
+                    <a
+                      href={`https://www.mca.gov.in/mcafoportal/showCheckCompanyName.do?name=${encodeURIComponent(masterData.companyName)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors"
                     >
-                      {searchResult.assessment.overallRisk === 'LOW'
-                        ? 'High Viability'
-                        : searchResult.assessment.overallRisk === 'MEDIUM'
-                        ? 'Moderate'
-                        : searchResult.assessment.overallRisk === 'HIGH'
-                        ? 'Low Viability'
-                        : 'Statutory Bar'}
-                    </span>
+                      <span>Verify on MCA</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                   </div>
                 </div>
 
-                {/* Clean, 1-Line Notice */}
-                <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center gap-2 text-xs text-slate-500">
-                  <Info className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <p className="text-[11px]">
-                    Preliminary check based on public MCA and trademark records. Official name approval is subject to MCA review during SPICe+ filing.
-                  </p>
-                </div>
-              </div>
+                {/* 4-Box Master Data Statutory Grid */}
+                <div className="p-6 sm:p-7">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                      <span className="text-xs text-slate-500 font-medium block">Corporate Identification Number</span>
+                      <span className="text-sm font-bold text-slate-900 font-mono mt-1 block select-all">
+                        {masterData.cin || 'Pending'}
+                      </span>
+                    </div>
 
-              {/* Grid: MCA Corporate Registry + IP India Trademark Results */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* CARD 1: MCA Corporate Registry Screening */}
-                <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-100">
-                        <Building2 className="w-4 h-4" />
-                      </div>
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                      <span className="text-xs text-slate-500 font-medium block">Company Class</span>
+                      <span className="text-sm font-semibold text-slate-900 mt-1 block">
+                        {masterData.classType || 'Public / Private'}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                      <span className="text-xs text-slate-500 font-medium block">Incorporation Year</span>
+                      <span className="text-sm font-semibold text-slate-900 mt-1 block">
+                        {masterData.incorporationYear || masterData.incYear || 'Registered'}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                      <span className="text-xs text-slate-500 font-medium block">Authorized / Paid Capital</span>
+                      <span className="text-sm font-semibold text-slate-900 mt-1 block">
+                        {masterData.authorizedCapital ? `₹${Number(masterData.authorizedCapital).toLocaleString('en-IN')}` : '₹1,00,000'} / {masterData.paidUpCapital ? `₹${Number(masterData.paidUpCapital).toLocaleString('en-IN')}` : '₹1,00,000'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Registered Office Address */}
+                  {masterData.registeredAddress && (
+                    <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200 flex items-start gap-3 mb-6">
+                      <MapPin className="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900">MCA Company & LLP Records</h3>
-                        <p className="text-[11px] text-slate-500">Corporate registry direct match & similarity check</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {searchResult.mcaSearch.exactMatches && searchResult.mcaSearch.exactMatches.length > 0 ? (
-                    <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-950 space-y-2">
-                      <div className="flex items-center gap-1.5 font-bold text-xs text-rose-900">
-                        <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                        <span>Exact Match Found in MCA Registry:</span>
-                      </div>
-                      {searchResult.mcaSearch.exactMatches.map((m, idx) => (
-                        <div key={idx} className="bg-white p-2.5 rounded-xl border border-rose-200 text-xs">
-                          <p className="font-extrabold text-slate-900">{m.name}</p>
-                          <p className="text-[11px] text-slate-500 font-mono mt-0.5">
-                            CIN: {m.identifier} • ROC: {m.roc} • Status: {m.status}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <div className="text-xs">
-                        <p className="font-bold text-emerald-900">No Identical Company Found</p>
-                        <p className="text-[11px] text-emerald-800">
-                          No existing company or LLP has an identical name in active registry records.
+                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                          Registered Office Address
+                        </span>
+                        <p className="text-sm text-slate-700 mt-0.5 leading-relaxed">
+                          {masterData.registeredAddress}
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {/* Similar Matches Table */}
-                  {searchResult.mcaSearch.similarMatches && searchResult.mcaSearch.similarMatches.length > 0 && (
-                    <div className="space-y-1.5">
-                      <span className="text-xs font-bold text-slate-700">Similar Corporate Names:</span>
-                      <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                        {searchResult.mcaSearch.similarMatches.map((sim, idx) => (
-                          <div
-                            key={idx}
-                            className="p-2.5 rounded-xl border border-slate-100 bg-slate-50/60 flex items-center justify-between text-xs"
-                          >
-                            <div>
-                              <p className="font-semibold text-slate-900 text-xs">{sim.name}</p>
-                              <p className="text-[10px] text-slate-400 font-mono">
-                                {sim.identifier} • ROC: {sim.roc}
-                              </p>
-                            </div>
-                            <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                sim.similarityScore >= 80
-                                  ? 'bg-rose-100 text-rose-800'
-                                  : sim.similarityScore >= 65
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-slate-200 text-slate-700'
-                              }`}
-                            >
-                              {sim.similarityScore}% Similar
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                  {/* Statutory Availability Notice */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-bold text-amber-900">Name Unavailable for New Incorporation</h4>
+                      <p className="text-xs sm:text-sm text-amber-800 mt-0.5 leading-relaxed">
+                        This business name is already actively registered with the Registrar of Companies (ROC). Under Rule 8 of the Companies (Incorporation) Rules, 2014, CRC examiners reject any identical or deceptively similar name reservation.
+                      </p>
                     </div>
-                  )}
-
-                  <div className="pt-2 border-t border-slate-100">
-                    <a
-                      href={searchResult.officialVerificationLinks.mcaCheckUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800"
-                    >
-                      <span>Verify on official MCA portal</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
                   </div>
-                </div>
 
-                {/* CARD 2: IP India Trademark Registry Screening */}
-                <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-100">
-                        <Scale className="w-4 h-4" />
-                      </div>
+                  {exactTm && (
+                    <div className="mt-3 bg-red-50 border border-red-200 rounded-xl p-3.5 flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900">IP India Trademark Search</h3>
-                        <p className="text-[11px] text-slate-500">Searched in Nice Classes {selectedIndustryConfig.classes.join(', ')}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Exact / Similar Conflicts */}
-                  {searchResult.trademarkSearch.exactConflicts && searchResult.trademarkSearch.exactConflicts.length > 0 ? (
-                    <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-950 space-y-2">
-                      <div className="flex items-center gap-1.5 font-bold text-xs text-rose-900">
-                        <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                        <span>Conflicting Registered Mark Found:</span>
-                      </div>
-                      {searchResult.trademarkSearch.exactConflicts.map((c, idx) => (
-                        <div key={idx} className="bg-white p-2.5 rounded-xl border border-rose-200 text-xs">
-                          <p className="font-extrabold text-slate-900">
-                            {c.mark} <span className="font-normal text-slate-500">(Class {c.classNumber})</span>
-                          </p>
-                          <p className="text-[11px] text-slate-600 mt-0.5">{c.reason}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <div className="text-xs">
-                        <p className="font-bold text-emerald-900">No Conflicting Trademarks Found</p>
-                        <p className="text-[11px] text-emerald-800">
-                          No registered mark conflict detected in Nice Classes {selectedIndustryConfig.classes.join(' & ')}.
+                        <h4 className="text-xs font-bold text-red-900 uppercase tracking-wide">Registered Trademark Conflict</h4>
+                        <p className="text-xs text-red-800 mt-0.5 leading-relaxed">
+                          Mark &ldquo;<strong>{exactTm.mark}</strong>&rdquo; is also actively registered with IP India in Class {exactTm.classNumber} ({exactTm.goodsServices || 'Goods & Services'}). CRC officers will cite Section 11 of the Trade Marks Act 1999.
                         </p>
                       </div>
                     </div>
                   )}
-
-                  <div className="pt-2 border-t border-slate-100">
-                    <a
-                      href={searchResult.officialVerificationLinks.ipIndiaSearchUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 hover:text-purple-900"
-                    >
-                      <span>Search IP India trademark portal</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
                 </div>
               </div>
+            )}
 
-              {/* CARD 3: Statutory Naming Rules & Clearance Checks */}
-              <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center border border-indigo-100">
-                      <ShieldCheck className="w-4 h-4" />
+            {/* Case B: Name Unavailable Due to Trademark or Statutory Conflict */}
+            {isUnavailable && (
+              <div className="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden p-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-red-100 text-red-700 rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <X className="w-7 h-7" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-slate-900">
-                        Naming Rules & Statutory Compliance
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Rule 8, Emblems Act & regulatory keyword checks
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 uppercase tracking-wide">
+                        Not Available for Reservation
+                      </span>
+                      <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 uppercase">
+                        {searchResult.query?.proposedName}
+                      </h2>
+                      <p className="text-sm text-slate-600 mt-0.5">
+                        {hasTmConflict
+                          ? `Direct conflict: "${searchResult.query?.proposedName}" conflicts with registered trademark "${exactTm?.mark || similarTm?.mark}" in Class ${exactTm?.classNumber || similarTm?.classNumber || '1'}.`
+                          : searchResult?.assessment?.summaryHeadline || 'Substantial conflict detected under Companies Act Rule 8 / Emblems Act.'}
                       </p>
                     </div>
+                  </div>
+
+                  <a
+                    href="#ai-suggestions"
+                    className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition-all text-sm whitespace-nowrap"
+                  >
+                    <span>View Coined Alternatives</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-xs text-slate-500 font-medium">MCA Company Match</span>
+                    <span className="text-sm font-bold text-slate-700 mt-1 block">
+                      {searchResult?.mcaSearch?.similarMatches?.length > 0
+                        ? `${searchResult.mcaSearch.similarMatches.length} Similar Entities`
+                        : '0 Direct Matches'}
+                    </span>
+                  </div>
+                  <div className="p-3.5 bg-red-50 rounded-xl border border-red-200">
+                    <span className="text-xs text-red-600 font-medium">Trademark Conflict</span>
+                    <span className="text-sm font-bold text-red-700 mt-1 block flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4" /> {exactTm ? `Class ${exactTm.classNumber} (${exactTm.mark})` : 'Conflicting Mark Flagged'}
+                    </span>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-xs text-slate-500 font-medium">Approval Likelihood</span>
+                    <span className="text-sm font-bold text-red-600 mt-1 block">
+                      &lt; 10% (High Rejection Probability)
+                    </span>
                   </div>
                 </div>
 
-                {searchResult.rulesCheck.warnings && searchResult.rulesCheck.warnings.length > 0 ? (
-                  <div className="space-y-2">
-                    {searchResult.rulesCheck.warnings.map((w, idx) => (
-                      <div
-                        key={idx}
-                        className={`p-3 rounded-2xl border text-xs ${
-                          w.severity === 'CRITICAL'
-                            ? 'bg-rose-50 border-rose-200 text-rose-950'
-                            : w.severity === 'HIGH'
-                            ? 'bg-amber-50 border-amber-200 text-amber-950'
-                            : 'bg-blue-50 border-blue-200 text-blue-950'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between font-bold mb-1">
-                          <span className="flex items-center gap-1.5">
-                            <AlertTriangle
-                              className={`w-4 h-4 shrink-0 ${
-                                w.severity === 'CRITICAL'
-                                  ? 'text-rose-600'
-                                  : w.severity === 'HIGH'
-                                  ? 'text-amber-600'
-                                  : 'text-blue-600'
-                              }`}
-                            />
-                            {w.title}
-                          </span>
-                          <span
-                            className={`text-[9px] uppercase px-2 py-0.5 rounded-full font-bold ${
-                              w.severity === 'CRITICAL'
-                                ? 'bg-rose-200 text-rose-800'
-                                : w.severity === 'HIGH'
-                                ? 'bg-amber-200 text-amber-800'
-                                : 'bg-blue-200 text-blue-800'
-                            }`}
-                          >
-                            {w.severity}
-                          </span>
-                        </div>
-                        <p className="text-[11px] leading-relaxed">{w.message}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <div className="text-xs">
-                      <p className="font-bold text-emerald-900">All Standard Naming Rules Cleared</p>
-                      <p className="text-[11px] text-emerald-800">
-                        No prohibited words under Emblems Act, no restricted financial terms, and valid suffix formatting.
-                      </p>
-                    </div>
+                {hasTmConflict && exactTm && (
+                  <div className="mt-4 p-4 bg-red-50/70 rounded-xl border border-red-200 text-xs text-red-800 leading-relaxed">
+                    <span className="font-semibold">IP India Trademark Examiner Finding:</span> Registered under application #{exactTm.applicationNumber || 'TM-REG'} in Class {exactTm.classNumber} ({exactTm.goodsServices || 'Proprietary classification'}). Under Section 11 of Trade Marks Act 1999 and Rule 8(2)(b) of Companies Rules, Central Registration Centre (CRC) rejects names that incorporate registered proprietary trademarks without written NOC.
                   </div>
                 )}
               </div>
+            )}
 
-              {/* CARD 4: Alternative Name Suggestions */}
-              {searchResult.alternativeSuggestions && searchResult.alternativeSuggestions.length > 0 && (
-                <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-100">
-                        <Sparkles className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-900">
-                          Recommended Alternative Names
-                        </h3>
-                        <p className="text-[11px] text-slate-500">
-                          Distinctive variations designed for higher approval rates
-                        </p>
-                      </div>
+            {/* Case C: Name Available for Registration */}
+            {isAvailable && (
+              <div className={`bg-white rounded-2xl border ${isPreliminary ? 'border-amber-300' : 'border-emerald-200'} shadow-sm overflow-hidden p-6 sm:p-8`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-12 h-12 ${isPreliminary ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} rounded-2xl flex items-center justify-center flex-shrink-0`}>
+                      {isPreliminary ? <Info className="w-7 h-7" /> : <CheckCircle2 className="w-7 h-7" />}
+                    </div>
+                    <div>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${isPreliminary ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'} uppercase tracking-wide`}>
+                        {isPreliminary ? 'Preliminary Clearance (Offline Database Verified)' : 'Available for Reservation'}
+                      </span>
+                      <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 uppercase">
+                        {searchResult.query?.proposedName}
+                      </h2>
+                      <p className="text-sm text-slate-600 mt-0.5">
+                        {isPreliminary
+                          ? 'Zero collisions detected across 131,000+ indexed MCA companies. Live online sync was unreachable; final verification via MCA RUN recommended.'
+                          : 'High viability screen: Zero identical corporate records or registered trademark conflicts detected.'}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {searchResult.alternativeSuggestions.map((sug, idx) => (
-                      <div
+                  <Link
+                    to="/services/pvt-ltd-company-registration"
+                    className={`inline-flex items-center justify-center gap-2 ${isPreliminary ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white font-semibold px-6 py-3 rounded-xl shadow-md transition-all text-sm whitespace-nowrap`}
+                  >
+                    <span>{isPreliminary ? 'Proceed with RUN Reservation' : 'Reserve & Incorporate Now'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-xs text-slate-500 font-medium">MCA Collision Check</span>
+                    <span className={`text-sm font-bold ${isPreliminary ? 'text-amber-700' : 'text-emerald-700'} mt-1 block flex items-center gap-1.5`}>
+                      <Check className="w-4 h-4" /> 0 Identical Records
+                    </span>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-xs text-slate-500 font-medium">Trademark Conflict</span>
+                    <span className={`text-sm font-bold ${isPreliminary ? 'text-amber-700' : 'text-emerald-700'} mt-1 block flex items-center gap-1.5`}>
+                      <Check className="w-4 h-4" /> Clear in Nice Classes
+                    </span>
+                  </div>
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-xs text-slate-500 font-medium">Approval Likelihood</span>
+                    <span className={`text-sm font-bold ${isPreliminary ? 'text-amber-700' : 'text-emerald-700'} mt-1 block`}>
+                      {isPreliminary ? '80%+ (Preliminary Database Clearance)' : '95%+ (High Rule 8 Viability)'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* AI Rule 8 Statutory Scrutiny & Brand Alternatives */}
+            <div id="ai-suggestions" className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-7">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">
+                      Rule 8 Statutory Compliance & Coined Brand Suggestions
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Statutory scrutiny powered by MCA guidelines & corporate availability algorithms
+                    </p>
+                  </div>
+                </div>
+                <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                  AI Legal Examiner
+                </span>
+              </div>
+
+              {/* Legal Summary */}
+              {aiCompliance?.legalSummary && (
+                <div className="bg-blue-50/60 border border-blue-200/80 rounded-xl p-4 mb-5">
+                  <h4 className="text-xs font-bold text-blue-900 uppercase tracking-wider mb-1">
+                    Statutory Rule 8 Legal Assessment
+                  </h4>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {aiCompliance.legalSummary}
+                  </p>
+                </div>
+              )}
+
+              {/* Coined Brand Alternatives Pills */}
+              {suggestionsList.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                    Distinctive Coined Names with High Approval Probability (Click to check):
+                  </h4>
+                  <div className="flex flex-wrap gap-2.5">
+                    {suggestionsList.map((sug, idx) => (
+                      <button
                         key={idx}
-                        className="p-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 bg-slate-50/60 hover:bg-slate-50 transition flex flex-col justify-between"
+                        type="button"
+                        onClick={() => handleAlternativeSelect(sug.name)}
+                        className="group inline-flex items-center gap-2 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 hover:text-blue-700 transition-all shadow-2xs"
                       >
-                        <div className="mb-3">
-                          <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block mb-1">
-                            Available Idea
-                          </span>
-                          <p className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                            {sug.name}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleSuggestionSelect(sug.name)}
-                          className="w-full py-1.5 rounded-xl bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                        >
-                          <Search className="w-3 h-3 text-blue-600" />
-                          <span>Check Name</span>
-                        </button>
-                      </div>
+                        <span>{sug.name}</span>
+                        <span className="text-[11px] font-normal text-slate-400 group-hover:text-blue-500 bg-white group-hover:bg-blue-100/60 px-1.5 py-0.5 rounded border border-slate-200/60">
+                          Check ↗
+                        </span>
+                      </button>
                     ))}
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* Consultation / Incorporation CTA Banner */}
-              <div className="rounded-3xl bg-slate-900 text-white p-6 sm:p-8 shadow-sm flex flex-wrap items-center justify-between gap-6">
-                <div className="space-y-1.5 max-w-xl">
-                  <span className="text-xs uppercase font-bold tracking-widest text-orange-400">
-                    Fast-Track Incorporation
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-black tracking-tight">
-                    Ready to Reserve Your Name with the MCA?
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    Our practicing Chartered Accountants & Company Secretaries handle SPICe+ Part A name reservation, DSC generation, MOA/AOA drafting, and complete ROC registration.
-                  </p>
+            {/* Incorporation Assistance CTA Banner */}
+            <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-sm">
+              <div className="text-center sm:text-left">
+                <h3 className="text-lg font-bold">Ready to Register Your Indian Company or LLP?</h3>
+                <p className="text-xs sm:text-sm text-blue-200 mt-1">
+                  Our Senior Chartered Accountants & CS file your MCA SPICe+ Part A, MOA/AOA, and DSC within 48 hours.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/services/pvt-ltd-company-registration"
+                  className="bg-white hover:bg-blue-50 text-blue-900 font-bold px-5 py-2.5 rounded-xl text-sm transition-colors whitespace-nowrap shadow-sm"
+                >
+                  Start Registration (₹1,499)
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* State B: Clean Initial State (Before Search) */}
+        {!loading && !searchResult && (
+          <div className="space-y-10 animate-in fade-in duration-200">
+            {/* 3 Trust & Feature Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+                  <Building2 className="w-5 h-5" />
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    to="/services/company-registration"
-                    className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold shadow-xs transition flex items-center gap-2 cursor-pointer"
-                  >
-                    <span>Reserve Name with CA</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-bold border border-white/20 transition cursor-pointer"
-                  >
-                    <span>Talk to Expert</span>
-                  </Link>
-                </div>
+                <h3 className="text-base font-bold text-slate-900">130,000+ Official MCA Records</h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                  Real-time lookup across the Ministry of Corporate Affairs national database, covering CIN, ROC location, and entity class.
+                </p>
               </div>
 
-              {/* Statutory FAQ Component */}
-              <FirmNameFAQ />
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Rule 8 Statutory Compliance</h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                  Automated checks for phonetic similarity, Emblems & Names Act restrictions, and regulatory sector approvals (RBI, SEBI, IRDAI).
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Instant AI Name Suggestions</h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                  If your preferred corporate name is unavailable, our AI engine suggests coined, distinctive alternatives with high approval likelihood.
+                </p>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
+
+            {/* 4-Step Guide */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-2xs">
+              <h3 className="text-lg font-bold text-slate-900 mb-6 text-center sm:text-left">
+                How MCA Company Name Reservation Works in India
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="relative">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center mb-3">
+                    1
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900">Name Availability</h4>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Check if the name or phonetically similar variation is already registered with MCA or IP India.
+                  </p>
+                </div>
+                <div className="relative">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center mb-3">
+                    2
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900">Rule 8 Clearance</h4>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Ensure the name has a coined distinctive prefix and aligns with the main objects of the enterprise.
+                  </p>
+                </div>
+                <div className="relative">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center mb-3">
+                    3
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900">SPICe+ Part A</h4>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    File the reservation application electronically to the Central Registration Centre (CRC) with ₹1,000 govt fee.
+                  </p>
+                </div>
+                <div className="relative">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center mb-3">
+                    4
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900">Incorporation</h4>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Once approved, the name is reserved for 20 days to file SPICe+ Part B and receive Certificate of Incorporation.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

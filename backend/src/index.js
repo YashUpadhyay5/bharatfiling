@@ -3,7 +3,7 @@ import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { getAllowedOrigins } from './config/cors.js';
+import { corsOptions, isOriginAllowed } from './config/cors.js';
 import path from 'path';
 import fs from 'fs';
 import { ENV } from './config/env.js';
@@ -48,18 +48,14 @@ app.use(
   })
 );
 
-// CORS: explicit allowlist only (never reflect arbitrary origins with credentials)
-const allowedOrigins = getAllowedOrigins();
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      // Same-origin / server-to-server / curl requests carry no Origin header
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-      return cb(null, false);
-    },
-    credentials: true,
-  })
-);
+// CORS: explicit allowlist with credentials, pattern matching, and preflight handling
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 // JSON bodies are small forms; documents go through multipart upload (10 MB cap in multer)
 app.use(express.json({ limit: '1mb' }));

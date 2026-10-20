@@ -34,7 +34,7 @@ export const ENV = {
   JWT_SECRET: requireSecret('JWT_SECRET'),
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
   // Comma-separated list of allowed browser origins. '*' is intentionally not honoured.
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  CORS_ORIGIN: process.env.CORS_ORIGIN || 'https://bharatfiling.onrender.com,http://localhost:3000,http://localhost:5173',
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || '',
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || '',
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',

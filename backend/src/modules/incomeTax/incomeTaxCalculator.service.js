@@ -7,7 +7,15 @@
 import { getTaxRulesForYear } from './rules/taxRuleRegistry.js';
 
 /**
- * Rounds an amount to the nearest multiple of 10 under Section 288B.
+ * Rounds taxable income to the nearest multiple of 10 under Section 288A.
+ */
+export function roundSection288A(amount) {
+  const num = Math.round(Number(amount) || 0);
+  return Math.round(num / 10) * 10;
+}
+
+/**
+ * Rounds tax liability to the nearest multiple of 10 under Section 288B.
  */
 export function roundSection288B(amount) {
   const num = Math.round(Number(amount) || 0);
@@ -28,6 +36,7 @@ export function calculateSlabTax(income, slabs) {
         min: slab.min,
         max: slab.max,
         rate: slab.rate,
+        label: slab.label,
         taxableInSlab: 0,
         taxAmount: 0,
       });
@@ -42,6 +51,7 @@ export function calculateSlabTax(income, slabs) {
       min: slab.min,
       max: slab.max,
       rate: slab.rate,
+      label: slab.label,
       taxableInSlab: Math.round(chunk),
       taxAmount: Math.round(slabTax),
     });
@@ -54,43 +64,64 @@ export function calculateSlabTax(income, slabs) {
 
 /**
  * Calculates surcharge and surcharge marginal relief.
+ * Statutorily caps surcharge on STCG 111A, LTCG 112A, LTCG 112, and Dividend income at 15%.
  */
-export function calculateSurchargeAndRelief(totalIncome, taxBeforeSurcharge, isNewRegime, rules) {
+export function calculateSurchargeAndRelief(
+  totalIncome,
+  taxBeforeSurcharge,
+  specialGainsTaxOrIsNewRegime,
+  isNewRegimeOrRules,
+  maybeRules
+) {
   const income = Math.max(0, Number(totalIncome) || 0);
-  const tax = Math.max(0, Number(taxBeforeSurcharge) || 0);
+  let isNewRegime = false;
+  let rules = null;
+  let specialGainsTax = 0;
+  let normalTax = Math.max(0, Number(taxBeforeSurcharge) || 0);
 
-  if (income <= 5000000 || tax === 0) {
+  if (typeof specialGainsTaxOrIsNewRegime === 'boolean') {
+    // 4-argument call signature: (totalIncome, taxBeforeSurcharge, isNewRegime, rules)
+    isNewRegime = specialGainsTaxOrIsNewRegime;
+    rules = isNewRegimeOrRules;
+    specialGainsTax = 0;
+  } else {
+    // 5-argument call signature: (totalIncome, normalTax, specialGainsTax, isNewRegime, rules)
+    specialGainsTax = Math.max(0, Number(specialGainsTaxOrIsNewRegime) || 0);
+    isNewRegime = Boolean(isNewRegimeOrRules);
+    rules = maybeRules;
+  }
+
+  const totalTax = normalTax + specialGainsTax;
+  if (income <= 5000000 || totalTax === 0) {
     return { surcharge: 0, marginalRelief: 0, netSurcharge: 0, applicableRate: 0 };
   }
 
-  let rate = 0;
+  let normalRate = 0;
   let threshold = 5000000;
-  let prevTaxWithSurcharge = 0;
 
   // Surcharge brackets
   if (income > 50000000) {
-    rate = isNewRegime ? 0.25 : 0.37;
+    normalRate = isNewRegime ? 0.25 : 0.37;
     threshold = 50000000;
   } else if (income > 20000000) {
-    rate = 0.25;
+    normalRate = 0.25;
     threshold = 20000000;
   } else if (income > 10000000) {
-    rate = 0.15;
+    normalRate = 0.15;
     threshold = 10000000;
   } else {
-    rate = 0.1;
+    normalRate = 0.1;
     threshold = 5000000;
   }
 
-  const rawSurcharge = Math.round(tax * rate);
+  // Surcharge on capital gains (111A, 112A, 112) is statutorily capped at 15%
+  const specialRate = Math.min(0.15, normalRate);
+  const rawSurcharge = Math.round(normalTax * normalRate + specialGainsTax * specialRate);
 
   // Marginal relief check on surcharge
-  // Tax + Surcharge cannot exceed: [Tax on threshold + applicable surcharge at threshold] + (Total Income - threshold)
   let marginalRelief = 0;
-
-  // Approximate tax at threshold using slabs
-  const slabs = isNewRegime ? rules.newRegimeSlabs : rules.oldRegimeSlabs.individual;
-  const taxAtThreshold = calculateSlabTax(threshold, slabs).tax;
+  const slabs = rules ? (isNewRegime ? rules.newRegimeSlabs : rules.oldRegimeSlabs?.individual) : null;
+  const taxAtThreshold = slabs ? calculateSlabTax(threshold, slabs).tax : 0;
 
   let prevSurchargeRate = 0;
   if (threshold === 10000000) prevSurchargeRate = 0.1;
@@ -101,14 +132,14 @@ export function calculateSurchargeAndRelief(totalIncome, taxBeforeSurcharge, isN
   const excessIncomeOverThreshold = income - threshold;
   const cap = totalPayableAtThreshold + excessIncomeOverThreshold;
 
-  if (tax + rawSurcharge > cap) {
-    marginalRelief = Math.max(0, Math.round(tax + rawSurcharge - cap));
+  if (taxAtThreshold > 0 && totalTax + rawSurcharge > cap) {
+    marginalRelief = Math.max(0, Math.round(totalTax + rawSurcharge - cap));
   }
 
   const netSurcharge = Math.max(0, rawSurcharge - marginalRelief);
 
   return {
-    applicableRate: rate,
+    applicableRate: normalRate,
     surcharge: rawSurcharge,
     marginalRelief,
     netSurcharge,
@@ -116,7 +147,8 @@ export function calculateSurchargeAndRelief(totalIncome, taxBeforeSurcharge, isN
 }
 
 /**
- * Calculates Section 87A rebate and marginal relief for New Regime.
+ * Calculates Section 87A rebate and marginal relief.
+ * Applies strictly to normal slab tax (Sec 112A(6) & 115BB exclude capital gains & winnings).
  */
 export function calculateRebateAndMarginalRelief87A(taxableIncome, normalTax, isNewRegime, isResident, rules) {
   if (!isResident || normalTax <= 0) {
@@ -138,7 +170,7 @@ export function calculateRebateAndMarginalRelief87A(taxableIncome, normalTax, is
       };
     }
 
-    // Section 87A Marginal Relief: Income marginally above ₹7,00,000
+    // Section 87A Marginal Relief: Income marginally above ₹7,00,000 (up to ₹7,27,777)
     // Tax payable cannot exceed excess income over ₹7,00,000
     const excessIncome = income - marginalReliefThreshold;
     if (normalTax > excessIncome) {
@@ -173,8 +205,10 @@ export function calculateRebateAndMarginalRelief87A(taxableIncome, normalTax, is
 export function computeRegimeTax({
   isNewRegime,
   financialYear = '2025-26',
+  taxPayer = 'individual',
   ageCategory = 'individual',
   residentialStatus = 'resident',
+  incomeMode = 'gross',
   salary = {},
   houseProperty = {},
   capitalGains = {},
@@ -185,34 +219,44 @@ export function computeRegimeTax({
 }) {
   const rules = getTaxRulesForYear(financialYear);
   const isResident = residentialStatus !== 'nonResident';
+  const isDirectTaxable = incomeMode === 'taxable';
+  const directTaxableAmount = Math.max(0, Number(salary.netTaxableIncome ?? salary.grossSalary ?? 0));
 
   // 1. SALARY HEAD COMPUTATION
-  const grossSalary = Number(salary.grossSalary) || 0;
-  const standardDedLimit = isNewRegime ? rules.standardDeduction.newRegime : rules.standardDeduction.oldRegime;
-  const standardDeduction = grossSalary > 0 ? Math.min(grossSalary, standardDedLimit) : 0;
-
+  let grossSalary = Number(salary.grossSalary) || 0;
+  let standardDeduction = 0;
   let hraExempt = 0;
   let ltaExempt = 0;
   let profTax = 0;
   let otherExempt = 0;
+  let netSalary = 0;
 
-  if (!isNewRegime) {
-    hraExempt = Math.min(grossSalary, Number(salary.hraExemption) || 0);
-    ltaExempt = Math.min(grossSalary, Number(salary.ltaExemption) || 0);
-    profTax = Math.min(grossSalary, Number(salary.professionalTax) || 0);
-    otherExempt = Math.min(grossSalary, Number(salary.otherAllowancesExempt) || 0);
+  if (isDirectTaxable) {
+    grossSalary = directTaxableAmount;
+    standardDeduction = 0;
+    netSalary = directTaxableAmount;
+  } else {
+    const standardDedLimit = isNewRegime ? rules.standardDeduction.newRegime : rules.standardDeduction.oldRegime;
+    standardDeduction = grossSalary > 0 ? Math.min(grossSalary, standardDedLimit) : 0;
+
+    if (!isNewRegime) {
+      hraExempt = Math.min(grossSalary, Number(salary.hraExemption) || 0);
+      ltaExempt = Math.min(grossSalary, Number(salary.ltaExemption) || 0);
+      profTax = Math.min(grossSalary, Number(salary.professionalTax) || 0);
+      otherExempt = Math.min(grossSalary, Number(salary.otherAllowancesExempt) || 0);
+    }
+
+    // Family Pension
+    const familyPension = Number(salary.familyPension) || 0;
+    const fpRules = isNewRegime ? rules.familyPensionDeduction.newRegime : rules.familyPensionDeduction.oldRegime;
+    const familyPensionDeduction = familyPension > 0 ? Math.min(familyPension * fpRules.fraction, fpRules.maxLimit) : 0;
+    const netFamilyPension = Math.max(0, familyPension - familyPensionDeduction);
+
+    netSalary = Math.max(
+      0,
+      grossSalary - standardDeduction - hraExempt - ltaExempt - profTax - otherExempt + netFamilyPension
+    );
   }
-
-  // Family Pension
-  const familyPension = Number(salary.familyPension) || 0;
-  const fpRules = isNewRegime ? rules.familyPensionDeduction.newRegime : rules.familyPensionDeduction.oldRegime;
-  const familyPensionDeduction = familyPension > 0 ? Math.min(familyPension * fpRules.fraction, fpRules.maxLimit) : 0;
-  const netFamilyPension = Math.max(0, familyPension - familyPensionDeduction);
-
-  const netSalary = Math.max(
-    0,
-    grossSalary - standardDeduction - hraExempt - ltaExempt - profTax - otherExempt + netFamilyPension
-  );
 
   // 2. HOUSE PROPERTY HEAD COMPUTATION
   const rentalIncome = Number(houseProperty.rentalIncome) || 0;
@@ -274,7 +318,11 @@ export function computeRegimeTax({
   const deductionBreakdown = {};
 
   // Employer NPS (Section 80CCD(2)) is allowed in BOTH Old & New regimes!
-  const employerNPS = Math.max(0, Number(deductions.sec80CCD2) || 0);
+  // Cap at 14% for New Regime (Finance (No. 2) Act 2024 parity), 10% for Old Regime (private sector standard)
+  const rawEmployerNPS = Math.max(0, Number(deductions.sec80CCD2) || 0);
+  const maxNPSFraction = isNewRegime ? 0.14 : 0.10;
+  const npsCeiling = grossSalary > 0 ? Math.round(grossSalary * maxNPSFraction) : rawEmployerNPS;
+  const employerNPS = Math.min(rawEmployerNPS, npsCeiling > 0 ? npsCeiling : rawEmployerNPS);
   deductionBreakdown.sec80CCD2 = employerNPS;
   totalDeductions += employerNPS;
 
@@ -316,23 +364,89 @@ export function computeRegimeTax({
   }
 
   // Deductions cannot exceed ordinary income
-  const allowableDeductions = Math.min(ordinaryIncome, totalDeductions);
-  const netOrdinaryTaxable = Math.max(0, ordinaryIncome - allowableDeductions);
-  const totalTaxableIncome = netOrdinaryTaxable + specialRateTotal;
+  let allowableDeductions = 0;
+  let netOrdinaryTaxable = 0;
+  let totalTaxableIncome = 0;
+
+  if (isDirectTaxable) {
+    allowableDeductions = Math.min(directTaxableAmount, totalDeductions);
+    netOrdinaryTaxable = roundSection288A(Math.max(0, directTaxableAmount - allowableDeductions));
+    totalTaxableIncome = roundSection288A(netOrdinaryTaxable + specialRateTotal);
+  } else {
+    allowableDeductions = Math.min(ordinaryIncome, totalDeductions);
+    const rawOrdinaryTaxable = Math.max(0, ordinaryIncome - allowableDeductions);
+    netOrdinaryTaxable = roundSection288A(rawOrdinaryTaxable);
+    totalTaxableIncome = roundSection288A(netOrdinaryTaxable + specialRateTotal);
+  }
 
   // 7. TAX COMPUTATION BY SLABS & SPECIAL RATES
   let slabs = rules.newRegimeSlabs;
-  if (!isNewRegime) {
-    if (ageCategory === 'superSenior') slabs = rules.oldRegimeSlabs.superSenior;
-    else if (ageCategory === 'senior') slabs = rules.oldRegimeSlabs.senior;
-    else slabs = rules.oldRegimeSlabs.individual;
+  let normalSlabTax = 0;
+  let slabBreakdown = [];
+
+  if (taxPayer === 'firm_llp') {
+    normalSlabTax = Math.round(netOrdinaryTaxable * 0.30);
+    slabBreakdown = [
+      {
+        min: 0,
+        max: netOrdinaryTaxable,
+        rate: 0.30,
+        label: 'Partnership Firm / LLP flat rate (30%)',
+        taxableInSlab: netOrdinaryTaxable,
+        taxAmount: normalSlabTax,
+      },
+    ];
+    slabs = [{ min: 0, max: Infinity, rate: 0.30, label: 'Flat 30%' }];
+  } else if (taxPayer === 'domestic_company') {
+    normalSlabTax = Math.round(netOrdinaryTaxable * 0.22);
+    slabBreakdown = [
+      {
+        min: 0,
+        max: netOrdinaryTaxable,
+        rate: 0.22,
+        label: 'Domestic Company flat rate u/s 115BAA (22%)',
+        taxableInSlab: netOrdinaryTaxable,
+        taxAmount: normalSlabTax,
+      },
+    ];
+    slabs = [{ min: 0, max: Infinity, rate: 0.22, label: 'Flat 22%' }];
+  } else if (taxPayer === 'foreign_company') {
+    normalSlabTax = Math.round(netOrdinaryTaxable * 0.40);
+    slabBreakdown = [
+      {
+        min: 0,
+        max: netOrdinaryTaxable,
+        rate: 0.40,
+        label: 'Foreign Company flat rate (40%)',
+        taxableInSlab: netOrdinaryTaxable,
+        taxAmount: normalSlabTax,
+      },
+    ];
+    slabs = [{ min: 0, max: Infinity, rate: 0.40, label: 'Flat 40%' }];
+  } else {
+    slabs = rules.newRegimeSlabs;
+    if (!isNewRegime) {
+      if (taxPayer === 'huf') {
+        slabs = rules.oldRegimeSlabs.individual;
+      } else if (ageCategory === 'superSenior') {
+        slabs = rules.oldRegimeSlabs.superSenior;
+      } else if (ageCategory === 'senior') {
+        slabs = rules.oldRegimeSlabs.senior;
+      } else {
+        slabs = rules.oldRegimeSlabs.individual;
+      }
+    }
+    const slabRes = calculateSlabTax(netOrdinaryTaxable, slabs);
+    normalSlabTax = slabRes.tax;
+    slabBreakdown = slabRes.breakdown;
   }
 
-  const { tax: normalSlabTax, breakdown: slabBreakdown } = calculateSlabTax(netOrdinaryTaxable, slabs);
-
-  // Unexhausted basic exemption limit adjustment against special rate gains (for resident individuals)
-  const basicExemptionLimit = slabs[0].max;
-  const unexhaustedExemption = isResident ? Math.max(0, basicExemptionLimit - netOrdinaryTaxable) : 0;
+  // Unexhausted basic exemption limit adjustment against special rate gains (for resident individuals & HUFs)
+  const basicExemptionLimit = slabs[0]?.rate === 0 ? slabs[0].max : 0;
+  const unexhaustedExemption =
+    isResident && (taxPayer === 'individual' || taxPayer === 'huf')
+      ? Math.max(0, basicExemptionLimit - netOrdinaryTaxable)
+      : 0;
   let remainingUnexhausted = unexhaustedExemption;
 
   // Tax on STCG 111A
@@ -363,24 +477,75 @@ export function computeRegimeTax({
   }
   const taxLTCGOther = Math.round(taxableLTCGOther * rules.capitalGains.ltcg112);
 
-  // Tax on Lottery / Gaming (30%)
+  // Tax on Lottery / Gaming (30%) - No basic exemption set-off allowed
   const taxLottery = Math.round(lotteryWinnings * rules.capitalGains.winnings115BB);
 
   const specialGainsTax = taxSTCG111A + taxLTCG112A + taxLTCGOther + taxLottery;
   const totalTaxBeforeRebate = normalSlabTax + specialGainsTax;
 
   // 8. SECTION 87A REBATE & MARGINAL RELIEF
-  const { rebate87A, marginalRelief87A, taxAfterRebateAndRelief } = calculateRebateAndMarginalRelief87A(
-    totalTaxableIncome,
-    totalTaxBeforeRebate,
-    isNewRegime,
-    isResident,
-    rules
-  );
+  // Applied strictly to normal slab income for resident individuals
+  // Section 87A is explicitly NOT available to HUFs, Firms, LLPs, or Companies
+  const isEligibleFor87A = isResident && taxPayer === 'individual';
+  const {
+    rebate87A,
+    marginalRelief87A,
+    taxAfterRebateAndRelief: normalTaxAfterRebate,
+  } = isEligibleFor87A
+    ? calculateRebateAndMarginalRelief87A(
+        totalTaxableIncome,
+        normalSlabTax,
+        isNewRegime,
+        isResident,
+        rules
+      )
+    : { rebate87A: 0, marginalRelief87A: 0, taxAfterRebateAndRelief: normalSlabTax };
+
+  const taxAfterRebateAndRelief = normalTaxAfterRebate + specialGainsTax;
 
   // 9. SURCHARGE & SURCHARGE MARGINAL RELIEF
-  const { surcharge, marginalRelief: surchargeMarginalRelief, netSurcharge, applicableRate: surchargeRate } =
-    calculateSurchargeAndRelief(totalTaxableIncome, taxAfterRebateAndRelief, isNewRegime, rules);
+  let surcharge = 0;
+  let surchargeMarginalRelief = 0;
+  let netSurcharge = 0;
+  let surchargeRate = 0;
+
+  if (taxPayer === 'firm_llp') {
+    if (totalTaxableIncome > 10000000 && taxAfterRebateAndRelief > 0) {
+      surchargeRate = 0.12;
+      surcharge = Math.round(taxAfterRebateAndRelief * 0.12);
+      const taxAt1Cr = 10000000 * 0.30;
+      const maxPayable = taxAt1Cr + (totalTaxableIncome - 10000000);
+      if (taxAfterRebateAndRelief + surcharge > maxPayable) {
+        surchargeMarginalRelief = Math.max(0, Math.round(taxAfterRebateAndRelief + surcharge - maxPayable));
+      }
+      netSurcharge = Math.max(0, surcharge - surchargeMarginalRelief);
+    }
+  } else if (taxPayer === 'domestic_company') {
+    if (taxAfterRebateAndRelief > 0) {
+      surchargeRate = 0.10;
+      surcharge = Math.round(taxAfterRebateAndRelief * 0.10);
+      netSurcharge = surcharge;
+    }
+  } else if (taxPayer === 'foreign_company') {
+    if (taxAfterRebateAndRelief > 0) {
+      if (totalTaxableIncome > 100000000) surchargeRate = 0.05;
+      else if (totalTaxableIncome > 10000000) surchargeRate = 0.02;
+      surcharge = Math.round(taxAfterRebateAndRelief * surchargeRate);
+      netSurcharge = surcharge;
+    }
+  } else {
+    const scRes = calculateSurchargeAndRelief(
+      totalTaxableIncome,
+      normalTaxAfterRebate,
+      specialGainsTax,
+      isNewRegime,
+      rules
+    );
+    surcharge = scRes.surcharge;
+    surchargeMarginalRelief = scRes.marginalRelief;
+    netSurcharge = scRes.netSurcharge;
+    surchargeRate = scRes.applicableRate;
+  }
 
   // 10. HEALTH & EDUCATION CESS (4%)
   const taxableForCess = taxAfterRebateAndRelief + netSurcharge;
@@ -400,6 +565,17 @@ export function computeRegimeTax({
   const netBalance = totalTaxLiability - totalTaxCredits;
   const netPayable = netBalance > 0 ? roundSection288B(netBalance) : 0;
   const refundDue = netBalance < 0 ? roundSection288B(Math.abs(netBalance)) : 0;
+
+  // Formatted slabs alias for simple cards and tables
+  const formattedSlabs = slabBreakdown.map((s) => ({
+    ...s,
+    slab:
+      s.label ||
+      (s.max === Infinity
+        ? `Above ₹${s.min.toLocaleString('en-IN')}`
+        : `₹${s.min.toLocaleString('en-IN')} to ₹${s.max.toLocaleString('en-IN')}`),
+    tax: s.taxAmount,
+  }));
 
   return {
     regime: isNewRegime ? 'new' : 'old',
@@ -426,9 +602,11 @@ export function computeRegimeTax({
     totalDeductions: allowableDeductions,
     deductionBreakdown,
     netTaxableIncome: totalTaxableIncome,
+    taxableIncome: totalTaxableIncome, // Backward-compatible alias for simple UI
 
     // Slabs & Taxes
     slabBreakdown,
+    slabs: formattedSlabs, // Backward-compatible alias for simple UI
     normalSlabTax,
     specialGainsTax,
     taxSTCG111A,
@@ -448,6 +626,7 @@ export function computeRegimeTax({
     surchargeMarginalRelief,
     netSurcharge,
     cess,
+    healthAndEducationCess: cess, // Backward-compatible alias for simple UI
     totalTaxLiability,
 
     // Balance
@@ -496,5 +675,6 @@ export default {
   calculateSlabTax,
   calculateSurchargeAndRelief,
   calculateRebateAndMarginalRelief87A,
+  roundSection288A,
   roundSection288B,
 };

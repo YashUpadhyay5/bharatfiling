@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "build": "echo 'Backend dependencies ready'",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test": "node --test src/tests/hraCalculator.test.js src/tests/incomeTaxCalculator.test.js"
   },
   "keywords": [
     "gst",

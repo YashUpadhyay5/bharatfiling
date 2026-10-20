@@ -229,4 +229,83 @@ describe('HRA Calculation Engine - Unit & Formula Tests', () => {
 
     assert.ok(res.calculationWarnings.some((w) => w.includes('Form 12BB') || w.includes('landlord\'s PAN')));
   });
+
+  test('Scenario 9: Monthly rent > ₹50,000 warns about Section 194-IB 2% TDS and Form 26QC', () => {
+    const res = computeHraExemption({
+      taxRegime: 'old',
+      simpleInput: {
+        basicSalary: 150000,
+        hraReceived: 60000,
+        rentPaid: 55000, // Monthly > 50,000
+        isMetro: true,
+      },
+    });
+
+    assert.equal(res.summary.requiresSection194IB, true);
+    assert.equal(res.summary.monthlyTds194IB, 1100); // 2% of 55,000
+    assert.equal(res.summary.annualTds194IB, 13200);
+    assert.ok(res.calculationWarnings.some((w) => w.includes('Section 194-IB') && w.includes('Form 26QC')));
+  });
+
+  test('Scenario 10: Zero HRA with Rent Paid provides Section 80GG fallback deduction', () => {
+    const res = computeHraExemption({
+      taxRegime: 'old',
+      simpleInput: {
+        basicSalary: 60000,
+        hraReceived: 0, // No HRA received
+        rentPaid: 20000,
+        isMetro: false,
+      },
+    });
+
+    assert.equal(res.summary.totalExemptHra, 0);
+    assert.ok(res.summary.section80GGEstimate);
+    assert.equal(res.summary.section80GGEstimate.isEligible, true);
+    // Max annual cap under 80GG is 60,000 (5,000/mo)
+    assert.equal(res.summary.section80GGEstimate.annualDeduction, 60000);
+    assert.equal(res.summary.section80GGEstimate.monthlyDeduction, 5000);
+    assert.ok(res.calculationWarnings.some((w) => w.includes('Section 80GG')));
+  });
+
+  test('Scenario 11: Expanded Metro Classification for FY 2026-27 (Bengaluru/Hyderabad/Pune/Ahmedabad)', () => {
+    // FY 2025-26: Bangalore is non-metro (40%)
+    assert.equal(isMetroCity('Bangalore', '2025-26'), false);
+    assert.equal(isMetroCity('Bengaluru', '2025-26'), false);
+    assert.equal(isMetroCity('Hyderabad', '2025-26'), false);
+    assert.equal(isMetroCity('Delhi', '2025-26'), true);
+
+    // FY 2026-27 onwards: Bangalore, Hyderabad, Pune, Ahmedabad are metro (50%)
+    assert.equal(isMetroCity('Bangalore', '2026-27'), true);
+    assert.equal(isMetroCity('Bengaluru', '2026-27'), true);
+    assert.equal(isMetroCity('Hyderabad', '2026-27'), true);
+    assert.equal(isMetroCity('Pune', '2026-27'), true);
+    assert.equal(isMetroCity('Ahmedabad', '2026-27'), true);
+  });
+
+  test('Scenario 12: Exact Verification of User Uploaded Dataset (ClearTax Reference)', () => {
+    // Input: Basic ₹6,00,000, DA ₹20,000, HRA ₹2,40,000, Rent ₹1,80,000, Metro (50%)
+    const res = computeHraExemption({
+      financialYear: '2026-27',
+      taxRegime: 'old',
+      calculationMode: 'simple',
+      simpleInput: {
+        frequency: 'annual',
+        basicSalary: '600000',
+        da: '20000',
+        daFormsRetirement: true,
+        hraReceived: '240000',
+        rentPaid: '180000',
+        isMetro: true,
+      },
+    });
+
+    assert.equal(res.summary.totalEligibleSalary, 620000);
+    assert.equal(res.summary.totalHraReceived, 240000);
+    assert.equal(res.summary.totalRentPaid, 180000);
+    assert.equal(res.summary.totalLimitA, 240000);
+    assert.equal(res.summary.totalLimitB, 118000); // 1,80,000 - 62,000
+    assert.equal(res.summary.totalLimitC, 310000); // 50% of 6,20,000
+    assert.equal(res.summary.totalExemptHra, 118000);
+    assert.equal(res.summary.totalTaxableHra, 122000);
+  });
 });

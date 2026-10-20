@@ -18,29 +18,66 @@ import {
   CheckCircle2,
   Info,
 } from 'lucide-react';
-import Breadcrumbs from '../../components/common/Breadcrumbs.jsx';
 import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 import HRAPrintReport from '../../components/hra/HRAPrintReport.jsx';
 import HRASimpleCalculatorCard from '../../components/hra/HRASimpleCalculatorCard.jsx';
 import { computeClientHraExemption, formatIndianCurrency } from '../../utils/hraTaxEngine.js';
 
+const DEFAULT_SIMPLE_INPUT = {
+  frequency: 'monthly',
+  basicSalary: '50000',
+  da: '0',
+  daFormsRetirement: true,
+  commission: '0',
+  hraReceived: '20000',
+  rentPaid: '18000',
+  isMetro: false,
+  tenureMonths: '12',
+};
+
 export default function HRACalculatorPage() {
   // Mode: 'simple' | 'advanced'
   const [calculationMode, setCalculationMode] = useState('simple');
-  const [taxRegime, setTaxRegime] = useState('old');
-  const [financialYear, setFinancialYear] = useState('2026-27');
 
-  // Simple Mode State
-  const [simpleInput, setSimpleInput] = useState({
-    frequency: 'monthly',
-    basicSalary: '50000',
-    da: '0',
-    daFormsRetirement: true,
-    commission: '0',
-    hraReceived: '20000',
-    rentPaid: '18000',
-    isMetro: false,
-    tenureMonths: '12',
+  const [taxRegime, setTaxRegimeState] = useState(() => {
+    try {
+      return sessionStorage.getItem('bf_hra_regime') || 'old';
+    } catch {
+      return 'old';
+    }
+  });
+
+  const [financialYear, setFinancialYearState] = useState(() => {
+    try {
+      return sessionStorage.getItem('bf_hra_fy') || '2026-27';
+    } catch {
+      return '2026-27';
+    }
+  });
+
+  const setTaxRegime = (val) => {
+    setTaxRegimeState(val);
+    try {
+      sessionStorage.setItem('bf_hra_regime', val);
+    } catch {}
+  };
+
+  const setFinancialYear = (val) => {
+    setFinancialYearState(val);
+    try {
+      sessionStorage.setItem('bf_hra_fy', val);
+    } catch {}
+  };
+
+  // Simple Mode State (Persists on refresh, fresh defaults for new sessions)
+  const [simpleInput, setSimpleInput] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('bf_hra_state');
+      if (saved) {
+        return { ...DEFAULT_SIMPLE_INPUT, ...JSON.parse(saved) };
+      }
+    } catch {}
+    return DEFAULT_SIMPLE_INPUT;
   });
 
   // Advanced Multi-Period State
@@ -73,9 +110,22 @@ export default function HRACalculatorPage() {
     },
   ]);
 
-  // Handle Simple Input Change
+  // Handle Simple Input Change with sessionStorage sync
   const handleSimpleChange = (field, value) => {
-    setSimpleInput((prev) => ({ ...prev, [field]: value }));
+    setSimpleInput((prev) => {
+      const updated = { ...prev, [field]: value };
+      try {
+        sessionStorage.setItem('bf_hra_state', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleResetSimple = () => {
+    try {
+      sessionStorage.removeItem('bf_hra_state');
+    } catch {}
+    setSimpleInput(DEFAULT_SIMPLE_INPUT);
   };
 
   // Handle Advanced Period Change
@@ -157,13 +207,6 @@ export default function HRACalculatorPage() {
 
         {/* Main Content Container */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-8 space-y-6">
-          {/* Breadcrumbs */}
-          <Breadcrumbs
-            items={[
-              { label: 'Financial Tools', path: '/services' },
-              { label: 'HRA Tax Exemption Calculator' },
-            ]}
-          />
 
           {/* Page Title & Subtitle */}
           <div className="space-y-2">
@@ -205,8 +248,8 @@ export default function HRACalculatorPage() {
             </div>
           </div>
 
-          {/* New Tax Regime Warning Banner (If Selected) */}
-          {!isOldRegime && (
+          {/* New Tax Regime Warning Banner (If Selected in Advanced Mode) */}
+          {!isOldRegime && calculationMode === 'advanced' && (
             <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 flex items-start gap-3 shadow-xs">
               <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="text-xs space-y-1">
@@ -226,6 +269,12 @@ export default function HRACalculatorPage() {
               simpleInput={simpleInput}
               handleSimpleChange={handleSimpleChange}
               summary={summary}
+              calculationWarnings={calculationWarnings}
+              taxRegime={taxRegime}
+              setTaxRegime={setTaxRegime}
+              financialYear={financialYear}
+              setFinancialYear={setFinancialYear}
+              onReset={handleResetSimple}
               onSwitchToAdvanced={() => setCalculationMode('advanced')}
             />
           ) : (

@@ -152,4 +152,163 @@ describe('Income Tax Calculator Engine Tests', () => {
     assert.ok(res.savings > 0);
     assert.ok(res.newRegime.totalTaxLiability < res.oldRegime.totalTaxLiability);
   });
+
+  test('Scenario 7: Salaried ₹15,00,000 under New Regime AY 2026-27 pays ₹1,30,000', () => {
+    // Gross: 15,00,000
+    // Std Ded: 75,000 -> Taxable: 14,25,000
+    // Slabs:
+    // 0-3L: 0
+    // 3L-7L (4L): 20,000
+    // 7L-10L (3L): 30,000
+    // 10L-12L (2L): 30,000
+    // 12L-14.25L (2.25L @ 20%): 45,000
+    // Total Slab Tax = 1,25,000
+    // Cess (4%) = 5,000
+    // Total Tax Liability = 1,30,000
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2025-26',
+      salary: { grossSalary: 1500000 },
+    });
+
+    assert.equal(res.netTaxableIncome, 1425000);
+    assert.equal(res.normalSlabTax, 125000);
+    assert.equal(res.cess, 5000);
+    assert.equal(res.totalTaxLiability, 130000);
+  });
+
+  test('Scenario 8: Section 112A LTCG strictly disallows Section 87A rebate per Section 112A(6)', () => {
+    // Resident with ₹4,00,000 Salary and ₹2,25,000 LTCG 112A
+    // Std Ded: 75,000 -> Net Salary = 3,25,000
+    // Ordinary Slab Tax on 3,25,000: (3.25L - 3L) * 5% = 1,250
+    // LTCG 112A: 2,25,000 - 1,25,000 exemption = 1,00,000 @ 12.5% = 12,500
+    // Total taxable income = 4,25,000 (<= 7,00,000)
+    // Section 87A rebate applies ONLY to normalSlabTax (1,250), ZERO rebate against LTCG 112A!
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2025-26',
+      salary: { grossSalary: 400000 },
+      capitalGains: { ltcg112A: 225000 },
+    });
+
+    assert.equal(res.normalSlabTax, 1250);
+    assert.equal(res.rebate87A, 1250); // Fully offsets normal slab tax
+    assert.equal(res.taxLTCG112A, 12500); // Intact, no 87A rebate allowed
+    assert.equal(res.taxAfterRebateAndRelief, 12500);
+    assert.equal(res.totalTaxLiability, roundSection288B(12500 * 1.04));
+  });
+
+  test('Scenario 9: Surcharge on Capital Gains statutorily capped at 15% for income > ₹2 Crore', () => {
+    // Total income ₹2.5 Crore: ₹1.5 Cr normal + ₹1 Cr STCG 111A
+    // General surcharge rate for ₹2.5 Cr is 25%, but capital gains surcharge is capped at 15%
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2025-26',
+      salary: { grossSalary: 15075000 }, // 1.5 Cr taxable after 75k std ded
+      capitalGains: { stcg111A: 10000000 }, // 1 Cr STCG 111A
+    });
+
+    assert.equal(res.surchargeRate, 0.25);
+    // STCG 111A tax = 20% of 1 Cr = 20,00,000
+    assert.equal(res.taxSTCG111A, 2000000);
+    // Surcharge should be less than 25% of total tax because STCG is surcharged at 15%
+    const totalTax = res.normalSlabTax + res.taxSTCG111A;
+    assert.ok(res.surcharge < Math.round(totalTax * 0.25));
+  });
+
+  test('Scenario 10: Backward-compatible schema aliases for simple UI cards and reports', () => {
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2025-26',
+      salary: { grossSalary: 1000000 },
+    });
+
+    assert.equal(res.taxableIncome, res.netTaxableIncome);
+    assert.equal(res.healthAndEducationCess, res.cess);
+    assert.ok(Array.isArray(res.slabs));
+    assert.equal(res.slabs.length, res.slabBreakdown.length);
+    assert.ok(res.slabs[0].slab); // Has readable slab label
+  });
+
+  test('Scenario 11: Partnership Firm / LLP taxed at flat 30% + 4% cess', () => {
+    const res = computeRegimeTax({
+      isNewRegime: false,
+      financialYear: '2025-26',
+      taxPayer: 'firm_llp',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 1000000 },
+    });
+
+    // 10,00,000 @ 30% = 3,00,000 + 4% cess = 3,12,000
+    assert.equal(res.normalSlabTax, 300000);
+    assert.equal(res.cess, 12000);
+    assert.equal(res.totalTaxLiability, 312000);
+    assert.equal(res.rebate87A, 0);
+  });
+
+  test('Scenario 12: Domestic Company taxed at flat 22% + 10% surcharge + 4% cess', () => {
+    const res = computeRegimeTax({
+      isNewRegime: false,
+      financialYear: '2025-26',
+      taxPayer: 'domestic_company',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 1000000 },
+    });
+
+    // 10,00,000 @ 22% = 2,20,000
+    // Surcharge 10% = 22,000 -> 2,42,000
+    // Cess 4% = 9,680 -> Total = 2,51,680
+    assert.equal(res.normalSlabTax, 220000);
+    assert.equal(res.netSurcharge, 22000);
+    assert.equal(res.cess, 9680);
+    assert.equal(res.totalTaxLiability, 251680);
+    assert.equal(res.rebate87A, 0);
+  });
+
+  test('Scenario 13: HUF with ₹7,00,000 taxable income in New Regime pays ₹26,000 (no 87A rebate)', () => {
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2025-26',
+      taxPayer: 'huf',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 700000 },
+    });
+
+    // 0-3L: 0, 3-7L: 20,000 -> Slab Tax = 20,000
+    // HUF is NOT eligible for 87A rebate!
+    // Cess 4% = 800 -> Total Tax = 20,800
+    assert.equal(res.rebate87A, 0);
+    assert.equal(res.normalSlabTax, 20000);
+    assert.equal(res.totalTaxLiability, 20800);
+  });
+
+  test('Scenario 14: Non-Resident (NRI) with ₹7,00,000 in New Regime pays tax (no 87A rebate)', () => {
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2025-26',
+      residentialStatus: 'nonResident',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 700000 },
+    });
+
+    // Non-Resident is NOT eligible for 87A rebate!
+    assert.equal(res.rebate87A, 0);
+    assert.equal(res.normalSlabTax, 20000);
+    assert.equal(res.totalTaxLiability, 20800);
+  });
+
+  test('Scenario 15: AY 2024-25 (FY 2023-24) New Regime slab calculation', () => {
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2023-24',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 900000 },
+    });
+
+    // FY 2023-24 slabs: 0-3L 0%, 3-6L 5% (15k), 6-9L 10% (30k) -> 45,000
+    // Cess 4% = 1,800 -> 46,800
+    assert.equal(res.normalSlabTax, 45000);
+    assert.equal(res.cess, 1800);
+    assert.equal(res.totalTaxLiability, 46800);
+  });
 });

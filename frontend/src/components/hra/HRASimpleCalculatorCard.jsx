@@ -20,6 +20,12 @@ export default function HRASimpleCalculatorCard({
   simpleInput,
   handleSimpleChange,
   summary,
+  calculationWarnings = [],
+  taxRegime = 'old',
+  setTaxRegime,
+  financialYear = '2026-27',
+  setFinancialYear,
+  onReset,
   onSwitchToAdvanced,
 }) {
   const [lang, setLang] = useState('en'); // 'en' | 'hi'
@@ -27,6 +33,8 @@ export default function HRASimpleCalculatorCard({
   const [copiedEmbed, setCopiedEmbed] = useState(false);
 
   const isMonthly = (simpleInput.frequency || 'monthly') === 'monthly';
+  const startYear = parseInt(String(financialYear).split('-')[0], 10) || 2026;
+  const isFY26OrLater = startYear >= 2026;
 
   // Toggle Monthly vs Annually with automatic scale adjustment
   const handleFrequencyToggle = (newFreq) => {
@@ -50,6 +58,10 @@ export default function HRASimpleCalculatorCard({
   };
 
   const handleReset = () => {
+    if (onReset) {
+      onReset();
+      return;
+    }
     if (isMonthly) {
       handleSimpleChange('basicSalary', '50000');
       handleSimpleChange('da', '0');
@@ -83,6 +95,16 @@ export default function HRASimpleCalculatorCard({
     monthly: lang === 'hi' ? 'मासिक' : 'Monthly',
     annually: lang === 'hi' ? 'वार्षिक' : 'Annually',
     embed: lang === 'hi' ? 'एम्बेड' : 'Embed',
+    oldRegime: lang === 'hi' ? 'पुरानी व्यवस्था' : 'Old Regime',
+    newRegime: lang === 'hi' ? 'नई व्यवस्था (115BAC)' : 'New Regime (Sec 115BAC)',
+    newRegimeWarningTitle:
+      lang === 'hi'
+        ? 'नई कर व्यवस्था (धारा 115BAC) में एचआरए छूट अनुमेय नहीं है'
+        : 'No HRA Exemption Under New Tax Regime (Section 115BAC)',
+    newRegimeWarningDesc:
+      lang === 'hi'
+        ? 'धारा 115BAC के तहत प्राप्त कुल एचआरए पर सामान्य वेतन की तरह कर लगता है। अपनी छूट देखने और दावा करने के लिए पुरानी व्यवस्था चुनें।'
+        : 'Under Section 115BAC, HRA exemption is 100% disallowed. The entire HRA received is treated as taxable salary income. Switch to Old Tax Regime to claim your exemption.',
     basicSalary:
       lang === 'hi'
         ? `मूल वेतन (${isMonthly ? 'मासिक' : 'वार्षिक'})`
@@ -101,8 +123,20 @@ export default function HRASimpleCalculatorCard({
         : `Total Rent Paid (${isMonthly ? 'Monthly' : 'Annually'})`,
     metroQuestion:
       lang === 'hi'
-        ? 'क्या आप दिल्ली, मुंबई, कोलकाता या चेन्नई में रहते हैं?'
-        : 'Do You Live In Delhi, Mumbai, Kolkata or Chennai?',
+        ? (isFY26OrLater
+            ? 'क्या आप पात्र मेट्रो शहर में रहते हैं? (दिल्ली, मुंबई, कोलकाता, चेन्नई, बेंगलुरु, हैदराबाद, पुणे, अहमदाबाद)'
+            : 'क्या आप दिल्ली, मुंबई, कोलकाता या चेन्नई में रहते हैं?')
+        : (isFY26OrLater
+            ? 'Do you live in an eligible Metro City? (Delhi, Mumbai, Kolkata, Chennai, Bengaluru, Hyderabad, Pune, Ahmedabad)'
+            : 'Do You Live In Delhi, Mumbai, Kolkata or Chennai?'),
+    metroNote:
+      lang === 'hi'
+        ? (isFY26OrLater
+            ? '*वित्तीय वर्ष 2026-27 से: दिल्ली, मुंबई, कोलकाता और चेन्नई के साथ बेंगलुरु, हैदराबाद, पुणे और अहमदाबाद भी 50% वेतन सीमा के पात्र हैं (अन्य सभी शहरों के लिए 40% लागू होता है)।'
+            : '*वित्तीय वर्ष 2025-26 तक: नियम 2A के तहत केवल दिल्ली, मुंबई, कोलकाता और चेन्नई 50% वेतन सीमा के पात्र हैं। अन्य सभी शहरों के लिए 40% लागू होता है।')
+        : (isFY26OrLater
+            ? '*FY 2026–27 onwards: Bengaluru, Hyderabad, Pune, and Ahmedabad qualify for the 50% salary ceiling under expanded metro provisions alongside Delhi, Mumbai, Kolkata, and Chennai. (40% applies for all other locations).'
+            : '*Till FY 2025–26: Under Rule 2A, only Delhi, Mumbai, Kolkata, and Chennai qualify for the 50% salary ceiling. Non-metro cities qualify for 40%.'),
     metroYes: lang === 'hi' ? 'हाँ (मेट्रो - 50%)' : 'Yes (Metro - 50%)',
     metroNo: lang === 'hi' ? 'नहीं (अन्य शहर - 40%)' : 'No (Non-Metro - 40%)',
     taxableHra: lang === 'hi' ? 'कर योग्य एचआरए' : 'Taxable HRA',
@@ -152,8 +186,34 @@ export default function HRASimpleCalculatorCard({
           </div>
         </div>
 
-        {/* Right: Controls (Monthly/Annually Toggle, EN/हि, Reset, Embed) */}
-        <div className="flex items-center gap-2">
+        {/* Right: Controls (Regime Toggle, Monthly/Annually Toggle, EN/हि, Reset, Embed) */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Tax Regime Selector Pill */}
+          <div className="inline-flex p-1 bg-slate-100 rounded-full border border-slate-200/80 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setTaxRegime && setTaxRegime('old')}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+                taxRegime === 'old'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {t.oldRegime}
+            </button>
+            <button
+              type="button"
+              onClick={() => setTaxRegime && setTaxRegime('new')}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+                taxRegime === 'new'
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {t.newRegime}
+            </button>
+          </div>
+
           {/* Monthly / Annually Toggle Pill */}
           <div className="inline-flex p-1 bg-slate-100 rounded-full border border-slate-200/80 shadow-2xs">
             <button
@@ -213,6 +273,19 @@ export default function HRASimpleCalculatorCard({
         </div>
       </div>
 
+      {/* New Regime Warning Banner (If Selected) */}
+      {taxRegime === 'new' && (
+        <div className="mt-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 flex items-start gap-3 shadow-2xs">
+          <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="text-xs space-y-1">
+            <p className="font-bold">{t.newRegimeWarningTitle}</p>
+            <p className="text-amber-800 leading-relaxed">
+              {t.newRegimeWarningDesc}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* MAIN 2-COLUMN BODY */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-6">
         {/* LEFT COLUMN: USER INPUTS (7 COLS) */}
@@ -241,6 +314,21 @@ export default function HRASimpleCalculatorCard({
                 className="w-full h-11 pl-9 pr-3 text-sm font-semibold text-slate-900 bg-slate-50/50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition"
               />
             </div>
+            {isMonthly && Number(simpleInput.basicSalary) >= 200000 && (
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50/90 border border-blue-200 text-xs text-blue-950 mt-1.5 shadow-2xs">
+                <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  {lang === 'hi' ? 'क्या आपने वार्षिक वेतन दर्ज किया है?' : 'Entering annual basic salary?'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleSimpleChange('frequency', 'annual')}
+                  className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] transition cursor-pointer shadow-2xs"
+                >
+                  {lang === 'hi' ? 'वार्षिक पर स्विच करें' : 'Switch to Annually'}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* 2. Dearness Allowance (DA) Received */}
@@ -345,6 +433,39 @@ export default function HRASimpleCalculatorCard({
                 </span>
               </p>
             )}
+
+            {/* Statutory Compliance Alerts under Rent */}
+            {summary.requiresSection194IB && (
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5 shadow-2xs mt-2">
+                <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="font-bold text-[11px]">
+                    {lang === 'hi' ? 'धारा 194-IB अधिदेश (2% टीडीएस)' : 'Section 194-IB Mandate (2% TDS)'}
+                  </p>
+                  <p className="text-[11px] text-amber-800 leading-snug">
+                    {lang === 'hi'
+                      ? `मासिक किराया ₹50,000 से अधिक है। आपको प्रतिमाह ₹${(summary.monthlyTds194IB || 0).toLocaleString('en-IN')} का 2% TDS काटकर फॉर्म 26QC में ऑनलाइन जमा करना होगा।`
+                      : `Monthly rent exceeds ₹50,000. Under Section 194-IB, you must deduct 2% TDS (₹${(summary.monthlyTds194IB || 0).toLocaleString('en-IN')}/month) and deposit online via Form 26QC within 30 days.`}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {summary.requiresLandlordPan && (
+              <div className="p-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-950 text-xs flex items-start gap-2.5 shadow-2xs mt-1.5">
+                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="font-bold text-[11px]">
+                    {lang === 'hi' ? 'फॉर्म 12BB मकान मालिक पैन अनिवार्य' : 'Form 12BB Landlord PAN Mandate'}
+                  </p>
+                  <p className="text-[11px] text-blue-800 leading-snug">
+                    {lang === 'hi'
+                      ? 'वार्षिक किराया ₹1,00,000 से अधिक होने पर नियोक्ता को फॉर्म 12BB में मकान मालिक का पैन देना अनिवार्य है (CBDT Circular 08/2013).'
+                      : 'Annual rent exceeds ₹1,00,000. Under CBDT Circular 08/2013, submitting landlord\'s PAN in Form 12BB to your employer is statutory.'}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 5. Metro City Question */}
@@ -378,10 +499,45 @@ export default function HRASimpleCalculatorCard({
                 {simpleInput.isMetro === false && <Check className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-[10px] text-slate-500 mt-2">
-              Note: Under Indian Tax Law, only Delhi, Mumbai, Kolkata, and Chennai qualify for the 50% salary ceiling. Bengaluru, Hyderabad, Pune, and Gurugram qualify for 40%.
+            <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
+              {t.metroNote}
             </p>
           </div>
+
+          {/* Section 80GG Fallback Card when HRA Received is ₹0 */}
+          {summary.section80GGEstimate?.isEligible && (
+            <div className="p-4 rounded-2xl bg-indigo-50/80 border border-indigo-200 space-y-2 mt-4 shadow-2xs">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                  ₹
+                </div>
+                <h4 className="text-xs font-bold text-indigo-950">
+                  {lang === 'hi' ? 'धारा 80GG किराया छूट उपलब्ध (बिना एचआरए)' : 'Section 80GG Rent Deduction Available (No HRA)'}
+                </h4>
+              </div>
+              <p className="text-xs text-indigo-800 leading-relaxed">
+                {lang === 'hi'
+                  ? 'चूंकि आपको नियोक्ता से कोई एचआरए नहीं मिलता है, आप पुरानी कर व्यवस्था में धारा 80GG के तहत किराए पर कटौती का दावा कर सकते हैं।'
+                  : 'Since you do not receive HRA from an employer, you are eligible to claim rent deduction under Section 80GG under the Old Tax Regime.'}
+              </p>
+              <div className="p-2.5 rounded-xl bg-white border border-indigo-100 flex items-center justify-between text-xs">
+                <span className="font-semibold text-slate-700">
+                  {lang === 'hi' ? 'अनुमानित 80GG कटौती:' : 'Eligible Sec 80GG Deduction:'}
+                </span>
+                <span className="font-mono font-extrabold text-indigo-700 text-sm">
+                  {formatIndianCurrency(isMonthly ? summary.section80GGEstimate.monthlyDeduction : summary.section80GGEstimate.annualDeduction)}
+                  <span className="text-[10px] text-slate-500 font-normal ml-1">
+                    {isMonthly ? t.perMonth : t.perYear}
+                  </span>
+                </span>
+              </div>
+              <p className="text-[10px] text-indigo-600">
+                {lang === 'hi'
+                  ? '* छूट राशि सबसे कम होगी: (1) ₹5,000/माह (₹60,000/वर्ष), (2) कुल आय का 25%, या (3) कुल आय के 10% से अधिक चुकाया गया किराया।'
+                  : '* Capped at the lowest of: (1) ₹5,000/month (₹60,000/yr), (2) 25% of total income, or (3) Rent paid minus 10% of total income.'}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN: LIVE RESULTS, PIE CHART & STATISTICAL TOOLS (5 COLS) */}
@@ -470,6 +626,20 @@ export default function HRASimpleCalculatorCard({
               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                 Rule 2A
               </span>
+            </div>
+
+            {/* Statutory Rule 2A Formula Equation */}
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {lang === 'hi' ? 'वैधानिक नियम 2A सूत्र' : 'Statutory Rule 2A Formula'}
+              </div>
+              <div className="text-[11px] font-mono text-slate-800 leading-relaxed">
+                <span className="font-bold text-blue-700">min</span>(
+                Limit A: <span className="font-semibold">{formatIndianCurrency(limitA)}</span>,{' '}
+                Limit B: <span className="font-semibold">{formatIndianCurrency(limitB)}</span>,{' '}
+                Limit C: <span className="font-semibold">{formatIndianCurrency(limitC)}</span>
+                ) = <strong className="text-emerald-700 font-bold">{formatIndianCurrency(summary.totalExemptHra)}</strong>
+              </div>
             </div>
 
             {/* Limit A Bar */}
