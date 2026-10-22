@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SERVICES } from '../data/serviceCatalog.js';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck,
@@ -12,7 +13,6 @@ import {
   Receipt,
   Clock,
   ChevronDown,
-  ChevronUp,
   Star,
   Users,
   MessageCircle,
@@ -137,16 +137,16 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center">
             <div className="p-2 sm:p-0">
-              <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">10,000+</div>
-              <div className="text-[11px] sm:text-xs text-slate-500 mt-0.5">Indian Businesses Served</div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">{SERVICES.length}</div>
+              <div className="text-[11px] sm:text-xs text-slate-500 mt-0.5">CA, Tax & Legal Services</div>
             </div>
             <div className="p-2 sm:p-0">
               <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#111827]">3–7 Days</div>
               <div className="text-[11px] sm:text-xs text-slate-500 mt-0.5">Fast-Track Govt Filings</div>
             </div>
             <div className="p-2 sm:p-0">
-              <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">99.4%</div>
-              <div className="text-[11px] sm:text-xs text-slate-500 mt-0.5">First-Pass Approval Rate</div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">Fixed Fee</div>
+              <div className="text-[11px] sm:text-xs text-slate-500 mt-0.5">Shown Before You Pay</div>
             </div>
             <div className="p-2 sm:p-0">
               <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-emerald-600">100%</div>
@@ -160,21 +160,21 @@ export default function LandingPage() {
       <FrontpageTaxTools />
 
       {/* 3. POPULAR SERVICES GRID */}
-      <section className="py-16 md:py-20 bg-white border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+      <section className="py-12 md:py-14 bg-white border-b border-slate-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-8 space-y-1.5">
             <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Comprehensive CA & Legal Coverage
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
               Popular Chartered Accountant & Corporate Services
             </h2>
-            <p className="text-sm text-slate-600">
+            <p className="text-[13px] text-slate-600">
               Transparent fixed pricing. No hidden surprises. Professional CA consultation included with every service.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {popularServices.map((service) => (
               <div
                 key={service.title}
@@ -182,31 +182,31 @@ export default function LandingPage() {
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && handleSelectService(service)}
-                className="group relative p-5 sm:p-6 lg:p-7 rounded-3xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 ease-out transform-gpu flex flex-col justify-between cursor-pointer hover:-translate-y-2 hover:shadow-[0_22px_48px_rgba(17,24,39,0.12)] hover:border-[#111827]/40 active:scale-[0.98] active:translate-y-0 active:shadow-md"
+                className="group relative p-4 rounded-xl border border-slate-200 bg-white shadow-xs transition-all duration-200 ease-out transform-gpu flex flex-col justify-between cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(17,24,39,0.10)] hover:border-slate-300 active:scale-[0.99] active:translate-y-0 active:shadow-md"
               >
                 {/* Top Subtle Hairline Glow */}
                 <div className="absolute inset-x-8 top-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#111827] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-full"></div>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-[#111827] bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200 group-hover:bg-[#111827]/10 transition-colors">
+                    <span className="text-[10.5px] font-semibold text-[#111827] bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 group-hover:bg-[#111827]/10 transition-colors">
                       {service.tag}
                     </span>
-                    <span className="text-lg font-black text-slate-900 group-hover:scale-105 transition-transform duration-200 origin-right">
+                    <span className="text-base font-bold text-slate-900">
                       {service.price}
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-base text-slate-900 group-hover:text-[#111827] transition-colors duration-200">
+                    <h3 className="font-semibold text-[15px] leading-snug text-slate-900">
                       {service.title}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">
                       {service.desc}
                     </p>
                   </div>
 
-                  <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                  <div className="space-y-1 pt-3 border-t border-slate-100 text-xs text-slate-600">
                     {service.features.map((feat) => (
                       <div key={feat} className="flex items-center gap-2">
                         <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -216,8 +216,8 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="pt-5 mt-5 border-t border-slate-100">
-                  <div className="w-full py-2.5 sm:py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-[#111827] group-hover:bg-[#1F2937] text-white shadow-xs group-hover:shadow-md touch-target-safe">
+                <div className="pt-3 mt-3">
+                  <div className="w-full py-2 rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-[#111827] group-hover:bg-[#1F2937] text-white shadow-xs group-hover:shadow-md touch-target-safe">
                     <span>View Service Details & Pricing</span>
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-200 shrink-0" />
                   </div>
@@ -251,7 +251,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             <div className="p-5 sm:p-6 lg:p-7 rounded-3xl bg-white border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:border-slate-300 active:scale-[0.99] cursor-default">
-              <div className="w-10 h-10 rounded-xl bg-[#111827] text-white font-black text-sm flex items-center justify-center shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-[#111827] text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
                 1
               </div>
               <h3 className="font-bold text-base text-slate-900">Select Service & Share Details</h3>
@@ -261,7 +261,7 @@ export default function LandingPage() {
             </div>
 
             <div className="p-5 sm:p-6 lg:p-7 rounded-3xl bg-white border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:border-slate-300 active:scale-[0.99] cursor-default">
-              <div className="w-10 h-10 rounded-xl bg-amber-500 text-white font-black text-sm flex items-center justify-center shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-amber-500 text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
                 2
               </div>
               <h3 className="font-bold text-base text-slate-900">Expert CA & Financial Audit</h3>
@@ -271,7 +271,7 @@ export default function LandingPage() {
             </div>
 
             <div className="p-5 sm:p-6 lg:p-7 rounded-3xl bg-white border border-slate-200/90 space-y-3 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-md hover:border-slate-300 active:scale-[0.99] cursor-default">
-              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white font-black text-sm flex items-center justify-center shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
                 3
               </div>
               <h3 className="font-bold text-base text-slate-900">Get Approved & Manage in Vault</h3>
@@ -296,29 +296,55 @@ export default function LandingPage() {
           </div>
 
           <div className="space-y-3">
-            {faqs.map((faq, idx) => (
-              <div
-                key={faq.q}
-                className="bg-slate-50/50 rounded-2xl border border-slate-200 overflow-hidden shadow-xs transition"
-              >
-                <button
-                  onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
-                  className="w-full px-4 sm:px-5 py-3.5 sm:py-4 text-left flex items-center justify-between text-xs sm:text-sm font-bold text-slate-900 hover:text-[#111827] transition cursor-pointer touch-target-safe"
+            {faqs.map((faq, idx) => {
+              const open = openFaq === idx;
+              return (
+                <div
+                  key={faq.q}
+                  className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+                    open
+                      ? 'bg-white border-slate-300 shadow-[0_12px_28px_-18px_rgba(17,24,39,0.35)]'
+                      : 'bg-slate-50/50 border-slate-200 shadow-xs hover:bg-white hover:border-slate-300'
+                  }`}
                 >
-                  <span className="pr-2">{faq.q}</span>
-                  {openFaq === idx ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
-                  )}
-                </button>
-                {openFaq === idx && (
-                  <div className="px-4 sm:px-5 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3 animate-fade-in">
-                    {faq.a}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute inset-y-0 left-0 w-1 bg-[#111827] transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`}
+                  />
+                  <h3>
+                    <button
+                      type="button"
+                      id={`faq-q-${idx}`}
+                      aria-expanded={open}
+                      aria-controls={`faq-a-${idx}`}
+                      onClick={() => setOpenFaq(open ? -1 : idx)}
+                      className="w-full px-4 sm:px-5 py-3.5 sm:py-4 text-left flex items-center justify-between gap-4 text-xs sm:text-sm font-bold text-slate-900 cursor-pointer touch-target-safe focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#111827]"
+                    >
+                      <span>{faq.q}</span>
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+                          open ? 'rotate-180 bg-[#111827] text-white' : 'bg-white text-slate-500 ring-1 ring-slate-200'
+                        }`}
+                      >
+                        <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                      </span>
+                    </button>
+                  </h3>
+                  <div
+                    id={`faq-a-${idx}`}
+                    role="region"
+                    aria-labelledby={`faq-q-${idx}`}
+                    className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-4 sm:px-5 pb-4 pt-3 text-xs text-slate-600 leading-relaxed border-t border-slate-100">
+                        {faq.a}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -330,7 +356,7 @@ export default function LandingPage() {
             Complete CA, Finance & Legal Advisory for Your Business
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto">
-            Join 10,000+ Indian founders and businesses managing corporate registrations, accounting, tax filings, audits, and statutory compliance with BharatFiling.
+            Manage corporate registrations, accounting, tax filings, audits and statutory compliance with BharatFiling, with a qualified professional on every filing.
           </p>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
             <Link

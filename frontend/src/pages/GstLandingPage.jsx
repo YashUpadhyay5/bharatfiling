@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { whatsappLink } from '../config/support.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
@@ -99,7 +100,7 @@ export default function GstLandingPage() {
     <div className="flex flex-col min-h-screen bg-white font-sans">
       <Breadcrumbs items={[{ label: 'Services', path: '/services' }, { label: 'GST Registration' }]} />
       {/* 1. HERO SECTION */}
-      <section className="pt-10 pb-16 md:pt-16 md:pb-20 bg-gradient-to-b from-white via-slate-50/40 to-white border-b border-slate-100">
+      <section className="pt-10 pb-16 md:pt-16 md:pb-20 bg-gradient-to-b from-[#F4F7FC] to-white border-b border-slate-200/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             
@@ -110,7 +111,7 @@ export default function GstLandingPage() {
                 <span>Form REG-01 Filing · Govt Portal Ready</span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 tracking-tight leading-[1.2]">
+              <h1 className="text-2xl sm:text-4xl lg:text-[42px] font-semibold text-slate-900 tracking-tight leading-[1.2]">
                 Apply for GST Number <br className="hidden sm:inline" />
                 <span className="text-[#111827]">Online in India</span>
               </h1>
@@ -127,7 +128,7 @@ export default function GstLandingPage() {
                 />
 
                 <a
-                  href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20help%20with%20GST%20Registration."
+                  href={whatsappLink('Hi BharatFiling Team, I need help with GST Registration.')}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full sm:w-auto px-5 sm:px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm border border-slate-200 shadow-xs active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer touch-target-safe"
@@ -160,7 +161,7 @@ export default function GstLandingPage() {
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div>
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">All-Inclusive Package</span>
-                    <h3 className="font-bold text-base text-slate-900">GST Registration Service</h3>
+                    <h3 className="font-semibold tracking-tight text-base text-slate-900">GST Registration Service</h3>
                   </div>
                   <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                     Transparent
@@ -221,7 +222,7 @@ export default function GstLandingPage() {
             <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Document Checklist
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
               Documents Required for GST Registration
             </h2>
             <p className="text-xs sm:text-sm text-slate-600">
@@ -249,7 +250,7 @@ export default function GstLandingPage() {
           {/* Documents Card */}
           <div className="bg-white rounded-3xl p-5 sm:p-8 shadow-sm border border-slate-200/80 transition-all duration-300 hover:shadow-md">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">
+              <h3 className="font-semibold tracking-tight text-sm sm:text-base text-slate-900">
                 Checklist for {selectedEntity}
               </h3>
               <span className="text-xs text-[#111827] font-semibold">
@@ -293,7 +294,7 @@ export default function GstLandingPage() {
             <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
               Answers & Guidance
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
               Frequently Asked Questions
             </h2>
           </div>
@@ -329,7 +330,7 @@ export default function GstLandingPage() {
       {/* 4. BOTTOM ACTION */}
       <section className="py-12 bg-slate-50/70">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
-          <h2 className="text-2xl font-extrabold text-slate-900">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
             Ready to secure your GST Number?
           </h2>
           <p className="text-xs sm:text-sm text-slate-600">

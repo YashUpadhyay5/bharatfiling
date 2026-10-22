@@ -11,7 +11,7 @@ import LandingPage from './pages/LandingPage.jsx';
 // Code-split secondary routes (loaded on demand to keep the initial bundle small)
 const GstLandingPage = lazy(() => import('./pages/GstLandingPage.jsx'));
 const ServicesDirectory = lazy(() => import('./pages/ServicesDirectory.jsx'));
-const PlaceholderServicePage = lazy(() => import('./pages/PlaceholderServicePage.jsx'));
+const ServiceDetailPage = lazy(() => import('./pages/ServiceDetailPage.jsx'));
 const PricingPage = lazy(() => import('./pages/PricingPage.jsx'));
 const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
 const ContactPage = lazy(() => import('./pages/ContactPage.jsx'));
@@ -58,14 +58,9 @@ export default function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/services" element={<ServicesDirectory />} />
                 <Route path="/services/gst-registration" element={<GstLandingPage />} />
-                <Route path="/services/gst-return" element={<PlaceholderServicePage />} />
-                <Route path="/services/income-tax" element={<PlaceholderServicePage />} />
-                <Route path="/services/company-registration" element={<PlaceholderServicePage />} />
-                <Route path="/services/llp-registration" element={<PlaceholderServicePage />} />
-                <Route path="/services/trademark" element={<PlaceholderServicePage />} />
-                <Route path="/services/legal" element={<PlaceholderServicePage />} />
                 <Route path="/services/udyam-registration" element={<UdyamLandingPage />} />
                 <Route path="/services/msme-registration" element={<UdyamLandingPage />} />
+                <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />

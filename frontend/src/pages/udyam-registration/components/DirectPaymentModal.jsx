@@ -325,7 +325,7 @@ export default function DirectPaymentModal({
                     {/* We Accept logos */}
                     <div className="flex items-center gap-2 text-slate-600 flex-wrap">
                       <span className="font-semibold">We Accept :</span>
-                      <span className="px-2 py-0.5 bg-blue-900 text-white font-black text-[10px] rounded">AMEX</span>
+                      <span className="px-2 py-0.5 bg-blue-900 text-white font-extrabold text-[10px] rounded">AMEX</span>
                       <span className="px-2 py-0.5 bg-sky-700 text-white font-bold text-[10px] rounded">Diners Club</span>
                       <span className="px-2 py-0.5 bg-amber-600 text-white font-bold text-[10px] rounded">MasterCard</span>
                       <span className="px-2 py-0.5 bg-emerald-700 text-white font-bold text-[10px] rounded">RuPay</span>
@@ -431,7 +431,7 @@ export default function DirectPaymentModal({
                       className="w-full px-3 py-2 border border-slate-300 rounded focus:border-[#5cb85c] focus:outline-none text-slate-800"
                     />
                     <div className="text-[11px] text-slate-500">
-                      💡 Direct one-time payment of ₹3,421.00 will be requested on your UPI app.
+                      Direct one-time payment of ₹3,421.00 will be requested on your UPI app.
                     </div>
                   </div>
                 )}
@@ -445,7 +445,7 @@ export default function DirectPaymentModal({
 
                 {/* Amount Payable */}
                 <div className="pt-2">
-                  <span className="text-lg font-black text-blue-600">INR 3421.00 </span>
+                  <span className="text-lg font-extrabold text-blue-600">INR 3421.00 </span>
                   <span className="text-xs text-slate-500">(Total Amount Payable)</span>
                 </div>
 

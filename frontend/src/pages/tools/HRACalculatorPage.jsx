@@ -69,6 +69,12 @@ export default function HRACalculatorPage() {
     } catch {}
   };
 
+  // From FY 2026-27 (Income-tax Rules 2026) Bengaluru, Hyderabad, Pune and Ahmedabad also get the 50% limit
+  const isExpandedMetroFY = (parseInt(String(financialYear).split('-')[0], 10) || 2026) >= 2026;
+  const metroCityList = isExpandedMetroFY
+    ? 'Delhi, Mumbai, Kolkata, Chennai, Bengaluru, Hyderabad, Pune, Ahmedabad'
+    : 'Delhi, Mumbai, Kolkata, Chennai';
+
   // Simple Mode State (Persists on refresh, fresh defaults for new sessions)
   const [simpleInput, setSimpleInput] = useState(() => {
     try {
@@ -93,7 +99,6 @@ export default function HRACalculatorPage() {
       hraReceived: '20000',
       rentPaid: '15000',
       isMetro: false,
-      city: 'Bengaluru',
     },
     {
       id: 'p-2',
@@ -106,7 +111,6 @@ export default function HRACalculatorPage() {
       hraReceived: '26000',
       rentPaid: '15000',
       isMetro: false,
-      city: 'Bengaluru',
     },
   ]);
 
@@ -153,7 +157,6 @@ export default function HRACalculatorPage() {
         hraReceived: last.hraReceived || '20000',
         rentPaid: last.rentPaid || '15000',
         isMetro: last.isMetro || false,
-        city: last.city || 'Bengaluru',
       },
     ]);
   };
@@ -212,7 +215,7 @@ export default function HRACalculatorPage() {
           <div className="space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight">
                   Professional HRA Exemption Calculator
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-3xl">
@@ -231,7 +234,7 @@ export default function HRACalculatorPage() {
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  ⚡ Simple Mode
+                  Simple Mode
                 </button>
                 <button
                   type="button"
@@ -242,7 +245,7 @@ export default function HRACalculatorPage() {
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  ⚙️ Advanced Multi-Period
+                  Advanced Multi-Period
                 </button>
               </div>
             </div>
@@ -431,8 +434,8 @@ export default function HRACalculatorPage() {
                         onChange={(e) => handleSimpleChange('isMetro', e.target.value === 'metro')}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
                       >
-                        <option value="non-metro">Non-Metro (40% Limit - Bengaluru, Pune, Hyd, Gurgaon, etc.)</option>
-                        <option value="metro">Metro (50% Limit - Delhi, Mumbai, Kolkata, Chennai)</option>
+                        <option value="non-metro">Non-Metro (40% Limit - all other cities)</option>
+                        <option value="metro">Metro (50% Limit - {metroCityList})</option>
                       </select>
                     </div>
                   </div>
@@ -603,6 +606,7 @@ export default function HRACalculatorPage() {
                             <select
                               value={p.isMetro ? 'metro' : 'non-metro'}
                               onChange={(e) => handlePeriodChange(p.id, 'isMetro', e.target.value === 'metro')}
+                              title={`Metro (50%): ${metroCityList}. All other cities: 40%.`}
                               className="w-full px-2 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold bg-white"
                             >
                               <option value="non-metro">Non-Metro (40%)</option>
@@ -612,6 +616,9 @@ export default function HRACalculatorPage() {
                         </div>
                       </div>
                     ))}
+                    <p className="text-[11px] leading-relaxed text-slate-500">
+                      Metro (50%) applies to {metroCityList} for FY {financialYear}. All other cities qualify for 40%.
+                    </p>
                   </div>
                 </div>
               )}
@@ -661,7 +668,7 @@ export default function HRACalculatorPage() {
                   <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
                     Eligible HRA Exemption (Tax Free)
                   </span>
-                  <div className="text-3xl sm:text-4xl font-black text-emerald-700 tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">
                     {formatIndianCurrency(summary.totalExemptHra)}
                   </div>
                   <p className="text-[11px] text-slate-500 font-medium">
@@ -673,14 +680,14 @@ export default function HRACalculatorPage() {
                 <div className="grid grid-cols-2 gap-3 text-center">
                   <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
                     <span className="text-[10px] uppercase font-bold text-slate-500">Taxable HRA</span>
-                    <div className="text-lg font-black text-slate-800">
+                    <div className="text-lg font-extrabold text-slate-800">
                       {formatIndianCurrency(summary.totalTaxableHra)}
                     </div>
                   </div>
 
                   <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-200/70">
                     <span className="text-[10px] uppercase font-bold text-blue-700">Est. Tax Saved</span>
-                    <div className="text-lg font-black text-blue-800">
+                    <div className="text-lg font-extrabold text-blue-800">
                       {formatIndianCurrency(summary.estimatedTaxSaved)}
                     </div>
                   </div>
@@ -797,7 +804,7 @@ export default function HRACalculatorPage() {
               <div className="p-5 rounded-3xl bg-slate-900 text-white space-y-3 shadow-md">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-amber-400" />
-                  <h3 className="font-bold text-sm">Need CA Review for Salary Restructuring?</h3>
+                  <h3 className="font-semibold tracking-tight text-sm">Need CA Review for Salary Restructuring?</h3>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   Our licensed Chartered Accountants help salaried professionals structure their CTC, claim joint rental agreements, and optimize Form 16 / ITR filing.
@@ -821,7 +828,7 @@ export default function HRACalculatorPage() {
               <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
                 Comprehensive Statutory Guide
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
                 Understanding House Rent Allowance (HRA) Exemption
               </h2>
               <p className="text-sm text-slate-600 leading-relaxed">
@@ -834,7 +841,7 @@ export default function HRACalculatorPage() {
                 <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
                   1
                 </div>
-                <h3 className="font-bold text-sm text-slate-900">What Counts as Eligible Salary?</h3>
+                <h3 className="font-semibold tracking-tight text-sm text-slate-900">What Counts as Eligible Salary?</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   As affirmed by the Supreme Court in the <em>Gestetner Duplicators</em> ruling, salary includes Basic Pay, Dearness Allowance (only if considered for retirement benefits), and fixed turnover commission. Special allowances and bonuses are strictly excluded.
                 </p>
@@ -844,9 +851,11 @@ export default function HRACalculatorPage() {
                 <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm">
                   2
                 </div>
-                <h3 className="font-bold text-sm text-slate-900">Metro vs Non-Metro Classification</h3>
+                <h3 className="font-semibold tracking-tight text-sm text-slate-900">Metro vs Non-Metro Classification</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Only Delhi, Mumbai, Kolkata, and Chennai qualify for the 50% salary limit. IT hubs like Bengaluru, Hyderabad, Pune, Gurugram, and Noida legally fall under the 40% non-metro limit under Rule 2A.
+                  {isExpandedMetroFY
+                    ? 'From FY 2026-27, eight cities qualify for the 50% salary limit: Delhi, Mumbai, Kolkata, Chennai, Bengaluru, Hyderabad, Pune and Ahmedabad. Other cities, including Gurugram and Noida, stay at the 40% non-metro limit.'
+                    : 'For FY 2025-26 and earlier, only Delhi, Mumbai, Kolkata and Chennai qualify for the 50% salary limit. IT hubs like Bengaluru, Hyderabad, Pune, Gurugram and Noida fall under the 40% non-metro limit under Rule 2A.'}
                 </p>
               </div>
 
@@ -854,7 +863,7 @@ export default function HRACalculatorPage() {
                 <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
                   3
                 </div>
-                <h3 className="font-bold text-sm text-slate-900">Landlord PAN & Form 12BB</h3>
+                <h3 className="font-semibold tracking-tight text-sm text-slate-900">Landlord PAN & Form 12BB</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   If your annual rent exceeds ₹1,00,000, furnishing the landlord's PAN to your employer via Form 12BB is statutory. If the landlord has no PAN, a signed declaration in Form 60 must be secured.
                 </p>

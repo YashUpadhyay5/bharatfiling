@@ -49,7 +49,7 @@ Indian tax law has undergone its most dramatic transformation in decades. From A
 3. To claim exemptions like **House Rent Allowance (HRA u/s 10(13A))**, **Home Loan Interest (u/s 24(b))**, **Life Insurance & PPF (u/s 80C)**, and **Health Insurance (u/s 80D)**, taxpayers must actively exercise the option to switch to the Old Regime.
 
 **The Taxpayer Dilemma:**
-- Most salaried employees either blindly stay in the default New Regime (overpaying taxes if they have significant rent or home loan deductions) or blindly stick to the Old Regime out of habit (overpaying taxes because they do not realize the New Regime offers lower rates, ₹75,000 standard deduction, and zero tax up to ₹7.75 Lakh).
+- Most salaried employees either blindly stay in the default New Regime (overpaying taxes if they have significant rent or home loan deductions) or blindly stick to the Old Regime out of habit (overpaying taxes because they do not realize the New Regime offers lower rates, ₹75,000 standard deduction, and zero tax up to ₹12.75 Lakh).
 - BharatFiling's ITR Slab Checker eliminates this guesswork with exact mathematical certainty.
 
 ---
@@ -59,8 +59,8 @@ Indian tax law has undergone its most dramatic transformation in decades. From A
 | Financial Year (FY) | Assessment Year (AY) | Core Legislative Context |
 |---|---|---|
 | **FY 2024-25** | **AY 2025-26** | Budget 2024 enhanced the standard deduction to **₹75,000** for New Regime and widened the 5% slab from ₹3L–₹6L to **₹3L–₹7L**. Capital gains tax rates were restructured effective **23 July 2024**. |
-| **FY 2025-26** | **AY 2026-27** | Fully consolidates the 6-slab New Regime structure. Section 87A rebate of ₹25,000 ensures zero tax up to ₹7,00,000 taxable income (₹7,75,000 gross salary). Surcharge cap of 25% continues under New Regime. |
-| **FY 2026-27** | **AY 2027-28** | Reflects the transition to the updated direct tax framework (Finance Act 2025 / Income-tax Act, 2025), preserving versioned historical continuity for past year assessments while forecasting future liability. |
+| **FY 2025-26** | **AY 2026-27** | Budget 2025 (Finance Act 2025) replaced the New Regime slabs with a 7-slab structure (nil up to ₹4,00,000, 30% above ₹24,00,000) and raised the Section 87A rebate to ₹60,000 for taxable income up to ₹12,00,000, so a salaried taxpayer with up to ₹12,75,000 gross pays no tax. Surcharge cap of 25% continues under New Regime. |
+| **FY 2026-27** | **AY 2027-28** | Budget 2026 left the New Regime slabs and the ₹60,000 rebate unchanged. The Income-tax Act, 2025 replaces the 1961 Act from 1 April 2026 (tax year 2026-27) and the slab rates carry over. |
 
 Tax rules cannot be hardcoded into one static formula. A tax computation performed for income earned in FY 2024-25 must obey the rules of AY 2025-26, while payroll withholding for FY 2025-26 or FY 2026-27 must apply prospective statutory provisions.
 
@@ -69,7 +69,7 @@ Tax rules cannot be hardcoded into one static formula. A tax computation perform
 ### 2.3 Why Section 115BAC (New Tax Regime)?
 The Government of India introduced Section 115BAC with four key goals:
 1. **Simplification:** Eliminate cumbersome paperwork, rent receipt verification, and investment proof collection (Form 12BB) for millions of salaried workers.
-2. **Lower Nominal Slab Rates:** Progressive tax rates starting at 5% with smaller rate bumps (5%, 10%, 15%, 20%, 30%) instead of jumping directly from 5% to 20% to 30%.
+2. **Lower Nominal Slab Rates:** Progressive tax rates starting at 5% with smaller rate bumps (5%, 10%, 15%, 20%, 25%, 30%) instead of jumping directly from 5% to 20% to 30%.
 3. **Liquidity in Hands of Citizens:** Discourage forced illiquid investments in long-term lock-in products solely for tax savings, encouraging capital allocation based on financial merit.
 4. **Higher Surcharge Cap:** The highest surcharge rate was cut from **37%** (Old Regime) to **25%** (New Regime), lowering the peak effective tax rate for high earners from ~**42.74%** down to ~**39%**.
 
@@ -78,9 +78,9 @@ The Government of India introduced Section 115BAC with four key goals:
 ### 2.4 Why the Old Regime Remains Critical for Certain Taxpayers
 The Old Tax Regime remains substantially superior for taxpayers who have:
 1. **Substantial Home Loan Interest (Section 24(b)):** Deduction up to **₹2,00,000** for self-occupied property, plus uncapped interest for rented-out properties (subject to ₹2L inter-head set-off).
-2. **Significant HRA Claims (Section 10(13A)):** Especially in metro cities (Mumbai, Delhi, Bengaluru, Chennai) where annual rent paid can generate exemptions of ₹2 Lakh to ₹5 Lakh+.
+2. **Significant HRA Claims (Section 10(13A)):** Especially in metro cities (Mumbai, Delhi, Kolkata, Chennai and, from FY 2026-27, Bengaluru, Hyderabad, Pune, Ahmedabad) where annual rent paid can generate exemptions of ₹2 Lakh to ₹5 Lakh+.
 3. **Family Healthcare Expenses (Section 80D):** Up to **₹1,00,000** deduction if covering self, family, and senior citizen parents with medical insurance and preventive health checkups.
-4. **Combined Deductions Exceeding the Breakeven Threshold:** If aggregate exemptions & Chapter VI-A deductions exceed **₹3.75 Lakh to ₹4.25 Lakh** (depending on gross income bracket), the Old Regime reliably yields lower tax.
+4. **Combined Deductions Exceeding the Breakeven Threshold:** If aggregate exemptions & Chapter VI-A deductions exceed roughly **₹5.5 Lakh to ₹8 Lakh** (depending on gross income bracket, FY 2025-26 onwards), the Old Regime reliably yields lower tax.
 
 ---
 
@@ -125,17 +125,29 @@ flowchart LR
 
 ### 3.2 How Slabs are Applied (New vs Old Comparison Matrix)
 
-#### New Tax Regime (Section 115BAC — Default for FY 2024-25, 2025-26, 2026-27)
-*Uniform across all age groups (Individuals, Seniors, Super Seniors).*
+#### New Tax Regime (Section 115BAC — Default) for FY 2025-26 and FY 2026-27
+*Uniform across all age groups (Individuals, Seniors, Super Seniors). Slabs introduced by the Finance Act 2025 and left unchanged by Budget 2026.*
 
 | Taxable Income Slab | Tax Rate | Calculation Formula | Cumulative Tax |
 |---|---|---|---|
-| **₹0 to ₹3,00,000** | **Nil** | ₹0 | ₹0 |
-| **₹3,00,001 to ₹7,00,000** | **5%** | $5\% \times (\text{Income} - 3,00,000)$ | ₹20,000 |
-| **₹7,00,001 to ₹10,00,000** | **10%** | $₹20,000 + 10\% \times (\text{Income} - 7,00,000)$ | ₹50,000 |
-| **₹10,00,001 to ₹12,00,000** | **15%** | $₹50,000 + 15\% \times (\text{Income} - 10,00,000)$ | ₹80,000 |
-| **₹12,00,001 to ₹15,00,000** | **20%** | $₹80,000 + 20\% \times (\text{Income} - 12,00,000)$ | ₹1,40,000 |
-| **Above ₹15,00,000** | **30%** | $₹1,40,000 + 30\% \times (\text{Income} - 15,00,000)$ | Slab-based |
+| **₹0 to ₹4,00,000** | **Nil** | ₹0 | ₹0 |
+| **₹4,00,001 to ₹8,00,000** | **5%** | $5\% \times (\text{Income} - 4,00,000)$ | ₹20,000 |
+| **₹8,00,001 to ₹12,00,000** | **10%** | $₹20,000 + 10\% \times (\text{Income} - 8,00,000)$ | ₹60,000 |
+| **₹12,00,001 to ₹16,00,000** | **15%** | $₹60,000 + 15\% \times (\text{Income} - 12,00,000)$ | ₹1,20,000 |
+| **₹16,00,001 to ₹20,00,000** | **20%** | $₹1,20,000 + 20\% \times (\text{Income} - 16,00,000)$ | ₹2,00,000 |
+| **₹20,00,001 to ₹24,00,000** | **25%** | $₹2,00,000 + 25\% \times (\text{Income} - 20,00,000)$ | ₹3,00,000 |
+| **Above ₹24,00,000** | **30%** | $₹3,00,000 + 30\% \times (\text{Income} - 24,00,000)$ | Slab-based |
+
+#### New Tax Regime for FY 2024-25 (AY 2025-26)
+
+| Taxable Income Slab | Tax Rate | Cumulative Tax |
+|---|---|---|
+| **₹0 to ₹3,00,000** | **Nil** | ₹0 |
+| **₹3,00,001 to ₹7,00,000** | **5%** | ₹20,000 |
+| **₹7,00,001 to ₹10,00,000** | **10%** | ₹50,000 |
+| **₹10,00,001 to ₹12,00,000** | **15%** | ₹80,000 |
+| **₹12,00,001 to ₹15,00,000** | **20%** | ₹1,40,000 |
+| **Above ₹15,00,000** | **30%** | Slab-based |
 
 #### Old Tax Regime Slabs (Categorized by Age)
 - **Category 1: Individuals (< 60 years):** Basic exemption ₹2,50,000.
@@ -160,11 +172,13 @@ Section 87A provides a statutory tax credit to low- and middle-income resident i
    - Eligibility: Total Taxable Income $\le ₹5,00,000$.
    - Maximum Rebate: $\min(\text{Tax Payable}, ₹12,500)$.
    - Result: Any resident individual earning up to ₹5,00,000 pays **₹0** tax.
-2. **Under New Regime (Section 115BAC):**
-   - Eligibility: Total Taxable Income $\le ₹7,00,000$.
-   - Maximum Rebate: $\min(\text{Tax Payable}, ₹25,000)$.
-   - Result: Any resident individual earning up to ₹7,00,000 pays **₹0** tax.
-   - *Impact on Salaried Individuals:* Gross salary of ₹7,75,000 minus ₹75,000 standard deduction equals ₹7,00,000 taxable income $\implies$ **₹0 Tax**.
+2. **Under New Regime (Section 115BAC) — FY 2025-26 and FY 2026-27:**
+   - Eligibility: Total Taxable Income $\le ₹12,00,000$.
+   - Maximum Rebate: $\min(\text{Tax Payable}, ₹60,000)$.
+   - Result: Any resident individual with taxable income up to ₹12,00,000 pays **₹0** tax.
+   - *Impact on Salaried Individuals:* Gross salary of ₹12,75,000 minus ₹75,000 standard deduction equals ₹12,00,000 taxable income $\implies$ **₹0 Tax**.
+   - *Not available against special-rate income:* the rebate only offsets tax on ordinary slab income. Tax on capital gains u/s 111A, 112 and 112A is payable in full.
+3. **Under New Regime for FY 2024-25:** the limit was ₹7,00,000 taxable income and the maximum rebate ₹25,000 (zero tax up to ₹7,75,000 gross salary).
 
 ---
 
@@ -172,31 +186,32 @@ Section 87A provides a statutory tax credit to low- and middle-income resident i
 
 A critical flaw in basic calculators is the failure to handle the **"Section 87A Tax Cliff"**.
 
-#### The Problem:
-- At taxable income of **₹7,00,000**, tax is ₹25,000 minus ₹25,000 rebate = **₹0**.
-- If taxable income increases by just **₹1,000** to **₹7,01,000**, normal tax without relief jumps to:
-  $$\text{Tax} = 5\% \times 4,00,000 + 10\% \times 1,000 = 20,000 + 100 = ₹20,100$$
-  *The taxpayer earned ₹1,000 extra but would have to pay ₹20,100 in tax!*
+#### The Problem (FY 2025-26 / FY 2026-27):
+- At taxable income of **₹12,00,000**, tax is ₹60,000 minus ₹60,000 rebate = **₹0**.
+- If taxable income increases by just **₹1,000** to **₹12,01,000**, normal tax without relief jumps to:
+  $$\text{Tax} = 5\% \times 4,00,000 + 10\% \times 4,00,000 + 15\% \times 1,000 = 20,000 + 40,000 + 150 = ₹60,150$$
+  *The taxpayer earned ₹1,000 extra but would have to pay ₹60,150 in tax!*
 
 #### The Statutory Remedy (Proviso to Section 87A under Finance Act):
-The law mandates that the tax payable shall not exceed the amount by which total taxable income exceeds ₹7,00,000:
-$$\text{Tax Payable (before cess)} \le \text{Taxable Income} - 7,00,000$$
-$$\text{Section 87A Marginal Relief} = \max(0, \text{Normal Slab Tax} - (\text{Taxable Income} - 7,00,000))$$
+The law mandates that the tax payable shall not exceed the amount by which total taxable income exceeds ₹12,00,000:
+$$\text{Tax Payable (before cess)} \le \text{Taxable Income} - 12,00,000$$
+$$\text{Section 87A Marginal Relief} = \max(0, \text{Normal Slab Tax} - (\text{Taxable Income} - 12,00,000))$$
 
 #### Exact Mathematical Cutoff Derivation:
-Let $Y = \text{Taxable Income} - 7,00,000$. In the 10% slab ($7,00,000 < \text{Income} \le 10,00,000$):
-$$\text{Normal Slab Tax} = ₹20,000 + 0.10 \times Y$$
+Let $Y = \text{Taxable Income} - 12,00,000$. In the 15% slab ($12,00,000 < \text{Income} \le 16,00,000$):
+$$\text{Normal Slab Tax} = ₹60,000 + 0.15 \times Y$$
 Marginal relief applies as long as:
-$$\text{Normal Slab Tax} > Y \iff 20,000 + 0.10 Y > Y \iff 20,000 > 0.90 Y \iff Y < \frac{20,000}{0.90} \approx 22,222.22$$
-Therefore, **Marginal Relief applies up to Taxable Income of ₹7,22,222**.
+$$\text{Normal Slab Tax} > Y \iff 60,000 + 0.15 Y > Y \iff 60,000 > 0.85 Y \iff Y < \frac{60,000}{0.85} \approx 70,588.24$$
+Therefore, **Marginal Relief applies up to Taxable Income of ₹12,70,588**.
+*(For FY 2024-25 the same mechanism applied around the ₹7,00,000 limit, with relief up to ₹7,22,222.)*
 
 #### Worked Example:
-- **Taxable Income:** ₹7,10,000.
-- **Normal Slab Tax:** $₹20,000 + 10\% \times 10,000 = ₹21,000$.
-- **Excess Income over ₹7,00,000:** $₹7,10,000 - ₹7,00,000 = ₹10,000$.
-- **Section 87A Marginal Relief:** $₹21,000 - ₹10,000 = ₹11,000$.
-- **Tax Payable after Relief:** $₹21,000 - ₹11,000 = ₹10,000$.
-- **Plus 4% Cess:** $₹10,000 \times 1.04 = \mathbf{₹10,400}$ *(instead of ₹21,840)*.
+- **Taxable Income:** ₹12,10,000.
+- **Normal Slab Tax:** $₹60,000 + 15\% \times 10,000 = ₹61,500$.
+- **Excess Income over ₹12,00,000:** $₹12,10,000 - ₹12,00,000 = ₹10,000$.
+- **Section 87A Marginal Relief:** $₹61,500 - ₹10,000 = ₹51,500$.
+- **Tax Payable after Relief:** $₹61,500 - ₹51,500 = ₹10,000$.
+- **Plus 4% Cess:** $₹10,000 \times 1.04 = \mathbf{₹10,400}$ *(instead of ₹63,960)*.
 
 ---
 
@@ -233,7 +248,7 @@ Certain income types cannot be taxed at ordinary slab rates and are segregated b
 4. **Lottery / Online Gaming / Betting u/s 115BB / 115BBJ:**
    - Flat **30%** without any slab exemption, standard deduction, or Chapter VI-A deductions.
 
-*Basic Exemption Adjustment:* If ordinary income is less than the basic exemption limit (e.g. ₹2.5L / ₹3L), the unexhausted basic exemption is offset against capital gains for resident individuals before computing tax.
+*Basic Exemption Adjustment:* If ordinary income is less than the basic exemption limit (e.g. ₹2.5L / ₹3L under the Old Regime, ₹4L under the New Regime), the unexhausted basic exemption is offset against capital gains for resident individuals before computing tax.
 
 ---
 
@@ -263,15 +278,15 @@ Taxpayers should choose the regime that minimizes their tax. The decision boils 
 ```
 
 #### Breakeven Deductions Guide (FY 2025-26 / FY 2026-27):
-| Gross Salary Level | New Regime Tax | Deductions Required to Match in Old Regime | CA Recommendation |
+*Deductions = Old Regime exemptions and deductions over and above the ₹50,000 standard deduction (HRA, 80C, 80D, home loan interest u/s 24(b), etc.).*
+
+| Gross Salary Level | New Regime Tax (incl. cess) | Deductions Required to Match in Old Regime | CA Recommendation |
 |---|---|---|---|
-| **Up to ₹7,75,000** | **₹0** | Not applicable | **100% New Regime** (Tax is already zero). |
-| **₹9,00,000** | ₹20,800 | **₹2,62,500** | **New Regime** unless you have 80C + 80D + HRA. |
-| **₹10,50,000** | ₹36,400 | **₹3,12,500** | **New Regime** for most; Old only if paying heavy rent. |
-| **₹12,00,000** | ₹67,600 | **₹3,62,500** | **Tipping Point**: 80C (1.5L) + 24b Home Loan (2L) + 80D (25k) = 3.75L $\rightarrow$ Old Regime wins. |
-| **₹15,00,000** | ₹1,14,400 | **₹4,16,667** | **Old Regime** if Home Loan + HRA + 80C exist; else New Regime. |
-| **₹20,00,000** | ₹2,70,400 | **₹4,58,333** | **Old Regime** requires ₹4.6L+ deductions to beat New Regime. |
-| **₹50,00,000+** | ₹12,06,400 | **₹5,00,000+** | **New Regime** is usually superior, especially with 25% surcharge cap. |
+| **Up to ₹12,75,000** | **₹0** | Not applicable | **100% New Regime** (Tax is already zero). |
+| **₹15,00,000** | ₹97,500 | **≈ ₹5,45,000** | **New Regime** unless you have heavy rent + home loan + 80C + 80D claims. |
+| **₹20,00,000** | ₹1,92,400 | **≈ ₹7,10,000** | **New Regime** for most; Old Regime needs ₹7.1L+ of deductions. |
+| **₹25,00,000** | ₹3,19,800 | **≈ ₹8,00,000** | **Old Regime** only with very large HRA / home loan claims. |
+| **₹50,00,000+** | ₹10,99,800 (at ₹50L) | **≈ ₹8,00,000** | **New Regime** is usually superior, especially with 25% surcharge cap. |
 
 ---
 

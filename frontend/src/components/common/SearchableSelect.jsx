@@ -117,7 +117,7 @@ export default function SearchableSelect({
     const parts = text.split(new RegExp(`(${escapedQuery})`, 'gi'));
     return parts.map((part, i) =>
       part.toLowerCase() === query.trim().toLowerCase() ? (
-        <span key={i} className="text-blue-600 bg-blue-50 font-black rounded-xs px-0.5">
+        <span key={i} className="text-blue-600 bg-blue-50 font-extrabold rounded-xs px-0.5">
           {part}
         </span>
       ) : (

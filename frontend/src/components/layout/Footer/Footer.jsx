@@ -1,4 +1,5 @@
 import React from 'react';
+import { SUPPORT } from '../../../config/support.js';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Lock, Award, Heart, Phone, Mail, MapPin } from 'lucide-react';
 
@@ -33,8 +34,8 @@ export default function Footer() {
               <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <div className="text-white font-bold text-xs">256-Bit Bank Grade</div>
-              <div className="text-[11px] text-slate-500">Encrypted document vault with auto-masking</div>
+              <div className="text-white font-bold text-xs">Secure Document Vault</div>
+              <div className="text-[11px] text-slate-500">Encrypted in transit and stored privately</div>
             </div>
           </div>
 
@@ -72,11 +73,11 @@ export default function Footer() {
           <div className="space-y-2.5 text-xs pt-2">
             <div className="flex items-center gap-2 text-slate-300">
               <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>1800-890-8800 (Mon - Sat, 9:00 AM - 7:00 PM IST)</span>
+              <span>{SUPPORT.phoneDisplay} ({SUPPORT.hours})</span>
             </div>
             <div className="flex items-center gap-2 text-slate-300">
               <Mail className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>compliance@bharatfiling.in</span>
+              <span>{SUPPORT.email}</span>
             </div>
             <div className="flex items-center gap-2 text-slate-300">
               <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />

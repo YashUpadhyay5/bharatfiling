@@ -15,7 +15,6 @@ export default function OnboardingHero() {
       {/* Top Banner Pill */}
       <div className="flex justify-center sm:justify-start">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-200 bg-blue-50/70 text-blue-950 shadow-2xs text-xs sm:text-sm font-semibold tracking-wide">
-          <span className="text-sm">🚀</span>
           <span>Get Your Udyam Registration from</span>
           <span className="font-extrabold text-blue-700">₹2,899</span>
         </div>
@@ -52,10 +51,10 @@ export default function OnboardingHero() {
         <div className="pt-2">
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
             <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-              ★ 4.9
+              CA
             </div>
             <div className="text-xs">
-              <p className="font-bold text-slate-800">1,00,000+ MSMEs Registered</p>
+              <p className="font-bold text-slate-800">Udyam registration with CA assistance</p>
               <p className="text-slate-500 font-medium">100% Online & CA Verified Assistance</p>
             </div>
           </div>

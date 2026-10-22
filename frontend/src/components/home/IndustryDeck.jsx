@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AuthRequiredModal from '../common/AuthRequiredModal.jsx';
 import { INDUSTRY_SOLUTIONS } from './industrySolutions.js';
@@ -9,7 +9,7 @@ const INTERVAL = 3200; // ms per card - calm enough for a hero
 const EASE = 'cubic-bezier(0.22, 0.8, 0.24, 1)';
 
 // Position of a card by its distance behind the front card (0 = front).
-// The stack peeks upwards so the right-hand side stays clear for the rail.
+// The stack peeks upwards so the left-hand side stays clear for the rail.
 const LAYOUT = {
   0: { x: 0, y: 0, s: 1, o: 1, z: 40 },
   1: { x: 0, y: -18, s: 0.95, o: 0.75, z: 30 },
@@ -22,15 +22,14 @@ const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-
 
 /**
  * Industry solutions as a stacked 3D card deck for the hero: the front card is fully readable,
- * the next two peek behind it. A rail on the right lists every industry - picking one opens its
- * card and pins it (auto-rotation stops until play is pressed). Auto-advance also pauses on
- * hover / focus / hidden tab / reduced motion; prev / next and a pointer-follow tilt as well.
+ * the next two peek behind it. A rail on the left lists every industry - picking one opens its
+ * card. Auto-advance pauses on hover / focus / hidden tab / reduced motion; prev / next and a
+ * pointer-follow tilt as well.
  */
 export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
   const count = items.length;
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false); // transient: hover / focus
-  const [pinned, setPinned] = useState(false); // chosen by the user: stays until play
   const [reduced, setReduced] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
@@ -39,11 +38,6 @@ export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
   const navigate = useNavigate();
 
   const go = useCallback((delta) => setActive((a) => (a + delta + count) % count), [count]);
-
-  const pick = (i) => {
-    setActive(i);
-    setPinned(true);
-  };
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -58,7 +52,7 @@ export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
     };
   }, []);
 
-  const running = !paused && !pinned && !reduced && !hidden;
+  const running = !paused && !reduced && !hidden;
 
   // one timer per step; manual navigation restarts the countdown
   useEffect(() => {
@@ -169,62 +163,27 @@ export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
             </div>
           </div>
 
-          {/* controls: play / pause with countdown ring, counter, prev / next */}
-          <div className="mt-6 flex items-center justify-between pl-1">
-            <div className="flex items-center gap-3">
-              {!reduced && (
-                <button
-                  type="button"
-                  onClick={() => setPinned((p) => !p)}
-                  aria-label={pinned ? 'Resume auto-rotation' : 'Pause auto-rotation'}
-                  className={`relative flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#062A4D] shadow-sm ring-1 ring-slate-200 transition hover:shadow-md active:scale-95 ${focusRing}`}
-                >
-                  {running && (
-                    <svg key={active} aria-hidden="true" viewBox="0 0 36 36" className="absolute inset-0 -rotate-90">
-                      <circle
-                        cx="18"
-                        cy="18"
-                        r="16.5"
-                        pathLength="100"
-                        fill="none"
-                        stroke="#062A4D"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeDasharray="100"
-                        className="bf-countdown"
-                        style={{ animationDuration: `${INTERVAL}ms` }}
-                      />
-                    </svg>
-                  )}
-                  {pinned ? <Play className="h-3.5 w-3.5 translate-x-px fill-current" aria-hidden="true" /> : <Pause className="h-3.5 w-3.5 fill-current" aria-hidden="true" />}
-                </button>
-              )}
-              <span className="text-xs font-semibold tabular-nums text-slate-400 3xl:text-[13px]" data-deck-counter>
-                {String(active + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
-              </span>
-              {pinned && <span className="bf-fade-in rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">Paused</span>}
-            </div>
-            <div className="flex gap-2">
-              {[
-                [-1, 'Previous industry', ChevronLeft],
-                [1, 'Next industry', ChevronRight],
-              ].map(([delta, label, Icon]) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => go(delta)}
-                  aria-label={label}
-                  className={`flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow-md active:scale-95 ${focusRing}`}
-                >
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                </button>
-              ))}
-            </div>
+          {/* controls: prev / next */}
+          <div className="mt-6 flex justify-end gap-2">
+            {[
+              [-1, 'Previous industry', ChevronLeft],
+              [1, 'Next industry', ChevronRight],
+            ].map(([delta, label, Icon]) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => go(delta)}
+                aria-label={label}
+                className={`flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow-md active:scale-95 ${focusRing}`}
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* rail: every industry at a glance - pick one to open and pin it */}
-        <ol aria-label="Choose an industry" className="relative flex h-[318px] shrink-0 flex-col justify-between 3xl:h-[372px]">
+        {/* rail: every industry at a glance - pick one to open it */}
+        <ol aria-label="Choose an industry" className="relative order-first flex h-[318px] shrink-0 flex-col justify-between 3xl:h-[372px]">
           <span aria-hidden="true" className="absolute bottom-3 left-[7px] top-3 w-0.5 rounded-full bg-slate-200">
             <span
               className="absolute inset-x-0 top-0 rounded-full bg-gradient-to-b from-[#062A4D] to-[#2563EB]"
@@ -238,7 +197,7 @@ export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
               <li key={item.id} className="relative flex h-6 items-center">
                 <button
                   type="button"
-                  onClick={() => pick(i)}
+                  onClick={() => setActive(i)}
                   aria-label={`Show ${item.title}`}
                   aria-current={isActive ? 'true' : undefined}
                   title={item.title}

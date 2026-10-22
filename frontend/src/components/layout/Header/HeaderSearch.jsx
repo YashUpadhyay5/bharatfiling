@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
 import AuthRequiredModal from '../../common/AuthRequiredModal.jsx';
-import { SERVICES_DATA, searchServices, PUBLIC_INFO_PATHS } from '../../search/serviceSearch.js';
 import {
   Search,
   X,
@@ -19,6 +18,280 @@ import {
   PhoneCall,
 } from 'lucide-react';
 
+// Comprehensive structured directory of BharatFiling services
+const SERVICES_DATA = [
+  // INCORPORATION
+  {
+    id: 'pvt-ltd',
+    title: 'Private Limited Company',
+    subtitle: 'Incorporate a Pvt Ltd company in India',
+    category: 'INCORPORATION',
+    badge: 'INCORPORATION',
+    path: '/services/company-registration',
+    keywords: ['pvt ltd', 'company', 'incorporation', 'private limited', 'mca', 'spice+', 'startup'],
+    isTrending: true,
+  },
+  {
+    id: 'llp-reg',
+    title: 'Limited Liability Partnership',
+    subtitle: 'Register an LLP with limited liability',
+    category: 'INCORPORATION',
+    badge: 'INCORPORATION',
+    path: '/services/llp-registration',
+    keywords: ['llp', 'partnership', 'limited liability', 'firm', 'partners', 'agreement'],
+    isTrending: false,
+  },
+  {
+    id: 'opc-reg',
+    title: 'One Person Company',
+    subtitle: 'Single-owner company registration',
+    category: 'INCORPORATION',
+    badge: 'INCORPORATION',
+    path: '/services/company-registration',
+    keywords: ['opc', 'one person', 'solo', 'company', 'founder'],
+    isTrending: false,
+  },
+  {
+    id: 'partnership-firm',
+    title: 'Partnership Firm',
+    subtitle: 'Register a partnership firm in India',
+    category: 'INCORPORATION',
+    badge: 'INCORPORATION',
+    path: '/services/company-registration',
+    keywords: ['partnership', 'firm', 'deed', 'registration', 'partners'],
+    isTrending: false,
+  },
+  {
+    id: 'proprietorship',
+    title: 'Sole Proprietorship Firm',
+    subtitle: 'Register a sole proprietorship business',
+    category: 'INCORPORATION',
+    badge: 'INCORPORATION',
+    path: '/apply/gst',
+    keywords: ['proprietorship', 'sole trader', 'individual', 'business', 'shop'],
+    isTrending: false,
+  },
+  {
+    id: 'section-8',
+    title: 'Section 8 Company',
+    subtitle: 'NGO & non-profit entity registration',
+    category: 'INCORPORATION',
+    badge: 'INCORPORATION',
+    path: '/services/company-registration',
+    keywords: ['section 8', 'ngo', 'non profit', 'trust', 'society', '12a', '80g'],
+    isTrending: false,
+  },
+
+  // TRADEMARK
+  {
+    id: 'tm-reg',
+    title: 'Trademark Registration',
+    subtitle: 'Protect your brand name & logo in India',
+    category: 'TRADEMARK',
+    badge: 'TRADEMARK',
+    path: '/services/trademark',
+    keywords: ['trademark', 'tm', 'brand', 'logo', 'brand name', 'ipr', 'symbol'],
+    isTrending: true,
+  },
+  {
+    id: 'copyright-reg',
+    title: 'Copyright Registration',
+    subtitle: 'Register copyright for creative works',
+    category: 'TRADEMARK',
+    badge: 'TRADEMARK',
+    path: '/services/trademark',
+    keywords: ['copyright', 'art', 'music', 'books', 'software', 'content'],
+    isTrending: false,
+  },
+  {
+    id: 'tm-objection',
+    title: 'Trademark Objection Reply',
+    subtitle: 'Respond to examination report by IP examiner',
+    category: 'TRADEMARK',
+    badge: 'TRADEMARK',
+    path: '/services/trademark',
+    keywords: ['tm objection', 'examination report', 'section 9', 'section 11', 'reply'],
+    isTrending: false,
+  },
+  {
+    id: 'tm-search',
+    title: 'Trademark Availability Search',
+    subtitle: 'Free comprehensive public TM class check',
+    category: 'TRADEMARK',
+    badge: 'TRADEMARK',
+    path: '/services/trademark',
+    keywords: ['tm search', 'brand search', 'trademark check', 'class search', 'availability'],
+    isTrending: false,
+  },
+
+  // GST & TAX
+  {
+    id: 'gst-apply',
+    title: 'GST Registration',
+    subtitle: 'New GSTIN registration for businesses',
+    category: 'GST & TAX',
+    badge: 'GST & TAX',
+    path: '/apply/gst',
+    keywords: ['gst', 'registration', 'gstin', 'apply', 'trn', 'new tax', 'certificate'],
+    isTrending: true,
+  },
+  {
+    id: 'gst-return',
+    title: 'GST Return Filing (GSTR-1 & 3B)',
+    subtitle: 'Monthly & quarterly GSTR filings with reconciliation',
+    category: 'GST & TAX',
+    badge: 'GST & TAX',
+    path: '/services/gst-return',
+    keywords: ['gst', 'return', 'gstr1', 'gstr3b', 'monthly filing', 'quarterly'],
+    isTrending: false,
+  },
+  {
+    id: 'itr-filing',
+    title: 'Income Tax Return (ITR)',
+    subtitle: 'Expert CA filing for individual & business',
+    category: 'GST & TAX',
+    badge: 'GST & TAX',
+    path: '/services/income-tax',
+    keywords: ['itr', 'tax', 'income tax', 'salary', 'capital gains', 'refund', 'itr 1', 'itr 4'],
+    isTrending: true,
+  },
+  {
+    id: 'tds-returns',
+    title: 'TDS Return Filing (24Q / 26Q)',
+    subtitle: 'Quarterly salary & vendor TDS compliance',
+    category: 'GST & TAX',
+    badge: 'GST & TAX',
+    path: '/services/income-tax',
+    keywords: ['tds', 'form 16', 'traces', '24q', '26q', 'tax deducted'],
+    isTrending: false,
+  },
+  {
+    id: 'gstr-9',
+    title: 'GSTR-9 Annual Return',
+    subtitle: 'Annual GST audit & turnover reconciliation',
+    category: 'GST & TAX',
+    badge: 'GST & TAX',
+    path: '/services/gst-return',
+    keywords: ['gstr9', 'annual return', 'audit', 'gst reconciliation', 'annual'],
+    isTrending: false,
+  },
+  {
+    id: '15ca-15cb',
+    title: 'Form 15CA / 15CB Certification',
+    subtitle: 'Foreign remittance CA certification',
+    category: 'GST & TAX',
+    badge: 'GST & TAX',
+    path: '/services/income-tax',
+    keywords: ['15ca', '15cb', 'foreign remittance', 'ca certificate', 'rbi'],
+    isTrending: false,
+  },
+
+  // MCA & COMPLIANCE
+  {
+    id: 'roc-filing',
+    title: 'Company Annual ROC Filing',
+    subtitle: 'File AOC-4 and MGT-7 with MCA',
+    category: 'MCA & COMPLIANCE',
+    badge: 'MCA & COMPLIANCE',
+    path: '/services/llp-registration',
+    keywords: ['roc', 'mca', 'annual filing', 'aoc4', 'mgt7', 'balance sheet'],
+    isTrending: false,
+  },
+  {
+    id: 'dir3-kyc',
+    title: 'Director KYC (DIR-3 KYC)',
+    subtitle: 'Annual director verification on MCA',
+    category: 'MCA & COMPLIANCE',
+    badge: 'MCA & COMPLIANCE',
+    path: '/services/llp-registration',
+    keywords: ['dir-3', 'dir3', 'director kyc', 'din kyc', 'din'],
+    isTrending: false,
+  },
+  {
+    id: 'add-director',
+    title: 'Add or Remove Director (DIR-12)',
+    subtitle: 'DIR-12 appointment & resignation filings',
+    category: 'MCA & COMPLIANCE',
+    badge: 'MCA & COMPLIANCE',
+    path: '/services/llp-registration',
+    keywords: ['director', 'dir12', 'resignation', 'appointment', 'board'],
+    isTrending: false,
+  },
+  {
+    id: 'strike-off',
+    title: 'Strike Off Company / LLP',
+    subtitle: 'Fast-track closure of dormant entities',
+    category: 'MCA & COMPLIANCE',
+    badge: 'MCA & COMPLIANCE',
+    path: '/services/llp-registration',
+    keywords: ['strike off', 'close company', 'close llp', 'stk2', 'dormant'],
+    isTrending: false,
+  },
+
+  // LICENSES & REGISTRATION
+  {
+    id: 'msme-reg',
+    title: 'MSME / Udyam Registration',
+    subtitle: 'Priority government subsidies & collateral-free loans',
+    category: 'LICENSES & REGISTRATION',
+    badge: 'LICENSES & REGISTRATION',
+    path: '/services',
+    keywords: ['msme', 'udyam', 'small business', 'subsidy', 'priority loan'],
+    isTrending: false,
+  },
+  {
+    id: 'fssai-food',
+    title: 'FSSAI Food Safety License',
+    subtitle: 'Food safety license for restaurants & food units',
+    category: 'LICENSES & REGISTRATION',
+    badge: 'LICENSES & REGISTRATION',
+    path: '/services',
+    keywords: ['fssai', 'food license', 'restaurant', 'cloud kitchen', 'foscos'],
+    isTrending: false,
+  },
+  {
+    id: 'iec-code',
+    title: 'Import Export Code (IEC)',
+    subtitle: 'Mandatory DGFT code for international trade',
+    category: 'LICENSES & REGISTRATION',
+    badge: 'LICENSES & REGISTRATION',
+    path: '/services',
+    keywords: ['iec', 'dgft', 'export license', 'import license', 'customs'],
+    isTrending: false,
+  },
+  {
+    id: 'dsc-token',
+    title: 'Digital Signature Certificate (DSC)',
+    subtitle: 'Class 3 USB cryptographic token for MCA & GST',
+    category: 'LICENSES & REGISTRATION',
+    badge: 'LICENSES & REGISTRATION',
+    path: '/services',
+    keywords: ['dsc', 'digital signature', 'class 3', 'emsigner', 'usb token'],
+    isTrending: false,
+  },
+
+  // CONSULTATIONS & SUPPORT
+  {
+    id: 'talk-ca',
+    title: 'Talk to Chartered Accountant (CA)',
+    subtitle: '1-on-1 private consultation with experienced CA',
+    category: 'CONSULTATION',
+    badge: 'CONSULTATION',
+    path: '/contact',
+    keywords: ['talk to ca', 'ca consultation', 'chartered accountant', 'tax advice', 'consult'],
+    isTrending: false,
+  },
+  {
+    id: 'pricing-page',
+    title: 'Transparent Pricing Plans',
+    subtitle: 'All-inclusive CA filing packages & transparent fees',
+    category: 'PRICING',
+    badge: 'PRICING',
+    path: '/pricing',
+    keywords: ['pricing', 'plans', 'cost', 'fees', 'charges', 'packages'],
+    isTrending: false,
+  },
+];
 
 // Curated Top Services categories for the modal initial view (matching image 2)
 const TOP_SERVICE_GROUPS = [
@@ -26,7 +299,7 @@ const TOP_SERVICE_GROUPS = [
     key: 'INCORPORATION',
     name: 'INCORPORATION',
     badgeLabel: 'INCORPORATION',
-    iconText: '🏢',
+    iconText: '',
     badgeClass: 'bg-blue-50 text-blue-700 border-blue-200/80',
     serviceIds: ['pvt-ltd', 'llp-reg', 'opc-reg', 'partnership-firm'],
   },
@@ -34,7 +307,7 @@ const TOP_SERVICE_GROUPS = [
     key: 'TRADEMARK',
     name: 'TRADEMARK',
     badgeLabel: 'TRADEMARK',
-    iconText: '™',
+    iconText: '',
     badgeClass: 'bg-purple-50 text-purple-700 border-purple-200/80',
     serviceIds: ['tm-reg', 'copyright-reg'],
   },
@@ -42,7 +315,7 @@ const TOP_SERVICE_GROUPS = [
     key: 'GST_TAX',
     name: 'GST & TAX',
     badgeLabel: 'GST & TAX',
-    iconText: '📊',
+    iconText: '',
     badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
     serviceIds: ['gst-apply', 'itr-filing', 'gst-return', 'tds-returns'],
   },
@@ -50,7 +323,7 @@ const TOP_SERVICE_GROUPS = [
     key: 'MCA',
     name: 'MCA & COMPLIANCE',
     badgeLabel: 'MCA & COMPLIANCE',
-    iconText: '📜',
+    iconText: '',
     badgeClass: 'bg-amber-50 text-amber-800 border-amber-200/80',
     serviceIds: ['roc-filing', 'dir3-kyc', 'add-director', 'strike-off'],
   },
@@ -58,7 +331,7 @@ const TOP_SERVICE_GROUPS = [
     key: 'LICENSES',
     name: 'LICENSES & REGISTRATION',
     badgeLabel: 'LICENSES',
-    iconText: '🛡️',
+    iconText: '',
     badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
     serviceIds: ['msme-reg', 'fssai-food', 'iec-code', 'dsc-token'],
   },
@@ -118,7 +391,43 @@ export default function HeaderSearch({
   const navigate = useNavigate();
 
   // Instant real-time suggestions whenever query changes
-  const searchResults = useMemo(() => searchServices(query), [query]);
+  const searchResults = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+
+    const tokens = q.split(/\s+/).filter(Boolean);
+
+    return SERVICES_DATA.map((item) => {
+      let score = 0;
+      const titleLower = item.title.toLowerCase();
+      const subLower = item.subtitle.toLowerCase();
+      const catLower = item.category.toLowerCase();
+      const allKeywords = item.keywords.join(' ').toLowerCase();
+
+      // Exact or prefix match
+      if (titleLower === q) score += 150;
+      else if (titleLower.startsWith(q)) score += 100;
+      else if (titleLower.includes(q)) score += 60;
+
+      // Subtitle match
+      if (subLower.includes(q)) score += 35;
+
+      // Category match
+      if (catLower.startsWith(q)) score += 40;
+      else if (catLower.includes(q)) score += 20;
+
+      // Token matches
+      tokens.forEach((token) => {
+        if (titleLower.includes(token)) score += 25;
+        if (subLower.includes(token)) score += 15;
+        if (allKeywords.includes(token)) score += 25;
+      });
+
+      return { ...item, score };
+    })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score);
+  }, [query]);
 
   // Reset active selection when query changes
   useEffect(() => {
@@ -155,15 +464,8 @@ export default function HeaderSearch({
       }
     };
 
-    // The hamburger list asks for the search dialog through this event.
-    const handleExternalOpen = () => setIsModalOpen(true);
-
     window.addEventListener('keydown', handleGlobalKeyDown);
-    window.addEventListener('bf:open-search', handleExternalOpen);
-    return () => {
-      window.removeEventListener('keydown', handleGlobalKeyDown);
-      window.removeEventListener('bf:open-search', handleExternalOpen);
-    };
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [isMobile]);
 
   // Select service and navigate (requires login/register for services)
@@ -173,7 +475,7 @@ export default function HeaderSearch({
     setQuery('');
     if (onCloseMobile) onCloseMobile();
 
-    const isInfoPage = PUBLIC_INFO_PATHS.includes(item.path);
+    const isInfoPage = ['/about', '/faq', '/pricing', '/contact', '/services'].includes(item.path);
     if (isAuthenticated || isInfoPage) {
       navigate(item.path);
     } else {
@@ -239,22 +541,22 @@ export default function HeaderSearch({
             <span>Search GST, Trademark, Company...</span>
           </div>
         </button>
-      ) : variant === 'none' ? null : variant === 'header' ? (
-        /* Header trigger for the navy bar: round icon button, labelled pill on very wide screens */
+      ) : variant === 'header' ? (
+        /* Header trigger: round icon button that grows into the labelled pill on very wide screens */
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className={`group inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/40 text-white transition-colors hover:bg-white/10 cursor-pointer min-[1700px]:w-[188px] min-[1700px]:justify-between min-[1700px]:px-3.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFC21A] ${className}`}
+          className={`group inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 shadow-xs transition-all hover:border-slate-400 hover:bg-slate-50 hover:text-slate-800 cursor-pointer min-[1600px]:h-9 min-[1600px]:w-[192px] min-[1600px]:justify-between min-[1600px]:px-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827] ${className}`}
           aria-label={`Search services (${shortcutLabel})`}
           title={`Search services (Press ${shortcutLabel} or /)`}
         >
           <span className="flex min-w-0 items-center gap-2">
-            <Search className="h-[18px] w-[18px] shrink-0" />
-            <span className="hidden truncate text-[13px] font-normal text-white/75 min-[1700px]:inline">
-              Search services
+            <Search className="h-4 w-4 shrink-0 text-slate-500 group-hover:text-slate-700 min-[1600px]:h-3.5 min-[1600px]:w-3.5" />
+            <span className="hidden truncate text-xs font-normal text-slate-400 group-hover:text-slate-600 min-[1600px]:inline">
+              Search services...
             </span>
           </span>
-          <kbd className="pointer-events-none hidden shrink-0 items-center whitespace-nowrap rounded border border-white/25 bg-white/10 px-1.5 py-0.5 font-sans text-[10px] text-white/80 min-[1700px]:inline-flex">
+          <kbd className="pointer-events-none hidden shrink-0 items-center whitespace-nowrap rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 group-hover:border-slate-300 min-[1600px]:inline-flex">
             {shortcutLabel}
           </kbd>
         </button>

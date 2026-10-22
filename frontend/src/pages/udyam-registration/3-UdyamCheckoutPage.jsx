@@ -125,7 +125,7 @@ export default function UdyamCheckoutPage() {
                 e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
               }}
             />
-            <div className="flex items-baseline font-black tracking-tight text-xl leading-none select-none">
+            <div className="flex items-baseline font-extrabold tracking-tight text-xl leading-none select-none">
               <span className="text-[#111827]">Bharat</span>
               <span className="text-[#F26522]">Filing</span>
             </div>
@@ -316,7 +316,7 @@ export default function UdyamCheckoutPage() {
               {/* Payment Method Badge */}
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                 <span className="text-slate-500 font-medium">Payment Method</span>
-                <span className="font-black text-slate-800 tracking-wider">CC Avenue</span>
+                <span className="font-extrabold text-slate-800 tracking-wider">CC Avenue</span>
               </div>
 
               {/* Pay Online Button */}

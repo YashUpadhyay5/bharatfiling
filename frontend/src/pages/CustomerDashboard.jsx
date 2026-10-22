@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { SUPPORT, whatsappLink } from '../config/support.js';
+import { BarChart3, Handshake } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -158,7 +160,7 @@ export default function CustomerDashboard() {
     if (socket) {
       const handleStatusUpdated = (data) => {
         if (!activeApp || data.application_id === activeApp.id) {
-          showSuccess(`⚡ Live Update from CA: ${data.customer_status || 'Application Updated'}`);
+          showSuccess(`Live Update from CA: ${data.customer_status || 'Application Updated'}`);
           setApplications((prev) =>
             prev.map((app) =>
               app.id === data.application_id
@@ -179,7 +181,7 @@ export default function CustomerDashboard() {
       const handleCertificateDispatched = (data) => {
         if (!activeApp || data.application_id === activeApp.id) {
           confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
-          showSuccess('🎉 Congratulations! Your Official Statutory Registration Certificate has been issued!');
+          showSuccess('Congratulations! Your Official Statutory Registration Certificate has been issued!');
           setApplications((prev) =>
             prev.map((app) =>
               app.id === data.application_id
@@ -446,7 +448,7 @@ export default function CustomerDashboard() {
           <div className="text-[11px] text-slate-400">Statutory Compliance Desk</div>
           <div className="pt-2 flex gap-2">
             <a
-              href="https://wa.me/9118008908800"
+              href={whatsappLink()}
               target="_blank"
               rel="noreferrer"
               className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-center font-bold text-[11px] text-white transition"
@@ -454,7 +456,7 @@ export default function CustomerDashboard() {
               WhatsApp
             </a>
             <a
-              href="tel:18008908800"
+              href={SUPPORT.phoneTel}
               className="flex-1 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-center font-bold text-[11px] text-slate-300 transition"
             >
               Call Desk
@@ -472,7 +474,7 @@ export default function CustomerDashboard() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-                  Welcome back, {user?.full_name?.split(' ')[0]} 👋
+                  Welcome back, {user?.full_name?.split(' ')[0]} 
                 </h1>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Here is the live status of your GST registration and verified compliance assets.
@@ -518,7 +520,7 @@ export default function CustomerDashboard() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-5">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
+                      <span className="font-mono text-xs font-extrabold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
                         {activeApp.application_number}
                       </span>
                       <span className="text-[10px] uppercase font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
@@ -528,7 +530,7 @@ export default function CustomerDashboard() {
                         {activeApp.customer_status}
                       </span>
                     </div>
-                    <h2 className="text-base sm:text-lg font-black text-slate-900 mt-2">
+                    <h2 className="text-base sm:text-lg font-extrabold text-slate-900 mt-2">
                       {activeApp.service_name || activeApp.fields_data?.legal_name || activeApp.business_type || 'Statutory Compliance Dossier'}
                     </h2>
                     <div className="text-xs text-slate-500 mt-0.5">
@@ -583,7 +585,7 @@ export default function CustomerDashboard() {
 
                       return (
                         <div key={idx} className={`p-3.5 rounded-2xl border text-center space-y-1.5 transition ${bg}`}>
-                          <div className="w-6 h-6 rounded-full bg-white mx-auto flex items-center justify-center text-xs font-black shadow-xs">
+                          <div className="w-6 h-6 rounded-full bg-white mx-auto flex items-center justify-center text-xs font-extrabold shadow-xs">
                             {icon}
                           </div>
                           <div className="text-xs font-bold leading-tight">{step.title}</div>
@@ -635,7 +637,7 @@ export default function CustomerDashboard() {
                     </div>
                     <div className="font-mono font-bold text-sm mt-0.5">
                       {activeApp.gstin ? (
-                        <span className="text-emerald-700 font-black">{activeApp.gstin}</span>
+                        <span className="text-emerald-700 font-extrabold">{activeApp.gstin}</span>
                       ) : (
                         <span className="text-slate-400 italic">Issued upon final approval</span>
                       )}
@@ -680,7 +682,7 @@ export default function CustomerDashboard() {
                       <Sparkles className="w-3.5 h-3.5" />
                       Zero Active Filings • Instant 3-Minute Initiation
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                       Start Your Business Statutory Registrations
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -715,7 +717,7 @@ export default function CustomerDashboard() {
                     <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-emerald-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
                         <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
-                          📜
+                          <FileCheck2 className="w-5 h-5" aria-hidden="true" />
                         </div>
                         <h4 className="font-extrabold text-slate-900 text-sm">GST Registration</h4>
                         <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -737,7 +739,7 @@ export default function CustomerDashboard() {
                     <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
                         <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
-                          🏢
+                          <Building2 className="w-5 h-5" aria-hidden="true" />
                         </div>
                         <h4 className="font-extrabold text-slate-900 text-sm">Private Limited Company</h4>
                         <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -759,7 +761,7 @@ export default function CustomerDashboard() {
                     <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-amber-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
                         <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
-                          📊
+                          <BarChart3 className="w-5 h-5" aria-hidden="true" />
                         </div>
                         <h4 className="font-extrabold text-slate-900 text-sm">Income Tax Return (ITR)</h4>
                         <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -781,7 +783,7 @@ export default function CustomerDashboard() {
                     <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-purple-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
                         <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
-                          ™️
+                          
                         </div>
                         <h4 className="font-extrabold text-slate-900 text-sm">Trademark Registration</h4>
                         <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -803,7 +805,7 @@ export default function CustomerDashboard() {
                     <div className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-indigo-500 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
                         <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold">
-                          🤝
+                          <Handshake className="w-5 h-5" aria-hidden="true" />
                         </div>
                         <h4 className="font-extrabold text-slate-900 text-sm">Limited Liability Partnership</h4>
                         <p className="text-[11px] text-slate-500 leading-relaxed">

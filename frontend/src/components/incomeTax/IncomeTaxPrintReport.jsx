@@ -12,8 +12,8 @@ export default function IncomeTaxPrintReport({ comparison, profile }) {
       <div className="border-b-2 border-slate-900 pb-4 mb-6 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-black tracking-tight text-slate-900">Bharat</span>
-            <span className="text-2xl font-black tracking-tight text-[#F26522]">Filing</span>
+            <span className="text-2xl font-extrabold tracking-tight text-slate-900">Bharat</span>
+            <span className="text-2xl font-extrabold tracking-tight text-[#F26522]">Filing</span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             AI + CA Powered Indian Business Compliance & Direct Tax Advisory
@@ -124,7 +124,7 @@ export default function IncomeTaxPrintReport({ comparison, profile }) {
                 -{formatIndianCurrency(newRegime.totalDeductions)} (80CCD2 only)
               </td>
             </tr>
-            <tr className="bg-slate-100 font-black">
+            <tr className="bg-slate-100 font-extrabold">
               <td className="p-2 border-r border-slate-300">Total Net Taxable Income</td>
               <td className="p-2 text-right border-r border-slate-300">{formatIndianCurrency(oldRegime.netTaxableIncome)}</td>
               <td className="p-2 text-right">{formatIndianCurrency(newRegime.netTaxableIncome)}</td>
@@ -164,12 +164,12 @@ export default function IncomeTaxPrintReport({ comparison, profile }) {
               <td className="p-2 text-right border-r border-slate-300">-{formatIndianCurrency(oldRegime.totalTaxCredits)}</td>
               <td className="p-2 text-right">-{formatIndianCurrency(newRegime.totalTaxCredits)}</td>
             </tr>
-            <tr className="bg-slate-50 font-black">
+            <tr className="bg-slate-50 font-extrabold">
               <td className="p-2 border-r border-slate-300">NET TAX PAYABLE / (REFUND DUE)</td>
               <td className="p-2 text-right border-r border-slate-300">
                 {oldRegime.netPayable > 0 ? `Payable: ${formatIndianCurrency(oldRegime.netPayable)}` : `Refund: ${formatIndianCurrency(oldRegime.refundDue)}`}
               </td>
-              <td className="p-2 text-right text-emerald-700 font-black">
+              <td className="p-2 text-right text-emerald-700 font-extrabold">
                 {newRegime.netPayable > 0 ? `Payable: ${formatIndianCurrency(newRegime.netPayable)}` : `Refund: ${formatIndianCurrency(newRegime.refundDue)}`}
               </td>
             </tr>

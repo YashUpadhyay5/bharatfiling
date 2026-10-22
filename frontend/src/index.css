@@ -3,6 +3,9 @@
 /* wide desktops at 100% zoom (1920px screens) - sorts after 2xl so it wins over lg / xl rules */
 @theme {
   --breakpoint-3xl: 106.25rem; /* 1700px - rem like the defaults, so it orders after them */
+  /* brand typefaces (loaded in index.html; 400-800 weights) */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 @layer base {
@@ -35,7 +38,9 @@
   body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', 'Noto Sans', sans-serif;
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    text-rendering: optimizeLegibility;
     background-color: #F8FAFC;
     color: #1E293B;
     -webkit-font-smoothing: antialiased;
@@ -44,6 +49,19 @@
     width: 100%;
     max-width: 100%;
     min-height: 100dvh;
+  }
+
+  h1, h2, h3 {
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: rgba(37, 99, 235, 0.18);
   }
 
   #root {
@@ -230,10 +248,6 @@
 @keyframes bf-drift-b    { from { transform: translate3d(5%, 3%, 0) scale(1.06); }  to { transform: translate3d(-6%, -4%, 0) scale(1); } }
 @keyframes bf-sweep      { from { transform: translateX(-130%) skewX(-20deg); }     to { transform: translateX(260%) skewX(-20deg); } }
 @keyframes bf-pop        { from { opacity: 0; transform: translateY(14px) scale(0.8); } to { opacity: 1; transform: none; } }
-
-/* hero industry deck: ring that fills until the next card (duration set inline) */
-@keyframes bf-countdown { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
-.bf-countdown { animation: bf-countdown linear forwards; }
 
 /* Gradient text with a slow, seamless shimmer */
 .bf-text-shine {

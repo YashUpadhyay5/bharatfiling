@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
-import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
+import React from 'react';
+import { PageHero, Section, FaqList, CtaBand, Button, INK } from '../components/ui/kit.jsx';
 
 export default function FaqPage() {
-  const [openIdx, setOpenIdx] = useState(0);
-
   const categories = [
     {
       category: 'GST Registration Basics',
@@ -48,61 +45,26 @@ export default function FaqPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      <Breadcrumbs items={[{ label: 'Knowledge Base & FAQs' }]} />
-      <div className="py-14 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-12">
-        <div className="text-center space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-            Knowledge Base
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
-            GST & Compliance Frequently Asked Questions
-          </h1>
-          <p className="text-sm text-slate-600">
-            Everything you need to know about GST registration, documentation, and the filing lifecycle.
-          </p>
-        </div>
-
-        <div className="space-y-8">
-          {categories.map((cat, cIdx) => (
-            <div key={cIdx} className="space-y-3">
-              <h2 className="text-base font-black text-slate-900 border-b border-slate-200 pb-2">
-                {cat.category}
-              </h2>
-              <div className="space-y-2">
-                {cat.faqs.map((faq, fIdx) => {
-                  const globalIdx = cIdx * 10 + fIdx;
-                  const isOpen = openIdx === globalIdx;
-
-                  return (
-                    <div
-                      key={fIdx}
-                      className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs"
-                    >
-                      <button
-                        onClick={() => setOpenIdx(isOpen ? -1 : globalIdx)}
-                        className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 font-bold text-xs sm:text-sm text-slate-900 cursor-pointer touch-target-safe"
-                      >
-                        <span className="min-w-0 pr-2">{faq.q}</span>
-                        {isOpen ? (
-                          <ChevronUp className="w-4 h-4 text-emerald-600 shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
-                        )}
-                      </button>
-                      {isOpen && (
-                        <div className="px-4 pb-4 sm:px-5 sm:pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                          {faq.a}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+    <div className="bg-white font-sans">
+      <PageHero
+        center
+        eyebrow="Knowledge base"
+        title="GST and compliance questions, answered"
+        subtitle="Everything you need to know about GST registration, documents and the filing lifecycle."
+      />
+      <Section>
+        <div className="mx-auto max-w-3xl space-y-10">
+          {categories.map((cat) => (
+            <div key={cat.category} className="space-y-3">
+              <h2 className={`text-lg font-semibold ${INK}`}>{cat.category}</h2>
+              <FaqList items={cat.faqs} />
             </div>
           ))}
         </div>
-      </div>
+      </Section>
+      <CtaBand title="Did not find your answer?" subtitle="Ask our team directly. We reply during business hours.">
+        <Button to="/contact" variant="secondary">Ask a question</Button>
+      </CtaBand>
     </div>
   );
 }

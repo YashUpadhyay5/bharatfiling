@@ -175,10 +175,10 @@ export default function HRASimpleCalculatorCard({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
                 {t.title}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-[10px] font-black tracking-wider uppercase">
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-[10px] font-extrabold tracking-wider uppercase">
                 {t.ruleBadge}
               </span>
             </div>
@@ -549,7 +549,7 @@ export default function HRASimpleCalculatorCard({
               <span className="text-[11px] font-bold text-sky-800 uppercase tracking-wide block mb-0.5">
                 {t.taxableHra}
               </span>
-              <div className="text-lg sm:text-xl font-black text-[#002D62] font-mono leading-tight">
+              <div className="text-lg sm:text-xl font-extrabold text-[#002D62] font-mono leading-tight">
                 {formatIndianCurrency(displayTaxable)}
                 <span className="text-xs font-normal text-slate-500 ml-1">
                   {isMonthly ? t.perMonth : t.perYear}
@@ -565,7 +565,7 @@ export default function HRASimpleCalculatorCard({
               <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wide block mb-0.5">
                 {t.exemptedHra}
               </span>
-              <div className="text-lg sm:text-xl font-black text-emerald-700 font-mono leading-tight">
+              <div className="text-lg sm:text-xl font-extrabold text-emerald-700 font-mono leading-tight">
                 {formatIndianCurrency(displayExempt)}
                 <span className="text-xs font-normal text-slate-500 ml-1">
                   {isMonthly ? t.perMonth : t.perYear}
@@ -705,19 +705,19 @@ export default function HRASimpleCalculatorCard({
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-white p-2 rounded-xl border border-emerald-200">
                 <p className="text-[10px] text-slate-500 font-bold">30% Slab</p>
-                <p className="font-mono font-black text-emerald-700 text-xs">
+                <p className="font-mono font-extrabold text-emerald-700 text-xs">
                   {formatIndianCurrency(summary.taxSavedAt30Percent || Math.round(summary.totalExemptHra * 0.312))}
                 </p>
               </div>
               <div className="bg-white p-2 rounded-xl border border-emerald-200">
                 <p className="text-[10px] text-slate-500 font-bold">20% Slab</p>
-                <p className="font-mono font-black text-emerald-700 text-xs">
+                <p className="font-mono font-extrabold text-emerald-700 text-xs">
                   {formatIndianCurrency(summary.taxSavedAt20Percent || Math.round(summary.totalExemptHra * 0.208))}
                 </p>
               </div>
               <div className="bg-white p-2 rounded-xl border border-emerald-200">
                 <p className="text-[10px] text-slate-500 font-bold">10% Slab</p>
-                <p className="font-mono font-black text-emerald-700 text-xs">
+                <p className="font-mono font-extrabold text-emerald-700 text-xs">
                   {formatIndianCurrency(summary.taxSavedAt10Percent || Math.round(summary.totalExemptHra * 0.104))}
                 </p>
               </div>

@@ -19,7 +19,7 @@ export default function FirmNamePrintReport({ result }) {
       <div className="border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-start">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xl font-black tracking-tight text-slate-900">
+            <span className="text-xl font-extrabold tracking-tight text-slate-900">
               BHARAT<span className="text-orange-600">FILING</span>
             </span>
             <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 bg-slate-100 rounded text-slate-700">

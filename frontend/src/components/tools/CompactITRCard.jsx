@@ -37,7 +37,7 @@ export default function CompactITRCard() {
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-orange-100 text-[#F26522] border border-orange-200">
             <Sparkles className="w-3 h-3" /> SEC 115BAC vs OLD REGIME
           </span>
-          <h3 className="text-base sm:text-lg font-black text-[#111827] tracking-tight">
+          <h3 className="text-base sm:text-lg font-extrabold text-[#111827] tracking-tight">
             Income Tax & Slab Checker
           </h3>
           <p className="text-xs text-slate-500">
@@ -195,7 +195,7 @@ export default function CompactITRCard() {
 
         <div className="flex items-baseline justify-between gap-2">
           <div>
-            <span className="text-2xl sm:text-3xl font-black text-[#10B981] tracking-tight font-mono">
+            <span className="text-2xl sm:text-3xl font-extrabold text-[#10B981] tracking-tight font-mono">
               {savings > 0 ? `Saves ${formatIndianCurrency(savings)}` : 'Equal Tax'}
             </span>
             <p className="text-[10px] text-slate-400 mt-0.5">

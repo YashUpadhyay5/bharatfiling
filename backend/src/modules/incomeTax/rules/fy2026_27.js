@@ -1,6 +1,7 @@
 /**
  * BharatFiling - Income Tax Rules for FY 2026-27 (AY 2027-28)
- * Forecasted provisions reflecting the updated direct tax code and transition rules.
+ * Budget 2026 left the new regime slabs and the ₹60,000 rebate (up to ₹12L) unchanged from FY 2025-26.
+ * The Income-tax Act, 2025 applies from 1 April 2026; rates and slabs are carried over.
  */
 
 export const FY_2026_27 = {
@@ -19,12 +20,13 @@ export const FY_2026_27 = {
   },
 
   newRegimeSlabs: [
-    { min: 0, max: 300000, rate: 0 },
-    { min: 300000, max: 700000, rate: 0.05 },
-    { min: 700000, max: 1000000, rate: 0.1 },
-    { min: 1000000, max: 1200000, rate: 0.15 },
-    { min: 1200000, max: 1500000, rate: 0.2 },
-    { min: 1500000, max: Infinity, rate: 0.3 },
+    { min: 0, max: 400000, rate: 0 },
+    { min: 400000, max: 800000, rate: 0.05 },
+    { min: 800000, max: 1200000, rate: 0.1 },
+    { min: 1200000, max: 1600000, rate: 0.15 },
+    { min: 1600000, max: 2000000, rate: 0.2 },
+    { min: 2000000, max: 2400000, rate: 0.25 },
+    { min: 2400000, max: Infinity, rate: 0.3 },
   ],
 
   oldRegimeSlabs: {
@@ -49,11 +51,11 @@ export const FY_2026_27 = {
 
   rebate87A: {
     newRegime: {
-      maxTaxableIncome: 700000,
-      maxRebate: 25000,
+      maxTaxableIncome: 1200000,
+      maxRebate: 60000,
       hasMarginalRelief: true,
-      marginalReliefThreshold: 700000,
-      marginalReliefCutoff: 727777,
+      marginalReliefThreshold: 1200000,
+      marginalReliefCutoff: 1270588, // 12,00,000 + 60,000 / 0.85 - relief is nil beyond this income
     },
     oldRegime: {
       maxTaxableIncome: 500000,

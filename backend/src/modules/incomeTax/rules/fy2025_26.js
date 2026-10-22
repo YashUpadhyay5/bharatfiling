@@ -1,6 +1,7 @@
 /**
  * BharatFiling - Income Tax Rules for FY 2025-26 (AY 2026-27)
- * Reflects consolidated provisions under Section 115BAC and Finance Acts.
+ * New regime (Section 115BAC) uses the Finance Act 2025 slabs: nil up to ₹4L, rebate u/s 87A of
+ * ₹60,000 for taxable income up to ₹12L. Old regime slabs are unchanged.
  */
 
 export const FY_2025_26 = {
@@ -21,12 +22,13 @@ export const FY_2025_26 = {
 
   // New Tax Regime Slabs (Section 115BAC)
   newRegimeSlabs: [
-    { min: 0, max: 300000, rate: 0 },
-    { min: 300000, max: 700000, rate: 0.05 },
-    { min: 700000, max: 1000000, rate: 0.1 },
-    { min: 1000000, max: 1200000, rate: 0.15 },
-    { min: 1200000, max: 1500000, rate: 0.2 },
-    { min: 1500000, max: Infinity, rate: 0.3 },
+    { min: 0, max: 400000, rate: 0 },
+    { min: 400000, max: 800000, rate: 0.05 },
+    { min: 800000, max: 1200000, rate: 0.1 },
+    { min: 1200000, max: 1600000, rate: 0.15 },
+    { min: 1600000, max: 2000000, rate: 0.2 },
+    { min: 2000000, max: 2400000, rate: 0.25 },
+    { min: 2400000, max: Infinity, rate: 0.3 },
   ],
 
   // Old Tax Regime Slabs by Age Group
@@ -53,11 +55,11 @@ export const FY_2025_26 = {
   // Section 87A Rebate
   rebate87A: {
     newRegime: {
-      maxTaxableIncome: 700000,
-      maxRebate: 25000,
+      maxTaxableIncome: 1200000,
+      maxRebate: 60000,
       hasMarginalRelief: true,
-      marginalReliefThreshold: 700000,
-      marginalReliefCutoff: 727777,
+      marginalReliefThreshold: 1200000,
+      marginalReliefCutoff: 1270588, // 12,00,000 + 60,000 / 0.85 - relief is nil beyond this income
     },
     oldRegime: {
       maxTaxableIncome: 500000,

@@ -317,20 +317,22 @@ export default function PaymentModal({
                 </button>
 
                 {/* Subtle Demo Simulation */}
-                <button
-                  type="button"
-                  onClick={() => handleVerifyPayment('AUTOPAY')}
-                  className="w-full py-2 text-center text-[11px] font-semibold text-slate-500 hover:text-[#111827] transition cursor-pointer"
-                >
-                  ⚡ Instant Demo Test (Bypass Bank Authentication)
-                </button>
+                {import.meta.env.DEV && (
+                  <button
+                    type="button"
+                    onClick={() => handleVerifyPayment('AUTOPAY')}
+                    className="w-full py-2 text-center text-[11px] font-semibold text-slate-500 hover:text-[#111827] transition cursor-pointer"
+                  >
+                    Instant Demo Test (Bypass Bank Authentication)
+                  </button>
+                )}
               </div>
             </div>
           ) : (
             /* TAB 2: Dynamic UPI QR Code */
             <div className="space-y-4 text-center">
               <div className="space-y-1">
-                <div className="text-2xl font-black text-slate-900">
+                <div className="text-2xl font-extrabold text-slate-900">
                   ₹{order?.amount || 1769}.00
                 </div>
                 <p className="text-xs text-slate-500">
@@ -354,7 +356,7 @@ export default function PaymentModal({
 
                 {/* BharatFiling Shield in center */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1.5 rounded-full shadow-md border border-slate-200">
-                  <div className="w-7 h-7 rounded-full bg-[#111827] text-[#F26522] flex items-center justify-center font-black text-xs">
+                  <div className="w-7 h-7 rounded-full bg-[#111827] text-[#F26522] flex items-center justify-center font-extrabold text-xs">
                     BF
                   </div>
                 </div>
@@ -403,13 +405,15 @@ export default function PaymentModal({
                   )}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => handleVerifyPayment('UPI_QR')}
-                  className="w-full py-1.5 text-center text-[11px] font-semibold text-slate-500 hover:text-[#111827] transition cursor-pointer"
-                >
-                  ⚡ Instant Demo Test (Simulate Successful Scan)
-                </button>
+                {import.meta.env.DEV && (
+                  <button
+                    type="button"
+                    onClick={() => handleVerifyPayment('UPI_QR')}
+                    className="w-full py-1.5 text-center text-[11px] font-semibold text-slate-500 hover:text-[#111827] transition cursor-pointer"
+                  >
+                    Instant Demo Test (Simulate Successful Scan)
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -418,7 +422,7 @@ export default function PaymentModal({
         {/* Modal Footer Trust Bar */}
         <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
           <div className="flex items-center gap-1.5 font-medium">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" /> 256-Bit Bank Grade Encryption
+            <ShieldCheck className="w-4 h-4 text-emerald-600" /> Secure, encrypted payment
           </div>
           <span>CIN: U67190TN2014PTC096978</span>
         </div>

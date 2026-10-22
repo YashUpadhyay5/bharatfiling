@@ -219,7 +219,7 @@ export function computeClientHraExemption({
       {
         id: 'full-year',
         periodLabel: simpleInput.frequency === 'annual' ? 'Full Financial Year' : `${simpleInput.tenureMonths || 12} Months`,
-        city: simpleInput.city || (isMetro ? 'Metro (Delhi/Mumbai/Kolkata/Chennai)' : 'Non-Metro'),
+        city: simpleInput.city || (isMetro ? 'Metro City' : 'Non-Metro City'),
         isMetro,
         ...res,
       },

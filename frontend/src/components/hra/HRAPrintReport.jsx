@@ -13,8 +13,8 @@ export default function HRAPrintReport({ result }) {
       <div className="border-b-2 border-slate-900 pb-4 mb-6 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-black tracking-tight text-slate-900">Bharat</span>
-            <span className="text-2xl font-black tracking-tight text-[#F26522]">Filing</span>
+            <span className="text-2xl font-extrabold tracking-tight text-slate-900">Bharat</span>
+            <span className="text-2xl font-extrabold tracking-tight text-[#F26522]">Filing</span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">AI + CA Powered Indian Business Compliance & Tax Advisory</p>
         </div>

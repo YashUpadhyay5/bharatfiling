@@ -4,7 +4,7 @@ import { HelpCircle, ChevronDown, CheckCircle2 } from 'lucide-react';
 const FAQS = [
   {
     q: 'Which tax regime is better for me: Old or New?',
-    a: 'Under current tax laws, the New Tax Regime (Section 115BAC) is the default and is better for most salaried employees earning up to ₹15 Lakh unless you have high deductions. If your total eligible deductions under Old Regime (HRA u/s 10(13A) + Home Loan Interest u/s 24(b) + Section 80C + Section 80D) exceed ₹3.75 Lakh to ₹4.25 Lakh, the Old Regime usually results in lower tax.',
+    a: 'Under current tax laws, the New Tax Regime (Section 115BAC) is the default and is better for most salaried employees, because salaried income up to ₹12.75 Lakh is tax-free. As a rough guide for FY 2025-26 and FY 2026-27, the Old Regime starts to win only when your Old Regime deductions (HRA u/s 10(13A) + Home Loan Interest u/s 24(b) + Section 80C + Section 80D, over and above the ₹50,000 standard deduction) exceed about ₹5.5 Lakh at a ₹15 Lakh salary, ₹7 Lakh at ₹20 Lakh, and ₹8 Lakh at ₹25 Lakh or more.',
   },
   {
     q: 'What is the Standard Deduction for FY 2025-26 and FY 2026-27?',
@@ -12,7 +12,7 @@ const FAQS = [
   },
   {
     q: 'How does the Section 87A rebate and Marginal Relief work under New Regime?',
-    a: 'Under Section 115BAC, resident individuals with total taxable income up to ₹7,00,000 receive a tax rebate of up to ₹25,000, reducing their tax to ₹0 (combined with the ₹75,000 standard deduction, salary income up to ₹7.75 Lakh is completely tax-free). Furthermore, if your taxable income marginally exceeds ₹7,00,000 (up to ₹7,22,222), marginal relief ensures that the tax payable does not exceed the income earned above ₹7,00,000.',
+    a: 'Under Section 115BAC, resident individuals with total taxable income up to ₹12,00,000 receive a tax rebate of up to ₹60,000 for FY 2025-26 and FY 2026-27, reducing their tax to ₹0 (combined with the ₹75,000 standard deduction, salary income up to ₹12.75 Lakh is completely tax-free). If your taxable income marginally exceeds ₹12,00,000 (up to about ₹12,70,588), marginal relief ensures that the tax payable does not exceed the income earned above ₹12,00,000. The rebate is not available against tax on special-rate income such as capital gains under Sections 111A and 112A. For FY 2024-25 the limit was ₹7,00,000 with a ₹25,000 rebate.',
   },
   {
     q: 'Can salaried individuals switch between Old and New regimes every year?',

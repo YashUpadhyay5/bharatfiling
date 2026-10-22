@@ -7,11 +7,11 @@ export default function TrustFooter() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 text-center sm:text-left">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 text-amber-500 flex items-center justify-center shadow-2xs shrink-0">
-            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            <Star className="w-4 h-4 text-amber-500" />
           </div>
           <div>
-            <div className="text-xs font-black text-slate-900">4.8 ★★★★★</div>
-            <div className="text-[11px] text-slate-500">Verified Reviews</div>
+            <div className="text-xs font-extrabold text-slate-900">Expert Reviewed</div>
+            <div className="text-[11px] text-slate-500">CA checks every application</div>
           </div>
         </div>
 
@@ -20,8 +20,8 @@ export default function TrustFooter() {
             <Award className="w-4 h-4 text-amber-600" />
           </div>
           <div>
-            <div className="text-xs font-black text-slate-900">15+ Years</div>
-            <div className="text-[11px] text-slate-500">Industry Leadership</div>
+            <div className="text-xs font-extrabold text-slate-900">Fixed Fee</div>
+            <div className="text-[11px] text-slate-500">Shown before you pay</div>
           </div>
         </div>
 
@@ -30,8 +30,8 @@ export default function TrustFooter() {
             <Users className="w-4 h-4 text-blue-600" />
           </div>
           <div>
-            <div className="text-xs font-black text-slate-900">5,00,000+</div>
-            <div className="text-[11px] text-slate-500">Indian Businesses</div>
+            <div className="text-xs font-extrabold text-slate-900">100% Online</div>
+            <div className="text-[11px] text-slate-500">No office visits</div>
           </div>
         </div>
 
@@ -40,8 +40,8 @@ export default function TrustFooter() {
             <ShieldCheck className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-xs font-black text-slate-900">ISO 27001</div>
-            <div className="text-[11px] text-slate-500">Bank-Grade Security</div>
+            <div className="text-xs font-extrabold text-slate-900">Secure Uploads</div>
+            <div className="text-[11px] text-slate-500">Encrypted in transit</div>
           </div>
         </div>
       </div>

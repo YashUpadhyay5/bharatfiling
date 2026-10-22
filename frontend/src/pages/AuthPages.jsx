@@ -1426,7 +1426,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 onClick={() => handleDemoLogin('CUSTOMER')}
                 className="p-2 sm:p-2.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-700 border border-slate-200 text-[10px] sm:text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
               >
-                <div>👤 Customer</div>
+                <div>Customer</div>
                 <div className="text-[9px] font-normal text-slate-500 truncate mt-0.5">customer@...</div>
               </button>
               <button
@@ -1434,7 +1434,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 onClick={() => handleDemoLogin('CA')}
                 className="p-2 sm:p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[10px] sm:text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
               >
-                <div>⚖️ CA Desk</div>
+                <div>CA Desk</div>
                 <div className="text-[9px] font-normal text-amber-700 truncate mt-0.5">ca.sharma@...</div>
               </button>
               <button
@@ -1442,7 +1442,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 onClick={() => handleDemoLogin('ADMIN')}
                 className="p-2 sm:p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[10px] sm:text-[11px] font-bold transition text-center shadow-xs cursor-pointer"
               >
-                <div>🛡️ Admin</div>
+                <div>Admin</div>
                 <div className="text-[9px] font-normal text-blue-700 truncate mt-0.5">admin@...</div>
               </button>
             </div>

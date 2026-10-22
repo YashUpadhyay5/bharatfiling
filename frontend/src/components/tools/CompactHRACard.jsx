@@ -42,7 +42,7 @@ export default function CompactHRACard() {
               <ShieldCheck className="w-3 h-3 text-blue-600" />
               <span>Section 10(13A) & Rule 2A</span>
             </div>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-1.5 group-hover/header:text-blue-600 transition-colors">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5 group-hover/header:text-blue-600 transition-colors">
               <span>HRA Exemption Calculator</span>
               <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover/header:text-blue-600 transition-colors" />
             </h3>
@@ -214,7 +214,7 @@ export default function CompactHRACard() {
               <span className="text-[11px] font-bold text-slate-300">
                 Eligible Annual HRA Exemption:
               </span>
-              <div className="text-2xl sm:text-3xl font-black text-[#10B981] tracking-tight font-mono">
+              <div className="text-2xl sm:text-3xl font-extrabold text-[#10B981] tracking-tight font-mono">
                 {formatIndianCurrency(summary.totalExemptHra)}
               </div>
               <p className="text-[10px] text-slate-400">

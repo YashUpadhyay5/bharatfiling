@@ -25,23 +25,57 @@ describe('Income Tax Calculator Engine Tests', () => {
     assert.equal(roundSection288B(0), 0);
   });
 
-  test('New Regime Slab Computation - FY 2025-26 6-bracket progression', () => {
+  test('New Regime Slab Computation - FY 2025-26 7-bracket progression', () => {
     // ₹15,00,000 income
-    // 0-3L: 0
-    // 3L-7L (4L): 20,000
-    // 7L-10L (3L): 30,000
-    // 10L-12L (2L): 30,000
-    // 12L-15L (3L): 60,000
-    // Total = 1,40,000
+    // 0-4L: 0
+    // 4L-8L (4L @ 5%): 20,000
+    // 8L-12L (4L @ 10%): 40,000
+    // 12L-15L (3L @ 15%): 45,000
+    // Total = 1,05,000
     const { tax } = calculateSlabTax(1500000, rules2526.newRegimeSlabs);
-    assert.equal(tax, 140000);
+    assert.equal(tax, 105000);
+
+    // ₹25,00,000 income reaches the 25% and 30% brackets
+    // 20,000 + 40,000 + 60,000 + 80,000 + 1,00,000 + (1L @ 30% = 30,000) = 3,30,000
+    assert.equal(calculateSlabTax(2500000, rules2526.newRegimeSlabs).tax, 330000);
+  });
+
+  test('FY 2026-27 carries the same New Regime slabs and ₹60,000 rebate as FY 2025-26', () => {
+    const rules2627 = getTaxRulesForYear('2026-27');
+    assert.deepEqual(rules2627.newRegimeSlabs, rules2526.newRegimeSlabs);
+    assert.equal(rules2627.rebate87A.newRegime.maxTaxableIncome, 1200000);
+    assert.equal(rules2627.rebate87A.newRegime.maxRebate, 60000);
+
+    // ₹15,00,000 salaried: taxable 14,25,000 -> slab tax 93,750 + 4% cess = 97,500
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2026-27',
+      salary: { grossSalary: 1500000 },
+    });
+    assert.equal(res.totalTaxLiability, 97500);
+  });
+
+  test('FY 2024-25 keeps the earlier 6-bracket New Regime slabs and ₹25,000 rebate up to ₹7L', () => {
+    const rules2425 = getTaxRulesForYear('2024-25');
+    // 0-3L: 0 | 3-7L: 20,000 | 7-10L: 30,000 | 10-12L: 30,000 | 12-15L: 60,000 = 1,40,000
+    assert.equal(calculateSlabTax(1500000, rules2425.newRegimeSlabs).tax, 140000);
+
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2024-25',
+      salary: { grossSalary: 775000 },
+    });
+    assert.equal(res.netTaxableIncome, 700000);
+    assert.equal(res.normalSlabTax, 20000);
+    assert.equal(res.rebate87A, 20000);
+    assert.equal(res.totalTaxLiability, 0);
   });
 
   test('Scenario 1: Salaried Individual with ₹7,50,000 Income (New Regime FY 25-26) pays ₹0 Tax', () => {
     // Gross: 7,50,000
     // Std Ded: 75,000 -> Taxable: 6,75,000
-    // Slab Tax: 3.75L * 5% = 18,750
-    // Rebate 87A: 18,750 -> Net Tax: 0
+    // Slab Tax: (6.75L - 4L) * 5% = 13,750
+    // Rebate 87A: 13,750 -> Net Tax: 0
     const res = computeRegimeTax({
       isNewRegime: true,
       financialYear: '2025-26',
@@ -51,47 +85,62 @@ describe('Income Tax Calculator Engine Tests', () => {
     assert.equal(res.grossSalary, 750000);
     assert.equal(res.standardDeduction, 75000);
     assert.equal(res.netTaxableIncome, 675000);
-    assert.equal(res.normalSlabTax, 18750);
-    assert.equal(res.rebate87A, 18750);
+    assert.equal(res.normalSlabTax, 13750);
+    assert.equal(res.rebate87A, 13750);
     assert.equal(res.totalTaxLiability, 0);
   });
 
-  test('Scenario 2: Salaried Individual with ₹7,75,000 Income (New Regime FY 25-26) pays ₹0 Tax', () => {
-    // Gross: 7,75,000
-    // Std Ded: 75,000 -> Taxable: 7,00,000
-    // Slab Tax: 4.00L * 5% = 20,000
-    // Rebate 87A: 20,000 -> Net Tax: 0
+  test('Scenario 2: Salaried Individual with ₹12,75,000 Income (New Regime FY 25-26) pays ₹0 Tax', () => {
+    // Gross: 12,75,000
+    // Std Ded: 75,000 -> Taxable: 12,00,000
+    // Slab Tax: 20,000 (4-8L @ 5%) + 40,000 (8-12L @ 10%) = 60,000
+    // Rebate 87A: 60,000 (maximum) -> Net Tax: 0
     const res = computeRegimeTax({
       isNewRegime: true,
       financialYear: '2025-26',
-      salary: { grossSalary: 775000 },
+      salary: { grossSalary: 1275000 },
     });
 
-    assert.equal(res.netTaxableIncome, 700000);
-    assert.equal(res.normalSlabTax, 20000);
-    assert.equal(res.rebate87A, 20000);
+    assert.equal(res.netTaxableIncome, 1200000);
+    assert.equal(res.normalSlabTax, 60000);
+    assert.equal(res.rebate87A, 60000);
     assert.equal(res.totalTaxLiability, 0);
   });
 
-  test('Scenario 3: Section 87A Marginal Relief at ₹7,85,000 Gross Salary (₹7,10,000 Taxable)', () => {
-    // Taxable: 7,10,000
-    // Normal tax: 20,000 + 10% of 10,000 = 21,000
-    // Excess income over 7,00,000 = 10,000
-    // Marginal relief = 21,000 - 10,000 = 11,000
+  test('Scenario 3: Section 87A Marginal Relief at ₹12,85,000 Gross Salary (₹12,10,000 Taxable)', () => {
+    // Taxable: 12,10,000
+    // Normal tax: 60,000 + 15% of 10,000 = 61,500
+    // Excess income over 12,00,000 = 10,000
+    // Marginal relief = 61,500 - 10,000 = 51,500
     // Tax after relief = 10,000
     // Plus 4% Cess = 400 -> Total = 10,400
     const res = computeRegimeTax({
       isNewRegime: true,
       financialYear: '2025-26',
-      salary: { grossSalary: 785000 },
+      salary: { grossSalary: 1285000 },
     });
 
-    assert.equal(res.netTaxableIncome, 710000);
-    assert.equal(res.normalSlabTax, 21000);
-    assert.equal(res.marginalRelief87A, 11000);
+    assert.equal(res.netTaxableIncome, 1210000);
+    assert.equal(res.normalSlabTax, 61500);
+    assert.equal(res.marginalRelief87A, 51500);
     assert.equal(res.taxAfterRebateAndRelief, 10000);
     assert.equal(res.cess, 400);
     assert.equal(res.totalTaxLiability, 10400);
+  });
+
+  test('Scenario 3b: Marginal Relief fades out once slab tax is below the income earned over ₹12L', () => {
+    // Taxable: 12,75,000 -> slab tax = 60,000 + 15% of 75,000 = 71,250
+    // Excess income over 12,00,000 = 75,000, which is more than the slab tax -> no relief
+    const res = computeRegimeTax({
+      isNewRegime: true,
+      financialYear: '2025-26',
+      incomeMode: 'taxable',
+      salary: { netTaxableIncome: 1275000 },
+    });
+
+    assert.equal(res.normalSlabTax, 71250);
+    assert.equal(res.marginalRelief87A, 0);
+    assert.equal(res.totalTaxLiability, roundSection288B(71250 * 1.04));
   });
 
   test('Scenario 4: Senior Citizen (Age 65) with ₹4,00,000 Income under Old Regime', () => {
@@ -130,10 +179,10 @@ describe('Income Tax Calculator Engine Tests', () => {
       },
     });
 
-    // In New Regime: deductions disallowed (only 75k std ded allowed) -> Tax ~ 1,14,400
+    // In New Regime: deductions disallowed (only 75k std ded allowed) -> taxable 14,25,000 -> Tax 97,500.
     // In Old Regime: 15L - 50k(std ded) - 1.5L(HRA) - 2L(HP) - 1.5L(80C) - 50k(80D) = 9,00,000 taxable.
     // Old Regime Tax on 9L: 2.5L-5L: 12.5k + 4L*20%: 80k = 92.5k + 4% cess = 96,200.
-    // Old Regime saves money!
+    // Old Regime saves money (96,200 vs 97,500)!
     assert.equal(res.winner, 'old');
     assert.ok(res.savings > 0);
     assert.ok(res.oldRegime.totalTaxLiability < res.newRegime.totalTaxLiability);
@@ -153,18 +202,17 @@ describe('Income Tax Calculator Engine Tests', () => {
     assert.ok(res.newRegime.totalTaxLiability < res.oldRegime.totalTaxLiability);
   });
 
-  test('Scenario 7: Salaried ₹15,00,000 under New Regime AY 2026-27 pays ₹1,30,000', () => {
+  test('Scenario 7: Salaried ₹15,00,000 under New Regime AY 2026-27 pays ₹97,500', () => {
     // Gross: 15,00,000
     // Std Ded: 75,000 -> Taxable: 14,25,000
     // Slabs:
-    // 0-3L: 0
-    // 3L-7L (4L): 20,000
-    // 7L-10L (3L): 30,000
-    // 10L-12L (2L): 30,000
-    // 12L-14.25L (2.25L @ 20%): 45,000
-    // Total Slab Tax = 1,25,000
-    // Cess (4%) = 5,000
-    // Total Tax Liability = 1,30,000
+    // 0-4L: 0
+    // 4L-8L (4L @ 5%): 20,000
+    // 8L-12L (4L @ 10%): 40,000
+    // 12L-14.25L (2.25L @ 15%): 33,750
+    // Total Slab Tax = 93,750
+    // Cess (4%) = 3,750
+    // Total Tax Liability = 97,500
     const res = computeRegimeTax({
       isNewRegime: true,
       financialYear: '2025-26',
@@ -172,22 +220,22 @@ describe('Income Tax Calculator Engine Tests', () => {
     });
 
     assert.equal(res.netTaxableIncome, 1425000);
-    assert.equal(res.normalSlabTax, 125000);
-    assert.equal(res.cess, 5000);
-    assert.equal(res.totalTaxLiability, 130000);
+    assert.equal(res.normalSlabTax, 93750);
+    assert.equal(res.cess, 3750);
+    assert.equal(res.totalTaxLiability, 97500);
   });
 
   test('Scenario 8: Section 112A LTCG strictly disallows Section 87A rebate per Section 112A(6)', () => {
-    // Resident with ₹4,00,000 Salary and ₹2,25,000 LTCG 112A
-    // Std Ded: 75,000 -> Net Salary = 3,25,000
-    // Ordinary Slab Tax on 3,25,000: (3.25L - 3L) * 5% = 1,250
+    // Resident with ₹5,00,000 Salary and ₹2,25,000 LTCG 112A
+    // Std Ded: 75,000 -> Net Salary = 4,25,000
+    // Ordinary Slab Tax on 4,25,000: (4.25L - 4L) * 5% = 1,250
     // LTCG 112A: 2,25,000 - 1,25,000 exemption = 1,00,000 @ 12.5% = 12,500
-    // Total taxable income = 4,25,000 (<= 7,00,000)
+    // Total taxable income = 6,50,000 (<= 12,00,000)
     // Section 87A rebate applies ONLY to normalSlabTax (1,250), ZERO rebate against LTCG 112A!
     const res = computeRegimeTax({
       isNewRegime: true,
       financialYear: '2025-26',
-      salary: { grossSalary: 400000 },
+      salary: { grossSalary: 500000 },
       capitalGains: { ltcg112A: 225000 },
     });
 
@@ -265,7 +313,7 @@ describe('Income Tax Calculator Engine Tests', () => {
     assert.equal(res.rebate87A, 0);
   });
 
-  test('Scenario 13: HUF with ₹7,00,000 taxable income in New Regime pays ₹26,000 (no 87A rebate)', () => {
+  test('Scenario 13: HUF with ₹7,00,000 taxable income in New Regime pays ₹15,600 (no 87A rebate)', () => {
     const res = computeRegimeTax({
       isNewRegime: true,
       financialYear: '2025-26',
@@ -274,12 +322,12 @@ describe('Income Tax Calculator Engine Tests', () => {
       salary: { netTaxableIncome: 700000 },
     });
 
-    // 0-3L: 0, 3-7L: 20,000 -> Slab Tax = 20,000
+    // 0-4L: 0, 4-7L (3L @ 5%): 15,000 -> Slab Tax = 15,000
     // HUF is NOT eligible for 87A rebate!
-    // Cess 4% = 800 -> Total Tax = 20,800
+    // Cess 4% = 600 -> Total Tax = 15,600
     assert.equal(res.rebate87A, 0);
-    assert.equal(res.normalSlabTax, 20000);
-    assert.equal(res.totalTaxLiability, 20800);
+    assert.equal(res.normalSlabTax, 15000);
+    assert.equal(res.totalTaxLiability, 15600);
   });
 
   test('Scenario 14: Non-Resident (NRI) with ₹7,00,000 in New Regime pays tax (no 87A rebate)', () => {
@@ -293,8 +341,8 @@ describe('Income Tax Calculator Engine Tests', () => {
 
     // Non-Resident is NOT eligible for 87A rebate!
     assert.equal(res.rebate87A, 0);
-    assert.equal(res.normalSlabTax, 20000);
-    assert.equal(res.totalTaxLiability, 20800);
+    assert.equal(res.normalSlabTax, 15000);
+    assert.equal(res.totalTaxLiability, 15600);
   });
 
   test('Scenario 15: AY 2024-25 (FY 2023-24) New Regime slab calculation', () => {
@@ -310,5 +358,35 @@ describe('Income Tax Calculator Engine Tests', () => {
     assert.equal(res.normalSlabTax, 45000);
     assert.equal(res.cess, 1800);
     assert.equal(res.totalTaxLiability, 46800);
+  });
+
+  test('Scenario 16: ₹12,75,000 salaried with ₹1.5L 80C - New Regime is tax-free and is recommended', () => {
+    // New Regime: taxable 12,00,000 -> slab tax 60,000 fully covered by the 87A rebate
+    // Old Regime: 12,75,000 - 50,000 - 1,50,000 = 10,75,000 -> 1,35,000 + 4% cess = 1,40,400
+    const res = calculateIncomeTaxComparison({
+      financialYear: '2025-26',
+      salary: { grossSalary: 1275000 },
+      deductions: { sec80C: 150000 },
+    });
+
+    assert.equal(res.newRegime.totalTaxLiability, 0);
+    assert.equal(res.oldRegime.totalTaxLiability, 140400);
+    assert.equal(res.winner, 'new');
+    assert.equal(res.savings, 140400);
+  });
+
+  test('Scenario 17: Old Regime FY 2025-26 is unchanged - ₹10,00,000 gross with ₹1.5L 80C pays ₹75,400', () => {
+    // Taxable: 10,00,000 - 50,000 (std ded) - 1,50,000 (80C) = 8,00,000
+    // Tax: 12,500 (2.5-5L @ 5%) + 60,000 (5-8L @ 20%) = 72,500 + 4% cess = 75,400
+    const res = computeRegimeTax({
+      isNewRegime: false,
+      financialYear: '2025-26',
+      salary: { grossSalary: 1000000 },
+      deductions: { sec80C: 150000 },
+    });
+
+    assert.equal(res.netTaxableIncome, 800000);
+    assert.equal(res.normalSlabTax, 72500);
+    assert.equal(res.totalTaxLiability, 75400);
   });
 });

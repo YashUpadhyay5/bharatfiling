@@ -156,7 +156,7 @@ export default function HRAQuickEstimator({ isEmbedded = false }) {
                   <span className="text-xs font-bold text-slate-300">
                     Eligible Annual HRA Exemption:
                   </span>
-                  <div className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tight">
                     {formatIndianCurrency(summary.totalExemptHra)}
                   </div>
                   <p className="text-[11px] text-slate-400">

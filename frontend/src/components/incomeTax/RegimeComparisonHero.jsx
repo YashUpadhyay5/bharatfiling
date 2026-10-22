@@ -89,7 +89,7 @@ export default function RegimeComparisonHero({
             )}
           </div>
           <p className="text-xs text-slate-500 mb-1">Total Tax Liability</p>
-          <div className="text-xl sm:text-2xl font-black text-[#111827]">
+          <div className="text-xl sm:text-2xl font-extrabold text-[#111827]">
             {formatIndianCurrency(newRegime.totalTaxLiability)}
           </div>
           <div className="mt-3 pt-3 border-t border-slate-200/80 space-y-1.5 text-[11px] sm:text-xs">
@@ -151,7 +151,7 @@ export default function RegimeComparisonHero({
             )}
           </div>
           <p className="text-xs text-slate-500 mb-1">Total Tax Liability</p>
-          <div className="text-xl sm:text-2xl font-black text-[#111827]">
+          <div className="text-xl sm:text-2xl font-extrabold text-[#111827]">
             {formatIndianCurrency(oldRegime.totalTaxLiability)}
           </div>
           <div className="mt-3 pt-3 border-t border-slate-200/80 space-y-1.5 text-[11px] sm:text-xs">

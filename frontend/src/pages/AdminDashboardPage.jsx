@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
             <span className="bg-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-500/30">
               System Administration
             </span>
-            <h1 className="text-xl sm:text-2xl font-black mt-1">Platform Operations & Analytics</h1>
+            <h1 className="text-xl sm:text-2xl font-extrabold mt-1">Platform Operations & Analytics</h1>
           </div>
           <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
             <NotificationBell />
@@ -80,21 +80,21 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <div className="p-3.5 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800">
             <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Revenue (INR)</div>
-            <div className="text-lg sm:text-2xl font-black text-emerald-400 mt-1 break-all">
+            <div className="text-lg sm:text-2xl font-extrabold text-emerald-400 mt-1 break-all">
               ₹{(analytics?.total_revenue_inr || 0).toLocaleString()}
             </div>
           </div>
           <div className="p-3.5 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800">
             <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Applications</div>
-            <div className="text-lg sm:text-2xl font-black text-white mt-1">{analytics?.total_applications || 0}</div>
+            <div className="text-lg sm:text-2xl font-extrabold text-white mt-1">{analytics?.total_applications || 0}</div>
           </div>
           <div className="p-3.5 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800">
             <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Registered Customers</div>
-            <div className="text-lg sm:text-2xl font-black text-blue-400 mt-1">{analytics?.total_customers || 0}</div>
+            <div className="text-lg sm:text-2xl font-extrabold text-blue-400 mt-1">{analytics?.total_customers || 0}</div>
           </div>
           <div className="p-3.5 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800">
             <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Certified CAs</div>
-            <div className="text-lg sm:text-2xl font-black text-amber-400 mt-1">{analytics?.total_cas || 0}</div>
+            <div className="text-lg sm:text-2xl font-extrabold text-amber-400 mt-1">{analytics?.total_cas || 0}</div>
           </div>
         </div>
 

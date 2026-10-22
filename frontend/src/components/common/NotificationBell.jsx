@@ -101,11 +101,11 @@ export default function NotificationBell() {
 
       // 3. Playful visual toast alert
       if (notif.severity === 'success') {
-        showSuccess(`⚡ ${notif.title}: ${notif.message}`);
+        showSuccess(`${notif.title}: ${notif.message}`);
       } else if (notif.severity === 'warning') {
-        showError(`⚠️ ${notif.title}: ${notif.message}`);
+        showError(`${notif.title}: ${notif.message}`);
       } else {
-        showInfo(`🔔 ${notif.title}: ${notif.message}`);
+        showInfo(`${notif.title}: ${notif.message}`);
       }
     };
 
@@ -203,7 +203,7 @@ export default function NotificationBell() {
       >
         <Bell className="w-[18px] h-[18px] transition-transform active:scale-90" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-600 text-[9px] font-black text-white ring-2 ring-white animate-pulse">
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-600 text-[9px] font-extrabold text-white ring-2 ring-white animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -215,7 +215,7 @@ export default function NotificationBell() {
           {/* Header */}
           <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-slate-900 tracking-tight">Notifications</span>
+              <span className="text-xs font-extrabold text-slate-900 tracking-tight">Notifications</span>
               {unreadCount > 0 && (
                 <span className="bg-rose-100 text-rose-700 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">
                   {unreadCount} new

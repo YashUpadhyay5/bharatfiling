@@ -17,13 +17,15 @@ export const TAX_RULES_BY_YEAR = {
     assessmentYear: '2027-28',
     standardDeduction: { newRegime: 75000, oldRegime: 50000 },
     familyPensionDeduction: { newRegime: 25000, oldRegime: 15000 },
+    // Finance Act 2025 slabs (unchanged by Budget 2026): nil up to ₹4L, 87A rebate ₹60,000 up to ₹12L
     newRegimeSlabs: [
-      { min: 0, max: 300000, rate: 0, label: 'Up to ₹3,00,000' },
-      { min: 300000, max: 700000, rate: 0.05, label: '₹3,00,001 to ₹7,00,000' },
-      { min: 700000, max: 1000000, rate: 0.1, label: '₹7,00,001 to ₹10,00,000' },
-      { min: 1000000, max: 1200000, rate: 0.15, label: '₹10,00,001 to ₹12,00,000' },
-      { min: 1200000, max: 1500000, rate: 0.2, label: '₹12,00,001 to ₹15,00,000' },
-      { min: 1500000, max: Infinity, rate: 0.3, label: 'Above ₹15,00,000' },
+      { min: 0, max: 400000, rate: 0, label: 'Up to ₹4,00,000' },
+      { min: 400000, max: 800000, rate: 0.05, label: '₹4,00,001 to ₹8,00,000' },
+      { min: 800000, max: 1200000, rate: 0.1, label: '₹8,00,001 to ₹12,00,000' },
+      { min: 1200000, max: 1600000, rate: 0.15, label: '₹12,00,001 to ₹16,00,000' },
+      { min: 1600000, max: 2000000, rate: 0.2, label: '₹16,00,001 to ₹20,00,000' },
+      { min: 2000000, max: 2400000, rate: 0.25, label: '₹20,00,001 to ₹24,00,000' },
+      { min: 2400000, max: Infinity, rate: 0.3, label: 'Above ₹24,00,000' },
     ],
     oldRegimeSlabs: {
       individual: [
@@ -45,7 +47,7 @@ export const TAX_RULES_BY_YEAR = {
       ],
     },
     rebate87A: {
-      newRegime: { maxTaxableIncome: 700000, maxRebate: 25000, marginalReliefThreshold: 700000 },
+      newRegime: { maxTaxableIncome: 1200000, maxRebate: 60000, marginalReliefThreshold: 1200000 },
       oldRegime: { maxTaxableIncome: 500000, maxRebate: 12500 },
     },
     surcharge: {
@@ -69,13 +71,15 @@ export const TAX_RULES_BY_YEAR = {
     assessmentYear: '2026-27',
     standardDeduction: { newRegime: 75000, oldRegime: 50000 },
     familyPensionDeduction: { newRegime: 25000, oldRegime: 15000 },
+    // Finance Act 2025 slabs (unchanged by Budget 2026): nil up to ₹4L, 87A rebate ₹60,000 up to ₹12L
     newRegimeSlabs: [
-      { min: 0, max: 300000, rate: 0, label: 'Up to ₹3,00,000' },
-      { min: 300000, max: 700000, rate: 0.05, label: '₹3,00,001 to ₹7,00,000' },
-      { min: 700000, max: 1000000, rate: 0.1, label: '₹7,00,001 to ₹10,00,000' },
-      { min: 1000000, max: 1200000, rate: 0.15, label: '₹10,00,001 to ₹12,00,000' },
-      { min: 1200000, max: 1500000, rate: 0.2, label: '₹12,00,001 to ₹15,00,000' },
-      { min: 1500000, max: Infinity, rate: 0.3, label: 'Above ₹15,00,000' },
+      { min: 0, max: 400000, rate: 0, label: 'Up to ₹4,00,000' },
+      { min: 400000, max: 800000, rate: 0.05, label: '₹4,00,001 to ₹8,00,000' },
+      { min: 800000, max: 1200000, rate: 0.1, label: '₹8,00,001 to ₹12,00,000' },
+      { min: 1200000, max: 1600000, rate: 0.15, label: '₹12,00,001 to ₹16,00,000' },
+      { min: 1600000, max: 2000000, rate: 0.2, label: '₹16,00,001 to ₹20,00,000' },
+      { min: 2000000, max: 2400000, rate: 0.25, label: '₹20,00,001 to ₹24,00,000' },
+      { min: 2400000, max: Infinity, rate: 0.3, label: 'Above ₹24,00,000' },
     ],
     oldRegimeSlabs: {
       individual: [
@@ -97,7 +101,7 @@ export const TAX_RULES_BY_YEAR = {
       ],
     },
     rebate87A: {
-      newRegime: { maxTaxableIncome: 700000, maxRebate: 25000, marginalReliefThreshold: 700000 },
+      newRegime: { maxTaxableIncome: 1200000, maxRebate: 60000, marginalReliefThreshold: 1200000 },
       oldRegime: { maxTaxableIncome: 500000, maxRebate: 12500 },
     },
     surcharge: {

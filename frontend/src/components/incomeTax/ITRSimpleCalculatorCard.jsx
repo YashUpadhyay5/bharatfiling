@@ -146,7 +146,7 @@ export default function ITRSimpleCalculatorCard({
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  <span>🏛️ Old Tax Regime</span>
+                  <span>Old Tax Regime</span>
                 </button>
                 <button
                   type="button"
@@ -157,7 +157,7 @@ export default function ITRSimpleCalculatorCard({
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  <span>⚡ New Tax Regime (115BAC)</span>
+                  <span>New Tax Regime (115BAC)</span>
                 </button>
               </div>
             </div>
@@ -480,7 +480,7 @@ export default function ITRSimpleCalculatorCard({
                   {effectiveRate}% effective tax rate
                 </span>
               </div>
-              <div className="text-2xl font-black font-mono text-emerald-800">
+              <div className="text-2xl font-extrabold font-mono text-emerald-800">
                 ₹{(activeTax).toLocaleString('en-IN')}
               </div>
             </div>
@@ -769,7 +769,7 @@ export default function ITRSimpleCalculatorCard({
                   +₹{(activeRegime.cess ?? activeRegime.healthAndEducationCess ?? 0).toLocaleString('en-IN')}
                 </td>
               </tr>
-              <tr className="bg-emerald-50 text-emerald-950 font-black border-t-2 border-emerald-300">
+              <tr className="bg-emerald-50 text-emerald-950 font-extrabold border-t-2 border-emerald-300">
                 <td colSpan={3} className="py-3 px-3 text-right text-xs">
                   Total Tax Liability (rounded u/s 288B):
                 </td>

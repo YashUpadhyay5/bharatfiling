@@ -160,7 +160,7 @@ export function calculateRebateAndMarginalRelief87A(taxableIncome, normalTax, is
   if (isNewRegime) {
     const { maxTaxableIncome, maxRebate, marginalReliefThreshold } = rules.rebate87A.newRegime;
 
-    // Full rebate if taxable income <= ₹7,00,000
+    // Full rebate if taxable income <= the regime's rebate limit (₹12,00,000 from FY 2025-26, ₹7,00,000 before)
     if (income <= maxTaxableIncome) {
       const rebate = Math.min(normalTax, maxRebate);
       return {
@@ -170,8 +170,8 @@ export function calculateRebateAndMarginalRelief87A(taxableIncome, normalTax, is
       };
     }
 
-    // Section 87A Marginal Relief: Income marginally above ₹7,00,000 (up to ₹7,27,777)
-    // Tax payable cannot exceed excess income over ₹7,00,000
+    // Section 87A Marginal Relief: income marginally above the rebate limit
+    // Tax payable cannot exceed the income earned above that limit
     const excessIncome = income - marginalReliefThreshold;
     if (normalTax > excessIncome) {
       const relief = normalTax - excessIncome;

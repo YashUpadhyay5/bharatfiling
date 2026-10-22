@@ -208,7 +208,7 @@ export default function IncomeTaxCalculatorPage() {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60">
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight">
                   Income Tax Calculator & Slab Checker
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { SERVICES } from '../../data/serviceCatalog.js';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 import HeroSearch from './HeroSearch.jsx';
 import IndustryDeck from './IndustryDeck.jsx';
@@ -10,7 +11,7 @@ const HEADLINE_SIZE_LG = 'clamp(2.25rem, min(3.5vw, 6.6vh) + 0.2rem, 3.4rem)';
 // Wide screens at 100% zoom (1700px+): the hero spans the header's width, so type scales up too.
 const HEADLINE_SIZE_XL = 'clamp(3.4rem, min(3.5vw, 7vh), 4.5rem)';
 
-const TRUST_POINTS = ['40+ CA & Legal Services', '100% Online & Paperless', 'Licensed CA Verification', 'Bank-Grade 256-Bit Security'];
+const TRUST_POINTS = [`${SERVICES.length} CA & Legal Services`, '100% Online & Paperless', 'Licensed CA Verification', 'Encrypted Document Uploads'];
 
 const rise = (ms) => ({ '--bf-delay': `${ms}ms` });
 

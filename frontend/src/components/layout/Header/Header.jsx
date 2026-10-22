@@ -7,11 +7,10 @@ import NotificationBell from '../../common/NotificationBell.jsx';
 import BrandLogo from './BrandLogo.jsx';
 import CategoryDropdown from './CategoryDropdown.jsx';
 import UserMenu from './UserMenu.jsx';
-import MoreMenu from './MoreMenu.jsx';
 import MobileDrawer from './MobileDrawer.jsx';
 import HeaderSearch from './HeaderSearch.jsx';
-import { HEADER_MENUS, CONSULT_CATEGORY, getDashboardPath } from './navigationData.js';
-import { FOCUS_RING_ON_DARK, HEADER_NAVY } from './shared.js';
+import { SERVICE_CATEGORIES, getDashboardPath } from './navigationData.js';
+import { FOCUS_RING } from './shared.js';
 
 // Public information pages never require an account (same rule the search palette uses).
 const PUBLIC_INFO_PATHS = ['/', '/about', '/faq', '/pricing', '/contact', '/services'];
@@ -19,32 +18,18 @@ const PUBLIC_INFO_PATHS = ['/', '/about', '/faq', '/pricing', '/contact', '/serv
 // The full tab row needs ~1280px; below that the compact header + drawer is used.
 const DESKTOP_MEDIA_QUERY = '(min-width: 1280px)';
 
-
-/** Small filled caret used on the yellow button (matches the reference). */
-function Caret({ open }) {
-  return (
-    <svg
-      viewBox="0 0 10 6"
-      aria-hidden="true"
-      className={`h-1.5 w-2.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-    >
-      <path d="M0 0h10L5 6z" fill="currentColor" />
-    </svg>
-  );
-}
-
 /**
- * Site header (navy bar).
+ * Site header.
  *
- *   [Logo] [Consult an Expert v]   Startup v  Registrations v  Trademark v  Tax & Compliance v  Pricing   [Login] [=]
+ * Fixed to the top with a translucent, blurred background so page content scrolls smoothly
+ * underneath it. MainLayout reserves the matching 68px of space above the page content.
+ * (The sign-in modal, mobile drawer and search dialog are rendered outside this element, so the
+ * backdrop blur can never trap their fixed overlays.)
  *
- * Desktop (>= 1280px): one row, every category visible with its own hover dropdown; the hamburger
- * opens a small white list of secondary links.
- * Below that: the same links live in the slide-in drawer.
+ *   [ Logo ]   Home  Startup v  Registrations v  ...  Consultation v  Pricing   [ Search ] [ Log In ] [ Register ]
  *
- * Fixed to the top so page content scrolls underneath; MainLayout reserves the matching 68px.
- * The sign-in modal, mobile drawer and search dialog are rendered outside <header>, so the
- * backdrop blur can never trap their fixed overlays.
+ * Desktop (>= 1280px): one row, every category visible with its own hover dropdown.
+ * Below that: logo + search + hamburger, the same links live in the slide-in drawer.
  */
 export default function Header() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -52,9 +37,8 @@ export default function Header() {
   const { pathname } = useLocation();
 
   const [openKey, setOpenKey] = useState(null); // category whose dropdown is open
-  const [moreOpen, setMoreOpen] = useState(false); // hamburger list (desktop)
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false); // drawer (below desktop)
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [selectedServiceForAuth, setSelectedServiceForAuth] = useState(null);
@@ -66,13 +50,6 @@ export default function Header() {
   const menuTimer = useRef(null);
 
   const dashboardPath = getDashboardPath(user?.role);
-  const trackPath = isAuthenticated ? dashboardPath : '/dashboard';
-
-  const closePopovers = () => {
-    setOpenKey(null);
-    setMoreOpen(false);
-    setUserMenuOpen(false);
-  };
 
   /* ----- dropdown open/close with hover intent (mouse only; touch & keyboard use click) ----- */
   const clearMenuTimer = () => {
@@ -83,7 +60,6 @@ export default function Header() {
   const hoverOpen = (key) => {
     clearMenuTimer();
     setUserMenuOpen(false);
-    setMoreOpen(false);
     // Already browsing the menus: switch instantly. Otherwise wait briefly so a passing pointer does not flash a menu.
     if (openKey) setOpenKey(key);
     else menuTimer.current = setTimeout(() => setOpenKey(key), 90);
@@ -97,7 +73,6 @@ export default function Header() {
   const toggleMenu = (key) => {
     clearMenuTimer();
     setUserMenuOpen(false);
-    setMoreOpen(false);
     setOpenKey((current) => (current === key ? null : key));
   };
 
@@ -106,7 +81,6 @@ export default function Header() {
   /* ----- close everything when the route changes ----- */
   useEffect(() => {
     setOpenKey(null);
-    setMoreOpen(false);
     setUserMenuOpen(false);
     setMobileOpen(false);
   }, [pathname]);
@@ -121,17 +95,24 @@ export default function Header() {
 
   /* ----- outside click / Escape for the desktop popovers ----- */
   useEffect(() => {
-    if (!openKey && !userMenuOpen && !moreOpen) return undefined;
+    if (!openKey && !userMenuOpen) return undefined;
 
     const onPointerDown = (e) => {
-      if (headerRef.current && !headerRef.current.contains(e.target)) closePopovers();
+      if (headerRef.current && !headerRef.current.contains(e.target)) {
+        setOpenKey(null);
+        setUserMenuOpen(false);
+      }
     };
     const onKeyDown = (e) => {
       if (e.key !== 'Escape') return;
-      if (openKey) tabRefs.current[openKey]?.focus();
-      if (userMenuOpen) userTriggerRef.current?.focus();
-      if (moreOpen) hamburgerRef.current?.focus();
-      closePopovers();
+      if (openKey) {
+        tabRefs.current[openKey]?.focus();
+        setOpenKey(null);
+      }
+      if (userMenuOpen) {
+        setUserMenuOpen(false);
+        userTriggerRef.current?.focus();
+      }
     };
 
     document.addEventListener('pointerdown', onPointerDown);
@@ -140,14 +121,13 @@ export default function Header() {
       document.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [openKey, userMenuOpen, moreOpen]);
+  }, [openKey, userMenuOpen]);
 
   /* ----- drawer must not outlive the mobile breakpoint ----- */
   useEffect(() => {
     const mq = window.matchMedia(DESKTOP_MEDIA_QUERY);
     const onChange = (e) => {
       if (e.matches) setMobileOpen(false);
-      else setMoreOpen(false);
     };
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
@@ -158,20 +138,12 @@ export default function Header() {
     hamburgerRef.current?.focus({ preventScroll: true });
   }, []);
 
-  /* ----- hamburger: small list on desktop, full drawer below ----- */
-  const handleHamburger = () => {
-    setOpenKey(null);
-    setUserMenuOpen(false);
-    if (window.matchMedia(DESKTOP_MEDIA_QUERY).matches) setMoreOpen((v) => !v);
-    else setMobileOpen(true);
-  };
-
   /* ----- service links: gated behind sign-in, public info pages are not ----- */
   const handleServiceClick = (e, item, categoryLabel) => {
     setOpenKey(null);
     setMobileOpen(false);
 
-    if (isAuthenticated || PUBLIC_INFO_PATHS.includes(item.path)) return;
+    if (isAuthenticated || PUBLIC_INFO_PATHS.includes(item.path) || item.path.startsWith('/services/')) return;
 
     e.preventDefault();
     setSelectedServiceForAuth({
@@ -201,107 +173,97 @@ export default function Header() {
 
   const tabClass = (active) =>
     [
-      'relative isolate inline-flex h-full items-center gap-1 whitespace-nowrap px-2.5 text-[14px] font-medium transition-colors',
-      'min-[1440px]:px-3.5 min-[1440px]:text-[15px]',
-      // Keyboard focus: a soft pill + the accent underline (never a boxed outline).
-      // outline-hidden still draws a visible outline in Windows high-contrast mode.
-      'focus-visible:outline-hidden focus-visible:text-white focus-visible:after:scale-x-100',
-      'before:absolute before:inset-x-0 before:inset-y-3.5 before:-z-10 before:rounded-lg before:bg-white/10 before:opacity-0 before:transition-opacity focus-visible:before:opacity-100',
-      'after:absolute after:inset-x-2.5 after:-bottom-px after:h-[2px] after:rounded-full after:bg-[#F26522]',
-      'min-[1440px]:after:inset-x-3.5 after:transition-transform after:duration-200',
-      active ? 'text-white after:scale-x-100' : 'text-white/85 hover:text-white after:scale-x-0 hover:after:scale-x-100',
+      'relative inline-flex h-full items-center gap-1 whitespace-nowrap px-1.5 text-[12.5px] font-medium transition-colors',
+      'min-[1366px]:px-2 min-[1366px]:text-[13px]',
+      'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#111827]',
+      'after:absolute after:inset-x-1.5 after:-bottom-px after:h-[2px] after:rounded-full after:bg-[#F26522]',
+      'min-[1366px]:after:inset-x-2 after:transition-transform after:duration-200',
+      active
+        ? 'text-[#111827] after:scale-x-100'
+        : 'text-slate-700 hover:text-[#111827] after:scale-x-0 hover:after:scale-x-100',
     ].join(' ');
 
+  const isHome = pathname === '/';
   const isPricing = pathname.startsWith('/pricing');
-
-  /** A tab (or the CTA) that owns a hover/click dropdown. */
-  const renderMenuItem = (cat, button, extraClass = '') => {
-    const isOpen = openKey === cat.key;
-    const menuId = `nav-menu-${cat.key}`;
-    return (
-      <li
-        key={cat.key}
-        className={`relative flex ${extraClass}`}
-        onPointerEnter={(e) => e.pointerType === 'mouse' && hoverOpen(cat.key)}
-        onPointerLeave={(e) => e.pointerType === 'mouse' && hoverClose()}
-        onBlur={(e) => {
-          const next = e.relatedTarget;
-          if (next && !e.currentTarget.contains(next) && openKey === cat.key) setOpenKey(null);
-        }}
-      >
-        {button(isOpen, menuId)}
-        {isOpen && <CategoryDropdown id={menuId} category={cat} onItemClick={handleServiceClick} />}
-      </li>
-    );
-  };
 
   return (
     <>
       {/* Keyboard users can jump straight to the page content */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[80] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-[#062A4D]"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[80] focus:rounded-lg focus:bg-[#111827] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
       >
         Skip to main content
       </a>
 
       <header
         ref={headerRef}
-        style={{ backgroundColor: `${HEADER_NAVY}F2` }}
-        className={`fixed inset-x-0 top-0 z-40 w-full font-sans text-white backdrop-blur-md transition-shadow duration-200 print:hidden ${
-          scrolled ? 'shadow-[0_10px_30px_-14px_rgba(0,0,0,0.55)]' : 'shadow-[0_1px_0_rgba(255,255,255,0.06)]'
+        className={`fixed inset-x-0 top-0 z-40 w-full border-b border-slate-200/80 bg-white/95 font-sans backdrop-blur-md transition-shadow duration-200 print:hidden ${
+          scrolled ? 'shadow-[0_8px_24px_-14px_rgba(15,23,42,0.35)]' : 'shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
         }`}
       >
-        <div className="mx-auto flex h-[68px] w-full max-w-[1760px] items-center gap-3 px-3 sm:px-6 lg:px-8">
-          <BrandLogo onDark onClick={handleHomeClick} />
+        <div className="mx-auto flex h-[68px] w-full max-w-[1600px] items-center gap-3 px-3 sm:px-6 lg:px-8">
+          <BrandLogo />
 
-          {/* Consult an Expert (yellow call-to-action = the Consultation menu) */}
-          <ul className="hidden items-center sm:flex">
-            {renderMenuItem(CONSULT_CATEGORY, (isOpen, menuId) => (
-              <button
-                ref={(el) => {
-                  tabRefs.current[CONSULT_CATEGORY.key] = el;
-                }}
-                type="button"
-                aria-haspopup="true"
-                aria-expanded={isOpen}
-                aria-controls={menuId}
-                onClick={() => toggleMenu(CONSULT_CATEGORY.key)}
-                className={`inline-flex items-center gap-2 rounded-md bg-gradient-to-b from-[#FFC928] to-[#F4A900] px-3 py-2 text-[13px] font-semibold text-[#1B2A3A] shadow-sm transition hover:brightness-105 min-[1440px]:px-4 min-[1440px]:text-[14.5px] ${FOCUS_RING_ON_DARK}`}
-              >
-                Consult an Expert
-                <Caret open={isOpen} />
-              </button>
-            ))}
-          </ul>
-
-          {/* Primary navigation: every other service category is visible (desktop) */}
+          {/* Primary navigation: every service category is visible (desktop) */}
           <nav aria-label="Primary" className="hidden h-full min-w-0 flex-1 xl:block">
             <ul className="flex h-full items-stretch justify-center">
-              {HEADER_MENUS.map((cat) =>
-                renderMenuItem(cat, (isOpen, menuId) => (
-                  <button
-                    ref={(el) => {
-                      tabRefs.current[cat.key] = el;
+              <li className="flex">
+                <Link
+                  to="/"
+                  onClick={handleHomeClick}
+                  aria-current={isHome ? 'page' : undefined}
+                  className={tabClass(isHome)}
+                >
+                  Home
+                </Link>
+              </li>
+
+              {SERVICE_CATEGORIES.map((cat, index) => {
+                const isOpen = openKey === cat.key;
+                const menuId = `nav-menu-${cat.key}`;
+                return (
+                  <li
+                    key={cat.key}
+                    className="relative flex"
+                    onPointerEnter={(e) => e.pointerType === 'mouse' && hoverOpen(cat.key)}
+                    onPointerLeave={(e) => e.pointerType === 'mouse' && hoverClose()}
+                    onBlur={(e) => {
+                      const next = e.relatedTarget;
+                      if (next && !e.currentTarget.contains(next) && openKey === cat.key) setOpenKey(null);
                     }}
-                    type="button"
-                    aria-haspopup="true"
-                    aria-expanded={isOpen}
-                    aria-controls={menuId}
-                    onClick={() => toggleMenu(cat.key)}
-                    className={tabClass(isOpen)}
                   >
-                    {cat.label}
-                    <ChevronDown
-                      className={`h-3.5 w-3.5 transition-transform duration-200 min-[1440px]:h-4 min-[1440px]:w-4 ${
-                        isOpen ? 'rotate-180 text-white' : 'text-white/70'
-                      }`}
-                      strokeWidth={1.75}
-                      aria-hidden="true"
-                    />
-                  </button>
-                ))
-              )}
+                    <button
+                      ref={(el) => {
+                        tabRefs.current[cat.key] = el;
+                      }}
+                      type="button"
+                      aria-haspopup="true"
+                      aria-expanded={isOpen}
+                      aria-controls={menuId}
+                      onClick={() => toggleMenu(cat.key)}
+                      className={tabClass(isOpen)}
+                    >
+                      {cat.label}
+                      <ChevronDown
+                        className={`h-3 w-3 transition-transform duration-200 ${
+                          isOpen ? 'rotate-180 text-[#111827]' : 'text-slate-400'
+                        }`}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    {isOpen && (
+                      <CategoryDropdown
+                        id={menuId}
+                        category={cat}
+                        alignRight={index >= SERVICE_CATEGORIES.length - 3}
+                        onItemClick={handleServiceClick}
+                      />
+                    )}
+                  </li>
+                );
+              })}
 
               <li className="flex">
                 <Link to="/pricing" aria-current={isPricing ? 'page' : undefined} className={tabClass(isPricing)}>
@@ -313,58 +275,54 @@ export default function Header() {
 
           {/* Actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2.5 xl:ml-0" onPointerDown={() => setOpenKey(null)}>
-            {/* Search lives in the home hero now; this keeps the search dialog + Ctrl K shortcut site-wide
-                (also opened from the hamburger list and the mobile drawer). */}
-            <HeaderSearch variant="none" />
+            <HeaderSearch variant="header" />
 
             {isAuthenticated && <NotificationBell />}
 
-            {isAuthenticated ? (
-              <div className="hidden sm:block">
+            {/* Account (desktop) */}
+            <div className="hidden items-center gap-2 xl:flex">
+              {isAuthenticated ? (
                 <UserMenu
                   user={user}
                   open={userMenuOpen}
                   triggerRef={userTriggerRef}
                   onToggle={() => {
                     setOpenKey(null);
-                    setMoreOpen(false);
                     setUserMenuOpen((v) => !v);
                   }}
                   onClose={() => setUserMenuOpen(false)}
                   onLogout={handleLogout}
                 />
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className={`hidden rounded-md border border-white/80 px-5 py-2 text-[14px] font-medium text-white transition hover:bg-white/10 sm:inline-block min-[1440px]:text-[15px] ${FOCUS_RING_ON_DARK}`}
-              >
-                Login
-              </Link>
-            )}
-
-            {/* Hamburger: white list on desktop, drawer below */}
-            <div className="relative">
-              <button
-                ref={hamburgerRef}
-                type="button"
-                onClick={handleHamburger}
-                aria-label="Open menu"
-                aria-haspopup="true"
-                aria-expanded={moreOpen || mobileOpen}
-                className={`flex h-10 w-10 items-center justify-center rounded-md text-white transition hover:bg-white/10 ${FOCUS_RING_ON_DARK}`}
-              >
-                <Menu className="h-7 w-7" strokeWidth={2.25} aria-hidden="true" />
-              </button>
-              {moreOpen && (
-                <MoreMenu
-                  id="more-menu"
-                  isAuthenticated={isAuthenticated}
-                  trackPath={trackPath}
-                  onClose={() => setMoreOpen(false)}
-                />
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className={`rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[12.5px] font-semibold text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 ${FOCUS_RING}`}
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    to="/register"
+                    className={`rounded-full bg-[#111827] px-4 py-1.5 text-[12.5px] font-bold text-white shadow-xs transition hover:bg-[#1F2937] hover:shadow ${FOCUS_RING}`}
+                  >
+                    Register
+                  </Link>
+                </>
               )}
             </div>
+
+            {/* Menu button (below desktop width) */}
+            <button
+              ref={hamburgerRef}
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              aria-haspopup="dialog"
+              aria-expanded={mobileOpen}
+              className={`flex h-10 w-10 items-center justify-center rounded-xl text-slate-700 transition hover:bg-slate-100 xl:hidden ${FOCUS_RING}`}
+            >
+              <Menu className="h-6 w-6" aria-hidden="true" />
+            </button>
           </div>
         </div>
       </header>
@@ -379,7 +337,7 @@ export default function Header() {
         onItemClick={handleServiceClick}
       />
 
-      {/* Rendered outside <header> so its fixed overlay is never affected by the header */}
+      {/* Rendered outside <header> so its fixed overlay is never affected by the sticky header */}
       <AuthRequiredModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}

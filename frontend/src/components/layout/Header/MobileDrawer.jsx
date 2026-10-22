@@ -8,8 +8,7 @@ import {
   SUPPORT,
   PRIMARY_NAV,
   MOBILE_EXTRA_LINKS,
-  HEADER_MENUS,
-  CONSULT_CATEGORY,
+  SERVICE_CATEGORIES,
   getDashboardPath,
   getDashboardLabel,
 } from './navigationData.js';
@@ -90,9 +89,13 @@ export default function MobileDrawer({ open, onClose, pathname, user, isAuthenti
           <HeaderSearch isMobile onCloseMobile={onClose} />
 
           <nav aria-label="Mobile" className="mt-4">
-            <p className="px-3 pb-1 pt-1 text-[11px] font-bold uppercase tracking-widest text-slate-400">Services</p>
+            <Link to="/" onClick={onClose} aria-current={pathname === '/' ? 'page' : undefined} className={rowClass(pathname === '/')}>
+              Home
+            </Link>
+
+            <p className="px-3 pb-1 pt-5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Services</p>
             <div className="space-y-0.5">
-              {[...HEADER_MENUS, CONSULT_CATEGORY].map((cat) => {
+              {SERVICE_CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
                 const isOpen = openCat === cat.key;
                 return (
@@ -115,35 +118,24 @@ export default function MobileDrawer({ open, onClose, pathname, user, isAuthenti
                     </button>
 
                     {isOpen && (
-                      <div id={`m-cat-${cat.key}`} className="mb-2 ml-[26px] space-y-3 border-l border-slate-200 pl-3">
-                        {(cat.groups || [cat]).map((group) => (
-                          <div key={group.key}>
-                            {cat.groups && (
-                              <p className="px-2 pb-1 pt-1 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                                {group.label}
-                              </p>
-                            )}
-                            <ul className="space-y-0.5">
-                              {[...group.col1, ...group.col2].map((item) => (
-                                <li key={`${group.key}-${item.name}`}>
-                                  <Link
-                                    to={item.path}
-                                    onClick={(e) => onItemClick(e, item, group.label)}
-                                    className={`flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-[14px] text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#111827] ${FOCUS_RING}`}
-                                  >
-                                    <span>{item.name}</span>
-                                    {item.isLive && (
-                                      <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-700">
-                                        Live
-                                      </span>
-                                    )}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                      <ul id={`m-cat-${cat.key}`} className="mb-2 ml-[26px] space-y-0.5 border-l border-slate-200 pl-3">
+                        {[...cat.col1, ...cat.col2].map((item) => (
+                          <li key={`${cat.key}-${item.name}`}>
+                            <Link
+                              to={item.path}
+                              onClick={(e) => onItemClick(e, item, cat.label)}
+                              className={`flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-[14px] text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#111827] ${FOCUS_RING}`}
+                            >
+                              <span>{item.name}</span>
+                              {item.isLive && (
+                                <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-700">
+                                  Live
+                                </span>
+                              )}
+                            </Link>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     )}
                   </div>
                 );

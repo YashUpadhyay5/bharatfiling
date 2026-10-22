@@ -1,324 +1,101 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, ArrowRight, ShieldCheck, Sparkles, Building2, Receipt, FileCheck2, Calculator, Scale, Award, MessageCircle } from 'lucide-react';
-import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
+import { ArrowRight, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
+import CatalogBrowser from '../components/services/CatalogBrowser.jsx';
+import { whatsappLink } from '../config/support.js';
+import { GST_RATE, getCategory, getService, inr, servicePath, withGst } from '../data/serviceCatalog.js';
+import { PageHero, Section, Button, CheckList, CtaBand, INK, SOFT_SHADOW, LIFT_SHADOW } from '../components/ui/kit.jsx';
+
+/** Featured packages on the pricing page; everything else is in the full price list below. */
+const FEATURED = [
+  { slug: 'private-limited-company', tag: 'Most chosen by startups', popular: true },
+  { slug: 'gst-registration', tag: 'Fast-track' },
+  { slug: 'itr-filing', tag: 'For individuals' },
+  { slug: 'gst-return', tag: 'Monthly compliance' },
+  { slug: 'company-annual-roc-filing', tag: 'Mandatory every year' },
+  { slug: 'virtual-cfo', tag: 'Ongoing finance' },
+];
 
 export default function PricingPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [selectedPlanForAuth, setSelectedPlanForAuth] = useState(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authFor, setAuthFor] = useState(null);
 
-  const handleSelectPlan = (plan) => {
-    if (isAuthenticated) {
-      navigate(plan.ctaPath);
-    } else {
-      setSelectedPlanForAuth(plan);
-      setIsAuthModalOpen(true);
-    }
+  const open = (svc) => (e) => {
+    // live services start a filing flow, which needs an account
+    if (svc.status !== 'live' || isAuthenticated) return;
+    e.preventDefault();
+    setAuthFor({ title: svc.name, price: inr(svc.fee), path: servicePath(svc), ctaPath: servicePath(svc) });
   };
-  const pricingPlans = [
-    {
-      title: 'Company Incorporation',
-      category: 'MCA SPICe+ Portal',
-      price: '₹4,999',
-      period: '+ Govt Stamp Duty',
-      popular: true,
-      tag: 'Startup Favorite',
-      icon: Building2,
-      desc: 'Complete Private Limited Company or LLP registration with licensed CA & CS filing.',
-      breakdown: [
-        { label: 'CA & CS Professional Fee', val: '₹4,999' },
-        { label: 'GST on Professional Fee (18%)', val: '₹900' },
-        { label: 'Name Reservation (RUN)', val: 'Included' },
-      ],
-      features: [
-        'Name Approval (RUN) & Reservation',
-        '2 Digital Signatures (DSC Class 3)',
-        'Drafting MOA & AOA by Corporate CS',
-        'Certificate of Incorporation with CIN',
-        'Corporate PAN, TAN & Bank Account Assistance',
-      ],
-      ctaText: 'Incorporate Company',
-      ctaPath: '/services/company-registration',
-    },
-    {
-      title: 'Income Tax Return (ITR)',
-      category: 'Direct Taxation',
-      price: '₹999',
-      period: 'per filing',
-      popular: false,
-      tag: 'CA Tax Advisory',
-      icon: Receipt,
-      desc: 'Individual, professional, and corporate tax returns prepared and verified by Chartered Accountants.',
-      breakdown: [
-        { label: 'CA Preparation & Review', val: '₹999' },
-        { label: 'GST on Services (18%)', val: '₹180' },
-        { label: 'Income Tax Portal Filing Fee', val: '₹0 (FREE)' },
-      ],
-      features: [
-        'ITR-1, ITR-2, ITR-3 or ITR-4 Filings',
-        'AIS & 26AS Tax Credit Reconciliation',
-        'Capital Gains & Deduction Maximizer',
-        'Presumptive Taxation (Sec 44AD/ADA)',
-        'E-Verification & Refund Tracking',
-      ],
-      ctaText: 'File Your ITR',
-      ctaPath: '/services/income-tax',
-    },
-    {
-      title: 'Online GST Registration',
-      category: 'Indirect Taxation',
-      price: '₹1,499',
-      period: 'all-inclusive fee',
-      popular: false,
-      tag: 'Fast-Track',
-      icon: FileCheck2,
-      desc: 'Full Form REG-01 preparation with AI document verification and jurisdictional officer follow-up.',
-      breakdown: [
-        { label: 'CA Preparation & Audit Fee', val: '₹1,499' },
-        { label: 'GST on Services (18%)', val: '₹270' },
-        { label: 'Government Portal Fee', val: '₹0 (FREE)' },
-      ],
-      features: [
-        'Full Form REG-01 Preparation by CA Desk',
-        'AI Document OCR & Name Mismatch Validation',
-        'Dedicated Chartered Accountant Oversight',
-        'Notice Clarification (REG-03) Replies Included',
-        'Final Form REG-06 Certificate & GSTIN',
-      ],
-      ctaText: 'Start GST Registration',
-      ctaPath: '/apply/gst',
-    },
-    {
-      title: 'Virtual CFO & Accounting',
-      category: 'Finance & Accounts',
-      price: '₹2,999',
-      period: '/ month',
-      popular: false,
-      tag: 'Ongoing Finance',
-      icon: Calculator,
-      desc: 'Complete bookkeeping, monthly financial statements, and ongoing payroll & tax management.',
-      breakdown: [
-        { label: 'Monthly Retainer Fee', val: '₹2,999' },
-        { label: 'GST on Services (18%)', val: '₹540' },
-        { label: 'Cloud Ledger Integration', val: 'Included' },
-      ],
-      features: [
-        'Tally & Zoho Books Ledger Maintenance',
-        'Monthly P&L, Balance Sheet & Cash Flow',
-        'Vendor Bill Processing & Invoicing',
-        'TDS Deduction & Payroll Compliance',
-        'Monthly Strategic Review with Senior CA',
-      ],
-      ctaText: 'Hire Virtual CFO',
-      ctaPath: '/services/legal',
-    },
-    {
-      title: 'Annual MCA ROC Compliance',
-      category: 'Corporate Secretarial',
-      price: '₹3,499',
-      period: 'per financial year',
-      popular: false,
-      tag: 'Mandatory Compliance',
-      icon: Scale,
-      desc: 'Annual statutory compliance for Pvt Ltd and LLP entities to prevent ROC strike-off and penalties.',
-      breakdown: [
-        { label: 'CS & CA Audit Fee', val: '₹3,499' },
-        { label: 'GST on Services (18%)', val: '₹630' },
-        { label: 'ROC Filing Assistance', val: 'Included' },
-      ],
-      features: [
-        'Filing Form AOC-4 (Financial Statements)',
-        'Filing Form MGT-7 (Annual Return)',
-        'Director KYC (DIR-3 KYC) for 2 Directors',
-        'Drafting AGM Minutes & Resolutions',
-        'Statutory Audit Support & Assistance',
-      ],
-      ctaText: 'Manage ROC Filings',
-      ctaPath: '/services/llp-registration',
-    },
-    {
-      title: 'Trademark Registration',
-      category: 'Intellectual Property',
-      price: '₹1,999',
-      period: '+ Govt TM Fee',
-      popular: false,
-      tag: 'Brand Protection',
-      icon: Award,
-      desc: 'Protect brand name, logo, or tagline nationwide with licensed IP Attorney representation.',
-      breakdown: [
-        { label: 'IP Attorney Drafting Fee', val: '₹1,999' },
-        { label: 'GST on Services (18%)', val: '₹360' },
-        { label: 'Nice Class Classification', val: 'Included' },
-      ],
-      features: [
-        'Free Comprehensive TM Search Report',
-        'Class 1-45 Selection & Strategy',
-        'Form TM-A Preparation & Submission',
-        'Govt Trademark Application Receipt',
-        'Examination Report Advisory',
-      ],
-      ctaText: 'Protect Your Brand',
-      ctaPath: '/services/trademark',
-    },
-  ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      <Breadcrumbs items={[{ label: 'Transparent Pricing' }]} />
-      
-      <div className="py-4 sm:py-5 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-2">
-          <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-[#111827] bg-slate-100 px-3 py-0.5 rounded-full border border-slate-200">
-            Fair & Transparent
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-slate-900">
-            Straightforward CA & Compliance Pricing
-          </h1>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            We believe in 100% upfront clarity with zero hidden surprises. Every plan includes certified Chartered Accountant review and direct government portal filing.
-          </p>
-        </div>
+    <div className="bg-white font-sans">
+      <PageHero
+        center
+        eyebrow="Pricing"
+        title="Simple packages. Transparent pricing."
+        subtitle="One fixed professional fee per service, shown before you pay. Government fees are listed separately and paid at actuals."
+      />
 
-        {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-          {pricingPlans.map((plan) => {
-            const IconComp = plan.icon;
+      <Section tone="tint">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {FEATURED.map(({ slug, tag, popular }) => {
+            const svc = getService(slug);
+            if (!svc) return null;
             return (
-              <div
-                key={plan.title}
-                className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all duration-300 flex flex-col justify-between relative shadow-xs hover:shadow-lg hover:-translate-y-1 ${
-                  plan.popular
-                    ? 'border-[#111827] ring-2 ring-[#111827]/10'
-                    : 'border-slate-200/90'
-                }`}
+              <article
+                key={slug}
+                className={`relative flex flex-col rounded-2xl border bg-white p-6 sm:p-7 ${popular ? `border-[#111827] ${LIFT_SHADOW}` : `border-slate-200/80 ${SOFT_SHADOW}`}`}
               >
-                {plan.popular && (
-                  <div className="absolute -top-3.5 right-5 bg-[#111827] text-white text-[11px] font-black px-3 py-0.5 rounded-full shadow-md">
-                    {plan.tag}
-                  </div>
-                )}
+                <p className="flex items-center justify-between gap-2 text-[13px]">
+                  <span className="font-medium text-emerald-700">{getCategory(svc.category)?.label}</span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${popular ? 'bg-[#111827] text-white' : 'bg-slate-100 text-slate-600'}`}>{tag}</span>
+                </p>
+                <h2 className={`mt-3 text-lg font-semibold ${INK}`}>{svc.name}</h2>
+                <p className="mt-1 text-[13px] leading-relaxed text-slate-500">{svc.summary}</p>
 
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="w-9 h-9 rounded-lg bg-slate-100 text-[#111827] flex items-center justify-center">
-                      <IconComp className="w-[18px] h-[18px]" />
-                    </div>
-                    {!plan.popular && (
-                      <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
-                        {plan.tag}
-                      </span>
-                    )}
-                  </div>
+                <p className="mt-5 flex items-baseline gap-1.5">
+                  <span className={`text-[34px] font-semibold leading-none tabular-nums ${INK}`}>{inr(svc.fee)}</span>
+                  <span className="text-[13px] text-slate-500">{svc.unit}</span>
+                </p>
+                <p className="mt-1.5 text-xs text-slate-500">
+                  {inr(withGst(svc.fee))} with {Math.round(GST_RATE * 100)}% GST · {svc.govt}
+                </p>
 
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider leading-none">
-                      {plan.category}
-                    </span>
-                    <h3 className="text-xl font-extrabold leading-snug text-slate-900 mt-1">
-                      {plan.title}
-                    </h3>
-                    <p className="text-sm text-slate-500 mt-1 leading-snug">
-                      {plan.desc}
-                    </p>
-                  </div>
+                <CheckList items={svc.includes} className="mt-5 border-t border-slate-100 pt-5" />
 
-                  <div className="py-1 border-y border-slate-100">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl font-black leading-none text-slate-900">
-                        {plan.price}
-                      </span>
-                      <span className="text-[13px] text-slate-500 font-medium">
-                        {plan.period}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Fee Breakdown */}
-                  <div className="bg-slate-50/70 rounded-lg px-3 py-1.5 space-y-0.5 text-[13px] leading-snug text-slate-600">
-                    {plan.breakdown.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between gap-3">
-                        <span>{item.label}</span>
-                        <span className="font-bold text-slate-900 whitespace-nowrap text-right">{item.val}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Features */}
-                  <div className="space-y-1 text-[13px] leading-snug text-slate-700">
-                    {plan.features.map((feat, idx) => (
-                      <div key={idx} className="flex items-start gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-px" />
-                        <span>{feat}</span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="mt-auto pt-6">
+                  <Button to={servicePath(svc)} onClick={open(svc)} variant={popular ? 'primary' : 'secondary'} className="w-full">
+                    {svc.status === 'live' ? 'Start now' : 'View details'} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Button>
                 </div>
-
-                <div className="pt-2.5 mt-2.5 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectPlan(plan)}
-                    className={`w-full py-2 rounded-lg font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer ${
-                      plan.popular
-                        ? 'bg-[#111827] hover:bg-[#1F2937] text-white shadow-md'
-                        : 'bg-slate-100 hover:bg-[#111827] text-slate-800 hover:text-white'
-                    }`}
-                  >
-                    <span>{plan.ctaText}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
+              </article>
             );
           })}
         </div>
+      </Section>
 
-        {/* Custom Quote & Consultation Banner */}
-        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="space-y-1.5 text-center md:text-left">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-              Need a Custom Corporate Advisory Package?
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-xl">
-              We create customized plans for fast-growing startups, manufacturing units, e-commerce sellers, and foreign subsidiaries needing multi-state compliance and specialized tax planning.
-            </p>
-          </div>
+      <Section>
+        <CatalogBrowser id="price-list" heading="Complete price list" />
+      </Section>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto shrink-0">
-            <Link
-              to="/contact"
-              className="w-full sm:w-auto text-center px-6 py-3 rounded-xl sm:rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shadow-md transition"
-            >
-              Request Custom Quote
-            </Link>
-            <a
-              href="https://wa.me/919876543210?text=Hi%20BharatFiling%20Team%2C%20I%20need%20a%20custom%20corporate%20CA%20proposal."
-              target="_blank"
-              rel="noreferrer"
-              className="w-full sm:w-auto justify-center px-5 py-3 rounded-xl sm:rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs transition flex items-center gap-1.5"
-            >
-              <MessageCircle className="w-4 h-4 text-emerald-600" />
-              Chat on WhatsApp
-            </a>
-          </div>
-        </div>
-      </div>
+      <CtaBand
+        title="Need a custom package?"
+        subtitle="For fast-growing startups, manufacturers, e-commerce sellers and foreign subsidiaries that need multi-state compliance or specialised tax planning."
+      >
+        <Button to="/contact?service=Custom%20package" variant="secondary">Request a custom quote</Button>
+        <Button href={whatsappLink('Hi BharatFiling Team, I need a custom corporate CA proposal.')} variant="whatsapp" target="_blank" rel="noreferrer">
+          <MessageCircle className="h-4 w-4" aria-hidden="true" /> Chat on WhatsApp
+        </Button>
+      </CtaBand>
 
-      {/* Authentication Popup Modal */}
       <AuthRequiredModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        service={selectedPlanForAuth}
-        onSuccess={() => {
-          if (selectedPlanForAuth?.ctaPath) {
-            navigate(selectedPlanForAuth.ctaPath);
-          }
-        }}
+        isOpen={Boolean(authFor)}
+        onClose={() => setAuthFor(null)}
+        service={authFor}
+        onSuccess={() => authFor?.ctaPath && navigate(authFor.ctaPath)}
       />
     </div>
   );

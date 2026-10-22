@@ -29,7 +29,7 @@ export default function OnboardingHero({ currentStep = 1, serviceMeta = null }) 
             <Sparkles className="w-3 h-3 text-[#F26522]" />
             {meta.badge || 'Fast-Track 2026 Portal Filing'}
           </div>
-          <h1 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight leading-snug">
+          <h1 className="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
             {meta.title}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">

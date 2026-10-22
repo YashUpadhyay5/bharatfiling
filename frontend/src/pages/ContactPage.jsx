@@ -1,156 +1,128 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Phone, Mail, MapPin, MessageCircle, Clock, Send, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../context/ToastContext.jsx';
-import { Phone, Mail, MapPin, MessageCircle, Clock, ShieldCheck, Send } from 'lucide-react';
-import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
+import { SUPPORT, whatsappLink } from '../config/support.js';
+import { PageHero, Section, Card, Button, INK } from '../components/ui/kit.jsx';
+
+const inputCls =
+  'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-[#111827] focus:outline-hidden focus:ring-4 focus:ring-slate-900/5';
 
 export default function ContactPage() {
   const { showSuccess } = useToast();
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', query: '' });
+  const [searchParams] = useSearchParams();
+  const requestedService = searchParams.get('service');
+  const [formData, setFormData] = useState({
+    name: searchParams.get('name') || '',
+    email: '',
+    phone: searchParams.get('phone') || '',
+    query: requestedService ? `I would like to request: ${requestedService}.` : '',
+  });
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    showSuccess('Message received. Our compliance advisory desk will reach out shortly.');
+    showSuccess('Message received. Our compliance desk will reach out shortly.');
     setSubmitted(true);
   };
 
+  const set = (field) => (e) => setFormData({ ...formData, [field]: e.target.value });
+
+  const channels = [
+    { icon: Phone, label: 'Call us (toll free)', value: SUPPORT.phoneDisplay, href: SUPPORT.phoneTel, note: 'CA and compliance consultation desk' },
+    { icon: MessageCircle, label: 'WhatsApp', value: SUPPORT.whatsappDisplay, href: whatsappLink(), note: 'Document checks and quick questions', external: true },
+    { icon: Mail, label: 'Email', value: SUPPORT.email, href: `mailto:${SUPPORT.email}`, note: 'Notices, proposals and legal queries' },
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      <Breadcrumbs items={[{ label: 'Contact Us' }]} />
-      <div className="py-14 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-12">
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-            Reach Out Anytime
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
-            We Are Here to Assist Your Business
-          </h1>
-          <p className="text-sm text-slate-600">
-            Talk to certified Chartered Accountants or get instant help through WhatsApp and phone.
-          </p>
-        </div>
+    <div className="bg-white font-sans">
+      <PageHero
+        eyebrow="Contact"
+        title="Talk to a compliance expert"
+        subtitle={
+          requestedService
+            ? `Tell us a little about your business and we will get back to you about ${requestedService}.`
+            : 'Reach a Chartered Accountant or legal expert by phone, WhatsApp or email, or send us your question below.'
+        }
+      />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          {/* Contact Details Cards */}
-          <div className="space-y-4 text-xs">
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-md space-y-4">
-              <h3 className="font-extrabold text-sm text-slate-900">Official Helplines</h3>
+      <Section align="left">
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+          <div className="space-y-4">
+            {channels.map(({ icon: Icon, label, value, href, note, external }) => (
+              <Card key={label} className="flex items-start gap-4 p-5">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-slate-500">{label}</p>
+                  <a
+                    href={href}
+                    {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
+                    className={`block truncate text-[15px] font-semibold ${INK} hover:text-emerald-700`}
+                  >
+                    {value}
+                  </a>
+                  <p className="mt-0.5 text-[13px] text-slate-500">{note}</p>
+                </div>
+              </Card>
+            ))}
 
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-700">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="font-bold text-slate-900">1800-890-8800 (Toll Free)</div>
-                  <div className="text-slate-500 text-[11px]">Direct CA & compliance consultation desk</div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-700">
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="font-bold text-slate-900">+91 98765 43210 (WhatsApp)</div>
-                  <div className="text-slate-500 text-[11px]">Instant document checks & query resolution</div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-blue-100 text-blue-700">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="font-bold text-slate-900">compliance@bharatfiling.in</div>
-                  <div className="text-slate-500 text-[11px]">Notice responses & corporate legal desk</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-md space-y-3">
-              <h3 className="font-extrabold text-sm text-slate-900">Registered Office</h3>
-              <div className="text-slate-600 leading-relaxed">
-                BharatFiling Technologies Private Limited <br />
-                Tower 4, Level 7, EPIP Tech Park, Whitefield, <br />
-                Bengaluru, Karnataka 560066, India.
-              </div>
-            </div>
+            <Card className="space-y-3 p-5">
+              <p className="flex items-center gap-2 text-sm text-slate-700">
+                <Clock className="h-4 w-4 text-slate-400" aria-hidden="true" /> {SUPPORT.hours}
+              </p>
+              <p className="flex items-start gap-2 text-sm leading-relaxed text-slate-700">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+                <span>
+                  BharatFiling Technologies Private Limited
+                  <br />
+                  Tower 4, Level 7, EPIP Tech Park, Whitefield,
+                  <br />
+                  Bengaluru, Karnataka 560066, India
+                </span>
+              </p>
+            </Card>
           </div>
 
-          {/* Contact Form */}
-          <div className="p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-xl space-y-5">
-            <h3 className="font-extrabold text-base text-slate-900">Send an Inquiry</h3>
+          <Card className="p-6 sm:p-8">
+            <h2 className={`text-xl font-semibold ${INK}`}>Send us your question</h2>
+            <p className="mt-1 text-sm text-slate-500">We reply during business hours.</p>
+
             {submitted ? (
-              <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2 text-xs text-emerald-950">
-                <div className="font-black text-sm">Inquiry Received!</div>
-                <p>A compliance specialist has been assigned to your query and will contact you via email or phone within 15 minutes.</p>
+              <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
+                <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-600" aria-hidden="true" />
+                <p className={`mt-3 text-base font-semibold ${INK}`}>Thank you, we have your message</p>
+                <p className="mt-1 text-sm text-slate-600">A compliance specialist will contact you by email or phone.</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Your Full Name *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Rahul Verma"
-                    autoComplete="name"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
-                    required
-                  />
+              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="mb-1.5 block text-[13px] font-medium text-slate-700">Full name</span>
+                    <input type="text" value={formData.name} onChange={set('name')} placeholder="Rahul Verma" autoComplete="name" className={inputCls} required />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1.5 block text-[13px] font-medium text-slate-700">Mobile number</span>
+                    <input type="tel" inputMode="tel" autoComplete="tel" value={formData.phone} onChange={set('phone')} placeholder="10-digit mobile number" className={inputCls} required />
+                  </label>
                 </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Email Address *</label>
-                  <input
-                    type="email"
-                    inputMode="email"
-                    autoComplete="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="official@company.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Mobile Number *</label>
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    autoComplete="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="10-digit mobile number"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">How can we help? *</label>
-                  <textarea
-                    rows={3}
-                    value={formData.query}
-                    onChange={(e) => setFormData({ ...formData, query: e.target.value })}
-                    placeholder="Tell us about your business or GST registration query..."
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Send className="w-3.5 h-3.5" /> Submit Question
-                </button>
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] font-medium text-slate-700">Email address</span>
+                  <input type="email" inputMode="email" autoComplete="email" value={formData.email} onChange={set('email')} placeholder="you@company.com" className={inputCls} required />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] font-medium text-slate-700">How can we help?</span>
+                  <textarea rows={4} value={formData.query} onChange={set('query')} placeholder="Tell us about your business and what you need" className={inputCls} required />
+                </label>
+                <Button type="submit" className="w-full">
+                  <Send className="h-4 w-4" aria-hidden="true" /> Send message
+                </Button>
               </form>
             )}
-          </div>
+          </Card>
         </div>
-      </div>
+      </Section>
     </div>
   );
 }

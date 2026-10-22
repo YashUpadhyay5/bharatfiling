@@ -254,7 +254,7 @@ export default function AuthRequiredModal({
               alt="BharatFiling"
               className="h-6 w-auto object-contain"
             />
-            <span className="font-black text-base text-slate-900 tracking-tight">
+            <span className="font-extrabold text-base text-slate-900 tracking-tight">
               Bharat<span className="text-[#F26522]">Filing</span>
             </span>
           </div>
@@ -284,7 +284,7 @@ export default function AuthRequiredModal({
                   </h4>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-sm font-black text-slate-900">
+                  <div className="text-sm font-extrabold text-slate-900">
                     {service.price}
                   </div>
                   {service.period && (
@@ -615,7 +615,7 @@ export default function AuthRequiredModal({
           {/* Footer Security Badges */}
           <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 pt-1">
             <Lock className="w-3 h-3 text-emerald-600" />
-            <span>256-Bit SSL Encryption • Licensed ICAI Chartered Accountants</span>
+            <span>Encrypted connection • Reviewed by Chartered Accountants</span>
           </div>
         </div>
       </div>

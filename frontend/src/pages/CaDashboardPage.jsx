@@ -82,7 +82,7 @@ export default function CaDashboardPage() {
   useEffect(() => {
     if (socket) {
       const handleNewCase = (newCase) => {
-        showSuccess(`🔔 New ${newCase.module_type || 'Statutory'} Filing Received: ${newCase.customer_name} (${newCase.state}) - ₹${newCase.amount} Paid!`);
+        showSuccess(`New ${newCase.module_type || 'Statutory'} Filing Received: ${newCase.customer_name} (${newCase.state}) - ₹${newCase.amount} Paid!`);
         fetchCases();
       };
 
@@ -200,7 +200,7 @@ export default function CaDashboardPage() {
                 Senior Partner: <strong>{user?.full_name || 'CA Rajesh Sharma (FCA)'}</strong>
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black mt-1 text-white">
+            <h1 className="text-xl sm:text-2xl font-extrabold mt-1 text-white">
               Chartered Accountant Case Workbench
             </h1>
           </div>
@@ -227,19 +227,19 @@ export default function CaDashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <div className="p-3.5 sm:p-4.5 rounded-2xl bg-slate-800/80 border border-slate-700">
             <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Client Filings</div>
-            <div className="text-xl sm:text-2xl font-black text-white mt-1">{metrics?.total_cases || cases.length}</div>
+            <div className="text-xl sm:text-2xl font-extrabold text-white mt-1">{metrics?.total_cases || cases.length}</div>
           </div>
           <div className="p-3.5 sm:p-4.5 rounded-2xl bg-slate-800/80 border border-slate-700">
             <div className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Pending CA Review</div>
-            <div className="text-xl sm:text-2xl font-black text-amber-400 mt-1">{metrics?.pending_review || 0}</div>
+            <div className="text-xl sm:text-2xl font-extrabold text-amber-400 mt-1">{metrics?.pending_review || 0}</div>
           </div>
           <div className="p-3.5 sm:p-4.5 rounded-2xl bg-slate-800/80 border border-slate-700">
             <div className="text-[10px] uppercase font-bold text-blue-400 tracking-wider">Government Portal Review</div>
-            <div className="text-xl sm:text-2xl font-black text-blue-400 mt-1">{metrics?.processing || 0}</div>
+            <div className="text-xl sm:text-2xl font-extrabold text-blue-400 mt-1">{metrics?.processing || 0}</div>
           </div>
           <div className="p-3.5 sm:p-4.5 rounded-2xl bg-slate-800/80 border border-slate-700">
             <div className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Certificates Delivered</div>
-            <div className="text-xl sm:text-2xl font-black text-emerald-400 mt-1">{metrics?.completed || 0}</div>
+            <div className="text-xl sm:text-2xl font-extrabold text-emerald-400 mt-1">{metrics?.completed || 0}</div>
           </div>
         </div>
 
@@ -255,7 +255,7 @@ export default function CaDashboardPage() {
               key={tab.id}
               onClick={() => setActiveFilter(tab.id)}
               className={`whitespace-nowrap shrink-0 px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
-                activeFilter === tab.id ? 'bg-emerald-600 text-white font-black' : 'text-slate-400 hover:text-white'
+                activeFilter === tab.id ? 'bg-emerald-600 text-white font-extrabold' : 'text-slate-400 hover:text-white'
               }`}
             >
               {tab.label}
@@ -293,7 +293,7 @@ export default function CaDashboardPage() {
                         <User className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>{c.customer_name}</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">📞 +91 {c.customer_phone}</div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">+91 {c.customer_phone}</div>
                     </div>
                     <div className="text-right">
                       <div className="font-extrabold text-emerald-400 text-xs">₹{c.amount_paid || 1769} INR</div>
@@ -302,10 +302,10 @@ export default function CaDashboardPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-300 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800">
-                    <div>📍 <span className="font-medium text-slate-200">{c.state}</span></div>
-                    <div>🏢 <span className="font-medium text-slate-200 truncate block">{c.business_type}</span></div>
+                    <div><span className="font-medium text-slate-200">{c.state}</span></div>
+                    <div><span className="font-medium text-slate-200 truncate block">{c.business_type}</span></div>
                     <div className="font-mono text-emerald-400 text-[10px]">PAN: {c.pan_number || 'ABCDE1234F'}</div>
-                    <div className="text-slate-400 text-[10px]">🕒 {formatDateTime(c.submitted_at || c.created_at)}</div>
+                    <div className="text-slate-400 text-[10px]">{formatDateTime(c.submitted_at || c.created_at)}</div>
                   </div>
 
                   <div className="flex items-center justify-between gap-2 pt-1">
@@ -645,7 +645,7 @@ export default function CaDashboardPage() {
                 <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xs font-black uppercase text-amber-400 tracking-wider">
+                      <h3 className="text-xs font-extrabold uppercase text-amber-400 tracking-wider">
                         CA Statutory 4-Stage Decision & Dispatch Console
                       </h3>
                       <p className="text-[11px] text-slate-400 mt-0.5">

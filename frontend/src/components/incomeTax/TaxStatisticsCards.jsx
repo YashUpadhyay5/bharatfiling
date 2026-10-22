@@ -1,6 +1,6 @@
 import React from 'react';
 import { Wallet, Percent, ShieldCheck, Award, TrendingUp, Sparkles } from 'lucide-react';
-import { formatIndianCurrency } from '../../utils/incomeTaxEngine';
+import { formatIndianCurrency, TAX_RULES_BY_YEAR } from '../../utils/incomeTaxEngine';
 
 export default function TaxStatisticsCards({ comparison, grossIncome = 0 }) {
   const { winner, savings, oldRegime, newRegime } = comparison;
@@ -22,6 +22,8 @@ export default function TaxStatisticsCards({ comparison, grossIncome = 0 }) {
   // 3. Section 87A Status
   const hasZeroTax = winningTax === 0;
   const hasMarginalRelief = winningRegime.marginalRelief87A > 0;
+  const rebateRules = TAX_RULES_BY_YEAR[winningRegime.financialYear]?.rebate87A?.[isNewWinner ? 'newRegime' : 'oldRegime'];
+  const rebateLimitLakh = rebateRules ? rebateRules.maxTaxableIncome / 100000 : null;
 
   // 4. Total deductions claimed
   const totalDeductionsClaimed = oldRegime.totalDeductions + oldRegime.hraExemption;
@@ -38,7 +40,7 @@ export default function TaxStatisticsCards({ comparison, grossIncome = 0 }) {
             <Wallet className="w-3.5 h-3.5" />
           </div>
         </div>
-        <div className="text-xl sm:text-2xl font-black text-[#111827] tracking-tight font-mono">
+        <div className="text-xl sm:text-2xl font-extrabold text-[#111827] tracking-tight font-mono">
           {formatIndianCurrency(monthlyTakeHome)}
         </div>
         <div className="mt-2 flex items-center gap-1 text-[11px] font-bold text-emerald-700">
@@ -62,7 +64,7 @@ export default function TaxStatisticsCards({ comparison, grossIncome = 0 }) {
             <Percent className="w-3.5 h-3.5" />
           </div>
         </div>
-        <div className="text-xl sm:text-2xl font-black text-[#111827] tracking-tight font-mono">
+        <div className="text-xl sm:text-2xl font-extrabold text-[#111827] tracking-tight font-mono">
           {winningEffectiveRate}%
         </div>
         <div className="mt-2 text-[11px] text-slate-500">
@@ -80,7 +82,7 @@ export default function TaxStatisticsCards({ comparison, grossIncome = 0 }) {
             <ShieldCheck className="w-3.5 h-3.5" />
           </div>
         </div>
-        <div className="text-lg sm:text-xl font-black text-[#111827] tracking-tight">
+        <div className="text-lg sm:text-xl font-extrabold text-[#111827] tracking-tight">
           {hasZeroTax ? (
             <span className="text-emerald-600 flex items-center gap-1">
               <Sparkles className="w-4 h-4" /> 100% Tax Free
@@ -96,7 +98,9 @@ export default function TaxStatisticsCards({ comparison, grossIncome = 0 }) {
             ? 'Income within statutory zero-tax limit'
             : hasMarginalRelief
             ? `Saved ${formatIndianCurrency(winningRegime.marginalRelief87A)} via 87A proviso`
-            : 'Above ₹7 Lakh rebate threshold'}
+            : rebateLimitLakh
+            ? `Above ₹${rebateLimitLakh} Lakh rebate threshold`
+            : 'Above the rebate threshold'}
         </div>
       </div>
 
@@ -110,7 +114,7 @@ export default function TaxStatisticsCards({ comparison, grossIncome = 0 }) {
             <Award className="w-3.5 h-3.5" />
           </div>
         </div>
-        <div className="text-xl sm:text-2xl font-black text-[#111827] tracking-tight font-mono">
+        <div className="text-xl sm:text-2xl font-extrabold text-[#111827] tracking-tight font-mono">
           {formatIndianCurrency(totalDeductionsClaimed)}
         </div>
         <div className="mt-2 text-[11px] text-slate-500">

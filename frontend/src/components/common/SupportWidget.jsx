@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SUPPORT, whatsappLink } from '../../config/support.js';
 import { api } from '../../services/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -261,7 +262,7 @@ export default function SupportWidget({ currentStep, businessType, applicationId
                             Request CA Callback
                           </button>
                           <a
-                            href="https://wa.me/919876543210"
+                            href={whatsappLink()}
                             target="_blank"
                             rel="noreferrer"
                             className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg hover:bg-emerald-100 transition flex items-center gap-1"
@@ -315,13 +316,13 @@ export default function SupportWidget({ currentStep, businessType, applicationId
                 </div>
                 <div className="bg-slate-50 p-3 rounded-xl text-left border border-slate-100 text-xs text-slate-600">
                   <div className="font-bold text-slate-800 mb-1">Available Hours:</div>
-                  <div>Monday to Saturday: 9:00 AM – 8:00 PM IST</div>
-                  <div className="text-emerald-600 font-semibold mt-1">Average Response: Under 3 minutes</div>
+                  <div>{SUPPORT.hours}</div>
+                  <div className="text-emerald-600 font-semibold mt-1">We reply during business hours</div>
                 </div>
                 <a
-                  href={`https://wa.me/919876543210?text=Hi%20BharatFiling%20CA%2C%20I%20have%20a%20question%20regarding%20my%20GST%20Registration${
-                    applicationId ? `%20(App%20ID%3A%20${applicationId})` : ''
-                  }.`}
+                  href={whatsappLink(
+                    `Hi BharatFiling CA, I have a question regarding my GST Registration${applicationId ? ` (App ID: ${applicationId})` : ''}.`
+                  )}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition"
@@ -344,15 +345,15 @@ export default function SupportWidget({ currentStep, businessType, applicationId
                   </p>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="text-xl font-black text-slate-900 tracking-wider">1800-890-8800</div>
+                  <div className="text-xl font-extrabold text-slate-900 tracking-wider">{SUPPORT.phoneDisplay}</div>
                   <div className="text-[11px] text-slate-500 mt-0.5">Toll-Free Nationwide (All Operators)</div>
                 </div>
                 <a
-                  href="tel:18008908800"
+                  href={SUPPORT.phoneTel}
                   className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition"
                 >
                   <PhoneCall className="w-4 h-4 text-emerald-400" />
-                  Call 1800-890-8800 Now
+                  Call {SUPPORT.phoneDisplay}
                 </a>
               </div>
             )}

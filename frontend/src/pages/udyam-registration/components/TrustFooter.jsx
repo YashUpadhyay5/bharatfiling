@@ -4,27 +4,26 @@ import { Award, Users, Smartphone, CheckCircle2 } from 'lucide-react';
 export default function TrustFooter() {
   const trustItems = [
     {
-      badge: '4.7',
-      stars: '★★★★★',
-      label: 'Verified Reviews',
+      badge: 'Expert Reviewed',
+      label: 'CA checks every application',
       icon: CheckCircle2,
       iconColor: 'text-amber-500 bg-amber-50 border-amber-200',
     },
     {
-      badge: '15+ Years',
-      label: 'of Experience',
+      badge: 'Fixed Fee',
+      label: 'Shown before you pay',
       icon: Award,
       iconColor: 'text-amber-600 bg-amber-50 border-amber-200',
     },
     {
-      badge: '2 Lakh+ Customers',
-      label: 'Trusted across India',
+      badge: '100% Online',
+      label: 'No office visits',
       icon: Users,
       iconColor: 'text-amber-700 bg-amber-50 border-amber-200',
     },
     {
-      badge: 'App Tracking',
-      label: 'Live status updates',
+      badge: 'Status Tracking',
+      label: 'Updates in your dashboard',
       icon: Smartphone,
       iconColor: 'text-rose-500 bg-rose-50 border-rose-200',
     },

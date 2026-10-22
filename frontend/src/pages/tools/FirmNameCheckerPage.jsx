@@ -200,7 +200,7 @@ export default function FirmNameCheckerPage() {
             />
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight">
             Business Information Platform
           </h1>
           <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
@@ -361,7 +361,7 @@ export default function FirmNameCheckerPage() {
         {loading && (
           <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
             <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <h3 className="text-base font-semibold text-slate-800">Searching Official MCA Corporate Master Records...</h3>
+            <h3 className="text-base font-semibold tracking-tight text-slate-800">Searching Official MCA Corporate Master Records...</h3>
             <p className="text-sm text-slate-500 mt-1">Verifying CIN, ROC jurisdiction, and Rule 8 statutory compliance across 130,000+ companies.</p>
           </div>
         )}
@@ -385,7 +385,7 @@ export default function FirmNameCheckerPage() {
                       </span>
                       <span className="text-xs text-slate-400">Official MCA Corporate Master Data</span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase">
+                    <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-white uppercase">
                       {masterData.companyName}
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-300 mt-1 flex items-center gap-1.5">
@@ -503,7 +503,7 @@ export default function FirmNameCheckerPage() {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 uppercase tracking-wide">
                         Not Available for Reservation
                       </span>
-                      <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 uppercase">
+                      <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900 mt-1 uppercase">
                         {searchResult.query?.proposedName}
                       </h2>
                       <p className="text-sm text-slate-600 mt-0.5">
@@ -566,7 +566,7 @@ export default function FirmNameCheckerPage() {
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${isPreliminary ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'} uppercase tracking-wide`}>
                         {isPreliminary ? 'Preliminary Clearance (Offline Database Verified)' : 'Available for Reservation'}
                       </span>
-                      <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 uppercase">
+                      <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900 mt-1 uppercase">
                         {searchResult.query?.proposedName}
                       </h2>
                       <p className="text-sm text-slate-600 mt-0.5">
@@ -617,7 +617,7 @@ export default function FirmNameCheckerPage() {
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900">
+                    <h3 className="text-base font-semibold tracking-tight text-slate-900">
                       Rule 8 Statutory Compliance & Coined Brand Suggestions
                     </h3>
                     <p className="text-xs text-slate-500">
@@ -670,7 +670,7 @@ export default function FirmNameCheckerPage() {
             {/* Incorporation Assistance CTA Banner */}
             <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-sm">
               <div className="text-center sm:text-left">
-                <h3 className="text-lg font-bold">Ready to Register Your Indian Company or LLP?</h3>
+                <h3 className="text-lg font-semibold tracking-tight">Ready to Register Your Indian Company or LLP?</h3>
                 <p className="text-xs sm:text-sm text-blue-200 mt-1">
                   Our Senior Chartered Accountants & CS file your MCA SPICe+ Part A, MOA/AOA, and DSC within 48 hours.
                 </p>
@@ -696,7 +696,7 @@ export default function FirmNameCheckerPage() {
                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
                   <Building2 className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900">130,000+ Official MCA Records</h3>
+                <h3 className="text-base font-semibold tracking-tight text-slate-900">130,000+ Official MCA Records</h3>
                 <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
                   Real-time lookup across the Ministry of Corporate Affairs national database, covering CIN, ROC location, and entity class.
                 </p>
@@ -706,7 +706,7 @@ export default function FirmNameCheckerPage() {
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900">Rule 8 Statutory Compliance</h3>
+                <h3 className="text-base font-semibold tracking-tight text-slate-900">Rule 8 Statutory Compliance</h3>
                 <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
                   Automated checks for phonetic similarity, Emblems & Names Act restrictions, and regulatory sector approvals (RBI, SEBI, IRDAI).
                 </p>
@@ -716,7 +716,7 @@ export default function FirmNameCheckerPage() {
                 <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900">Instant AI Name Suggestions</h3>
+                <h3 className="text-base font-semibold tracking-tight text-slate-900">Instant AI Name Suggestions</h3>
                 <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
                   If your preferred corporate name is unavailable, our AI engine suggests coined, distinctive alternatives with high approval likelihood.
                 </p>
@@ -725,7 +725,7 @@ export default function FirmNameCheckerPage() {
 
             {/* 4-Step Guide */}
             <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-2xs">
-              <h3 className="text-lg font-bold text-slate-900 mb-6 text-center sm:text-left">
+              <h3 className="text-lg font-semibold tracking-tight text-slate-900 mb-6 text-center sm:text-left">
                 How MCA Company Name Reservation Works in India
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
