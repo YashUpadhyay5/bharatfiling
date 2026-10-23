@@ -117,6 +117,23 @@ export const AuthProvider = ({ children }) => {
     return res;
   };
 
+  const requestLoginOtp = async (identifier) => {
+    return await api.requestLoginOtp(identifier);
+  };
+
+  const verifyLoginOtp = async ({ identifier, otp, txn_id }) => {
+    const res = await api.verifyLoginOtp({ identifier, otp, txn_id });
+    if (res.success && res.token) {
+      localStorage.setItem('bharatfiling_token', res.token);
+      if (res.user) {
+        localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
+      }
+      setToken(res.token);
+      setUser(res.user);
+    }
+    return res;
+  };
+
   const requestForgotPasswordOtp = async (email) => {
     return await api.requestForgotPasswordOtp(email);
   };
@@ -199,6 +216,8 @@ export const AuthProvider = ({ children }) => {
         verifyRegisterOtp,
         registerWithPhone,
         loginWithPhone,
+        requestLoginOtp,
+        verifyLoginOtp,
         requestForgotPasswordOtp,
         verifyForgotPasswordOtp,
         resetPassword,

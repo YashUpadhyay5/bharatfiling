@@ -104,6 +104,24 @@ export const api = {
     return handleResponse(res);
   },
 
+  requestLoginOtp: async (identifier) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/login/request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier }),
+    });
+    return handleResponse(res);
+  },
+
+  verifyLoginOtp: async ({ identifier, otp, txn_id }) => {
+    const res = await fetchWithRetry(`${API_BASE}/auth/login/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier, otp, txn_id }),
+    });
+    return handleResponse(res);
+  },
+
   requestForgotPasswordOtp: async (email) => {
     const res = await fetchWithRetry(`${API_BASE}/auth/forgot-password/request-otp`, {
       method: 'POST',
