@@ -78,8 +78,8 @@ export const AuthProvider = ({ children }) => {
     return await api.requestRegisterOtp(userData);
   };
 
-  const verifyRegisterOtp = async ({ email, otp, txn_id }) => {
-    const res = await api.verifyRegisterOtp({ email, otp, txn_id });
+  const verifyRegisterOtp = async ({ email, phone, identifier, otp, txn_id }) => {
+    const res = await api.verifyRegisterOtp({ email, phone, identifier, otp, txn_id });
     if (res.success && res.token) {
       localStorage.setItem('bharatfiling_token', res.token);
       if (res.user) {

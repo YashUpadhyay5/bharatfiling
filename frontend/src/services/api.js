@@ -77,11 +77,11 @@ export const api = {
     return handleResponse(res);
   },
 
-  verifyRegisterOtp: async ({ email, otp, txn_id }) => {
+  verifyRegisterOtp: async ({ email, phone, identifier, otp, txn_id }) => {
     const res = await fetchWithRetry(`${API_BASE}/auth/register/verify-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, otp, txn_id }),
+      body: JSON.stringify({ email, phone, identifier, otp, txn_id }),
     });
     return handleResponse(res);
   },

@@ -1,4 +1,4 @@
-import { supabase } from '../database/supabaseClient.js';
+import { supabase, isSupabaseConfigured, markSupabaseUnhealthy } from '../database/supabaseClient.js';
 import { db } from '../database/db.js';
 
 export class OtpModel {
@@ -6,9 +6,15 @@ export class OtpModel {
    * Creates a new OTP record (in Supabase, fallback to local db store)
    */
   static async create(otpData) {
+    const cleanEmail = otpData.email ? String(otpData.email).toLowerCase().trim() : null;
+    const cleanPhone = otpData.phone ? String(otpData.phone).replace(/\D/g, '').slice(-10) : null;
+    const identifier = cleanEmail || cleanPhone || String(otpData.identifier || '').trim();
+
     const record = {
       txn_id: otpData.txn_id,
-      email: otpData.email.toLowerCase().trim(),
+      email: cleanEmail || `${cleanPhone}@sms.bharatfiling.internal`,
+      phone: cleanPhone,
+      identifier,
       otp_hash: otpData.otp_hash,
       purpose: otpData.purpose,
       staged_payload: otpData.staged_payload || {},
@@ -23,17 +29,32 @@ export class OtpModel {
       consumed_at: null,
     };
 
-    try {
-      const { data, error } = await supabase
-        .from('otps')
-        .insert(record)
-        .select()
-        .single();
-      if (!error && data) {
-        return data;
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('otps')
+          .insert({
+            txn_id: record.txn_id,
+            email: record.email,
+            otp_hash: record.otp_hash,
+            purpose: record.purpose,
+            staged_payload: record.staged_payload,
+            attempts: 0,
+            max_attempts: record.max_attempts,
+            is_consumed: false,
+            is_superseded: false,
+            expires_at: record.expires_at,
+          })
+          .select()
+          .single();
+        if (!error && data) {
+          return { ...record, ...data };
+        } else if (error) {
+          markSupabaseUnhealthy();
+        }
+      } catch (e) {
+        markSupabaseUnhealthy();
       }
-    } catch (e) {
-      // Fall through to local fallback
     }
 
     // Local fallback
@@ -44,24 +65,31 @@ export class OtpModel {
   }
 
   /**
-   * Marks previous active OTPs for the same email and purpose as superseded
+   * Marks previous active OTPs for the same identifier (email or phone) and purpose as superseded
    */
-  static async supersedeExisting(email, purpose) {
-    const cleanEmail = email.toLowerCase().trim();
-    try {
-      await supabase
-        .from('otps')
-        .update({ is_superseded: true })
-        .eq('email', cleanEmail)
-        .eq('purpose', purpose)
-        .eq('is_consumed', false);
-    } catch (e) {
-      // Fallback
+  static async supersedeExisting(identifier, purpose) {
+    const clean = String(identifier || '').toLowerCase().trim();
+    const cleanDigits = String(identifier || '').replace(/\D/g, '').slice(-10);
+
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase
+          .from('otps')
+          .update({ is_superseded: true })
+          .or(`email.eq.${clean},email.eq.${cleanDigits}@sms.bharatfiling.internal`)
+          .eq('purpose', purpose)
+          .eq('is_consumed', false);
+      } catch (e) {
+        markSupabaseUnhealthy();
+      }
     }
 
     const otps = db.getOtps();
     otps.forEach((o) => {
-      if (o.email === cleanEmail && o.purpose === purpose && !o.is_consumed) {
+      const matchEmail = o.email && (o.email.toLowerCase() === clean || o.email === `${cleanDigits}@sms.bharatfiling.internal`);
+      const matchPhone = o.phone && (o.phone === cleanDigits || o.phone === clean);
+      const matchId = o.identifier && (o.identifier.toLowerCase() === clean || o.identifier === cleanDigits);
+      if ((matchEmail || matchPhone || matchId) && o.purpose === purpose && !o.is_consumed) {
         o.is_superseded = true;
       }
     });
@@ -72,68 +100,82 @@ export class OtpModel {
    * Finds latest active OTP by transaction ID
    */
   static async findByTxnId(txnId) {
-    try {
-      const { data, error } = await supabase
-        .from('otps')
-        .select('*')
-        .eq('txn_id', txnId)
-        .maybeSingle();
-      if (!error && data) return data;
-    } catch (e) {
-      // Fallback
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('otps')
+          .select('*')
+          .eq('txn_id', txnId)
+          .maybeSingle();
+        if (!error && data) return data;
+        if (error) markSupabaseUnhealthy();
+      } catch (e) {
+        markSupabaseUnhealthy();
+      }
     }
 
     return db.getOtps().find((o) => o.txn_id === txnId) || null;
   }
 
   /**
-   * Finds latest active, non-superseded OTP by email & purpose
+   * Finds latest active, non-superseded OTP by identifier (email or phone) & purpose
    */
-  static async findLatestActive(email, purpose) {
-    const cleanEmail = email.toLowerCase().trim();
-    try {
-      const { data, error } = await supabase
-        .from('otps')
-        .select('*')
-        .eq('email', cleanEmail)
-        .eq('purpose', purpose)
-        .eq('is_consumed', false)
-        .eq('is_superseded', false)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (!error && data) return data;
-    } catch (e) {
-      // Fallback
+  static async findLatestActive(identifier, purpose) {
+    const clean = String(identifier || '').toLowerCase().trim();
+    const cleanDigits = String(identifier || '').replace(/\D/g, '').slice(-10);
+
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('otps')
+          .select('*')
+          .or(`email.eq.${clean},email.eq.${cleanDigits}@sms.bharatfiling.internal`)
+          .eq('purpose', purpose)
+          .eq('is_consumed', false)
+          .eq('is_superseded', false)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!error && data) return data;
+        if (error) markSupabaseUnhealthy();
+      } catch (e) {
+        markSupabaseUnhealthy();
+      }
     }
 
-    const list = db.getOtps().filter(
-      (o) => o.email === cleanEmail && o.purpose === purpose && !o.is_consumed && !o.is_superseded
-    );
+    const list = db.getOtps().filter((o) => {
+      const matchEmail = o.email && (o.email.toLowerCase() === clean || o.email === `${cleanDigits}@sms.bharatfiling.internal`);
+      const matchPhone = o.phone && (o.phone === cleanDigits || o.phone === clean);
+      const matchId = o.identifier && (o.identifier.toLowerCase() === clean || o.identifier === cleanDigits);
+      return (matchEmail || matchPhone || matchId) && o.purpose === purpose && !o.is_consumed && !o.is_superseded;
+    });
     return list[list.length - 1] || null;
   }
+
 
   /**
    * Increments failed attempt count
    */
   static async incrementAttempts(txnId) {
     let currentAttempts = 0;
-    try {
-      const { data } = await supabase.from('otps').select('attempts, max_attempts').eq('txn_id', txnId).maybeSingle();
-      if (data) {
-        currentAttempts = (data.attempts || 0) + 1;
-        const shouldLock = currentAttempts >= (data.max_attempts || 5);
-        await supabase
-          .from('otps')
-          .update({
-            attempts: currentAttempts,
-            is_consumed: shouldLock ? true : false,
-          })
-          .eq('txn_id', txnId);
-        return currentAttempts;
+    if (isSupabaseConfigured()) {
+      try {
+        const { data } = await supabase.from('otps').select('attempts, max_attempts').eq('txn_id', txnId).maybeSingle();
+        if (data) {
+          currentAttempts = (data.attempts || 0) + 1;
+          const shouldLock = currentAttempts >= (data.max_attempts || 5);
+          await supabase
+            .from('otps')
+            .update({
+              attempts: currentAttempts,
+              is_consumed: shouldLock ? true : false,
+            })
+            .eq('txn_id', txnId);
+          return currentAttempts;
+        }
+      } catch (e) {
+        markSupabaseUnhealthy();
       }
-    } catch (e) {
-      // Fallback
     }
 
     const otps = db.getOtps();
@@ -154,16 +196,18 @@ export class OtpModel {
    */
   static async markConsumed(txnId) {
     const consumedAt = new Date().toISOString();
-    try {
-      await supabase
-        .from('otps')
-        .update({
-          is_consumed: true,
-          consumed_at: consumedAt,
-        })
-        .eq('txn_id', txnId);
-    } catch (e) {
-      // Fallback
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase
+          .from('otps')
+          .update({
+            is_consumed: true,
+            consumed_at: consumedAt,
+          })
+          .eq('txn_id', txnId);
+      } catch (e) {
+        markSupabaseUnhealthy();
+      }
     }
 
     const otps = db.getOtps();
@@ -179,17 +223,19 @@ export class OtpModel {
    * Sets single-use reset authorization token for password recovery
    */
   static async setResetToken(txnId, resetToken, expiresAt) {
-    try {
-      await supabase
-        .from('otps')
-        .update({
-          reset_token: resetToken,
-          reset_token_expires_at: expiresAt,
-          is_consumed: true,
-        })
-        .eq('txn_id', txnId);
-    } catch (e) {
-      // Fallback
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase
+          .from('otps')
+          .update({
+            reset_token: resetToken,
+            reset_token_expires_at: expiresAt,
+            is_consumed: true,
+          })
+          .eq('txn_id', txnId);
+      } catch (e) {
+        markSupabaseUnhealthy();
+      }
     }
 
     const otps = db.getOtps();
@@ -206,15 +252,18 @@ export class OtpModel {
    * Finds OTP record by single-use reset token
    */
   static async findByResetToken(resetToken) {
-    try {
-      const { data, error } = await supabase
-        .from('otps')
-        .select('*')
-        .eq('reset_token', resetToken)
-        .maybeSingle();
-      if (!error && data) return data;
-    } catch (e) {
-      // Fallback
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('otps')
+          .select('*')
+          .eq('reset_token', resetToken)
+          .maybeSingle();
+        if (!error && data) return data;
+        if (error) markSupabaseUnhealthy();
+      } catch (e) {
+        markSupabaseUnhealthy();
+      }
     }
 
     return db.getOtps().find((o) => o.reset_token === resetToken) || null;
@@ -224,13 +273,15 @@ export class OtpModel {
    * Revokes a used reset token
    */
   static async revokeResetToken(resetToken) {
-    try {
-      await supabase
-        .from('otps')
-        .update({ reset_token: null })
-        .eq('reset_token', resetToken);
-    } catch (e) {
-      // Fallback
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase
+          .from('otps')
+          .update({ reset_token: null })
+          .eq('reset_token', resetToken);
+      } catch (e) {
+        markSupabaseUnhealthy();
+      }
     }
 
     const otps = db.getOtps();
@@ -245,10 +296,12 @@ export class OtpModel {
    * Deletes an OTP record by transaction ID (used for immediate rollback on email dispatch failure)
    */
   static async deleteByTxnId(txnId) {
-    try {
-      await supabase.from('otps').delete().eq('txn_id', txnId);
-    } catch (e) {
-      // Fallback
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.from('otps').delete().eq('txn_id', txnId);
+      } catch (e) {
+        markSupabaseUnhealthy();
+      }
     }
 
     const otps = db.getOtps();
@@ -256,4 +309,5 @@ export class OtpModel {
     db.saveOtps(filtered);
   }
 }
+
 

@@ -34,7 +34,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
   // Register form state
   const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('7668976193');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regStep, setRegStep] = useState(1); // 1: details, 2: OTP
@@ -217,84 +217,59 @@ export default function AuthPages({ defaultMode = 'login' }) {
     }
   };
 
-  // --- REGISTER: SEND PHONE SMS OTP (FIREBASE) ---
+  // Optional phone handler fallback
   const handleRegisterSendPhoneOtp = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (!fullName || !email || !phone || !regPassword) {
-      showError('Please fill in all mandatory registration fields.');
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      showError('Please enter a valid email address (e.g. name@example.com).');
-      return;
-    }
-
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length < 10) {
-      showError('Please enter a valid 10-digit Indian mobile number.');
-      return;
-    }
-
-    if (regPassword.length < 8) {
-      showError('Password must be at least 8 characters.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const confirmation = await sendPhoneOtp(phone, 'recaptcha-container');
-      setPhoneConfirmationResult(confirmation);
-      setRegMethod('phone');
-      setRegStep(2);
-      setRegCooldown(60);
-      showSuccess(`SMS OTP sent to +91 ${cleanPhone.slice(-10)} via Firebase!`);
-    } catch (err) {
-      console.error('Firebase Phone OTP error:', err);
-      showError(err.message || 'Failed to send SMS OTP. Please try Email OTP instead.');
-    } finally {
-      setLoading(false);
-    }
+    setRegMethod('phone');
+    return handleRegisterRequestOtp(e);
   };
 
-  // --- REGISTER STEP 1: REQUEST EMAIL OTP ---
+
+  // --- REGISTER STEP 1: REQUEST OTP (PHONE OR EMAIL) ---
   const handleRegisterRequestOtp = async (e) => {
-    e.preventDefault();
-    if (!fullName || !email || !phone || !regPassword) {
-      showError('Please fill in all mandatory registration fields.');
+    if (e && e.preventDefault) e.preventDefault();
+    if (!fullName || !fullName.trim()) {
+      showError('Please enter your full legal name.');
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      showError('Please enter a valid email address (e.g. name@example.com).');
-      return;
-    }
-
-    if (regPassword.length < 8) {
+    if (!regPassword || regPassword.length < 8) {
       showError('Password must be at least 8 characters.');
       return;
+    }
+
+    if (regMethod === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email.trim())) {
+        showError('Please enter a valid email address (e.g. name@example.com).');
+        return;
+      }
+    } else {
+      const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
+      if (cleanPhone.length < 10) {
+        showError('Please enter a valid 10-digit Indian mobile number.');
+        return;
+      }
     }
 
     setLoading(true);
     try {
       const res = await requestRegisterOtp({
-        full_name: fullName,
-        email,
-        phone,
+        full_name: fullName.trim(),
+        email: regMethod === 'email' ? email.trim() : undefined,
+        phone: regMethod === 'phone' ? phone.trim() : undefined,
         password: regPassword,
+        method: regMethod,
       });
 
       if (res.success) {
         setRegTxnId(res.txn_id);
-        setRegMethod('email');
         setRegStep(2);
         setRegCooldown(res.cooldown_seconds || 60);
-        showSuccess(res.message || 'Verification code sent to your email!');
+        showSuccess(res.message || (regMethod === 'email' ? 'Verification code sent to your email!' : 'SMS verification code sent to your mobile phone!'));
       }
     } catch (err) {
-      showError(err.message || 'Failed to send verification code.');
+      console.error('Registration OTP dispatch error:', err);
+      showError(err.message || 'Failed to send verification code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -310,34 +285,33 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
     setLoading(true);
     try {
-      if (regMethod === 'phone') {
-        if (!phoneConfirmationResult) {
-          throw new Error('Phone verification session expired. Please request a new code.');
-        }
+      if (regMethod === 'phone' && phoneConfirmationResult) {
         const userCredential = await phoneConfirmationResult.confirm(regOtp.trim());
         const idToken = await userCredential.user.getIdToken();
         const res = await registerWithPhone({
           id_token: idToken,
           full_name: fullName,
-          email,
+          email: email || undefined,
           password: regPassword,
           phone,
         });
 
         if (res.success) {
           showSuccess('Mobile verified & account created! Welcome to BharatFiling.');
-          navigate(from);
+          navigate(from || '/dashboard');
         }
       } else {
         const res = await verifyRegisterOtp({
-          email,
+          email: regMethod === 'email' ? email.trim() : undefined,
+          phone: regMethod === 'phone' ? phone.trim() : undefined,
+          identifier: regMethod === 'email' ? email.trim() : phone.trim(),
           otp: regOtp.trim(),
           txn_id: regTxnId,
         });
 
         if (res.success) {
           showSuccess('Account verified & created! Welcome to BharatFiling.');
-          navigate(from);
+          navigate(from || '/dashboard');
         }
       }
     } catch (err) {
@@ -353,22 +327,23 @@ export default function AuthPages({ defaultMode = 'login' }) {
     if (regCooldown > 0) return;
     setLoading(true);
     try {
-      if (regMethod === 'phone') {
+      if (regMethod === 'phone' && phoneConfirmationResult) {
         const confirmation = await sendPhoneOtp(phone, 'recaptcha-container');
         setPhoneConfirmationResult(confirmation);
         setRegCooldown(60);
         showSuccess('New SMS OTP dispatched to your mobile number!');
       } else {
         const res = await requestRegisterOtp({
-          full_name: fullName,
-          email,
-          phone,
+          full_name: fullName.trim(),
+          email: regMethod === 'email' ? email.trim() : undefined,
+          phone: regMethod === 'phone' ? phone.trim() : undefined,
           password: regPassword,
+          method: regMethod,
         });
         if (res.success) {
           setRegTxnId(res.txn_id);
           setRegCooldown(res.cooldown_seconds || 60);
-          showSuccess('New verification code sent to your email!');
+          showSuccess(res.message || (regMethod === 'email' ? 'New verification code sent to your email!' : 'New verification code sent to your mobile phone!'));
         }
       }
     } catch (err) {
@@ -879,6 +854,34 @@ export default function AuthPages({ defaultMode = 'login' }) {
           {/* ======================= REGISTER VIEW: STEP 1 ======================= */}
           {mode === 'register' && regStep === 1 && (
             <form onSubmit={handleRegisterRequestOtp} className="space-y-3.5 text-xs">
+              {/* Method Selector Tabs: Phone Number vs Email / Gmail */}
+              <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setRegMethod('phone')}
+                  className={`flex-1 py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                    regMethod === 'phone'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  Mobile Number
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRegMethod('email')}
+                  className={`flex-1 py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                    regMethod === 'email'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  Email / Gmail
+                </button>
+              </div>
+
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Full Legal Name</label>
                 <div className="relative">
@@ -895,38 +898,48 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 </div>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Email Address (Verification OTP sent here)</label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
-                    placeholder="Enter your email address"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
-                    required
-                  />
+              {regMethod === 'phone' ? (
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Mobile Number (Verification OTP sent here)</label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      autoComplete="tel"
+                      placeholder="Enter 10-digit mobile number"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    No email required. You can log into your account anytime with this mobile number & password.
+                  </p>
                 </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Mobile Number (for GST updates & SMS)</label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    autoComplete="tel"
-                    placeholder="Enter 10-digit mobile number"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
-                    required
-                  />
+              ) : (
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Email / Gmail Address (Verification OTP sent here)</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
+                      placeholder="Enter your email or gmail address"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    No mobile required. You can log into your account anytime with this email & password.
+                  </p>
                 </div>
-              </div>
+              )}
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Create Password</label>
@@ -944,28 +957,24 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 </div>
               </div>
 
-              <div className="pt-2 space-y-2">
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={handleRegisterSendPhoneOtp}
-                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Smartphone className="w-4 h-4 text-emerald-200" />
-                  {loading && regMethod === 'phone'
-                    ? 'Sending SMS OTP...'
-                    : 'Verify via Mobile SMS OTP (Fastest)'}
-                </button>
-
+              <div className="pt-2">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer border border-slate-300"
+                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Mail className="w-4 h-4 text-slate-500" />
-                  {loading && regMethod === 'email'
-                    ? 'Sending Email OTP...'
-                    : 'Or Continue with Email OTP'}
+                  {regMethod === 'phone' ? (
+                    <>
+                      <Smartphone className="w-4 h-4 text-emerald-200" />
+                      {loading ? 'Sending SMS OTP...' : 'Verify Mobile & Send Code'}
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-4 h-4 text-emerald-200" />
+                      {loading ? 'Sending Email OTP...' : 'Verify Email & Send Code'}
+                    </>
+                  )}
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </form>
@@ -981,14 +990,14 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     SMS Verification Code Dispatched
                   </div>
                   <p className="text-[11px] text-emerald-700">
-                    We've sent a 6-digit SMS verification code to <span className="font-bold">+91 {phone.replace(/\D/g, '').slice(-10)}</span> via Firebase.
+                    We've sent a 6-digit SMS verification code to <span className="font-bold">+91 {phone.replace(/\D/g, '').slice(-10)}</span>.
                   </p>
                 </div>
               ) : (
                 <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
                   <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
                     <Mail className="w-4 h-4 text-emerald-600" />
-                    Check Your Email Inbox
+                    Check Your Email / Gmail Inbox
                   </div>
                   <p className="text-[11px] text-emerald-700">
                     We've sent a 6-digit confirmation code to <span className="font-bold">{email}</span>. Please enter it below.

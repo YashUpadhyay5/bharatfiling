@@ -1,0 +1,132 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import express from 'express';
+import authRoutes from '../routes/auth.routes.js';
+import { db } from '../database/db.js';
+import { UserModel } from '../models/User.js';
+
+const app = express();
+app.use(express.json());
+app.use('/api/v1/auth', authRoutes);
+
+let server;
+
+test.before(() => {
+  server = app.listen(5096);
+});
+
+test.after(() => {
+  if (server) server.close();
+});
+
+test('Auth Registration - Email Only Registration Flow', async () => {
+
+  const uniqueId = Date.now();
+  const testEmail = `user_${uniqueId}@gmail.com`;
+  const password = 'Password@123';
+
+  const reqRes = await fetch('http://localhost:5096/api/v1/auth/register/request-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      full_name: 'Test Email User',
+      email: testEmail,
+      password,
+      method: 'email',
+    }),
+  });
+
+  const reqData = await reqRes.json();
+  assert.equal(reqRes.status, 200);
+  assert.equal(reqData.success, true);
+  assert.ok(reqData.txn_id);
+
+  // Retrieve staged OTP from local DB
+  const otps = db.getOtps();
+  const staged = otps.find((o) => o.txn_id === reqData.txn_id);
+  assert.ok(staged, 'Staged OTP should exist');
+
+  // Verify OTP
+  // Extract OTP from staged payload dev_otp if available
+  const verifyRes = await fetch('http://localhost:5096/api/v1/auth/register/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: testEmail,
+      otp: reqData.dev_otp || '123456',
+      txn_id: reqData.txn_id,
+    }),
+  });
+
+  const verifyData = await verifyRes.json();
+  assert.equal(verifyRes.status, 201);
+  assert.equal(verifyData.success, true);
+  assert.ok(verifyData.token, 'Should return JWT token');
+  assert.equal(verifyData.user.email, testEmail);
+
+  // Re-login with Email + Password
+  const loginRes = await fetch('http://localhost:5096/api/v1/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      identifier: testEmail,
+      password,
+    }),
+  });
+  const loginData = await loginRes.json();
+  assert.equal(loginRes.status, 200);
+  assert.equal(loginData.success, true);
+  assert.ok(loginData.token);
+});
+
+test('Auth Registration - Phone Only Registration Flow', async () => {
+  const randomPhone = '98' + Math.floor(10000000 + Math.random() * 90000000);
+  const password = 'Password@123';
+
+  const reqRes = await fetch('http://localhost:5096/api/v1/auth/register/request-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      full_name: 'Test Phone User',
+      phone: randomPhone,
+      password,
+      method: 'phone',
+    }),
+  });
+
+  const reqData = await reqRes.json();
+  assert.equal(reqRes.status, 200);
+  assert.equal(reqData.success, true);
+  assert.ok(reqData.txn_id);
+
+  // Verify OTP with phone
+  const verifyRes = await fetch('http://localhost:5096/api/v1/auth/register/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      phone: randomPhone,
+      otp: reqData.dev_otp || '123456',
+      txn_id: reqData.txn_id,
+    }),
+  });
+
+  const verifyData = await verifyRes.json();
+  assert.equal(verifyRes.status, 201);
+  assert.equal(verifyData.success, true);
+  assert.ok(verifyData.token, 'Should return JWT token');
+  assert.equal(verifyData.user.phone, randomPhone);
+
+  // Re-login with Phone + Password
+  const loginRes = await fetch('http://localhost:5096/api/v1/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      identifier: randomPhone,
+      password,
+    }),
+  });
+  const loginData = await loginRes.json();
+  assert.equal(loginRes.status, 200);
+  assert.equal(loginData.success, true);
+  assert.ok(loginData.token);
+});
