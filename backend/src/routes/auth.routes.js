@@ -307,8 +307,22 @@ router.post('/register/verify-otp', async (req, res) => {
           pincode: '',
         },
       });
-    } catch {
-      // Profile fallback silently logged
+    } catch (profileErr) {
+      console.warn('Notice: Local fallback during profile initialization:', profileErr.message);
+      const profiles = db.getProfiles();
+      if (!profiles.some((p) => p.user_id === newUser.id)) {
+        profiles.push({
+          id: `prof_${Date.now().toString(36)}`,
+          user_id: newUser.id,
+          personal_info: { full_name: newUser.full_name },
+          identity_info: {},
+          contact_info: { mobile_number: newUser.phone || '', email: newUser.email || '' },
+          address_info: { state: 'Karnataka' },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+        db.saveProfiles(profiles);
+      }
     }
 
     // 7. Mark OTP as Consumed
