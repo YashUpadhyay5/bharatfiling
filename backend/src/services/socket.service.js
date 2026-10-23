@@ -24,7 +24,7 @@ export function initSocketServer(httpServer) {
       methods: ['GET', 'POST'],
       credentials: true,
     },
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'],
     maxHttpBufferSize: 1e5,
   });
 

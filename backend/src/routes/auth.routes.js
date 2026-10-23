@@ -563,17 +563,13 @@ router.post('/forgot-password/request-otp', async (req, res) => {
     const cleanEmail = normalizeEmail(email);
 
     // 1. Locate user in DB
-    // 1. Locate user in DB
     const user = await UserModel.findByEmail(cleanEmail);
 
     if (!user) {
-      // Same response as for a registered address so the endpoint can't be used to discover
-      // which emails have accounts. No code is generated or sent.
-      return res.json({
-        success: true,
-        message: `If an account exists for ${cleanEmail}, a 6-digit recovery code has been sent.`,
-        txn_id: `txn_${cryptoService.generateSecureToken(12)}`,
-        cooldown_seconds: 60,
+      return res.status(404).json({
+        success: false,
+        not_registered: true,
+        message: `No BharatFiling account found with ${cleanEmail}. Please create an account first.`,
       });
     }
 
@@ -610,22 +606,27 @@ router.post('/forgot-password/request-otp', async (req, res) => {
       dispatchResult = await emailService.sendPasswordResetOtp(cleanEmail, otp, user.full_name);
     } catch (emailErr) {
       console.warn(`[Password Reset Email Dispatch Failed for ${cleanEmail}]:`, emailErr.message);
-      await OtpModel.deleteByTxnId(txn_id);
-      return res.status(500).json({
-        success: false,
-        message: 'Could not deliver recovery email to this address. Please try again.',
-      });
+      if (ENV.NODE_ENV !== 'production' || process.env.ALLOW_DEV_OTP === 'true') {
+        console.log(`[DEV RECOVERY OTP for ${cleanEmail}]: ${otp}`);
+      } else {
+        await OtpModel.deleteByTxnId(txn_id);
+        return res.status(500).json({
+          success: false,
+          message: 'Could not deliver recovery email to this address. Please try again or use Mobile OTP recovery.',
+        });
+      }
     }
 
     const successMessage = dispatchResult?.provider === 'resend-sandbox-routed'
       ? `A 6-digit recovery code has been dispatched! (In sandbox mode, check inbox of ${dispatchResult.sandboxOwner})`
-      : `If an account exists for ${cleanEmail}, a 6-digit recovery code has been sent.`;
+      : `A 6-digit recovery code has been sent to ${cleanEmail}.`;
 
     return res.json({
       success: true,
       message: successMessage,
       txn_id,
       cooldown_seconds: 60,
+      ...(ENV.NODE_ENV !== 'production' ? { dev_otp: otp } : {}),
     });
   } catch (err) {
     console.error('[Forgot Password Request Error]:', err);
@@ -751,7 +752,7 @@ router.post('/forgot-password/reset-password', async (req, res) => {
     }
 
     const users = db.getUsers();
-    const localUser = users.find((u) => u.email.toLowerCase() === cleanEmail);
+    const localUser = users.find((u) => u.email && u.email.toLowerCase() === cleanEmail);
     if (localUser) {
       localUser.password_hash = password_hash;
       localUser.updated_at = new Date().toISOString();

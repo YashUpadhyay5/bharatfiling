@@ -1305,13 +1305,13 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   </form>
                 ) : (
                   <form onSubmit={handleForgotVerifyOtp} className="space-y-4">
-                    <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
-                      <div className="font-bold flex items-center gap-1.5 text-xs">
-                        <Mail className="w-4 h-4 text-amber-600" />
+                    <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+                      <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                        <Mail className="w-4 h-4 text-emerald-600" />
                         Recovery Code Dispatched
                       </div>
-                      <p className="text-[11px] text-amber-800">
-                        If an account exists for <span className="font-bold">{forgotEmail}</span>, a 6-digit recovery OTP has been sent.
+                      <p className="text-[11px] text-emerald-800">
+                        A 6-digit recovery OTP has been sent to <span className="font-bold">{forgotEmail}</span>. Please check your inbox and spam folder.
                       </p>
                     </div>
 

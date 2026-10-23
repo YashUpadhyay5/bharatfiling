@@ -32,11 +32,12 @@ export function getSocket() {
   if (!socket) {
     authedToken = readToken();
     socket = io(BACKEND_URL, {
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
+      reconnectionDelay: 1500,
+      timeout: 10000,
       // Evaluated on every (re)connect so a fresh login is picked up automatically
       auth: (cb) => cb({ token: readToken() }),
     });
@@ -47,8 +48,24 @@ export function getSocket() {
     });
 
     socket.on('connect_error', (err) => {
-      console.warn('Socket connection warning (will retry automatically):', err.message);
+      // Don't flood console with warnings if browser is navigating, page is hidden, or server is spinning up
+      if (typeof document !== 'undefined' && document.hidden) return;
+      console.warn('Socket connection status (reconnecting in background):', err.message);
     });
+
+    // Gracefully disconnect before bfcache / page unload to prevent "WebSocket closed before connection established"
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pagehide', () => {
+        if (socket && socket.connected) {
+          socket.disconnect();
+        }
+      });
+      window.addEventListener('pageshow', (event) => {
+        if (event.persisted && socket && !socket.connected) {
+          socket.connect();
+        }
+      });
+    }
   }
   return socket;
 }

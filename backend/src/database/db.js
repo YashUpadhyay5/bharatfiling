@@ -47,12 +47,67 @@ class DatabaseStore {
         this.data.support_tickets = this.data.support_tickets || [];
         this.data.audit_logs = this.data.audit_logs || [];
         this.data.notifications = this.data.notifications || [];
+        this.ensureDefaultUsers();
       } catch (err) {
         console.error('Failed to parse database file, re-seeding:', err);
         this.seedInitialData();
       }
     } else {
       this.seedInitialData();
+    }
+  }
+
+  ensureDefaultUsers() {
+    const seedPassword =
+      process.env.SEED_ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : 'Password@123');
+    const salt = bcrypt.genSaltSync(10);
+    const demoPasswordHash = bcrypt.hashSync(seedPassword || crypto.randomBytes(24).toString('hex'), salt);
+
+    if (!this.data.users.some((u) => u.email && u.email.toLowerCase() === 'yashupdhyay486@gmail.com')) {
+      this.data.users.push({
+        id: 'usr_yash_001',
+        email: 'yashupdhyay486@gmail.com',
+        phone: '7668976193',
+        password_hash: demoPasswordHash,
+        role: 'CUSTOMER',
+        full_name: 'Yash Upadhyay',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+      if (!this.data.customer_profiles.some((p) => p.user_id === 'usr_yash_001')) {
+        this.data.customer_profiles.push({
+          id: 'prof_yash_001',
+          user_id: 'usr_yash_001',
+          personal_info: {
+            full_name: 'Yash Upadhyay',
+            father_name: '',
+            dob: '1998-08-20',
+            gender: 'Male',
+          },
+          identity_info: {
+            pan_number: 'ABCPU1234K',
+            pan_verified: true,
+            aadhaar_number: '766897619312',
+            aadhaar_verified: true,
+          },
+          contact_info: {
+            mobile_number: '7668976193',
+            mobile_verified: true,
+            email: 'yashupdhyay486@gmail.com',
+            email_verified: true,
+          },
+          address_info: {
+            address_line_1: 'Civil Lines',
+            address_line_2: '',
+            city: 'Kanpur',
+            state: 'Uttar Pradesh',
+            pincode: '208001',
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      }
+      this.persist();
     }
   }
 
@@ -108,7 +163,18 @@ class DatabaseStore {
       updated_at: new Date().toISOString(),
     };
 
-    this.data.users = [adminUser, caUser, customerUser];
+    const yashUser = {
+      id: 'usr_yash_001',
+      email: 'yashupdhyay486@gmail.com',
+      phone: '7668976193',
+      password_hash: demoPasswordHash,
+      role: 'CUSTOMER',
+      full_name: 'Yash Upadhyay',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    this.data.users = [adminUser, caUser, customerUser, yashUser];
 
     // 2. Seed Master Profile for sample customer
     const customerProfile = {
@@ -142,7 +208,40 @@ class DatabaseStore {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    this.data.customer_profiles = [customerProfile];
+
+    const yashProfile = {
+      id: 'prof_yash_001',
+      user_id: 'usr_yash_001',
+      personal_info: {
+        full_name: 'Yash Upadhyay',
+        father_name: '',
+        dob: '1998-08-20',
+        gender: 'Male',
+      },
+      identity_info: {
+        pan_number: 'ABCPU1234K',
+        pan_verified: true,
+        aadhaar_number: '766897619312',
+        aadhaar_verified: true,
+      },
+      contact_info: {
+        mobile_number: '7668976193',
+        mobile_verified: true,
+        email: 'yashupdhyay486@gmail.com',
+        email_verified: true,
+      },
+      address_info: {
+        address_line_1: 'Civil Lines',
+        address_line_2: '',
+        city: 'Kanpur',
+        state: 'Uttar Pradesh',
+        pincode: '208001',
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    this.data.customer_profiles = [customerProfile, yashProfile];
 
     // 3. Seed Sample Business
     const sampleBusiness = {

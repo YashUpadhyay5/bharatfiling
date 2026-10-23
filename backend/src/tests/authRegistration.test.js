@@ -130,3 +130,83 @@ test('Auth Registration - Phone Only Registration Flow', async () => {
   assert.equal(loginData.success, true);
   assert.ok(loginData.token);
 });
+
+test('Forgot Password - Unregistered Email Returns 404 Not Registered', async () => {
+  const res = await fetch('http://localhost:5096/api/v1/auth/forgot-password/request-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'nonexistent_account_99999@example.com' }),
+  });
+  const data = await res.json();
+  assert.equal(res.status, 404);
+  assert.equal(data.success, false);
+  assert.equal(data.not_registered, true);
+});
+
+test('Forgot Password - Registered Email Dispatches OTP and Resets Password', async () => {
+  // Use seeded account
+  const testEmail = 'yashupdhyay486@gmail.com';
+  const newPassword = 'NewSecretPassword@2026';
+
+  const reqRes = await fetch('http://localhost:5096/api/v1/auth/forgot-password/request-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: testEmail }),
+  });
+
+  const reqData = await reqRes.json();
+  assert.equal(reqRes.status, 200);
+  assert.equal(reqData.success, true);
+  assert.ok(reqData.txn_id);
+
+  // Retrieve staged OTP
+  const otps = db.getOtps();
+  const activeOtp = otps.find((o) => o.txn_id === reqData.txn_id);
+  assert.ok(activeOtp, 'Active recovery OTP should be stored');
+
+  // Verify OTP
+  const verifyRes = await fetch('http://localhost:5096/api/v1/auth/forgot-password/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: testEmail,
+      otp: reqData.dev_otp || '123456',
+      txn_id: reqData.txn_id,
+    }),
+  });
+
+  const verifyData = await verifyRes.json();
+  assert.equal(verifyRes.status, 200);
+  assert.equal(verifyData.success, true);
+  assert.ok(verifyData.reset_token);
+
+  // Set New Password
+  const resetRes = await fetch('http://localhost:5096/api/v1/auth/forgot-password/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: testEmail,
+      reset_token: verifyData.reset_token,
+      new_password: newPassword,
+    }),
+  });
+
+  const resetData = await resetRes.json();
+  assert.equal(resetRes.status, 200);
+  assert.equal(resetData.success, true);
+
+  // Login with new password
+  const loginRes = await fetch('http://localhost:5096/api/v1/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      identifier: testEmail,
+      password: newPassword,
+    }),
+  });
+
+  const loginData = await loginRes.json();
+  assert.equal(loginRes.status, 200);
+  assert.equal(loginData.success, true);
+  assert.ok(loginData.token);
+});
