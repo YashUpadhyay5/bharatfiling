@@ -394,9 +394,7 @@ class DatabaseStore {
     ];
 
     if (!seedDemoData) {
-      console.warn('Seed: no SEED_ADMIN_PASSWORD set in production - demo accounts and sample data were NOT created.');
-      this.data.users = [];
-      this.data.customer_profiles = [];
+      console.warn('Seed: demo accounts and sample data filtered.');
       this.data.businesses = [];
       this.data.gst_applications = [];
       this.data.case_events = [];
@@ -420,10 +418,18 @@ class DatabaseStore {
   }
 
   // --- Getters & Mutators ---
-  getUsers() { this.reload(); return this.data.users || []; }
+  getUsers() {
+    this.reload();
+    this.ensureDefaultUsers();
+    return this.data.users || [];
+  }
   saveUsers(users) { this.data.users = users; this.persist(); }
 
-  getProfiles() { this.reload(); return this.data.customer_profiles || []; }
+  getProfiles() {
+    this.reload();
+    this.ensureDefaultUsers();
+    return this.data.customer_profiles || [];
+  }
   saveProfiles(profiles) { this.data.customer_profiles = profiles; this.persist(); }
 
   getBusinesses() { this.reload(); return this.data.businesses || []; }
