@@ -766,12 +766,30 @@ router.post('/forgot-password/reset-password', async (req, res) => {
     // 4. Invalidate single-use reset token
     await OtpModel.revokeResetToken(reset_token);
 
-    // 5. Send security alert notification email
-    await emailService.sendPasswordChangedAlert(cleanEmail, user?.full_name || localUser?.full_name || 'Valued Client');
+    // 5. Issue session JWT token so user is automatically logged in
+    const targetUser = user || localUser;
+    let token = null;
+    let userResponse = null;
+
+    if (targetUser) {
+      token = generateToken(targetUser);
+      userResponse = {
+        id: targetUser.id,
+        email: targetUser.email,
+        phone: targetUser.phone,
+        role: targetUser.role || 'CUSTOMER',
+        full_name: targetUser.full_name || 'Valued Client',
+      };
+    }
+
+    // 6. Send security alert notification email
+    await emailService.sendPasswordChangedAlert(cleanEmail, targetUser?.full_name || 'Valued Client');
 
     res.json({
       success: true,
-      message: 'Password updated successfully! Please log in with your new password.',
+      message: 'Password updated successfully! Welcome back to BharatFiling.',
+      token,
+      user: userResponse,
     });
   } catch (err) {
     console.error('[Reset Password Error]:', err);

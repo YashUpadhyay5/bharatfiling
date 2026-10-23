@@ -417,7 +417,17 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
       if (res.success) {
         showSuccess('Password updated successfully! Welcome back to BharatFiling.');
-        navigate(from);
+        setFpStep(1);
+        setFpOtp('');
+        setFpNewPassword('');
+        setFpConfirmPassword('');
+        if (res.user?.role === 'CA') {
+          navigate('/ca/dashboard', { replace: true });
+        } else if (res.user?.role === 'ADMIN') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate(from || '/dashboard', { replace: true });
+        }
       }
     } catch (err) {
       console.error('Phone reset password error:', err);
@@ -545,12 +555,19 @@ export default function AuthPages({ defaultMode = 'login' }) {
       });
 
       if (res.success) {
-        showSuccess('Password updated successfully! Please sign in with your new password.');
-        setIdentifier(forgotEmail);
-        setPassword('');
-        setMode('login');
+        showSuccess('Password updated successfully! Welcome back to BharatFiling.');
         setFpStep(1);
         setFpResetToken('');
+        setFpOtp('');
+        setFpNewPassword('');
+        setFpConfirmPassword('');
+        if (res.user?.role === 'CA') {
+          navigate('/ca/dashboard', { replace: true });
+        } else if (res.user?.role === 'ADMIN') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate(from || '/dashboard', { replace: true });
+        }
       }
     } catch (err) {
       showError(err.message || 'Failed to reset password.');

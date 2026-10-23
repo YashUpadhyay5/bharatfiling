@@ -194,6 +194,9 @@ test('Forgot Password - Registered Email Dispatches OTP and Resets Password', as
   const resetData = await resetRes.json();
   assert.equal(resetRes.status, 200);
   assert.equal(resetData.success, true);
+  assert.ok(resetData.token, 'Should return session token for auto-login');
+  assert.ok(resetData.user, 'Should return user profile for auto-login');
+  assert.equal(resetData.user.email, testEmail);
 
   // Login with new password
   const loginRes = await fetch('http://localhost:5096/api/v1/auth/login', {
