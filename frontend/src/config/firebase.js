@@ -130,6 +130,11 @@ export const sendPhoneOtp = async (phoneNumber, containerId = 'recaptcha-contain
     if (err.code === 'auth/quota-exceeded') {
       throw new Error('Daily SMS OTP quota exceeded on Firebase. Please try Email OTP instead.');
     }
+    if (err.code === 'auth/billing-not-enabled') {
+      throw new Error(
+        'Firebase requires Cloud Billing (Blaze Plan) to send real carrier SMS, or add this phone under "Phone numbers for testing" in Firebase Console. You can also use "Via Email OTP".'
+      );
+    }
     if (err.code === 'auth/captcha-check-failed') {
       throw new Error('reCAPTCHA verification failed. Please refresh the page and try again.');
     }
