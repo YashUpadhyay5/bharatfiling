@@ -617,14 +617,18 @@ router.post('/forgot-password/request-otp', async (req, res) => {
       }
     }
 
-    const successMessage = dispatchResult?.provider === 'resend-sandbox-routed'
-      ? `A 6-digit recovery code has been dispatched! (In sandbox mode, check inbox of ${dispatchResult.sandboxOwner})`
-      : `A 6-digit recovery code has been sent to ${cleanEmail}.`;
+    let successMessage = `A 6-digit recovery code has been sent to ${cleanEmail}. Please check your inbox and Spam / Promotions folder.`;
+
+    if (dispatchResult?.deliveredTo && dispatchResult.deliveredTo.toLowerCase() !== cleanEmail.toLowerCase()) {
+      successMessage = `Resend trial mode delivered the code to the verified account owner (${dispatchResult.deliveredTo}). Please check that inbox or spam folder.`;
+    }
 
     return res.json({
       success: true,
       message: successMessage,
       txn_id,
+      delivered_to: dispatchResult?.deliveredTo || cleanEmail,
+      provider: dispatchResult?.provider || 'smtp',
       cooldown_seconds: 60,
       ...(ENV.NODE_ENV !== 'production' ? { dev_otp: otp } : {}),
     });

@@ -59,6 +59,7 @@ export const httpEmailProvider = {
             return {
               success: true,
               provider: 'resend-clean-routed',
+              deliveredTo: ownerEmail,
               messageId: retryData.id,
             };
           }
@@ -69,7 +70,7 @@ export const httpEmailProvider = {
         }
 
         console.log(`[Resend HTTP Dispatch]: Id=${data.id} To=${to}`);
-        return { success: true, provider: 'resend-http', messageId: data.id };
+        return { success: true, provider: 'resend-http', deliveredTo: to, messageId: data.id };
       } catch (err) {
         console.warn(`[Resend Dispatch Failed]: ${err.message}`);
         lastError = err;
