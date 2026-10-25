@@ -482,6 +482,205 @@ router.post('/login/phone', async (req, res) => {
 });
 
 /**
+ * POST /api/v1/auth/login/request-otp
+ * Dispatches a dynamic, randomly generated 6-digit OTP for passwordless login
+ */
+router.post('/login/request-otp', async (req, res) => {
+  try {
+    const { identifier } = req.body;
+    if (!identifier || typeof identifier !== 'string') {
+      return res.status(400).json({ success: false, message: 'Email address or mobile number is required.' });
+    }
+
+    const cleanId = identifier.trim();
+    const isEmail = EMAIL_REGEX.test(cleanId);
+    const cleanEmail = isEmail ? normalizeEmail(cleanId) : '';
+    const cleanPhone = !isEmail ? cleanId.replace(/\D/g, '').slice(-10) : '';
+
+    if (!isEmail && cleanPhone.length !== 10) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid email or 10-digit mobile number.' });
+    }
+
+    const targetIdentifier = isEmail ? cleanEmail : cleanPhone;
+
+    // 1. Check if user exists
+    let user = null;
+    try {
+      user = isEmail ? await UserModel.findByEmail(cleanEmail) : await UserModel.findByPhone(cleanPhone);
+    } catch {
+      // Local fallback
+    }
+
+    if (!user) {
+      const lower = targetIdentifier.toLowerCase();
+      user = db.getUsers().find((u) =>
+        (u.email || '').toLowerCase() === lower ||
+        (u.phone && String(u.phone).replace(/\D/g, '').slice(-10) === targetIdentifier)
+      ) || null;
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        not_registered: true,
+        message: `No BharatFiling account found for ${cleanId}. Please register first.`,
+      });
+    }
+
+    // 2. Enforce 60-second cooldown
+    const latestOtp = await OtpModel.findLatestActive(targetIdentifier, 'LOGIN');
+    if (latestOtp) {
+      const elapsedSeconds = Math.floor((Date.now() - new Date(latestOtp.created_at).getTime()) / 1000);
+      if (elapsedSeconds < 60) {
+        return res.status(429).json({
+          success: false,
+          message: `Please wait ${60 - elapsedSeconds} seconds before requesting a new login code.`,
+          cooldown_remaining: 60 - elapsedSeconds,
+        });
+      }
+    }
+
+    // 3. Invalidate any existing unconsumed login OTPs for this user
+    await OtpModel.supersedeExisting(targetIdentifier, 'LOGIN');
+
+    // 4. Generate fresh, cryptographically random 6-digit OTP & Transaction ID
+    const otp = cryptoService.generateNumericOtp();
+    const txn_id = `txn_${cryptoService.generateSecureToken(12)}`;
+    const otp_hash = cryptoService.createOtpHmac(otp, targetIdentifier, 'LOGIN', txn_id);
+    const expires_at = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+    await OtpModel.create({
+      txn_id,
+      email: cleanEmail || null,
+      phone: cleanPhone || null,
+      identifier: targetIdentifier,
+      otp_hash,
+      purpose: 'LOGIN',
+      expires_at,
+    });
+
+    // 5. Dispatch OTP
+    let dispatchResult = null;
+    if (isEmail) {
+      try {
+        dispatchResult = await emailService.sendLoginOtp(cleanEmail, otp, user.full_name);
+      } catch (emailErr) {
+        console.warn(`[Login Email Dispatch Failed for ${cleanEmail}]:`, emailErr.message);
+        if (ENV.NODE_ENV !== 'production' || process.env.ALLOW_DEV_OTP === 'true') {
+          console.log(`[DEV LOGIN OTP for ${cleanEmail}]: ${otp}`);
+        } else {
+          await OtpModel.deleteByTxnId(txn_id);
+          return res.status(500).json({
+            success: false,
+            message: 'Could not deliver login code to this email. Please check your email address or use password login.',
+          });
+        }
+      }
+    } else {
+      console.log(`[SMS LOGIN OTP DISPATCH]: 6-digit OTP ${otp} dispatched to +91 ${cleanPhone}`);
+    }
+
+    const successMessage = isEmail
+      ? `A 6-digit login verification code has been sent to ${cleanEmail}.`
+      : `A 6-digit SMS login verification code has been dispatched to +91 ${cleanPhone}.`;
+
+    res.json({
+      success: true,
+      message: successMessage,
+      txn_id,
+      identifier: targetIdentifier,
+      cooldown_seconds: 60,
+      ...(ENV.NODE_ENV !== 'production' ? { dev_otp: otp } : {}),
+    });
+  } catch (err) {
+    console.error('[Login Request OTP Error]:', err);
+    res.status(500).json({ success: false, message: 'Failed to send login code. Please try again.' });
+  }
+});
+
+/**
+ * POST /api/v1/auth/login/verify-otp
+ * Verifies 6-digit OTP and logs in user directly
+ */
+router.post('/login/verify-otp', async (req, res) => {
+  try {
+    const { identifier, otp, txn_id } = req.body;
+
+    if (!identifier || !otp || !txn_id) {
+      return res.status(400).json({ success: false, message: 'Identifier, 6-digit OTP, and transaction ID are required.' });
+    }
+
+    const cleanDigits = String(identifier).replace(/\D/g, '').slice(-10);
+    const targetIdentifier = EMAIL_REGEX.test(identifier) ? normalizeEmail(identifier) : cleanDigits;
+
+    const otpRecord = await OtpModel.findByTxnId(txn_id);
+
+    if (!otpRecord || otpRecord.purpose !== 'LOGIN' || otpRecord.is_consumed || otpRecord.is_superseded) {
+      return res.status(401).json({ success: false, message: 'Invalid or expired login code. Please request a new code.' });
+    }
+
+    if (new Date() > new Date(otpRecord.expires_at)) {
+      return res.status(401).json({ success: false, message: 'Login code has expired. Please request a new code.' });
+    }
+
+    // Verify constant-time HMAC
+    const isMatch = cryptoService.verifyOtpHmac(String(otp).trim(), otpRecord.otp_hash, targetIdentifier, 'LOGIN', txn_id);
+
+    if (!isMatch) {
+      const attempts = await OtpModel.incrementAttempts(txn_id);
+      const remaining = Math.max(0, 5 - attempts);
+      return res.status(401).json({
+        success: false,
+        message: remaining > 0 ? `Incorrect login code. ${remaining} attempt(s) remaining.` : 'Maximum verification attempts exceeded. Please request a new code.',
+      });
+    }
+
+    // Mark consumed immediately
+    await OtpModel.markConsumed(txn_id);
+
+    // Fetch user
+    let user = null;
+    try {
+      user = EMAIL_REGEX.test(targetIdentifier)
+        ? await UserModel.findByEmail(targetIdentifier)
+        : await UserModel.findByPhone(targetIdentifier);
+    } catch {
+      // Local fallback
+    }
+
+    if (!user) {
+      const lower = targetIdentifier.toLowerCase();
+      user = db.getUsers().find((u) =>
+        (u.email || '').toLowerCase() === lower ||
+        (u.phone && String(u.phone).replace(/\D/g, '').slice(-10) === targetIdentifier)
+      ) || null;
+    }
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Account not found.' });
+    }
+
+    const token = generateToken(user);
+
+    res.json({
+      success: true,
+      message: 'Login successful. Welcome back to BharatFiling!',
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        full_name: user.full_name,
+      },
+    });
+  } catch (err) {
+    console.error('[Login Verify OTP Error]:', err);
+    res.status(500).json({ success: false, message: 'Failed to verify login code.' });
+  }
+});
+
+/**
  * POST /api/v1/auth/forgot-password/phone-reset
  * Resets password using verified Firebase SMS OTP token
  */
@@ -766,12 +965,30 @@ router.post('/forgot-password/reset-password', async (req, res) => {
     // 4. Invalidate single-use reset token
     await OtpModel.revokeResetToken(reset_token);
 
-    // 5. Send security alert notification email
-    await emailService.sendPasswordChangedAlert(cleanEmail, user?.full_name || localUser?.full_name || 'Valued Client');
+    // 5. Issue session JWT token so user is automatically logged in
+    const targetUser = user || localUser;
+    let token = null;
+    let userResponse = null;
+
+    if (targetUser) {
+      token = generateToken(targetUser);
+      userResponse = {
+        id: targetUser.id,
+        email: targetUser.email,
+        phone: targetUser.phone,
+        role: targetUser.role || 'CUSTOMER',
+        full_name: targetUser.full_name || 'Valued Client',
+      };
+    }
+
+    // 6. Send security alert notification email
+    await emailService.sendPasswordChangedAlert(cleanEmail, targetUser?.full_name || 'Valued Client');
 
     res.json({
       success: true,
-      message: 'Password updated successfully! Please log in with your new password.',
+      message: 'Password updated successfully! Welcome back to BharatFiling.',
+      token,
+      user: userResponse,
     });
   } catch (err) {
     console.error('[Reset Password Error]:', err);

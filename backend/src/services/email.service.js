@@ -189,6 +189,79 @@ export const emailService = {
   },
 
   /**
+   * Dispatches 6-digit login OTP email
+   */
+  async sendLoginOtp(email, otp, name = 'Valued Client') {
+    const subject = `${otp} is your BharatFiling login code`;
+
+    const text = `Hello ${name},\n\nYour 6-digit BharatFiling login verification code is: ${otp}\n\nThis code is valid for 5 minutes. Never share this code with anyone.\n\nBharatFiling Platform`;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your BharatFiling Login Code</title>
+</head>
+<body style="margin: 0; padding: 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td align="center">
+        <table width="560" border="0" cellspacing="0" cellpadding="0" style="background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+          <tr>
+            <td style="padding: 32px 32px 24px 32px; text-align: center; background-color: #0f172a;">
+              <h1 style="margin: 0; font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
+                Bharat<span style="color: #F26522;">Filing</span>
+              </h1>
+              <p style="margin: 6px 0 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;">
+                Taxation, MCA Compliance & Legal Documentation
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px;">
+              <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 24px;">
+                Hello <strong>${escapeHtml(name)}</strong>,
+              </p>
+              <p style="margin: 0 0 24px 0; font-size: 14px; color: #475569; line-height: 22px;">
+                Use the following 6-digit single-use login code to sign in to your BharatFiling account:
+              </p>
+              <div style="text-align: center; margin: 32px 0;">
+                <div style="display: inline-block; font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #0f172a; background: #f8fafc; padding: 16px 36px; border-radius: 12px; border: 2px dashed #cbd5e1;">
+                  ${otp}
+                </div>
+                <p style="margin: 12px 0 0 0; font-size: 12px; color: #64748b; font-weight: 500;">
+                  ⏳ Valid for 5 minutes only • Do not share with anyone
+                </p>
+              </div>
+              <p style="margin: 0 0 12px 0; font-size: 13px; color: #64748b; line-height: 20px;">
+                If you did not request this login code, you can safely ignore this email.
+              </p>
+              <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 28px 0;" />
+              <p style="margin: 0; font-size: 11px; color: #94a3b8; text-align: center; line-height: 18px;">
+                © 2026 BharatFiling Platform. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    return this._sendWithFallback({
+      to: email,
+      subject,
+      text,
+      html,
+      data: { otp, name, purpose: 'LOGIN' },
+    });
+  },
+
+  /**
    * Dispatches security alert notification email after successful password change
    */
   async sendPasswordChangedAlert(email, name = 'Valued Client') {

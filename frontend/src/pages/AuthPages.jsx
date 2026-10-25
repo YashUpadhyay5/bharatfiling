@@ -30,6 +30,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
   const [phoneLoginMobile, setPhoneLoginMobile] = useState('');
   const [phoneLoginOtp, setPhoneLoginOtp] = useState('');
   const [phoneLoginConfirmation, setPhoneLoginConfirmation] = useState(null);
+  const [loginOtpTxnId, setLoginOtpTxnId] = useState('');
   const [phoneLoginCooldown, setPhoneLoginCooldown] = useState(0);
 
   // Register form state
@@ -67,6 +68,8 @@ export default function AuthPages({ defaultMode = 'login' }) {
     login,
     registerWithPhone,
     loginWithPhone,
+    requestLoginOtp,
+    verifyLoginOtp,
     requestRegisterOtp,
     verifyRegisterOtp,
     requestForgotPasswordOtp,
@@ -156,61 +159,107 @@ export default function AuthPages({ defaultMode = 'login' }) {
     }
   };
 
-  // --- PHONE LOGIN: REQUEST SMS OTP ---
+  // --- OTP LOGIN: REQUEST 6-DIGIT CODE (EMAIL OR MOBILE SMS) ---
   const handlePhoneLoginRequestOtp = async (e) => {
     e.preventDefault();
-    const cleanDigits = phoneLoginMobile.replace(/\D/g, '');
-    if (cleanDigits.length < 10) {
-      showError('Please enter a valid 10-digit mobile number.');
+    const cleanInput = phoneLoginMobile.trim();
+    const isEmail = cleanInput.includes('@');
+    const cleanDigits = cleanInput.replace(/\D/g, '');
+
+    if (!isEmail && cleanDigits.length < 10) {
+      showError('Please enter a valid email address or 10-digit mobile number.');
       return;
     }
 
     setLoading(true);
     try {
-      const confirmation = await sendPhoneOtp(phoneLoginMobile, 'recaptcha-container');
-      setPhoneLoginConfirmation(confirmation);
-      setPhoneLoginStep(2);
-      setPhoneLoginCooldown(60);
-      showSuccess(`SMS OTP sent to +91 ${cleanDigits.slice(-10)} via Firebase!`);
+      if (isEmail) {
+        const res = await requestLoginOtp(cleanInput);
+        if (res.success) {
+          setLoginOtpTxnId(res.txn_id);
+          setPhoneLoginConfirmation(null);
+          setPhoneLoginStep(2);
+          setPhoneLoginCooldown(res.cooldown_seconds || 60);
+          showSuccess(res.message || `A 6-digit login verification code has been sent to ${cleanInput}.`);
+        }
+      } else {
+        // Try Firebase Phone SMS first
+        try {
+          const confirmation = await sendPhoneOtp(cleanInput, 'recaptcha-container');
+          setPhoneLoginConfirmation(confirmation);
+          setLoginOtpTxnId('');
+          setPhoneLoginStep(2);
+          setPhoneLoginCooldown(60);
+          showSuccess(`SMS OTP sent to +91 ${cleanDigits.slice(-10)} via Firebase!`);
+        } catch (firebaseErr) {
+          console.warn('Firebase SMS dispatch failed, falling back to backend OTP:', firebaseErr.message);
+          const res = await requestLoginOtp(cleanDigits);
+          if (res.success) {
+            setLoginOtpTxnId(res.txn_id);
+            setPhoneLoginConfirmation(null);
+            setPhoneLoginStep(2);
+            setPhoneLoginCooldown(res.cooldown_seconds || 60);
+            showSuccess(res.message || `A 6-digit verification code has been dispatched to +91 ${cleanDigits.slice(-10)}.`);
+          }
+        }
+      }
     } catch (err) {
-      console.error('Phone login OTP error:', err);
-      showError(err.message || 'Failed to dispatch SMS OTP. Please try password login.');
+      console.error('OTP login request error:', err);
+      if (err.data?.not_registered || err.status === 404) {
+        showError(err.message || 'Account not found. Please register.');
+        if (!isEmail) setPhone(cleanDigits);
+        else setEmail(cleanInput);
+        setMode('register');
+        setRegStep(1);
+      } else {
+        showError(err.message || 'Failed to dispatch login code. Please try password login.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // --- PHONE LOGIN: VERIFY SMS OTP ---
+  // --- OTP LOGIN: VERIFY 6-DIGIT CODE ---
   const handlePhoneLoginVerifyOtp = async (e) => {
     e.preventDefault();
     if (!phoneLoginOtp || phoneLoginOtp.trim().length !== 6) {
-      showError('Please enter the 6-digit code received on your phone.');
+      showError('Please enter the 6-digit code received on your phone or email.');
       return;
     }
 
     setLoading(true);
     try {
-      if (!phoneLoginConfirmation) {
-        throw new Error('Verification session expired. Please request a new OTP.');
+      let res = null;
+      if (phoneLoginConfirmation) {
+        const userCredential = await phoneLoginConfirmation.confirm(phoneLoginOtp.trim());
+        const idToken = await userCredential.user.getIdToken();
+        res = await loginWithPhone(idToken);
+      } else if (loginOtpTxnId) {
+        res = await verifyLoginOtp({
+          identifier: phoneLoginMobile.trim(),
+          otp: phoneLoginOtp.trim(),
+          txn_id: loginOtpTxnId,
+        });
+      } else {
+        throw new Error('Verification session expired. Please request a new code.');
       }
-      const userCredential = await phoneLoginConfirmation.confirm(phoneLoginOtp.trim());
-      const idToken = await userCredential.user.getIdToken();
-      const res = await loginWithPhone(idToken);
-      if (res.success) {
-        showSuccess('Mobile login successful! Welcome back.');
-        if (res.user.role === 'CA') navigate('/ca/dashboard');
-        else if (res.user.role === 'ADMIN') navigate('/admin');
-        else navigate(from);
+
+      if (res?.success) {
+        showSuccess('Login successful! Welcome back to BharatFiling.');
+        if (res.user?.role === 'CA') navigate('/ca/dashboard', { replace: true });
+        else if (res.user?.role === 'ADMIN') navigate('/admin', { replace: true });
+        else navigate(from || '/dashboard', { replace: true });
       }
     } catch (err) {
-      console.error('Phone login verify error:', err);
+      console.error('OTP login verify error:', err);
       if (err.data?.not_registered || err.status === 404) {
-        setPhone(phoneLoginMobile);
+        if (!phoneLoginMobile.includes('@')) setPhone(phoneLoginMobile.replace(/\D/g, ''));
+        else setEmail(phoneLoginMobile.trim());
         setMode('register');
         setRegStep(1);
         showError(err.message || 'Mobile number not registered. Please create an account.');
       } else {
-        showError(err.message || 'Failed to sign in with SMS OTP.');
+        showError(err.message || 'Failed to sign in with verification code.');
       }
     } finally {
       setLoading(false);
@@ -417,7 +466,17 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
       if (res.success) {
         showSuccess('Password updated successfully! Welcome back to BharatFiling.');
-        navigate(from);
+        setFpStep(1);
+        setFpOtp('');
+        setFpNewPassword('');
+        setFpConfirmPassword('');
+        if (res.user?.role === 'CA') {
+          navigate('/ca/dashboard', { replace: true });
+        } else if (res.user?.role === 'ADMIN') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate(from || '/dashboard', { replace: true });
+        }
       }
     } catch (err) {
       console.error('Phone reset password error:', err);
@@ -545,12 +604,19 @@ export default function AuthPages({ defaultMode = 'login' }) {
       });
 
       if (res.success) {
-        showSuccess('Password updated successfully! Please sign in with your new password.');
-        setIdentifier(forgotEmail);
-        setPassword('');
-        setMode('login');
+        showSuccess('Password updated successfully! Welcome back to BharatFiling.');
         setFpStep(1);
         setFpResetToken('');
+        setFpOtp('');
+        setFpNewPassword('');
+        setFpConfirmPassword('');
+        if (res.user?.role === 'CA') {
+          navigate('/ca/dashboard', { replace: true });
+        } else if (res.user?.role === 'ADMIN') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate(from || '/dashboard', { replace: true });
+        }
       }
     } catch (err) {
       showError(err.message || 'Failed to reset password.');
@@ -729,35 +795,34 @@ export default function AuthPages({ defaultMode = 'login' }) {
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-emerald-600 transition cursor-pointer"
                 >
                   <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
-                  Sign in with Mobile SMS OTP instead
+                  Sign in with 1-Time OTP (Email or SMS) instead
                 </button>
               </div>
             </form>
           )}
 
-          {/* ======================= LOGIN VIEW: PHONE OTP ======================= */}
+          {/* ======================= LOGIN VIEW: 1-TIME OTP ======================= */}
           {mode === 'login' && phoneLoginActive && (
             <div className="space-y-4 text-xs">
               {phoneLoginStep === 1 && (
                 <form onSubmit={handlePhoneLoginRequestOtp} className="space-y-4">
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Indian Mobile Number</label>
+                    <label className="block font-bold text-slate-700 mb-1">Email or Indian Mobile Number</label>
                     <div className="relative">
                       <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                       <input
-                        type="tel"
-                        inputMode="tel"
-                        autoComplete="tel"
+                        type="text"
+                        autoComplete="username"
                         value={phoneLoginMobile}
                         onChange={(e) => setPhoneLoginMobile(e.target.value)}
-                        placeholder="10-digit mobile number"
+                        placeholder="Enter email or 10-digit mobile number"
                         className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                         required
                         autoFocus
                       />
                     </div>
                     <p className="text-[10px] text-slate-400 mt-1">
-                      A 6-digit SMS OTP will be sent to your mobile phone via Google Firebase.
+                      A randomly generated 6-digit one-time code will be dispatched to your email or phone.
                     </p>
                   </div>
 
@@ -766,7 +831,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     disabled={loading}
                     className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    {loading ? 'Sending SMS OTP...' : 'Send SMS OTP'}
+                    {loading ? 'Dispatching 6-Digit Code...' : 'Send 6-Digit Login Code'}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
 
@@ -786,16 +851,16 @@ export default function AuthPages({ defaultMode = 'login' }) {
                 <form onSubmit={handlePhoneLoginVerifyOtp} className="space-y-4">
                   <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
                     <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
-                      <Smartphone className="w-4 h-4 text-emerald-600" />
-                      SMS OTP Sent
+                      <KeyRound className="w-4 h-4 text-emerald-600" />
+                      6-Digit Verification Code Sent
                     </div>
                     <p className="text-[11px] text-emerald-700">
-                      Enter the 6-digit code sent to <span className="font-bold">+91 {phoneLoginMobile.slice(-10)}</span>.
+                      Enter the 6-digit random code sent to <span className="font-bold">{phoneLoginMobile.includes('@') ? phoneLoginMobile : `+91 ${phoneLoginMobile.slice(-10)}`}</span>.
                     </p>
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1.5">6-Digit SMS Code</label>
+                    <label className="block font-bold text-slate-700 mb-1.5">6-Digit Verification Code</label>
                     <div className="relative">
                       <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                       <input
@@ -819,7 +884,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                     disabled={loading || phoneLoginOtp.length !== 6}
                     className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    {loading ? 'Verifying OTP...' : 'Verify & Sign In'}
+                    {loading ? 'Verifying Code...' : 'Verify & Sign In'}
                     <CheckCircle2 className="w-4 h-4" />
                   </button>
 
@@ -829,7 +894,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
                       onClick={() => setPhoneLoginStep(1)}
                       className="text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
                     >
-                      <ArrowLeft className="w-3 h-3" /> Change Number
+                      <ArrowLeft className="w-3 h-3" /> Change Email/Mobile
                     </button>
 
                     <button

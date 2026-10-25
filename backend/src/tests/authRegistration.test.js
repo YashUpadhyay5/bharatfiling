@@ -194,6 +194,9 @@ test('Forgot Password - Registered Email Dispatches OTP and Resets Password', as
   const resetData = await resetRes.json();
   assert.equal(resetRes.status, 200);
   assert.equal(resetData.success, true);
+  assert.ok(resetData.token, 'Should return session token for auto-login');
+  assert.ok(resetData.user, 'Should return user profile for auto-login');
+  assert.equal(resetData.user.email, testEmail);
 
   // Login with new password
   const loginRes = await fetch('http://localhost:5096/api/v1/auth/login', {
@@ -209,4 +212,33 @@ test('Forgot Password - Registered Email Dispatches OTP and Resets Password', as
   assert.equal(loginRes.status, 200);
   assert.equal(loginData.success, true);
   assert.ok(loginData.token);
+
+  // Test Passwordless Login via Random 6-Digit OTP
+  const loginOtpReqRes = await fetch('http://localhost:5096/api/v1/auth/login/request-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identifier: testEmail }),
+  });
+  const loginOtpReqData = await loginOtpReqRes.json();
+  assert.equal(loginOtpReqRes.status, 200);
+  assert.equal(loginOtpReqData.success, true);
+  assert.ok(loginOtpReqData.txn_id);
+  assert.match(loginOtpReqData.dev_otp, /^\d{6}$/, 'OTP must be exactly 6 random digits');
+
+  // Verify OTP Login
+  const loginOtpVerifyRes = await fetch('http://localhost:5096/api/v1/auth/login/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      identifier: testEmail,
+      otp: loginOtpReqData.dev_otp,
+      txn_id: loginOtpReqData.txn_id,
+    }),
+  });
+  const loginOtpVerifyData = await loginOtpVerifyRes.json();
+  assert.equal(loginOtpVerifyRes.status, 200);
+  assert.equal(loginOtpVerifyData.success, true);
+  assert.ok(loginOtpVerifyData.token, 'Should return session token on OTP login');
+  assert.equal(loginOtpVerifyData.user.email, testEmail);
 });
+

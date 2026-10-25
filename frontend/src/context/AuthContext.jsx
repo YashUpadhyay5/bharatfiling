@@ -117,6 +117,23 @@ export const AuthProvider = ({ children }) => {
     return res;
   };
 
+  const requestLoginOtp = async (identifier) => {
+    return await api.requestLoginOtp(identifier);
+  };
+
+  const verifyLoginOtp = async ({ identifier, otp, txn_id }) => {
+    const res = await api.verifyLoginOtp({ identifier, otp, txn_id });
+    if (res.success && res.token) {
+      localStorage.setItem('bharatfiling_token', res.token);
+      if (res.user) {
+        localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
+      }
+      setToken(res.token);
+      setUser(res.user);
+    }
+    return res;
+  };
+
   const requestForgotPasswordOtp = async (email) => {
     return await api.requestForgotPasswordOtp(email);
   };
@@ -126,7 +143,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const resetPassword = async ({ email, reset_token, new_password }) => {
-    return await api.resetPassword({ email, reset_token, new_password });
+    const res = await api.resetPassword({ email, reset_token, new_password });
+    if (res.success && res.token) {
+      localStorage.setItem('bharatfiling_token', res.token);
+      if (res.user) {
+        localStorage.setItem('bharatfiling_user', JSON.stringify(res.user));
+      }
+      setToken(res.token);
+      setUser(res.user);
+    }
+    return res;
   };
 
   const resetPasswordWithPhone = async ({ id_token, phone, new_password }) => {
@@ -190,6 +216,8 @@ export const AuthProvider = ({ children }) => {
         verifyRegisterOtp,
         registerWithPhone,
         loginWithPhone,
+        requestLoginOtp,
+        verifyLoginOtp,
         requestForgotPasswordOtp,
         verifyForgotPasswordOtp,
         resetPassword,
