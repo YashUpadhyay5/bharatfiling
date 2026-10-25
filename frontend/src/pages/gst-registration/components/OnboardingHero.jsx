@@ -1,75 +1,80 @@
 import React from 'react';
 import {
-  Sparkles,
   ShieldCheck,
-  FileCheck2,
-  Activity,
-  Award,
-  Lock,
-  BadgeCheck,
+  Check,
+  FileText,
 } from 'lucide-react';
+import { GST_PLANS } from '../constants.js';
 
 export default function OnboardingHero({ currentStep = 1, serviceMeta = null }) {
   const meta = serviceMeta || {
     badge: 'Fast-Track 2026 Portal Filing',
     title: 'Start Your GST Registration Instantly',
     desc: 'Get your business GST-ready quickly with BharatFiling. Expert team and advanced software ensure accurate, fully online GST registration anywhere in India.',
-    bullets: [
-      'Complete application preparation & CA review',
-      'Instant TRN generation & identity check',
-      '15-Digit statutory ARN filing desk',
-      'Official Form REG-06 GST Certificate delivery',
-      'Lifetime compliance & filing dashboard access',
-    ],
+  };
+
+  const isGst = !serviceMeta || meta.type === 'GST';
+
+  const scrollToPricing = (e) => {
+    e.preventDefault();
+    window.location.href = '/services/gst-registration#pricing-tiers';
   };
 
   return (
     <div className="lg:col-span-6 p-5 sm:p-8 lg:p-10 bg-white border-b lg:border-b-0 lg:border-r border-slate-100 flex flex-col justify-between">
-      <div className="space-y-6">
-        <div className="space-y-2.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-[11px] font-bold">
-            <Sparkles className="w-3 h-3 text-[#F26522]" />
-            {meta.badge || 'Fast-Track 2026 Portal Filing'}
+      <div className="space-y-4">
+        <div className="inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-[#111827] text-[11px] font-semibold">
+          <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-3.5 h-3.5" />
+          </span>
+          <span>Secure, Encrypted Filing Platform</span>
+        </div>
+
+        <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight leading-snug text-slate-900">
+          {meta.title}
+        </h1>
+
+        {isGst && (
+          <div className="flex items-baseline gap-2">
+            <span className="text-sm text-slate-600 font-medium">Starting at Just</span>
+            <span className="text-2xl font-extrabold text-emerald-600">₹{GST_PLANS[0].price}</span>
           </div>
-          <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight leading-snug text-slate-900">
-            {meta.title}
-          </h1>
+        )}
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             {meta.desc}
           </p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 border-t border-slate-100 pt-3">
+            <span>Reviewed by <strong className="text-slate-700">BharatFiling Compliance Desk</strong></span>
+            <span className="hidden sm:inline">&bull;</span>
+            <span>Licensed Chartered Accountants</span>
+          </div>
         </div>
 
-        {/* 5 Distinctive Bullet Items */}
-        <div className="space-y-3.5 pt-1 text-xs text-slate-700 font-medium">
-          {(meta.bullets || []).map((b, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                {i === 0 ? (
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                ) : i === 1 ? (
-                  <FileCheck2 className="w-4 h-4 text-blue-600" />
-                ) : i === 2 ? (
-                  <Activity className="w-4 h-4 text-amber-600" />
-                ) : i === 3 ? (
-                  <Award className="w-4 h-4 text-purple-600" />
-                ) : (
-                  <Sparkles className="w-4 h-4 text-[#F26522]" />
-                )}
-              </div>
+        <div className="space-y-2 text-xs sm:text-sm text-slate-700 font-medium">
+          {(meta.bullets || [
+            'Complete application preparation & CA review',
+            '100% Online Process with Expert CA Assistance',
+            'Zero Government Fees, Transparent Pricing',
+          ]).slice(0, 3).map((b, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{b}</span>
             </div>
           ))}
         </div>
 
-        {/* Trust strip */}
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[10px] font-semibold text-slate-600">
-            <Lock className="w-3 h-3 text-emerald-600" /> Encrypted Uploads
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[10px] font-semibold text-slate-600">
-            <BadgeCheck className="w-3 h-3 text-blue-600" /> CA-Reviewed
-          </span>
-        </div>
+        {isGst && (
+          <a
+            href="/services/gst-registration#pricing-tiers"
+            onClick={scrollToPricing}
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-800 underline underline-offset-2 cursor-pointer"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            View Package Details
+          </a>
+        )}
       </div>
 
       {/* Progress indicator */}
