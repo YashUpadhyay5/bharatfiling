@@ -24,34 +24,34 @@ export default function OnboardingHero({ currentStep = 1, serviceMeta = null }) 
   };
 
   return (
-    <div className="lg:col-span-6 p-5 sm:p-8 lg:p-10 bg-[#111827] bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.25),transparent_55%)] border-b lg:border-b-0 lg:border-r border-slate-800 flex flex-col justify-between text-white">
+    <div className="lg:col-span-6 p-5 sm:p-8 lg:p-10 bg-white border-b lg:border-b-0 lg:border-r border-slate-100 flex flex-col justify-between">
       <div className="space-y-6">
         <div className="space-y-2.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-amber-300 text-[11px] font-bold backdrop-blur-sm">
-            <Sparkles className="w-3 h-3" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-[11px] font-bold">
+            <Sparkles className="w-3 h-3 text-[#F26522]" />
             {meta.badge || 'Fast-Track 2026 Portal Filing'}
           </div>
-          <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight leading-snug text-white">
+          <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight leading-snug text-slate-900">
             {meta.title}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             {meta.desc}
           </p>
         </div>
 
         {/* 5 Distinctive Bullet Items */}
-        <div className="space-y-3.5 pt-1 text-xs text-slate-200 font-medium">
+        <div className="space-y-3.5 pt-1 text-xs text-slate-700 font-medium">
           {(meta.bullets || []).map((b, i) => (
             <div key={i} className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
                 {i === 0 ? (
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
                 ) : i === 1 ? (
-                  <FileCheck2 className="w-4 h-4 text-blue-400" />
+                  <FileCheck2 className="w-4 h-4 text-blue-600" />
                 ) : i === 2 ? (
-                  <Activity className="w-4 h-4 text-amber-400" />
+                  <Activity className="w-4 h-4 text-amber-600" />
                 ) : i === 3 ? (
-                  <Award className="w-4 h-4 text-purple-400" />
+                  <Award className="w-4 h-4 text-purple-600" />
                 ) : (
                   <Sparkles className="w-4 h-4 text-[#F26522]" />
                 )}
@@ -63,23 +63,23 @@ export default function OnboardingHero({ currentStep = 1, serviceMeta = null }) 
 
         {/* Trust strip */}
         <div className="flex flex-wrap items-center gap-2 pt-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold text-slate-300">
-            <Lock className="w-3 h-3 text-emerald-400" /> Encrypted Uploads
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[10px] font-semibold text-slate-600">
+            <Lock className="w-3 h-3 text-emerald-600" /> Encrypted Uploads
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold text-slate-300">
-            <BadgeCheck className="w-3 h-3 text-blue-400" /> CA-Reviewed
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[10px] font-semibold text-slate-600">
+            <BadgeCheck className="w-3 h-3 text-blue-600" /> CA-Reviewed
           </span>
         </div>
       </div>
 
       {/* Progress indicator */}
-      <div className="pt-6 sm:pt-8 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-        <span className="font-semibold text-slate-200">
+      <div className="pt-6 sm:pt-8 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+        <span className="font-semibold text-slate-700">
           Step {currentStep} of 2: {currentStep === 1 ? 'Applicant & Identification' : 'Jurisdiction & Package'}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className={`w-6 h-1.5 rounded-full ${currentStep >= 1 ? 'bg-amber-400' : 'bg-white/15'}`} />
-          <span className={`w-6 h-1.5 rounded-full ${currentStep === 2 ? 'bg-amber-400' : 'bg-white/15'}`} />
+          <span className={`w-6 h-1.5 rounded-full ${currentStep >= 1 ? 'bg-[#111827]' : 'bg-slate-200'}`} />
+          <span className={`w-6 h-1.5 rounded-full ${currentStep === 2 ? 'bg-[#111827]' : 'bg-slate-200'}`} />
         </div>
       </div>
     </div>
