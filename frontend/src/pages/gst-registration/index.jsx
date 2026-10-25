@@ -12,7 +12,7 @@ import OnboardingHero from './components/OnboardingHero.jsx';
 import TrustFooter from './components/TrustFooter.jsx';
 import ApplicantPanPage from './1-ApplicantPanPage.jsx';
 import BusinessJurisdictionPage from './2-BusinessJurisdictionPage.jsx';
-import { getGstPlan } from './constants.js';
+import { getGstPlan, BUSINESS_NATURES } from './constants.js';
 
 export { default as ApplicantPanPage } from './1-ApplicantPanPage.jsx';
 export { default as BusinessJurisdictionPage } from './2-BusinessJurisdictionPage.jsx';
@@ -143,7 +143,7 @@ export default function GstRegistrationModule() {
       phone: urlPhone.length === 10 ? urlPhone : '',
       pan: '',
       state: 'Karnataka',
-      businessType: serviceMeta.type === 'COMPANY' ? 'Private Limited Company' : 'Proprietorship',
+      businessType: serviceMeta.type === 'COMPANY' ? 'Private Limited Company' : BUSINESS_NATURES[0],
       propertyType: '',
       applyReasons: [],
       plan: searchParams.get('plan') || 'standard',
