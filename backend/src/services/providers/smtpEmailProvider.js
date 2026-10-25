@@ -60,11 +60,39 @@ export const smtpEmailProvider = {
       html,
     };
 
-    const info = await client.sendMail(mailOptions);
-    return {
-      success: true,
-      provider: 'smtp',
-      messageId: info.messageId,
-    };
+    try {
+      const info = await client.sendMail(mailOptions);
+      return {
+        success: true,
+        provider: 'smtp',
+        messageId: info.messageId,
+      };
+    } catch (primaryErr) {
+      console.warn(`[SMTP Primary Port 465 Failed]: ${primaryErr.message}. Retrying via smtp.gmail.com port 587 (STARTTLS)...`);
+      try {
+        const fallbackTransporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 587,
+          secure: false, // upgrades via STARTTLS
+          auth: {
+            user: ENV.SMTP_USER,
+            pass: ENV.SMTP_PASS.replace(/\s+/g, ''),
+          },
+          connectionTimeout: 8000,
+          greetingTimeout: 8000,
+          socketTimeout: 8000,
+        });
+
+        const fallbackInfo = await fallbackTransporter.sendMail(mailOptions);
+        return {
+          success: true,
+          provider: 'smtp-port587',
+          messageId: fallbackInfo.messageId,
+        };
+      } catch (fallbackErr) {
+        console.error(`[SMTP Port 587 Fallback Also Failed]: ${fallbackErr.message}`);
+        throw primaryErr;
+      }
+    }
   },
 };

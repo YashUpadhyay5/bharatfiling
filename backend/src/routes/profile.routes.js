@@ -21,7 +21,44 @@ router.get('/', authenticate, async (req, res) => {
     }
 
     if (!profile) {
-      return res.status(404).json({ success: false, message: 'Profile not found.' });
+      try {
+        profile = await CustomerProfileModel.create({
+          user_id: req.user.id,
+          personal_info: {
+            full_name: req.user.full_name || 'Customer',
+            father_name: '',
+            dob: '',
+            gender: '',
+          },
+          identity_info: {
+            pan_number: '',
+            pan_verified: false,
+            aadhaar_number: '',
+            aadhaar_verified: false,
+          },
+          contact_info: {
+            mobile_number: req.user.phone || '',
+            mobile_verified: !!req.user.phone,
+            email: req.user.email || '',
+            email_verified: !!req.user.email,
+          },
+          address_info: {
+            address_line_1: '',
+            address_line_2: '',
+            city: '',
+            state: 'Karnataka',
+            pincode: '',
+          },
+        });
+      } catch (createErr) {
+        profile = {
+          user_id: req.user.id,
+          personal_info: { full_name: req.user.full_name || 'Customer' },
+          identity_info: {},
+          contact_info: { mobile_number: req.user.phone || '', email: req.user.email || '' },
+          address_info: { state: 'Karnataka' },
+        };
+      }
     }
 
     res.json({

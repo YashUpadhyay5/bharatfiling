@@ -119,7 +119,7 @@ export const emailService = {
    * Dispatches 6-digit password recovery OTP email
    */
   async sendPasswordResetOtp(email, otp, name = 'Valued Client') {
-    const subject = `${otp} is your BharatFiling password recovery code`;
+    const subject = `BharatFiling Recovery Code: ${otp}`;
 
     const text = `Hello ${name},\n\nWe received a request to reset your BharatFiling account password. Your 6-digit recovery verification code is: ${otp}\n\nThis code is valid for 5 minutes. If you did not request a password reset, you can safely ignore this email.\n\nBharatFiling Platform`;
 

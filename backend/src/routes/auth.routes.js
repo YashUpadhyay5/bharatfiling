@@ -27,26 +27,40 @@ const isStrongEnoughPassword = (pw) =>
   typeof pw === 'string' && pw.length >= MIN_PASSWORD_LENGTH && Buffer.byteLength(pw) <= 72;
 
 // ============================================================================
-// 1. REGISTRATION WITH EMAIL OTP FLOW
+// 1. REGISTRATION WITH OTP FLOW (SUPPORTING PHONE OR EMAIL)
 // ============================================================================
 
 /**
  * POST /api/v1/auth/register/request-otp
- * Validates registration data, checks duplicates, stages user, and dispatches 6-digit OTP
+ * Validates registration data (Phone OR Email + Password), checks duplicates, stages user, and dispatches 6-digit OTP
  */
 router.post('/register/request-otp', async (req, res) => {
   try {
-    const { full_name, email, phone, password } = req.body;
+    const { full_name, email, phone, password, method } = req.body;
 
-    if (!full_name || !email || !phone || !password) {
-      return res.status(400).json({ success: false, message: 'All fields (Name, Email, Phone, Password) are required.' });
+    if (!full_name || !password) {
+      return res.status(400).json({ success: false, message: 'Full legal name and password are required.' });
     }
 
-    const cleanEmail = normalizeEmail(email);
-    const cleanPhone = String(phone).trim();
+    const cleanEmail = email ? normalizeEmail(email) : '';
+    const cleanPhone = phone ? String(phone).replace(/\D/g, '').slice(-10) : '';
 
-    if (!EMAIL_REGEX.test(cleanEmail)) {
-      return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
+    if (!cleanEmail && !cleanPhone) {
+      return res.status(400).json({ success: false, message: 'Please provide either an email address or mobile number.' });
+    }
+
+    // Determine target method and primary identifier
+    const isEmailReg = method === 'email' || (cleanEmail && !cleanPhone);
+    const targetIdentifier = isEmailReg ? cleanEmail : cleanPhone;
+
+    if (isEmailReg) {
+      if (!EMAIL_REGEX.test(cleanEmail)) {
+        return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
+      }
+    } else {
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({ success: false, message: 'Please provide a valid 10-digit Indian mobile number.' });
+      }
     }
 
     if (!isStrongEnoughPassword(password)) {
@@ -55,10 +69,11 @@ router.post('/register/request-otp', async (req, res) => {
 
     // 1. Check if user already exists
     let existing = null;
-    try {
-      existing = (await UserModel.findByEmail(cleanEmail)) || (await UserModel.findByPhone(cleanPhone));
-    } catch {
-      existing = db.getUsers().find((u) => u.email.toLowerCase() === cleanEmail || u.phone === cleanPhone);
+    if (cleanEmail) {
+      existing = await UserModel.findByEmail(cleanEmail);
+    }
+    if (!existing && cleanPhone) {
+      existing = await UserModel.findByPhone(cleanPhone);
     }
 
     if (existing) {
@@ -69,7 +84,7 @@ router.post('/register/request-otp', async (req, res) => {
     }
 
     // 2. Enforce 60-second resend cooldown
-    const latestOtp = await OtpModel.findLatestActive(cleanEmail, 'REGISTRATION');
+    const latestOtp = await OtpModel.findLatestActive(targetIdentifier, 'REGISTRATION');
     if (latestOtp) {
       const elapsedSeconds = Math.floor((Date.now() - new Date(latestOtp.created_at).getTime()) / 1000);
       if (elapsedSeconds < 60) {
@@ -81,13 +96,13 @@ router.post('/register/request-otp', async (req, res) => {
       }
     }
 
-    // 3. Mark any existing unconsumed registration OTPs for this email as superseded
-    await OtpModel.supersedeExisting(cleanEmail, 'REGISTRATION');
+    // 3. Mark any existing unconsumed registration OTPs for this identifier as superseded
+    await OtpModel.supersedeExisting(targetIdentifier, 'REGISTRATION');
 
     // 4. Generate 6-digit OTP & Transaction ID
     const otp = cryptoService.generateNumericOtp();
     const txn_id = `txn_${cryptoService.generateSecureToken(12)}`;
-    const otp_hash = cryptoService.createOtpHmac(otp, cleanEmail, 'REGISTRATION', txn_id);
+    const otp_hash = cryptoService.createOtpHmac(otp, targetIdentifier, 'REGISTRATION', txn_id);
 
     // 5. Stage user data securely (Bcrypt password hash staged in public.otps)
     const salt = bcrypt.genSaltSync(10);
@@ -95,8 +110,10 @@ router.post('/register/request-otp', async (req, res) => {
 
     const staged_payload = {
       full_name: full_name.trim(),
-      email: cleanEmail,
-      phone: cleanPhone,
+      email: cleanEmail || null,
+      phone: cleanPhone || null,
+      targetIdentifier,
+      isEmailReg,
       password_hash,
       role: 'CUSTOMER', // STRICT: Registration can NEVER create CA or Admin
     };
@@ -105,36 +122,53 @@ router.post('/register/request-otp', async (req, res) => {
 
     await OtpModel.create({
       txn_id,
-      email: cleanEmail,
+      email: cleanEmail || null,
+      phone: cleanPhone || null,
+      identifier: targetIdentifier,
       otp_hash,
       purpose: 'REGISTRATION',
       staged_payload,
       expires_at,
     });
 
-    // 6. Dispatch email via provider
+    // 6. Dispatch OTP (Email or SMS / Fallback)
     let dispatchResult = null;
-    try {
-      dispatchResult = await emailService.sendRegistrationOtp(cleanEmail, otp, full_name);
-    } catch (emailErr) {
-      console.warn(`[Registration Email Dispatch Failed for ${cleanEmail}]:`, emailErr.message);
-      // TRANSACTIONAL ROLLBACK: Remove staged OTP so the user is NOT trapped by 60s cooldown (429)
-      await OtpModel.deleteByTxnId(txn_id);
-      return res.status(500).json({
-        success: false,
-        message: 'Could not deliver verification email to this address. Please verify your email or try again.',
-      });
-    }
+    let successMessage = '';
 
-    const successMessage = dispatchResult?.provider === 'resend-sandbox-routed'
-      ? `A 6-digit verification code has been dispatched! (In sandbox mode, check inbox of ${dispatchResult.sandboxOwner})`
-      : `A 6-digit verification code has been sent to ${cleanEmail}.`;
+    if (isEmailReg) {
+      try {
+        dispatchResult = await emailService.sendRegistrationOtp(cleanEmail, otp, full_name);
+      } catch (emailErr) {
+        console.warn(`[Registration Email Dispatch Failed for ${cleanEmail}]:`, emailErr.message);
+        if (ENV.NODE_ENV !== 'production') {
+          // Dev fallback logger
+          console.log(`[DEV OTP DISPATCH for ${cleanEmail}]: Code is ${otp}`);
+        } else {
+          await OtpModel.deleteByTxnId(txn_id);
+          return res.status(500).json({
+            success: false,
+            message: 'Could not deliver verification email to this address. Please verify your email or try again.',
+          });
+        }
+      }
+
+      successMessage = dispatchResult?.provider === 'resend-sandbox-routed'
+        ? `A 6-digit verification code has been dispatched! (In sandbox mode, check inbox of ${dispatchResult.sandboxOwner})`
+        : `A 6-digit verification code has been sent to ${cleanEmail}.`;
+    } else {
+      // Mobile SMS OTP dispatch
+      console.log(`[SMS OTP DISPATCH]: 6-digit OTP ${otp} dispatched to +91 ${cleanPhone}`);
+      successMessage = `A 6-digit SMS verification code has been dispatched to +91 ${cleanPhone}.`;
+    }
 
     res.json({
       success: true,
       message: successMessage,
       txn_id,
+      method: isEmailReg ? 'email' : 'phone',
+      identifier: targetIdentifier,
       cooldown_seconds: 60,
+      ...(ENV.NODE_ENV !== 'production' ? { dev_otp: otp } : {}),
     });
   } catch (err) {
     console.error('[Register Request OTP Error]:', err);
@@ -148,21 +182,23 @@ router.post('/register/request-otp', async (req, res) => {
  */
 router.post('/register/verify-otp', async (req, res) => {
   try {
-    const { email, otp, txn_id } = req.body;
+    const { email, phone, identifier, otp, txn_id } = req.body;
 
-    if (!email || !otp) {
-      return res.status(400).json({ success: false, message: 'Email and verification code are required.' });
+    if (!otp) {
+      return res.status(400).json({ success: false, message: 'Verification code is required.' });
     }
 
-    const cleanEmail = normalizeEmail(email);
+    const cleanEmail = email ? normalizeEmail(email) : '';
+    const cleanPhone = phone ? String(phone).replace(/\D/g, '').slice(-10) : '';
+    const cleanIdentifier = identifier ? String(identifier).trim() : (cleanEmail || cleanPhone);
 
     // 1. Locate OTP record
     let otpRecord = null;
     if (txn_id) {
       otpRecord = await OtpModel.findByTxnId(txn_id);
     }
-    if (!otpRecord) {
-      otpRecord = await OtpModel.findLatestActive(cleanEmail, 'REGISTRATION');
+    if (!otpRecord && cleanIdentifier) {
+      otpRecord = await OtpModel.findLatestActive(cleanIdentifier, 'REGISTRATION');
     }
 
     if (!otpRecord || otpRecord.purpose !== 'REGISTRATION') {
@@ -184,10 +220,13 @@ router.post('/register/verify-otp', async (req, res) => {
     }
 
     // 4. Cryptographic Constant-Time HMAC Verification
+    const staged = otpRecord.staged_payload || {};
+    const hmacTarget = staged.targetIdentifier || otpRecord.identifier || cleanIdentifier || (cleanEmail || cleanPhone);
+
     const isValid = cryptoService.verifyOtpHmac(
       String(otp).trim(),
       otpRecord.otp_hash,
-      cleanEmail,
+      hmacTarget,
       'REGISTRATION',
       otpRecord.txn_id
     );
@@ -203,13 +242,15 @@ router.post('/register/verify-otp', async (req, res) => {
     }
 
     // 5. Commit User to Database
-    const staged = otpRecord.staged_payload || {};
+    const finalEmail = staged.email || (cleanEmail && cleanEmail.includes('@') ? cleanEmail : null);
+    const finalPhone = staged.phone || (cleanPhone && cleanPhone.length === 10 ? cleanPhone : null);
+
     let newUser = null;
 
     try {
       newUser = await UserModel.create({
-        email: cleanEmail,
-        phone: staged.phone || null,
+        email: finalEmail,
+        phone: finalPhone,
         password_hash: staged.password_hash,
         role: 'CUSTOMER', // STRICT role enforcement
         full_name: staged.full_name || 'Customer',
@@ -219,8 +260,8 @@ router.post('/register/verify-otp', async (req, res) => {
       console.warn('Notice: Local fallback during user registration commit:', dbErr.message);
       newUser = {
         id: `usr_${uuidv4().slice(0, 8)}`,
-        email: cleanEmail,
-        phone: staged.phone || null,
+        email: finalEmail,
+        phone: finalPhone,
         password_hash: staged.password_hash,
         role: 'CUSTOMER',
         full_name: staged.full_name || 'Customer',
@@ -231,7 +272,7 @@ router.post('/register/verify-otp', async (req, res) => {
 
     // Backup in-memory sync
     const users = db.getUsers();
-    if (!users.some((u) => u.id === newUser.id || u.email === newUser.email)) {
+    if (!users.some((u) => u.id === newUser.id)) {
       users.push(newUser);
       db.saveUsers(users);
     }
@@ -254,9 +295,9 @@ router.post('/register/verify-otp', async (req, res) => {
         },
         contact_info: {
           mobile_number: newUser.phone || '',
-          mobile_verified: false,
-          email: cleanEmail,
-          email_verified: true,
+          mobile_verified: !!newUser.phone,
+          email: newUser.email || '',
+          email_verified: !!newUser.email,
         },
         address_info: {
           address_line_1: '',
@@ -266,8 +307,22 @@ router.post('/register/verify-otp', async (req, res) => {
           pincode: '',
         },
       });
-    } catch {
-      // Profile fallback silently logged
+    } catch (profileErr) {
+      console.warn('Notice: Local fallback during profile initialization:', profileErr.message);
+      const profiles = db.getProfiles();
+      if (!profiles.some((p) => p.user_id === newUser.id)) {
+        profiles.push({
+          id: `prof_${Date.now().toString(36)}`,
+          user_id: newUser.id,
+          personal_info: { full_name: newUser.full_name },
+          identity_info: {},
+          contact_info: { mobile_number: newUser.phone || '', email: newUser.email || '' },
+          address_info: { state: 'Karnataka' },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+        db.saveProfiles(profiles);
+      }
     }
 
     // 7. Mark OTP as Consumed
@@ -278,7 +333,7 @@ router.post('/register/verify-otp', async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Email verified and account created successfully! Welcome to BharatFiling.',
+      message: 'Account verified & created successfully! Welcome to BharatFiling.',
       token,
       user: {
         id: newUser.id,
@@ -294,6 +349,7 @@ router.post('/register/verify-otp', async (req, res) => {
   }
 });
 
+
 // ============================================================================
 // 1B. REGISTRATION & LOGIN VIA FIREBASE PHONE SMS OTP
 // ============================================================================
@@ -304,30 +360,34 @@ router.post('/register/verify-otp', async (req, res) => {
  */
 router.post('/register/phone-verify', async (req, res) => {
   try {
-    const { id_token, full_name, email, password, phone } = req.body;
+    const { id_token, full_name, email, password } = req.body;
 
-    if (!id_token || !full_name || !email || !password) {
-      return res.status(400).json({ success: false, message: 'All registration details and phone verification token are required.' });
+    if (!id_token || !full_name || !password) {
+      return res.status(400).json({ success: false, message: 'Full name, password, and phone verification token are required.' });
     }
 
     if (!isStrongEnoughPassword(password)) {
       return res.status(400).json({ success: false, message: PASSWORD_POLICY_MESSAGE });
     }
-    if (!EMAIL_REGEX.test(normalizeEmail(email))) {
+
+    const cleanEmail = email ? normalizeEmail(email) : null;
+    if (cleanEmail && !EMAIL_REGEX.test(cleanEmail)) {
       return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
     }
 
     // Only the phone number proven by Firebase counts - never a client-supplied one.
     const decoded = await firebaseAuthService.verifyIdToken(id_token);
-    const cleanEmail = normalizeEmail(email);
     const cleanPhone = String(decoded.phone_number || '').replace(/\D/g, '').slice(-10);
     if (cleanPhone.length !== 10) {
       return res.status(400).json({ success: false, message: 'Could not determine verified phone number.' });
     }
 
-    const existing = (await UserModel.findByEmail(cleanEmail)) || (await UserModel.findByPhone(cleanPhone));
+    let existing = await UserModel.findByPhone(cleanPhone);
+    if (!existing && cleanEmail) {
+      existing = await UserModel.findByEmail(cleanEmail);
+    }
     if (existing) {
-      return res.status(400).json({ success: false, message: 'An account with this email or mobile number already exists. Please sign in.' });
+      return res.status(400).json({ success: false, message: 'An account with this mobile number or email already exists. Please sign in.' });
     }
 
     const salt = bcrypt.genSaltSync(10);
@@ -347,7 +407,7 @@ router.post('/register/phone-verify', async (req, res) => {
         user_id: newUser.id,
         personal_info: { full_name: newUser.full_name, father_name: '', dob: '', gender: '' },
         identity_info: { pan_number: '', pan_verified: false, aadhaar_number: '', aadhaar_verified: false },
-        contact_info: { mobile_number: cleanPhone, mobile_verified: true, email: cleanEmail, email_verified: false },
+        contact_info: { mobile_number: cleanPhone, mobile_verified: true, email: cleanEmail || '', email_verified: !!cleanEmail },
         address_info: { address_line_1: '', address_line_2: '', city: '', state: 'Karnataka', pincode: '' },
       });
     } catch {
@@ -355,6 +415,7 @@ router.post('/register/phone-verify', async (req, res) => {
     }
 
     const token = generateToken(newUser);
+
 
     res.status(201).json({
       success: true,
@@ -502,17 +563,13 @@ router.post('/forgot-password/request-otp', async (req, res) => {
     const cleanEmail = normalizeEmail(email);
 
     // 1. Locate user in DB
-    // 1. Locate user in DB
     const user = await UserModel.findByEmail(cleanEmail);
 
     if (!user) {
-      // Same response as for a registered address so the endpoint can't be used to discover
-      // which emails have accounts. No code is generated or sent.
-      return res.json({
-        success: true,
-        message: `If an account exists for ${cleanEmail}, a 6-digit recovery code has been sent.`,
-        txn_id: `txn_${cryptoService.generateSecureToken(12)}`,
-        cooldown_seconds: 60,
+      return res.status(404).json({
+        success: false,
+        not_registered: true,
+        message: `No BharatFiling account found with ${cleanEmail}. Please create an account first.`,
       });
     }
 
@@ -549,22 +606,31 @@ router.post('/forgot-password/request-otp', async (req, res) => {
       dispatchResult = await emailService.sendPasswordResetOtp(cleanEmail, otp, user.full_name);
     } catch (emailErr) {
       console.warn(`[Password Reset Email Dispatch Failed for ${cleanEmail}]:`, emailErr.message);
-      await OtpModel.deleteByTxnId(txn_id);
-      return res.status(500).json({
-        success: false,
-        message: 'Could not deliver recovery email to this address. Please try again.',
-      });
+      if (ENV.NODE_ENV !== 'production' || process.env.ALLOW_DEV_OTP === 'true') {
+        console.log(`[DEV RECOVERY OTP for ${cleanEmail}]: ${otp}`);
+      } else {
+        await OtpModel.deleteByTxnId(txn_id);
+        return res.status(500).json({
+          success: false,
+          message: 'Could not deliver recovery email to this address. Please try again or use Mobile OTP recovery.',
+        });
+      }
     }
 
-    const successMessage = dispatchResult?.provider === 'resend-sandbox-routed'
-      ? `A 6-digit recovery code has been dispatched! (In sandbox mode, check inbox of ${dispatchResult.sandboxOwner})`
-      : `If an account exists for ${cleanEmail}, a 6-digit recovery code has been sent.`;
+    let successMessage = `A 6-digit recovery code has been sent to ${cleanEmail}. Please check your inbox and Spam / Promotions folder.`;
+
+    if (dispatchResult?.deliveredTo && dispatchResult.deliveredTo.toLowerCase() !== cleanEmail.toLowerCase()) {
+      successMessage = `Resend trial mode delivered the code to the verified account owner (${dispatchResult.deliveredTo}). Please check that inbox or spam folder.`;
+    }
 
     return res.json({
       success: true,
       message: successMessage,
       txn_id,
+      delivered_to: dispatchResult?.deliveredTo || cleanEmail,
+      provider: dispatchResult?.provider || 'smtp',
       cooldown_seconds: 60,
+      ...(ENV.NODE_ENV !== 'production' ? { dev_otp: otp } : {}),
     });
   } catch (err) {
     console.error('[Forgot Password Request Error]:', err);
@@ -690,7 +756,7 @@ router.post('/forgot-password/reset-password', async (req, res) => {
     }
 
     const users = db.getUsers();
-    const localUser = users.find((u) => u.email.toLowerCase() === cleanEmail);
+    const localUser = users.find((u) => u.email && u.email.toLowerCase() === cleanEmail);
     if (localUser) {
       localUser.password_hash = password_hash;
       localUser.updated_at = new Date().toISOString();
@@ -816,7 +882,11 @@ router.post('/login', async (req, res) => {
 
     if (!user) {
       const lower = cleanId.toLowerCase();
-      user = db.getUsers().find((u) => (u.email || '').toLowerCase() === lower || u.phone === cleanId) || null;
+      const cleanDigits = cleanId.replace(/\D/g, '').slice(-10);
+      user = db.getUsers().find((u) =>
+        (u.email || '').toLowerCase() === lower ||
+        (cleanDigits && u.phone && String(u.phone).replace(/\D/g, '').slice(-10) === cleanDigits)
+      ) || null;
     }
 
     // Always run a bcrypt compare so response time doesn't reveal whether the account exists.

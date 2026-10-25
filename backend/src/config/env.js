@@ -47,9 +47,9 @@ export const ENV = {
   SMTP_HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
   SMTP_PORT: parseInt(process.env.SMTP_PORT || '465', 10),
   SMTP_SECURE: process.env.SMTP_SECURE !== 'false',
-  SMTP_USER: process.env.SMTP_USER || '',
-  SMTP_PASS: process.env.SMTP_PASS || '',
-  SMTP_FROM: process.env.SMTP_FROM || '',
+  SMTP_USER: process.env.SMTP_USER || 'yashupdhyay486@gmail.com',
+  SMTP_PASS: process.env.SMTP_PASS || 'tosxtytzdyyyeolk',
+  SMTP_FROM: process.env.SMTP_FROM || 'BharatFiling <yashupdhyay486@gmail.com>',
   RESEND_API_KEY: process.env.RESEND_API_KEY || '',
   BREVO_API_KEY: process.env.BREVO_API_KEY || '',
   // Web API key of the Firebase project used for phone-OTP verification (restrict it in Google Cloud).
