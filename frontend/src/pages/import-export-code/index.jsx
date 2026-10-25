@@ -78,12 +78,10 @@ export default function IecRegistrationModule() {
   const handleStep2Submit = (e) => {
     if (e) e.preventDefault();
     if (!formData.organizationType) {
-      showError('Please select your business entity type');
-      return;
-    }
-    if (!formData.pan || formData.pan.length < 10) {
-      showError('Please enter a valid 10-character PAN number');
-      return;
+      setFormData((prev) => ({
+        ...prev,
+        organizationType: 'Sole Proprietorship',
+      }));
     }
 
     setSearchParams({ step: '3', plan: formData.plan || initialPlan });
