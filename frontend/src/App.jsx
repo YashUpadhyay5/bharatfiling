@@ -30,6 +30,10 @@ const UdyamRegistrationModule = lazy(() => import('./pages/udyam-registration/in
 const UdyamCheckoutPage = lazy(() =>
   import('./pages/udyam-registration/index.jsx').then((m) => ({ default: m.UdyamCheckoutPage }))
 );
+const IecRegistrationModule = lazy(() => import('./pages/import-export-code/index.jsx'));
+const IecCheckoutPage = lazy(() =>
+  import('./pages/import-export-code/index.jsx').then((m) => ({ default: m.IecCheckoutPage }))
+);
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -63,6 +67,8 @@ export default function App() {
                 <Route path="/services/gst-registration" element={<GstLandingPage />} />
                 <Route path="/services/udyam-registration" element={<UdyamLandingPage />} />
                 <Route path="/services/msme-registration" element={<UdyamLandingPage />} />
+                <Route path="/services/import-export-code" element={<IecRegistrationModule />} />
+                <Route path="/services/iec-registration" element={<IecRegistrationModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -80,6 +86,8 @@ export default function App() {
                 <Route path="/dashboard" element={<CustomerDashboard />} />
                 <Route path="/apply/udyam" element={<UdyamRegistrationModule />} />
                 <Route path="/apply/msme" element={<UdyamRegistrationModule />} />
+                <Route path="/apply/import-export-code" element={<IecRegistrationModule />} />
+                <Route path="/apply/iec" element={<IecRegistrationModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
@@ -91,6 +99,7 @@ export default function App() {
               {/* ---------- Outlet only (screens with their own chrome) ---------- */}
               <Route element={<BareLayout />}>
                 <Route path="/checkout/udyam/:orderId" element={<UdyamCheckoutPage />} />
+                <Route path="/checkout/iec/:orderId" element={<IecCheckoutPage />} />
                 <Route path="/checkout" element={<GstCheckoutPage />} />
                 <Route path="/checkout/:orderId" element={<GstCheckoutPage />} />
                 <Route path="/checkout/:orderId/pay" element={<GstPaymentPage />} />
