@@ -124,18 +124,23 @@ export default function GstRegistrationModule() {
   // Retrieve cached draft from localStorage for refresh recovery
   const getInitialState = () => {
     const urlPlan = searchParams.get('plan');
+    const urlPhone = (searchParams.get('phone') || '').replace(/\D/g, '').slice(0, 10);
     try {
       const saved = localStorage.getItem(`bharatfiling_${serviceMeta.slug}_draft`);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return urlPlan ? { ...parsed, plan: urlPlan } : parsed;
+        return {
+          ...parsed,
+          ...(urlPlan ? { plan: urlPlan } : {}),
+          ...(urlPhone.length === 10 ? { phone: urlPhone } : {}),
+        };
       }
     } catch {
       // Ignore parse error
     }
     return {
       name: '',
-      phone: '',
+      phone: urlPhone.length === 10 ? urlPhone : '',
       pan: '',
       state: 'Karnataka',
       businessType: serviceMeta.type === 'COMPANY' ? 'Private Limited Company' : 'Proprietorship',
