@@ -99,6 +99,14 @@ export const ORGANIZATION_TYPES = [
   'Society / Trust / Club',
 ];
 
+export const ANNUAL_TURNOVER_OPTIONS = [
+  'Less than 10 lakhs',
+  '10 lakhs - 1 crore',
+  '1 crore - 5 crore',
+  '5 crore - 50 crore',
+  'Above 50 crore',
+];
+
 export const MAJOR_ACTIVITIES = ['Services', 'Manufacturing', 'Trading'];
 
 export const INDIAN_STATES = [

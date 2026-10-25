@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, CheckCircle2, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
-import { ORGANIZATION_TYPES } from './constants.js';
+import { ORGANIZATION_TYPES, ANNUAL_TURNOVER_OPTIONS } from './constants.js';
 
 export default function EnterpriseDetailsPage({
   formData = {},
@@ -10,15 +10,25 @@ export default function EnterpriseDetailsPage({
   onSubmit,
   isSubmitting,
 }) {
-  const [subStep, setSubStep] = useState(1); // 1 = Entity Type selection (0/2 complete), 2 = Enterprise Name (1/2 complete)
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [subStep, setSubStep] = useState(1); // 1 = Entity Type (0/2 complete), 2 = Annual Turnover (2/2 complete)
+  const [isEntityDropdownOpen, setIsEntityDropdownOpen] = useState(false);
+  const [isTurnoverDropdownOpen, setIsTurnoverDropdownOpen] = useState(false);
+
   const [selectedEntity, setSelectedEntity] = useState(formData.organizationType || '');
-  const [enterpriseName, setEnterpriseName] = useState(formData.enterpriseName || '');
+  const [selectedTurnover, setSelectedTurnover] = useState(
+    formData.annualTurnover || '10 lakhs - 1 crore'
+  );
 
   const handleSelectEntity = (opt) => {
     setSelectedEntity(opt);
     onInputChange('organizationType', opt);
-    setIsDropdownOpen(false);
+    setIsEntityDropdownOpen(false);
+  };
+
+  const handleSelectTurnover = (opt) => {
+    setSelectedTurnover(opt);
+    onInputChange('annualTurnover', opt);
+    setIsTurnoverDropdownOpen(false);
   };
 
   const handleNextClick = (e) => {
@@ -30,6 +40,15 @@ export default function EnterpriseDetailsPage({
       if (onSubmit) {
         onSubmit(e);
       }
+    }
+  };
+
+  const handleBackClick = (e) => {
+    if (e) e.preventDefault();
+    if (subStep === 2) {
+      setSubStep(1);
+    } else if (onBack) {
+      onBack();
     }
   };
 
@@ -57,7 +76,7 @@ export default function EnterpriseDetailsPage({
         </div>
       </header>
 
-      {/* Main 2-Column Container (Exact clone of Image 1) */}
+      {/* Main 2-Column Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
@@ -114,7 +133,7 @@ export default function EnterpriseDetailsPage({
             </div>
           </div>
 
-          {/* RIGHT COLUMN: The Exact Card from Image 1 */}
+          {/* RIGHT COLUMN: The Question Card */}
           <div className="lg:col-span-6">
             <div className="w-full max-w-[430px] mx-auto bg-white rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.08)] border border-slate-100 p-6 sm:p-8 relative">
               
@@ -131,24 +150,29 @@ export default function EnterpriseDetailsPage({
                 />
               </div>
 
-              {/* Progress & Status Bar */}
+              {/* Progress & Status Bar (Exact clone of reference images) */}
               <div className="space-y-2 mb-6">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-900">
-                    {subStep === 1 ? '0/2 complete' : '1/2 complete'}
+                    {subStep === 1
+                      ? selectedEntity
+                        ? '1/2 complete'
+                        : '0/2 complete'
+                      : '2/2 complete'}
                   </span>
                   <span className="text-slate-400 font-medium">Takes less than 1 min</span>
                 </div>
-                {/* Segmented Progress Bar */}
-                <div className="flex items-center gap-1.5">
+
+                {/* Segmented Green Progress Bar */}
+                <div className="flex items-center gap-2">
                   <div
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      subStep >= 1 && selectedEntity ? 'bg-[#0066FF]' : 'bg-slate-200'
+                    className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                      subStep >= 1 && selectedEntity ? 'bg-[#16A34A]' : 'bg-slate-200'
                     }`}
                   />
                   <div
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      subStep >= 2 ? 'bg-[#0066FF]' : 'bg-slate-200'
+                    className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                      subStep >= 2 ? 'bg-[#16A34A]' : 'bg-slate-200'
                     }`}
                   />
                 </div>
@@ -166,9 +190,9 @@ export default function EnterpriseDetailsPage({
                   <div className="relative">
                     <button
                       type="button"
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      onClick={() => setIsEntityDropdownOpen(!isEntityDropdownOpen)}
                       className={`w-full px-3.5 py-2.5 rounded-lg bg-white border text-left text-xs sm:text-sm font-normal text-slate-800 flex items-center justify-between shadow-xs cursor-pointer transition ${
-                        isDropdownOpen
+                        isEntityDropdownOpen
                           ? 'border-blue-500 ring-1 ring-blue-500'
                           : 'border-slate-300 hover:border-slate-400'
                       }`}
@@ -178,13 +202,13 @@ export default function EnterpriseDetailsPage({
                       </span>
                       <ChevronDown
                         className={`w-4 h-4 text-slate-500 transition-transform ${
-                          isDropdownOpen ? 'rotate-180' : ''
+                          isEntityDropdownOpen ? 'rotate-180' : ''
                         }`}
                       />
                     </button>
 
-                    {/* Dropdown Menu Options matching Image 1 */}
-                    {isDropdownOpen && (
+                    {/* Dropdown Menu Options */}
+                    {isEntityDropdownOpen && (
                       <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                         {ORGANIZATION_TYPES.map((opt) => {
                           const isOptionSelected = selectedEntity === opt;
@@ -214,7 +238,7 @@ export default function EnterpriseDetailsPage({
                       onClick={handleNextClick}
                       className={`px-8 py-2.5 rounded-md font-bold text-xs sm:text-sm transition flex items-center gap-1.5 ${
                         selectedEntity
-                          ? 'bg-[#022B50] hover:bg-[#073866] text-white shadow-xs cursor-pointer active:scale-98'
+                          ? 'bg-[#002B49] hover:bg-[#073866] text-white shadow-xs cursor-pointer active:scale-98'
                           : 'bg-[#E5E9EC] text-slate-400 cursor-not-allowed'
                       }`}
                     >
@@ -225,32 +249,63 @@ export default function EnterpriseDetailsPage({
                 </div>
               )}
 
-              {/* QUESTION 2: Enterprise Name (1/2 complete) */}
+              {/* QUESTION 2: Annual Turnover (2/2 complete) - Exact clone of Image 3 */}
               {subStep === 2 && (
                 <div className="space-y-4">
                   <label className="block text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                    Enter your Business / Enterprise Name?
+                    What’s the annual turnover of your company?
                   </label>
 
-                  <div>
-                    <input
-                      type="text"
-                      autoFocus
-                      value={enterpriseName}
-                      onChange={(e) => {
-                        setEnterpriseName(e.target.value);
-                        onInputChange('enterpriseName', e.target.value);
-                      }}
-                      placeholder="e.g. EcoWellness Enterprises"
-                      className="w-full px-3.5 py-2.5 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs sm:text-sm font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
-                    />
-                  </div>
-
-                  <div className="pt-6 flex items-center justify-between">
+                  {/* Turnover Dropdown Container */}
+                  <div className="relative">
                     <button
                       type="button"
-                      onClick={() => setSubStep(1)}
-                      className="px-4 py-2 rounded-md border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition cursor-pointer flex items-center gap-1"
+                      onClick={() => setIsTurnoverDropdownOpen(!isTurnoverDropdownOpen)}
+                      className={`w-full px-3.5 py-2.5 rounded-lg bg-white border text-left text-xs sm:text-sm font-normal text-slate-800 flex items-center justify-between shadow-xs cursor-pointer transition ${
+                        isTurnoverDropdownOpen
+                          ? 'border-[#002B49] ring-1 ring-[#002B49]'
+                          : 'border-slate-800 hover:border-slate-900'
+                      }`}
+                    >
+                      <span className="text-slate-900 font-medium">
+                        {selectedTurnover}
+                      </span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-600 transition-transform ${
+                          isTurnoverDropdownOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {/* Turnover Dropdown Options */}
+                    {isTurnoverDropdownOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                        {ANNUAL_TURNOVER_OPTIONS.map((opt) => {
+                          const isOptionSelected = selectedTurnover === opt;
+                          return (
+                            <div
+                              key={opt}
+                              onClick={() => handleSelectTurnover(opt)}
+                              className={`px-4 py-2.5 text-xs sm:text-sm transition cursor-pointer select-none ${
+                                isOptionSelected
+                                  ? 'bg-[#EBF3FE] text-[#0066FF] font-semibold'
+                                  : 'text-slate-700 hover:bg-slate-50'
+                              }`}
+                            >
+                              {opt}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bottom Action Buttons: Back and Next (matching Image 3) */}
+                  <div className="pt-8 flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={handleBackClick}
+                      className="px-6 py-2.5 rounded-md border border-[#002B49] text-[#002B49] font-bold text-xs sm:text-sm hover:bg-slate-50 transition cursor-pointer flex items-center gap-1.5"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
                       <span>Back</span>
@@ -260,7 +315,7 @@ export default function EnterpriseDetailsPage({
                       type="button"
                       disabled={isSubmitting}
                       onClick={handleNextClick}
-                      className="px-8 py-2.5 rounded-md bg-[#022B50] hover:bg-[#073866] text-white font-bold text-xs sm:text-sm shadow-xs transition active:scale-98 cursor-pointer flex items-center gap-1.5"
+                      className="px-8 py-2.5 rounded-md bg-[#002B49] hover:bg-[#073866] text-white font-bold text-xs sm:text-sm shadow-xs transition active:scale-98 cursor-pointer flex items-center gap-1.5"
                     >
                       <span>{isSubmitting ? 'Processing...' : 'Next'}</span>
                       <span className="text-base leading-none">&rarr;</span>

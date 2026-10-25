@@ -41,6 +41,7 @@ export default function UdyamRegistrationModule() {
       whatsappOptIn: true,
       enterpriseName: '',
       organizationType: 'Sole Proprietorship',
+      annualTurnover: '10 lakhs - 1 crore',
       majorActivity: 'Services',
       pan: '',
       aadhaar: '',
@@ -104,7 +105,7 @@ export default function UdyamRegistrationModule() {
         />
       )}
 
-      {/* Step 2: Enterprise Details Questionnaire (Exact clone of Image 1) */}
+      {/* Step 2: Enterprise Details Questionnaire (Exact clone with Entity Type and Annual Turnover) */}
       {currentStep === 2 && (
         <EnterpriseDetailsPage
           formData={formData}
