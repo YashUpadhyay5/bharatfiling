@@ -409,6 +409,32 @@ export const api = {
     return handleResponse(res);
   },
 
+  // Import Export Code (IEC) Registration & Direct Gateway Checkout
+  createIecQuote: async (iecData) => {
+    const res = await fetchWithRetry(`${API_BASE}/iec/onboarding-quote`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(iecData),
+    });
+    return handleResponse(res);
+  },
+
+  getIecCheckoutOrder: async (orderId) => {
+    const res = await fetchWithRetry(`${API_BASE}/iec/checkout-order/${orderId}`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  verifyIecDirectPayment: async (payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/iec/payment/verify`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
   // CA Portal
   getCACases: async () => {
     const res = await fetchWithRetry(`${API_BASE}/ca/cases`, {

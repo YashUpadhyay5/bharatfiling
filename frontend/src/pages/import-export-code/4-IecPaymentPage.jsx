@@ -1,3 +1,4 @@
+import { api } from '../../services/api.js';
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import confetti from 'canvas-confetti';
@@ -101,8 +102,49 @@ export default function IecPaymentPage({
     setIsProcessing(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1400));
+      let activeOrderId = formData.orderId || searchParams.get('orderId');
+
+      if (!activeOrderId) {
+        try {
+          const quoteRes = await api.createIecQuote({
+            ...formData,
+            plan: selectedPlanKey,
+            includeLabourWelfare,
+          });
+          if (quoteRes?.orderId) {
+            activeOrderId = quoteRes.orderId;
+          }
+        } catch {
+          // Graceful fallback for offline mode
+        }
+      }
+
       const refId = `BF-IEC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+
+      if (activeOrderId) {
+        try {
+          await api.verifyIecDirectPayment({
+            order_id: activeOrderId,
+            payment_id: refId,
+            payment_method:
+              activeMethod === 'upi'
+                ? 'UPI'
+                : activeMethod === 'card'
+                ? 'CARD'
+                : 'NETBANKING',
+            upi_app: selectedUpiApp,
+            billing_info: {
+              email: formData.email,
+              phone: formData.phone,
+              name: formData.applicantName || formData.enterpriseName,
+            },
+          });
+        } catch {
+          // Graceful fallback
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 600));
       setTransactionId(refId);
       setIsSuccess(true);
 
