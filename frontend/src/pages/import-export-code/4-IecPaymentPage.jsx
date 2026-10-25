@@ -38,13 +38,20 @@ export default function IecPaymentPage({
     propPlanId || searchParams.get('plan') || formData.plan || 'standard';
   const currentPlan = getIecPlan(selectedPlanKey);
 
-  const basePrice = currentPlan.price;
-  const gstOnFee = Math.round(basePrice * 0.18);
+  // Base calculation matching reference image:
+  // Base professional fee: ₹1270
+  // GST on fee (18%): ₹229 (1270 + 229 = ₹1499)
+  // Labour Welfare: ₹77
+  // GST on labour welfare (18%): ₹14 (77 + 14 = ₹91)
+  // Total with Labour = ₹1590
+  const isStarter = selectedPlanKey === 'starter';
+  const basePrice = isStarter ? 1270 : Math.round(currentPlan.price / 1.18);
+  const gstOnFee = isStarter ? 229 : Math.round(basePrice * 0.18);
 
   // Labour welfare addon (default: true as in reference screenshot)
   const [includeLabourWelfare, setIncludeLabourWelfare] = useState(true);
-  const labourWelfareAmount = includeLabourWelfare ? 150 : 0;
-  const gstOnLabour = includeLabourWelfare ? Math.round(150 * 0.18) : 0; // 27
+  const labourWelfareAmount = includeLabourWelfare ? (isStarter ? 77 : 150) : 0;
+  const gstOnLabour = includeLabourWelfare ? (isStarter ? 14 : Math.round(150 * 0.18)) : 0;
 
   const totalTaxes = gstOnFee + labourWelfareAmount + gstOnLabour;
   const totalAmount = basePrice + totalTaxes;
@@ -268,31 +275,7 @@ export default function IecPaymentPage({
                   )}
                 </button>
 
-                {/* 4. EMI option */}
-                <button
-                  type="button"
-                  onClick={() => setActiveMethod('emi')}
-                  className={`p-4 text-left transition relative flex items-center justify-between cursor-pointer ${
-                    activeMethod === 'emi'
-                      ? 'bg-white border-l-4 border-[#002B49]'
-                      : 'hover:bg-slate-100/60'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="text-[10px] font-black border border-slate-400 px-1 py-0.5 rounded text-slate-700 mt-0.5">
-                      EMI
-                    </span>
-                    <div>
-                      <div className="text-sm font-bold text-slate-900">EMI option</div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        Pay using credit card &amp; Debit card
-                      </div>
-                    </div>
-                  </div>
-                  {activeMethod === 'emi' && (
-                    <div className="text-[#002B49] text-xs font-black">▶</div>
-                  )}
-                </button>
+
               </div>
 
               {/* Right Content Area inside Card */}
@@ -578,8 +561,8 @@ export default function IecPaymentPage({
           {/* RIGHT SECTION (4 COLS): Order Summary Card */}
           <div className="lg:col-span-4 space-y-4">
             <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
-              <h2 className="text-base font-bold text-slate-900 text-center">
-                Import Export Code Registration
+              <h2 className="text-lg font-bold text-slate-900 text-center">
+                IEC Registration
               </h2>
 
               <div className="pt-2 border-t border-slate-100">
@@ -593,7 +576,7 @@ export default function IecPaymentPage({
                 <div className="space-y-3 text-xs sm:text-sm">
                   {/* Base Fee */}
                   <div className="flex justify-between items-center text-slate-700 font-medium">
-                    <span>Professional Fees ({currentPlan.name})</span>
+                    <span>Professional Fees</span>
                     <span className="font-bold text-slate-900">
                       ₹{basePrice.toLocaleString('en-IN')}
                     </span>
