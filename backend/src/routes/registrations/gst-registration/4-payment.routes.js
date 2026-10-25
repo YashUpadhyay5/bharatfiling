@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../../../database/db.js';
 import { optionalAuth } from '../../../middleware/auth.js';
@@ -9,11 +10,14 @@ import { ENV } from '../../../config/env.js';
 
 const router = express.Router();
 
+const MODE_LABEL = { UPI_QR: 'UPI', AUTOPAY: 'UPI AutoPay', CARD: 'Card', NETBANKING: 'Net Banking' };
+
 /**
- * POST /verify-payment & POST /payment/verify
- * Confirms UPI AutoPay / Instant QR payment for GST registration.
+ * POST /payment/verify (Screen 4: Payment)
+ * Confirms UPI / UPI AutoPay / Card / Net Banking payment for a GST registration order.
+ * Kept at /verify-payment too for backwards compatibility with older clients.
  */
-router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => {
+router.post(['/payment/verify', '/verify-payment'], optionalAuth, (req, res) => {
   try {
     if (!ENV.ALLOW_SIMULATED_PAYMENTS) {
       return res.status(503).json({
@@ -23,6 +27,11 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
     }
 
     const { order_id, payment_id, vpa, mandate_id } = req.body;
+    let { payment_mode = 'UPI_QR' } = req.body;
+    if (!['UPI_QR', 'AUTOPAY', 'CARD', 'NETBANKING'].includes(payment_mode)) {
+      payment_mode = 'UPI_QR';
+    }
+    const modeLabel = MODE_LABEL[payment_mode] || 'UPI';
 
     if (!order_id) {
       return res.status(400).json({ success: false, message: 'Order ID is required.' });
@@ -44,25 +53,31 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
     }
 
     // Idempotent: a paid order is never re-processed (no duplicate notifications / events)
-    if (existingOrder.status === 'PAID') {
+    if (existingOrder.status === 'PAID' || existingOrder.status === 'ACTIVE_AUTOPAY') {
       const paidApp = db.getApplications().find((a) => a.id === existingOrder.application_id) || null;
       return res.json({
         success: true,
         message: 'Payment already verified.',
+        transaction_id: existingOrder.transaction_id,
         order: existingOrder,
         application: paidApp,
       });
     }
 
+    const paymentTxnId = `gst_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
     let updatedOrder;
     {
       orders[orderIndex] = {
         ...orders[orderIndex],
-        status: 'PAID',
+        status: payment_mode === 'AUTOPAY' ? 'ACTIVE_AUTOPAY' : 'PAID',
+        payment_mode,
         payment_id: payment_id || `pay_${uuidv4().slice(0, 8)}`,
         mandate_id: mandate_id || `man_${uuidv4().slice(0, 8)}`,
         vpa: vpa || orders[orderIndex].customer_phone + '@upi',
+        transaction_id: paymentTxnId,
+        paid_amount: orders[orderIndex].amount,
         paid_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
       updatedOrder = orders[orderIndex];
       db.saveOrders(orders);
@@ -93,8 +108,8 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
         events.push({
           id: `evt_${uuidv4().slice(0, 8)}`,
           application_id: appId,
-          title: 'Payment Confirmed & AutoPay Activated',
-          description: `Mandate authorized for ${updatedOrder?.service_name || 'GST Registration'}. Ready for document upload.`,
+          title: payment_mode === 'AUTOPAY' ? 'Payment Confirmed & AutoPay Activated' : `Payment Confirmed via ${modeLabel}`,
+          description: `Verified ₹${updatedOrder?.amount} via ${modeLabel} (Ref: ${paymentTxnId}) for ${updatedOrder?.service_name || 'GST Registration'}. Ready for document upload.`,
           actor_role: 'SYSTEM',
           created_at: new Date().toISOString(),
         });
@@ -122,7 +137,7 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
             order_id: updatedOrder?.id,
             type: 'PAYMENT_SUCCESS',
             title: 'Payment Confirmed & Filing Active 💳',
-            message: `Your payment of ₹${updatedOrder?.amount || 1769} has been verified. Case transferred to CA verification desk.`,
+            message: `Your ${modeLabel} payment of ₹${updatedOrder?.amount || 1769} has been verified. Case transferred to CA verification desk.`,
             severity: 'success',
             action_url: `/dashboard?app=${appId}`,
             metadata: {
@@ -142,7 +157,7 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
           order_id: updatedOrder?.id,
           type: 'NEW_PAID_CASE',
           title: 'New Paid Filing Case Received',
-          message: `${updatedOrder?.customer_name || 'Customer'} paid ₹${updatedOrder?.amount || 1769} for ${updatedOrder?.service_name || 'GST Registration'}.`,
+          message: `${updatedOrder?.customer_name || 'Customer'} paid ₹${updatedOrder?.amount || 1769} via ${modeLabel} for ${updatedOrder?.service_name || 'GST Registration'}.`,
           severity: 'info',
           action_url: `/ca/dashboard?caseId=${appId}`,
           metadata: {
@@ -158,7 +173,10 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
 
     res.json({
       success: true,
-      message: 'Payment verified and subscription activated successfully.',
+      message: payment_mode === 'AUTOPAY'
+        ? 'UPI AutoPay mandate established successfully! Recurring billing activated.'
+        : `${modeLabel} payment verified successfully! GST filing service is now initiated.`,
+      transaction_id: paymentTxnId,
       order: updatedOrder,
       application: updatedApp,
     });

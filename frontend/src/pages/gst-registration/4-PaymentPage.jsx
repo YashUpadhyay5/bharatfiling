@@ -128,12 +128,17 @@ export default function GstPaymentPage() {
 
     try {
       setIsProcessing(true);
-      const res = await api.verifyUpiPayment({
+      const payload = {
         order_id: order.id,
         upi_id: upi_id || undefined,
         payment_mode,
         amount: order.amount,
-      });
+      };
+      // GST orders settle through the dedicated GST payment screen (Screen 4); every other
+      // module (Company, ITR, Trademark, LLP) keeps using the shared payments gateway.
+      const res = order.module_type === 'GST'
+        ? await api.verifyGstPayment(payload)
+        : await api.verifyUpiPayment(payload);
 
       if (res.success) {
         setIsSuccess(true);

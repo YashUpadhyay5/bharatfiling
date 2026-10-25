@@ -352,6 +352,16 @@ export const api = {
     return handleResponse(res);
   },
 
+  // Screen 1: Applicant & Identification
+  checkGstPan: async (pan) => {
+    const res = await fetchWithRetry(`${API_BASE}/gst/applicant/check-pan`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ pan }),
+    });
+    return handleResponse(res);
+  },
+
   // Onboarding Lead & Checkout
   createOnboardingQuote: async (leadData) => {
     const res = await fetchWithRetry(`${API_BASE}/gst/onboarding-quote`, {
@@ -374,6 +384,16 @@ export const api = {
       method: 'PATCH',
       headers: getHeaders(),
       body: JSON.stringify({ plan }),
+    });
+    return handleResponse(res);
+  },
+
+  // Screen 4: Payment (GST module only — Standard/Premium/Elite order flow)
+  verifyGstPayment: async (payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/gst/payment/verify`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
     });
     return handleResponse(res);
   },

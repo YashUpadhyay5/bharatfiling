@@ -1,7 +1,8 @@
-import React from 'react';
-import { ArrowRight, Lock } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowRight, Lock, Info } from 'lucide-react';
 import PanVerificationBadge from './components/PanVerificationBadge.jsx';
 import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
+import { api } from '../../services/api.js';
 
 export default function ApplicantPanPage({
   formData,
@@ -11,6 +12,32 @@ export default function ApplicantPanPage({
   isAuthenticated,
   onOpenAuthModal,
 }) {
+  const [existingAppNotice, setExistingAppNotice] = useState(null);
+
+  // Screen 1: once the PAN is a valid 10-character number, check if it already
+  // has a GST application on file so the applicant isn't filed twice.
+  useEffect(() => {
+    setExistingAppNotice(null);
+    if (!panAuth.isValid || formData.pan.length !== 10) return;
+
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.checkGstPan(formData.pan);
+        if (!cancelled && res.success && res.hasExistingApplication) {
+          setExistingAppNotice(res);
+        }
+      } catch {
+        // Non-blocking: a failed duplicate-check should never stop the applicant from continuing
+      }
+    }, 500);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [formData.pan, panAuth.isValid]);
+
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       {/* Account authentication prompt if not logged in */}
@@ -109,6 +136,19 @@ export default function ApplicantPanPage({
         />
 
         <PanVerificationBadge pan={formData.pan} panAuth={panAuth} />
+
+        {existingAppNotice && (
+          <div className="p-3 rounded-2xl bg-blue-50/80 border border-blue-200 text-blue-900 flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+            <span className="text-[11px] leading-snug">
+              {existingAppNotice.status === 'PAID' ? (
+                <>This PAN already has a completed GST application <strong>{existingAppNotice.application_number}</strong>. You can continue to file a new one, or check your Dashboard for the existing case.</>
+              ) : (
+                <>This PAN has an unpaid draft application <strong>{existingAppNotice.application_number}</strong>. Continuing will start a fresh application.</>
+              )}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Continue Button */}
