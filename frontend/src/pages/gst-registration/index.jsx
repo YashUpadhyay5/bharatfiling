@@ -110,12 +110,16 @@ export default function GstRegistrationModule() {
   const configKey = Object.keys(SERVICE_CONFIGS).find((k) => rawKey.includes(k) || k.includes(rawKey)) || 'gst';
   const serviceMeta = SERVICE_CONFIGS[configKey];
 
-  // Automatically prompt auth modal if user visits without login/register
+  // Automatically prompt auth modal if user visits without login/register.
+  // GST handles sign-in on its own landing page (the lead-capture card), so this
+  // generic gate would just flash oddly before the redirect below sends them
+  // there — skip it for GST and let that flow own authentication instead.
   useEffect(() => {
+    if (serviceMeta.type === 'GST') return;
     if (!authLoading && !isAuthenticated) {
       setAuthModalOpen(true);
     }
-  }, [authLoading, isAuthenticated]);
+  }, [authLoading, isAuthenticated, serviceMeta.type]);
 
   // Route-driven step: 1 or 2
   const stepParam = parseInt(searchParams.get('step') || '1', 10);
