@@ -25,7 +25,7 @@ export default function UdyamRegistrationModule() {
   const stepParam = parseInt(searchParams.get('step') || '1', 10);
   const currentStep = [1, 2, 3, 4].includes(stepParam) ? stepParam : 1;
 
-  const initialPlan = searchParams.get('plan') || 'fast-track';
+  const initialPlan = searchParams.get('plan') || 'standard';
 
   const getInitialDraft = () => {
     try {

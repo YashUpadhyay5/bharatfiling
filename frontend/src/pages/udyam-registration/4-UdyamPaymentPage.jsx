@@ -36,7 +36,7 @@ export default function UdyamPaymentPage({
   const { showError, showSuccess } = useToast();
 
   const selectedPlanKey =
-    propPlanId || searchParams.get('plan') || formData.plan || 'fast-track';
+    propPlanId || searchParams.get('plan') || formData.plan || 'standard';
   const currentPlan = getUdyamPlan(selectedPlanKey);
 
   const basePrice = currentPlan.price;
