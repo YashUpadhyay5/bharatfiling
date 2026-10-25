@@ -3,6 +3,7 @@ import {
   ShieldCheck,
   Check,
   FileText,
+  CheckCircle2,
 } from 'lucide-react';
 import { GST_PLANS } from '../constants.js';
 
@@ -20,6 +21,66 @@ export default function OnboardingHero({ currentStep = 1, serviceMeta = null }) 
     window.location.href = '/services/gst-registration#pricing-tiers';
   };
 
+  // For GST Registration: Clone the exact Left Hero from Image 1
+  if (isGst) {
+    return (
+      <div className="lg:col-span-6 p-6 sm:p-10 lg:p-12 flex flex-col justify-center">
+        <div className="space-y-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-extrabold text-[#042D50] tracking-tight leading-[1.25]">
+            Get Your GST Registration{' '}
+            <span className="text-[#94A3B8] font-normal block sm:inline">in 24 Hours*</span>
+          </h1>
+
+          <p className="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
+            Trusted by 5 lakh+ businesses across India for GST registration.
+          </p>
+        </div>
+
+        <div className="mt-8 sm:mt-10 space-y-6">
+          {/* Bullet 1: Trusted Nationwide */}
+          <div className="flex items-start gap-3.5">
+            <CheckCircle2 className="w-5 h-5 text-[#2563EB] shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                Trusted Nationwide
+              </h4>
+              <p className="mt-1 text-xs text-slate-500 leading-relaxed max-w-sm">
+                Vakilsearch supports nearly 10% of Indian businesses with compliant filings.
+              </p>
+            </div>
+          </div>
+
+          {/* Bullet 2: 20K+ Google Reviews */}
+          <div className="flex items-start gap-3.5">
+            <CheckCircle2 className="w-5 h-5 text-[#2563EB] shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                20K+ Google Reviews
+              </h4>
+              <p className="mt-1 text-xs text-slate-500 leading-relaxed max-w-sm">
+                Rated 4.5/5 by real customers on Google.
+              </p>
+            </div>
+          </div>
+
+          {/* Bullet 3: Compliance & Expert Support */}
+          <div className="flex items-start gap-3.5">
+            <CheckCircle2 className="w-5 h-5 text-[#2563EB] shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                Compliance &amp; Expert Support
+              </h4>
+              <p className="mt-1 text-xs text-slate-500 leading-relaxed max-w-sm">
+                Zero-penalty assurance, transparent pricing, and 1-minute expert help.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Non-GST fallback (Company, ITR, Trademark, LLP)
   return (
     <div className="lg:col-span-6 p-5 sm:p-8 lg:p-10 bg-white border-b lg:border-b-0 lg:border-r border-slate-100 flex flex-col justify-between">
       <div className="space-y-4">
@@ -33,13 +94,6 @@ export default function OnboardingHero({ currentStep = 1, serviceMeta = null }) 
         <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight leading-snug text-slate-900">
           {meta.title}
         </h1>
-
-        {isGst && (
-          <div className="flex items-baseline gap-2">
-            <span className="text-sm text-slate-600 font-medium">Starting at Just</span>
-            <span className="text-2xl font-extrabold text-emerald-600">₹{GST_PLANS[0].price}</span>
-          </div>
-        )}
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -64,27 +118,16 @@ export default function OnboardingHero({ currentStep = 1, serviceMeta = null }) 
             </div>
           ))}
         </div>
-
-        {isGst && (
-          <a
-            href="/services/gst-registration#pricing-tiers"
-            onClick={scrollToPricing}
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-800 underline underline-offset-2 cursor-pointer"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            View Package Details
-          </a>
-        )}
       </div>
 
       {/* Progress indicator */}
       <div className="pt-6 sm:pt-8 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
         <span className="font-semibold text-slate-700">
-          {isGst ? 'Final Step: Jurisdiction & Package' : `Step ${currentStep} of 2: ${currentStep === 1 ? 'Applicant & Identification' : 'Jurisdiction & Package'}`}
+          Step {currentStep} of 2: {currentStep === 1 ? 'Applicant & Identification' : 'Jurisdiction & Package'}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
           <span className={`w-6 h-1.5 rounded-full ${currentStep >= 1 ? 'bg-[#111827]' : 'bg-slate-200'}`} />
-          {!isGst && <span className={`w-6 h-1.5 rounded-full ${currentStep === 2 ? 'bg-[#111827]' : 'bg-slate-200'}`} />}
+          <span className={`w-6 h-1.5 rounded-full ${currentStep === 2 ? 'bg-[#111827]' : 'bg-slate-200'}`} />
         </div>
       </div>
     </div>

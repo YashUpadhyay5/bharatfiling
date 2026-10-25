@@ -53,11 +53,11 @@ export const BUSINESS_NATURES = [
 ];
 
 export const PROPERTY_TYPES = [
+  'Family Owned Property',
   'Owned Property',
   'Rented / Leased Property',
   'Shared Office Space',
   'Virtual / Co-working Office',
-  "Parent's / Relative's Property (with Consent)",
 ];
 
 export const GST_APPLY_REASONS = [

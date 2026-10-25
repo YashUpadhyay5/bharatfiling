@@ -101,7 +101,7 @@ export const SERVICES = [
     'Complete Form REG-01 preparation with dedicated CA review and the official REG-06 certificate.',
     ['PAN of the business or owner', 'Aadhaar and photograph', 'Business address proof', 'Bank account proof'],
     ['Form REG-01 preparation', 'Notice clarification (REG-03) replies included', 'GSTIN and REG-06 delivery'],
-    { status: 'live', path: '/apply/gst', priceStatus: 'existing', alsoIn: ['gst'] }),
+    { status: 'live', path: '/services/gst-registration', priceStatus: 'existing', alsoIn: ['gst'] }),
   s('udyam-registration', 'MSME / Udyam Registration', 'registrations', 2899, 'one-time', '1-2 working days',
     'Get the Udyam certificate with the LEDGERS platform to track compliance.',
     ['Aadhaar of the proprietor or authorised signatory', 'PAN of the business', 'Bank account details', 'Business activity and NIC code'],

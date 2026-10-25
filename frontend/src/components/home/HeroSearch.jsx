@@ -90,7 +90,7 @@ export default function HeroSearch() {
     if (!item) return;
     setOpen(false);
     setQuery('');
-    if (isAuthenticated || PUBLIC_INFO_PATHS.includes(item.path)) {
+    if (isAuthenticated || PUBLIC_INFO_PATHS.includes(item.path) || item.path.startsWith('/services/')) {
       navigate(item.path);
     } else {
       setAuthService({

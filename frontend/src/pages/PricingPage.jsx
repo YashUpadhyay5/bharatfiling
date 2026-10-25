@@ -24,8 +24,9 @@ export default function PricingPage() {
   const [authFor, setAuthFor] = useState(null);
 
   const open = (svc) => (e) => {
-    // live services start a filing flow, which needs an account
-    if (svc.status !== 'live' || isAuthenticated) return;
+    // live services start a filing flow, which needs an account — but /services/* pages
+    // are public landing pages that handle their own sign-in, so let those through
+    if (svc.status !== 'live' || isAuthenticated || servicePath(svc).startsWith('/services/')) return;
     e.preventDefault();
     setAuthFor({ title: svc.name, price: inr(svc.fee), path: servicePath(svc), ctaPath: servicePath(svc) });
   };

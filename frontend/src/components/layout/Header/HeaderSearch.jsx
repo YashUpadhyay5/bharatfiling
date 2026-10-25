@@ -131,7 +131,7 @@ const SERVICES_DATA = [
     subtitle: 'New GSTIN registration for businesses',
     category: 'GST & TAX',
     badge: 'GST & TAX',
-    path: '/apply/gst',
+    path: '/services/gst-registration',
     keywords: ['gst', 'registration', 'gstin', 'apply', 'trn', 'new tax', 'certificate'],
     isTrending: true,
   },
@@ -475,7 +475,9 @@ export default function HeaderSearch({
     setQuery('');
     if (onCloseMobile) onCloseMobile();
 
-    const isInfoPage = ['/about', '/faq', '/pricing', '/contact', '/services'].includes(item.path);
+    const isInfoPage =
+      ['/about', '/faq', '/pricing', '/contact', '/services'].includes(item.path) ||
+      item.path.startsWith('/services/');
     if (isAuthenticated || isInfoPage) {
       navigate(item.path);
     } else {

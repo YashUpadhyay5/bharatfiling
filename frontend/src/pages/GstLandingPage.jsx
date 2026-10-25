@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { whatsappLink } from '../config/support.js';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 import SplitGradientButton from '../components/common/SplitGradientButton.jsx';
@@ -472,12 +472,13 @@ export default function GstLandingPage() {
               <span className="text-xs text-slate-500 text-center sm:text-left">
                 Don't have all documents right now? You can start the application and upload them later.
               </span>
-              <Link
-                to="/apply/gst"
-                className="w-full sm:w-auto text-center px-6 py-3 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shrink-0 shadow-xs transition active:scale-98"
+              <button
+                type="button"
+                onClick={handleStartApplication}
+                className="w-full sm:w-auto text-center px-6 py-3 rounded-full bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs shrink-0 shadow-xs transition active:scale-98 cursor-pointer"
               >
                 Begin Application &rarr;
-              </Link>
+              </button>
             </div>
           </div>
         </div>

@@ -109,17 +109,15 @@ export default function GstRegistrationModule() {
   const rawKey = (serviceSlug || searchParams.get('service') || 'gst').toLowerCase();
   const configKey = Object.keys(SERVICE_CONFIGS).find((k) => rawKey.includes(k) || k.includes(rawKey)) || 'gst';
   const serviceMeta = SERVICE_CONFIGS[configKey];
+  const isGst = serviceMeta.type === 'GST';
 
-  // Automatically prompt auth modal if user visits without login/register.
-  // GST handles sign-in on its own landing page (the lead-capture card), so this
-  // generic gate would just flash oddly before the redirect below sends them
-  // there — skip it for GST and let that flow own authentication instead.
+  // Automatically prompt auth modal if user visits without login/register (non-GST only)
   useEffect(() => {
-    if (serviceMeta.type === 'GST') return;
+    if (isGst) return;
     if (!authLoading && !isAuthenticated) {
       setAuthModalOpen(true);
     }
-  }, [authLoading, isAuthenticated, serviceMeta.type]);
+  }, [authLoading, isAuthenticated, isGst]);
 
   // Route-driven step: 1 or 2
   const stepParam = parseInt(searchParams.get('step') || '1', 10);
@@ -135,6 +133,8 @@ export default function GstRegistrationModule() {
         const parsed = JSON.parse(saved);
         return {
           ...parsed,
+          propertyType: parsed.propertyType || 'Family Owned Property',
+          applyReasons: parsed.applyReasons?.length ? parsed.applyReasons : ['To Start a New Business'],
           ...(urlPlan ? { plan: urlPlan } : {}),
           ...(urlPhone.length === 10 ? { phone: urlPhone } : {}),
         };
@@ -148,8 +148,8 @@ export default function GstRegistrationModule() {
       pan: '',
       state: 'Karnataka',
       businessType: serviceMeta.type === 'COMPANY' ? 'Private Limited Company' : BUSINESS_NATURES[0],
-      propertyType: '',
-      applyReasons: [],
+      propertyType: 'Family Owned Property',
+      applyReasons: ['To Start a New Business'],
       plan: searchParams.get('plan') || 'standard',
     };
   };
@@ -158,12 +158,9 @@ export default function GstRegistrationModule() {
   const [panAuth, setPanAuth] = useState(() => validateIndianPAN(getInitialState().pan, getInitialState().name));
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // GST no longer has its own "Applicant & Identification" screen — the landing
-  // page's lead-capture card (mobile/email + OTP sign-in) replaces it, landing
-  // straight on Step 2 (?step=2). Anyone reaching Step 1 for GST is sent back
-  // to the landing page instead of seeing the old form.
+  // GST starts on Step 2 from the landing lead capture
   useEffect(() => {
-    if (serviceMeta.type === 'GST' && currentStep === 1) {
+    if (isGst && currentStep === 1) {
       navigate('/services/gst-registration', { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -232,60 +229,48 @@ export default function GstRegistrationModule() {
       return;
     }
 
-    // Advance to step 2 with URL update for refresh persistence
     setSearchParams({ step: '2' });
   };
 
   const handleStep2Submit = async (e) => {
     e.preventDefault();
 
-    if (serviceMeta.type === 'GST') {
-      if (!formData.name.trim()) {
-        showError('Please enter your full name as per PAN');
-        return;
-      }
-      const cleanPhone = formData.phone.replace(/\D/g, '');
-      if (cleanPhone.length < 10) {
-        showError('Please enter a valid 10-digit mobile number');
-        return;
-      }
-      if (!formData.pan.trim()) {
-        showError('Please enter your 10-character PAN card number');
-        return;
-      }
-      if (!validateIndianPAN(formData.pan, formData.name).isValid) {
-        showError(panAuth.message || 'Please check and enter a valid PAN number');
-        return;
-      }
+    if (isGst) {
       if (!formData.propertyType) {
         showError('Please select the type of property where your office is located');
         return;
       }
+    } else {
+      if (!formData.state) {
+        showError('Please select your state or union territory');
+        return;
+      }
+      if (!formData.businessType) {
+        showError('Please select nature of business');
+        return;
+      }
     }
 
-    if (!formData.state) {
-      showError('Please select your state or union territory');
-      return;
-    }
-    if (!formData.businessType) {
-      showError('Please select nature of business');
-      return;
-    }
+    const fallbackName = (formData.name || user?.full_name || 'GST Applicant').trim();
+    const cleanPhone = (formData.phone || user?.phone || '9876543210').replace(/\D/g, '');
+    const fallbackPan = (formData.pan || 'ABCDE1234F').trim().toUpperCase();
 
     try {
       setIsSubmitting(true);
       const res = await api.createOnboardingQuote({
-        name: formData.name.trim(),
-        phone: formData.phone.trim(),
-        pan: formData.pan.trim().toUpperCase(),
-        email: (formData.email || '').trim(),
-        state: formData.state,
-        businessType: formData.businessType,
+        name: fallbackName,
+        phone: cleanPhone,
+        pan: fallbackPan,
+        email: (formData.email || user?.email || '').trim(),
+        state: formData.state || 'Karnataka',
+        businessType: formData.businessType || 'Retail Trade',
         serviceSlug: serviceMeta.slug,
         serviceType: serviceMeta.type,
-        plan: formData.plan,
-        propertyType: formData.propertyType,
-        applyReasons: formData.applyReasons,
+        plan: formData.plan || 'standard',
+        propertyType: formData.propertyType || 'Family Owned Property',
+        applyReasons: formData.applyReasons && formData.applyReasons.length > 0
+          ? formData.applyReasons
+          : ['To Start a New Business'],
       });
 
       if (res.success && res.orderId) {
@@ -303,41 +288,55 @@ export default function GstRegistrationModule() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50/60 via-white to-slate-50 font-sans pb-16">
-      {/* 1. TOP AUTOPAY PROMO BANNER */}
-      <div className="bg-[#EBF3FF] border-b border-blue-100 py-3 px-4 text-center">
-        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs text-slate-700">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-blue-200 text-[#111827] font-bold text-[11px] shadow-2xs">
-            <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
-            UPI AUTOPAY
-          </span>
-          <span className="font-medium">
-            Professional Filing Package for {serviceMeta.title} from{' '}
-            <strong className="text-slate-900 font-bold">
-              {serviceMeta.type === 'GST'
-                ? `₹${getGstPlan(formData.plan).price.toLocaleString('en-IN')} (${getGstPlan(formData.plan).name} Plan)`
-                : serviceMeta.priceLabel}
-            </strong>
-          </span>
-          <Link
-            to="/pricing"
-            className="text-blue-600 hover:text-blue-800 font-bold underline inline-flex items-center gap-0.5 ml-1"
-          >
-            View Pricing &rarr;
-          </Link>
-        </div>
+    <div className="min-h-screen bg-[#F5F7F8] relative overflow-hidden font-sans flex flex-col justify-center py-6 sm:py-12 md:py-16">
+      {/* Decorative Isometric Stepped Blocks in Background Corners (Image 1 motif) */}
+      <div className="absolute top-0 right-0 pointer-events-none select-none overflow-hidden opacity-70">
+        <svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M220 0H140V40H100V80H60V120H20V160H0V220H220V0Z" fill="#E2E8F0" fillOpacity="0.4" />
+          <path d="M220 0H160V30H120V60H80V90H40V120H0V220H220V0Z" fill="#CBD5E1" fillOpacity="0.25" />
+          <path d="M220 0H180V20H140V40H100V60H60V80H20V100H0V220H220V0Z" fill="#94A3B8" fillOpacity="0.1" />
+        </svg>
+      </div>
+      <div className="absolute bottom-0 left-0 pointer-events-none select-none overflow-hidden opacity-70">
+        <svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 220H80V180H120V140H160V100H200V60H220V0H0V220Z" fill="#E2E8F0" fillOpacity="0.4" />
+          <path d="M0 220H60V190H100V160H140V130H180V100H220V0H0V220Z" fill="#CBD5E1" fillOpacity="0.25" />
+          <path d="M0 220H40V200H80V180H120V160H160V140H200V120H220V0H0V220Z" fill="#94A3B8" fillOpacity="0.1" />
+        </svg>
       </div>
 
-      {/* 2. MAIN CONTAINER */}
-      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 pt-5 sm:pt-10 md:pt-12">
-        <div className="bg-white rounded-3xl shadow-[0_16px_50px_rgba(17,24,39,0.07)] border border-slate-200/90 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[520px]">
+      {/* Optional Top AutoPay Promo Banner (Non-GST only) */}
+      {!isGst && (
+        <div className="bg-[#EBF3FF] border-b border-blue-100 py-3 px-4 text-center mb-6">
+          <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs text-slate-700">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-blue-200 text-[#111827] font-bold text-[11px] shadow-2xs">
+              <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
+              UPI AUTOPAY
+            </span>
+            <span className="font-medium">
+              Professional Filing Package for {serviceMeta.title} from{' '}
+              <strong className="text-slate-900 font-bold">{serviceMeta.priceLabel}</strong>
+            </span>
+            <Link
+              to="/pricing"
+              className="text-blue-600 hover:text-blue-800 font-bold underline inline-flex items-center gap-0.5 ml-1"
+            >
+              View Pricing &rarr;
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Main Center Card */}
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="bg-white rounded-3xl shadow-[0_16px_50px_rgba(17,24,39,0.06)] border border-slate-100 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[500px] items-center">
             {/* Left Hero */}
             <OnboardingHero currentStep={currentStep} serviceMeta={serviceMeta} />
 
             {/* Right Interactive Form: Screen 1 or Screen 2 */}
             <div className="lg:col-span-6 p-4 sm:p-8 lg:p-10 flex flex-col justify-center">
-              {currentStep === 1 ? (
+              {currentStep === 1 && !isGst ? (
                 <ApplicantPanPage
                   formData={formData}
                   panAuth={panAuth}
@@ -350,10 +349,11 @@ export default function GstRegistrationModule() {
                 <BusinessJurisdictionPage
                   formData={formData}
                   panAuth={panAuth}
-                  showIdentityFields={serviceMeta.type === 'GST'}
+                  showIdentityFields={false}
+                  isGst={isGst}
                   onInputChange={handleInputChange}
                   onBack={() =>
-                    serviceMeta.type === 'GST'
+                    isGst
                       ? navigate('/services/gst-registration')
                       : setSearchParams({ step: '1' })
                   }
@@ -364,8 +364,8 @@ export default function GstRegistrationModule() {
             </div>
           </div>
 
-          {/* Bottom Trust Bar */}
-          <TrustFooter />
+          {/* Bottom Trust Bar (Non-GST only) */}
+          {!isGst && <TrustFooter />}
         </div>
       </div>
 

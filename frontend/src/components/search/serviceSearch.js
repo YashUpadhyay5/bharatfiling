@@ -116,7 +116,7 @@ export const SERVICES_DATA = [
     subtitle: 'New GSTIN registration for businesses',
     category: 'GST & TAX',
     badge: 'GST & TAX',
-    path: '/apply/gst',
+    path: '/services/gst-registration',
     keywords: ['gst', 'registration', 'gstin', 'apply', 'trn', 'new tax', 'certificate'],
     isTrending: true,
   },

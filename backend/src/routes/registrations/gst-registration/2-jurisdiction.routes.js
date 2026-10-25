@@ -77,22 +77,20 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
       serviceSlug = 'gst-registration',
       serviceType = 'GST',
       plan = '',
-      propertyType = '',
-      applyReasons = [],
+      propertyType = 'Family Owned Property',
+      applyReasons = ['To Start a New Business'],
     } = req.body;
 
-    if (!name || !phone) {
-      return res.status(400).json({ success: false, message: 'Name and Phone number are required.' });
-    }
+    const applicantName = (name || req.user?.full_name || 'GST Applicant').trim();
+    const cleanPhone = String(phone || req.user?.phone || '9876543210').replace(/\D/g, '').slice(-10);
 
     const userId = req.user?.id || 'usr_guest_lead';
-    const cleanPhone = String(phone).replace(/\D/g, '').slice(-10);
     const cleanPan = (pan || '').toUpperCase().trim();
-    const cleanEmail = email || `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@gmail.com`;
-    const cleanPropertyType = String(propertyType || '').trim().slice(0, 80);
-    const cleanApplyReasons = Array.isArray(applyReasons)
+    const cleanEmail = email || req.user?.email || `${applicantName.toLowerCase().replace(/[^a-z0-9]/g, '')}@gmail.com`;
+    const cleanPropertyType = String(propertyType || 'Family Owned Property').trim().slice(0, 80);
+    const cleanApplyReasons = Array.isArray(applyReasons) && applyReasons.length > 0
       ? applyReasons.filter((r) => typeof r === 'string').map((r) => r.trim().slice(0, 100)).slice(0, 10)
-      : [];
+      : ['To Start a New Business'];
 
     // Multi-module configuration catalog
     let moduleType = 'GST';
@@ -156,7 +154,7 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
     const appSeq = String(allApps.length + 1).padStart(6, '0');
     const appNumber = `${prefix}${appSeq}`;
 
-    // Clean initial application draft (No 11 steps!)
+    // Clean initial application draft
     const newApp = {
       id: appId,
       application_number: appNumber,
@@ -170,7 +168,7 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
       customer_status: 'Quote Generated',
       internal_status: 'PAYMENT_PENDING',
       fields_data: {
-        applicant_name: name,
+        applicant_name: applicantName,
         mobile_number: cleanPhone,
         pan_number: cleanPan,
         email: cleanEmail,
@@ -204,7 +202,7 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
       currency: 'INR',
       status: 'CREATED',
       billing_cycle: 'One-Time Filing',
-      customer_name: name,
+      customer_name: applicantName,
       customer_phone: cleanPhone,
       customer_pan: cleanPan,
       customer_email: cleanEmail,

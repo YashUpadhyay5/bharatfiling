@@ -34,7 +34,8 @@ export default function LandingPage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const handleSelectService = (service) => {
-    if (isAuthenticated) {
+    // /services/* pages are public landing pages that handle their own sign-in
+    if (isAuthenticated || service.path?.startsWith('/services/')) {
       navigate(service.path);
     } else {
       setSelectedServiceForAuth(service);
