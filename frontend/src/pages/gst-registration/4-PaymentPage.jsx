@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import {
   CreditCard,
@@ -221,17 +221,20 @@ export default function GstPaymentPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F7F8] font-sans pb-16">
-      {/* Top Header Bar with VAKIL SEARCH Logo */}
+      {/* Top Header Bar with BharatFiling Logo */}
       <header className="bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="inline-flex items-center gap-1 select-none">
-            <span className="bg-[#FFD200] text-black font-black text-xs px-2 py-0.5 rounded-[3px] tracking-wider uppercase">
-              VAKIL
-            </span>
-            <span className="text-black font-black text-xs tracking-wider uppercase">
-              SEARCH
-            </span>
-          </div>
+          <Link to="/" className="inline-flex items-center select-none" title="BharatFiling">
+            <img
+              src="/bharatfiling-user-logo.png"
+              alt="BharatFiling"
+              className="h-8 sm:h-9 w-auto object-contain"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
+              }}
+            />
+          </Link>
 
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />

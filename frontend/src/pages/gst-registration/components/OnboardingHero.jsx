@@ -45,7 +45,7 @@ export default function OnboardingHero({ currentStep = 1, serviceMeta = null }) 
                 Trusted Nationwide
               </h4>
               <p className="mt-1 text-xs text-slate-500 leading-relaxed max-w-sm">
-                Vakilsearch supports nearly 10% of Indian businesses with compliant filings.
+                BharatFiling supports nearly 10% of Indian businesses with compliant filings.
               </p>
             </div>
           </div>

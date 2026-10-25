@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 import { PROPERTY_TYPES, GST_APPLY_REASONS, INDIAN_STATES, BUSINESS_NATURES } from './constants.js';
 
@@ -23,26 +24,29 @@ export default function BusinessJurisdictionPage({
     onInputChange('applyReasons', next);
   };
 
-  // For GST: Exact 1:1 Clone of the Right Card from Image 1
+  // For GST: Exact 1:1 Clone of the Right Card with BharatFiling Branding
   if (isGst) {
     return (
       <div className="w-full max-w-[420px] mx-auto bg-white rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.08)] border border-slate-100 p-6 sm:p-8 relative">
-        {/* Subtle scroll arrows indicator on the right edge as seen in Image 1 */}
+        {/* Subtle scroll arrows indicator on the right edge */}
         <div className="hidden sm:flex flex-col justify-between absolute right-2.5 top-8 bottom-8 text-slate-400/80 pointer-events-none text-[9px] select-none">
           <span>▲</span>
           <span>▼</span>
         </div>
 
-        {/* Top Centered Brand Badge: VAKIL SEARCH */}
+        {/* Top Centered Brand Logo */}
         <div className="flex items-center justify-center mb-6">
-          <div className="inline-flex items-center gap-1 select-none">
-            <span className="bg-[#FFD200] text-black font-black text-[11px] sm:text-xs px-2 py-0.5 rounded-[3px] tracking-wider uppercase">
-              VAKIL
-            </span>
-            <span className="text-black font-black text-[11px] sm:text-xs tracking-wider uppercase">
-              SEARCH
-            </span>
-          </div>
+          <Link to="/" className="inline-flex items-center select-none" title="BharatFiling">
+            <img
+              src="/bharatfiling-user-logo.png"
+              alt="BharatFiling"
+              className="h-8 sm:h-9 w-auto object-contain"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
+              }}
+            />
+          </Link>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-6">
