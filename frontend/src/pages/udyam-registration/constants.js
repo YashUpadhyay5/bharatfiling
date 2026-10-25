@@ -89,13 +89,13 @@ export const TESTIMONIALS = [
 ];
 
 export const ORGANIZATION_TYPES = [
-  'Proprietorship',
-  'Partnership',
-  'Private Limited Company',
-  'Limited Liability Partnership (LLP)',
-  'One Person Company (OPC)',
-  'Hindu Undivided Family (HUF)',
+  'Sole Proprietorship',
+  'Pvt. Ltd',
+  'LLP',
+  'Person Company',
+  'Partnership Firm',
   'Public Limited Company',
+  'Hindu Undivided Family (HUF)',
   'Society / Trust / Club',
 ];
 
@@ -138,20 +138,6 @@ export const INDIAN_STATES = [
   'Uttar Pradesh',
   'Uttarakhand',
   'West Bengal',
-];
-
-export const NIC_DIVISIONS = [
-  'Services - Software Development & IT Services',
-  'Services - Legal, Accounting & Business Consultancy',
-  'Services - Logistics, Courier & Transportation',
-  'Services - E-commerce & Online Marketplaces',
-  'Manufacturing - Food Products & Beverages',
-  'Manufacturing - Textiles, Apparel & Leather',
-  'Manufacturing - Machinery, Electrical & Equipment',
-  'Manufacturing - Chemicals & Pharmaceuticals',
-  'Trading - Wholesale & Retail Trade of Goods',
-  'Trading - Commission Agents & Distributors',
-  'Other Statutory Commercial Services',
 ];
 
 export function getUdyamPlan(planId) {

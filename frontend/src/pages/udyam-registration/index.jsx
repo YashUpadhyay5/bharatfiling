@@ -40,7 +40,7 @@ export default function UdyamRegistrationModule() {
       cityPincode: '',
       whatsappOptIn: true,
       enterpriseName: '',
-      organizationType: 'Proprietorship',
+      organizationType: 'Sole Proprietorship',
       majorActivity: 'Services',
       pan: '',
       aadhaar: '',
@@ -78,16 +78,8 @@ export default function UdyamRegistrationModule() {
   // Step 2: Enterprise questionnaire -> Proceed to Step 3
   const handleStep2Submit = (e) => {
     if (e) e.preventDefault();
-    if (!formData.enterpriseName?.trim()) {
-      showError('Please enter enterprise / firm name');
-      return;
-    }
-    if (!formData.pan?.trim()) {
-      showError('Please enter business or proprietor PAN');
-      return;
-    }
-    if (!formData.aadhaar?.trim() || formData.aadhaar.replace(/\D/g, '').length !== 12) {
-      showError('Please enter a valid 12-digit Aadhaar number');
+    if (!formData.organizationType) {
+      showError('Please select your entity type');
       return;
     }
 
@@ -104,7 +96,7 @@ export default function UdyamRegistrationModule() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Step 1: Landing Page (Exact clone of Image 1, NO login modal) */}
+      {/* Step 1: Landing Page (Exact clone of Vakilsearch Hero & Deep Sections) */}
       {currentStep === 1 && (
         <UdyamLandingPage
           initialData={formData}
@@ -112,7 +104,7 @@ export default function UdyamRegistrationModule() {
         />
       )}
 
-      {/* Step 2: Enterprise Details Questionnaire */}
+      {/* Step 2: Enterprise Details Questionnaire (Exact clone of Image 1) */}
       {currentStep === 2 && (
         <EnterpriseDetailsPage
           formData={formData}
