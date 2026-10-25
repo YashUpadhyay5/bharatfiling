@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ArrowLeft,
   ShieldCheck,
+  Lightbulb,
 } from 'lucide-react';
 
 export default function BusinessDetailsPage({
@@ -13,22 +14,18 @@ export default function BusinessDetailsPage({
   onSubmit,
   isSubmitting = false,
 }) {
-  // Sub-step inside Page 2: 1 = Question 1, 2 = Question 2
+  // Sub-step inside Page 2: 1 = Goods import/export question, 2 = Current Account question
   const [subStep, setSubStep] = useState(1);
 
   // Question 1: Are you into import & export of goods? ('yes' | 'no')
   const [isIntoGoods, setIsIntoGoods] = useState(
-    formData.isIntoGoods !== undefined ? formData.isIntoGoods : ''
+    formData.isIntoGoods !== undefined ? formData.isIntoGoods : 'yes'
   );
 
-  // Question 2: Business constitution / entity type
-  const [selectedEntity, setSelectedEntity] = useState(
-    formData.organizationType || ''
+  // Question 2: Current Account is Mandatory for IEC applicants. Want a DBS Bank current A/c? ('yes' | 'no')
+  const [wantDbsAccount, setWantDbsAccount] = useState(
+    formData.wantDbsAccount !== undefined ? formData.wantDbsAccount : 'yes'
   );
-
-  // Progress calculations (0/2, 1/2, 2/2)
-  const isQ1Answered = isIntoGoods !== '';
-  const isQ2Answered = selectedEntity !== '';
 
   const handleSelectGoods = (val) => {
     setIsIntoGoods(val);
@@ -43,10 +40,10 @@ export default function BusinessDetailsPage({
     }
   };
 
-  const handleSelectEntity = (entity) => {
-    setSelectedEntity(entity);
+  const handleSelectDbs = (val) => {
+    setWantDbsAccount(val);
     if (onInputChange) {
-      onInputChange('organizationType', entity);
+      onInputChange('wantDbsAccount', val);
     }
   };
 
@@ -54,10 +51,10 @@ export default function BusinessDetailsPage({
     if (e) e.preventDefault();
 
     if (subStep === 1) {
-      if (!isQ1Answered) return;
+      if (!isIntoGoods) return;
       setSubStep(2);
     } else if (subStep === 2) {
-      if (!isQ2Answered) return;
+      if (!wantDbsAccount) return;
       if (onSubmit) {
         onSubmit(e);
       }
@@ -197,15 +194,15 @@ export default function BusinessDetailsPage({
                 />
               </div>
 
-              {/* Progress Header Row (0/2 complete | Takes less than 1 min) */}
+              {/* Progress Header Row (0/2 complete / 2/2 complete | Takes less than 1 min) */}
               <div className="pt-2">
                 <div className="flex items-center justify-between text-xs mb-2">
                   <span className="font-bold text-slate-900">
                     {subStep === 1
-                      ? isQ1Answered
+                      ? isIntoGoods
                         ? '1/2 complete'
                         : '0/2 complete'
-                      : isQ2Answered
+                      : wantDbsAccount
                       ? '2/2 complete'
                       : '1/2 complete'}
                   </span>
@@ -214,26 +211,26 @@ export default function BusinessDetailsPage({
                   </span>
                 </div>
 
-                {/* 2-Segment Horizontal Progress Bar */}
+                {/* 2-Segment Horizontal Progress Bar (Green when complete, matching screenshot) */}
                 <div className="flex items-center gap-2 mb-8">
                   {/* Segment 1 */}
                   <div
                     className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                      isQ1Answered ? 'bg-[#002B49]' : 'bg-slate-100 border border-slate-200'
+                      isIntoGoods ? 'bg-[#22C55E]' : 'bg-slate-200'
                     }`}
                   />
                   {/* Segment 2 */}
                   <div
                     className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                      subStep === 2 && isQ2Answered
-                        ? 'bg-[#002B49]'
-                        : 'bg-slate-100 border border-slate-200'
+                      subStep === 2 && wantDbsAccount
+                        ? 'bg-[#22C55E]'
+                        : 'bg-slate-200'
                     }`}
                   />
                 </div>
               </div>
 
-              {/* QUESTION 1 (1:1 CLONE OF REFERENCE SCREENSHOT) */}
+              {/* QUESTION 1 (Image 1): Are you into import & export of goods? */}
               {subStep === 1 && (
                 <div className="space-y-4 animate-in fade-in duration-200">
                   <h2 className="text-base sm:text-lg font-bold text-slate-900">
@@ -246,7 +243,7 @@ export default function BusinessDetailsPage({
                       onClick={() => handleSelectGoods('yes')}
                       className={`w-full p-4 rounded-lg border transition-all flex items-center gap-3.5 cursor-pointer select-none ${
                         isIntoGoods === 'yes'
-                          ? 'border-[#002B49] bg-blue-50/20 ring-1 ring-[#002B49]'
+                          ? 'border-[#002B49] bg-slate-50/70 ring-1 ring-[#002B49]'
                           : 'border-slate-300 hover:border-slate-400 bg-white'
                       }`}
                     >
@@ -271,7 +268,7 @@ export default function BusinessDetailsPage({
                       onClick={() => handleSelectGoods('no')}
                       className={`w-full p-4 rounded-lg border transition-all flex items-center gap-3.5 cursor-pointer select-none ${
                         isIntoGoods === 'no'
-                          ? 'border-[#002B49] bg-blue-50/20 ring-1 ring-[#002B49]'
+                          ? 'border-[#002B49] bg-slate-50/70 ring-1 ring-[#002B49]'
                           : 'border-slate-300 hover:border-slate-400 bg-white'
                       }`}
                     >
@@ -294,76 +291,141 @@ export default function BusinessDetailsPage({
                 </div>
               )}
 
-              {/* QUESTION 2: Business Constitution / Entity Type */}
+              {/* QUESTION 2 (Image 2 - Current Screenshot): Current Account is Mandatory for IEC applicants */}
               {subStep === 2 && (
                 <div className="space-y-4 animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                      Select your business constitution
+                  <div>
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                      Current Account is Mandatory for IEC applicants.
                     </h2>
-                    <button
-                      type="button"
-                      onClick={() => setSubStep(1)}
-                      className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer font-medium"
-                    >
-                      <ArrowLeft className="w-3.5 h-3.5" />
-                      <span>Back</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 text-base sm:text-lg font-bold text-slate-900 mt-0.5">
+                      <span>Want a</span>
+                      <span className="inline-flex items-center gap-1">
+                        <svg viewBox="0 0 100 100" className="w-3.5 h-3.5 fill-[#E60000] inline-block shrink-0">
+                          <polygon points="50,0 65,15 50,30 35,15" />
+                          <polygon points="100,50 85,65 70,50 85,35" />
+                          <polygon points="50,100 35,85 50,70 65,85" />
+                          <polygon points="0,50 15,35 30,50 15,65" />
+                          <polygon points="50,20 80,50 50,80 20,50" />
+                        </svg>
+                        <span className="font-black text-sm tracking-tight text-slate-900">
+                          DBS<span className="font-normal text-xs text-slate-600">BANK</span>
+                        </span>
+                      </span>
+                      <span>current A/c</span>
+                    </div>
                   </div>
 
-                  <div className="space-y-2.5 pt-2">
-                    {[
-                      'Sole Proprietorship',
-                      'Partnership Firm',
-                      'Private Limited / LLP',
-                      'Other (Trust / Society / HUF)',
-                    ].map((entity) => (
+                  <div className="space-y-3 pt-2">
+                    {/* Option 1: Yes */}
+                    <div
+                      onClick={() => handleSelectDbs('yes')}
+                      className={`w-full p-4 rounded-lg border transition-all flex items-center gap-3.5 cursor-pointer select-none ${
+                        wantDbsAccount === 'yes'
+                          ? 'border-[#002B49] bg-[#EBF2F7] ring-1 ring-[#002B49]'
+                          : 'border-slate-300 hover:border-slate-400 bg-white'
+                      }`}
+                    >
                       <div
-                        key={entity}
-                        onClick={() => handleSelectEntity(entity)}
-                        className={`w-full p-3.5 rounded-lg border transition-all flex items-center gap-3.5 cursor-pointer select-none ${
-                          selectedEntity === entity
-                            ? 'border-[#002B49] bg-blue-50/20 ring-1 ring-[#002B49]'
-                            : 'border-slate-300 hover:border-slate-400 bg-white'
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                          wantDbsAccount === 'yes'
+                            ? 'border-[#002B49]'
+                            : 'border-slate-400'
                         }`}
                       >
-                        <div
-                          className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                            selectedEntity === entity
-                              ? 'border-[#002B49]'
-                              : 'border-slate-400'
-                          }`}
-                        >
-                          {selectedEntity === entity && (
-                            <div className="w-2 h-2 rounded-full bg-[#002B49]" />
-                          )}
-                        </div>
-                        <span className="text-sm font-medium text-slate-800">
-                          {entity}
-                        </span>
+                        {wantDbsAccount === 'yes' && (
+                          <div className="w-2 h-2 rounded-full bg-[#002B49]" />
+                        )}
                       </div>
-                    ))}
+                      <span className="text-sm sm:text-base font-medium text-slate-800">
+                        Yes
+                      </span>
+                    </div>
+
+                    {/* Option 2: No */}
+                    <div
+                      onClick={() => handleSelectDbs('no')}
+                      className={`w-full p-4 rounded-lg border transition-all flex items-center gap-3.5 cursor-pointer select-none ${
+                        wantDbsAccount === 'no'
+                          ? 'border-[#002B49] bg-[#EBF2F7] ring-1 ring-[#002B49]'
+                          : 'border-slate-300 hover:border-slate-400 bg-white'
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                          wantDbsAccount === 'no'
+                            ? 'border-[#002B49]'
+                            : 'border-slate-400'
+                        }`}
+                      >
+                        {wantDbsAccount === 'no' && (
+                          <div className="w-2 h-2 rounded-full bg-[#002B49]" />
+                        )}
+                      </div>
+                      <span className="text-sm sm:text-base font-medium text-slate-800">
+                        No
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Informational Lightbulb Card (Exact copy from image) */}
+                  <div className="mt-5 p-3 rounded-xl bg-[#F8FAFC] border border-slate-100 flex items-center gap-3 text-xs text-slate-600">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 text-slate-700 flex items-center justify-center shrink-0">
+                      <Lightbulb className="w-4 h-4 text-slate-600" />
+                    </div>
+                    <p className="text-[11px] sm:text-xs leading-relaxed text-slate-600">
+                      BharatFiling helped 5000+ customers in opening a zero balance DBS A/c with 3.5% interest rate.
+                    </p>
                   </div>
                 </div>
               )}
 
             </div>
 
-            {/* Bottom Row with Next Button (Exact position as reference image) */}
-            <div className="pt-8 flex justify-end">
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={subStep === 1 ? !isQ1Answered : !isQ2Answered || isSubmitting}
-                className={`py-3 px-8 rounded-lg font-bold text-sm tracking-wide transition-all flex items-center gap-2 ${
-                  (subStep === 1 ? isQ1Answered : isQ2Answered)
-                    ? 'bg-[#002B49] hover:bg-[#073866] active:scale-[0.99] text-white shadow-xs cursor-pointer'
-                    : 'bg-[#E2E8F0] text-slate-400 cursor-not-allowed select-none'
-                }`}
-              >
-                <span>{subStep === 2 ? 'Continue to Packages' : 'Next'}</span>
-                <span className="text-base">&rarr;</span>
-              </button>
+            {/* Bottom Row with Back & Next Buttons (Exact position from reference image) */}
+            <div className="pt-8">
+              {subStep === 1 ? (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!isIntoGoods}
+                    className={`py-3 px-8 rounded-lg font-bold text-sm tracking-wide transition-all flex items-center gap-2 ${
+                      isIntoGoods
+                        ? 'bg-[#002B49] hover:bg-[#073866] active:scale-[0.99] text-white shadow-xs cursor-pointer'
+                        : 'bg-[#E2E8F0] text-slate-400 cursor-not-allowed select-none'
+                    }`}
+                  >
+                    <span>Next</span>
+                    <span className="text-base">&rarr;</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setSubStep(1)}
+                    className="py-2.5 px-6 rounded-lg border border-[#002B49] text-[#002B49] hover:bg-slate-50 font-bold text-sm tracking-wide transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!wantDbsAccount || isSubmitting}
+                    className={`py-2.5 px-8 rounded-lg font-bold text-sm tracking-wide transition-all flex items-center gap-2 ${
+                      wantDbsAccount
+                        ? 'bg-[#002B49] hover:bg-[#073866] active:scale-[0.99] text-white shadow-xs cursor-pointer'
+                        : 'bg-[#E2E8F0] text-slate-400 cursor-not-allowed select-none'
+                    }`}
+                  >
+                    <span>Next</span>
+                    <span className="text-base">&rarr;</span>
+                  </button>
+                </div>
+              )}
             </div>
 
           </div>
