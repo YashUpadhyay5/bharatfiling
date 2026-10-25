@@ -80,11 +80,11 @@ export default function OnboardingHero({ currentStep = 1, serviceMeta = null }) 
       {/* Progress indicator */}
       <div className="pt-6 sm:pt-8 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
         <span className="font-semibold text-slate-700">
-          Step {currentStep} of 2: {currentStep === 1 ? 'Applicant & Identification' : 'Jurisdiction & Package'}
+          {isGst ? 'Final Step: Jurisdiction & Package' : `Step ${currentStep} of 2: ${currentStep === 1 ? 'Applicant & Identification' : 'Jurisdiction & Package'}`}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
           <span className={`w-6 h-1.5 rounded-full ${currentStep >= 1 ? 'bg-[#111827]' : 'bg-slate-200'}`} />
-          <span className={`w-6 h-1.5 rounded-full ${currentStep === 2 ? 'bg-[#111827]' : 'bg-slate-200'}`} />
+          {!isGst && <span className={`w-6 h-1.5 rounded-full ${currentStep === 2 ? 'bg-[#111827]' : 'bg-slate-200'}`} />}
         </div>
       </div>
     </div>

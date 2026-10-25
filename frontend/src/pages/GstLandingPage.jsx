@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { whatsappLink } from '../config/support.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -18,18 +18,32 @@ import {
   Tag,
 } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
-import { GST_PLANS } from './gst-registration/constants.js';
+import { GST_PLANS, BUSINESS_NATURES } from './gst-registration/constants.js';
+import { validateIndianPAN } from '../utils/panValidator.js';
+import PanVerificationBadge from './gst-registration/components/PanVerificationBadge.jsx';
 
 export default function GstLandingPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [selectedEntity, setSelectedEntity] = useState('Proprietorship');
   const [openFaq, setOpenFaq] = useState(0);
   const [pendingPlan, setPendingPlan] = useState(null);
+  const [heroName, setHeroName] = useState('');
   const [heroPhone, setHeroPhone] = useState('');
+  const [heroPan, setHeroPan] = useState('');
   const [heroWhatsappOptIn, setHeroWhatsappOptIn] = useState(true);
-  const [heroPhoneError, setHeroPhoneError] = useState('');
+  const [heroErrors, setHeroErrors] = useState({});
+
+  const heroPanAuth = validateIndianPAN(heroPan, heroName);
+
+  // Pre-fill the lead-capture form from the signed-in account, if any
+  useEffect(() => {
+    if (user) {
+      setHeroName((prev) => prev || user.full_name || '');
+      setHeroPhone((prev) => prev || user.phone || '');
+    }
+  }, [user]);
 
   const maxDiscountPercent = Math.max(...GST_PLANS.map((p) => p.discountPercent));
 
@@ -38,44 +52,64 @@ export default function GstLandingPage() {
     document.getElementById('pricing-tiers')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const applyUrl = (planId, phone) => {
-    const params = new URLSearchParams();
-    if (planId) params.set('plan', planId);
-    if (phone) params.set('phone', phone);
-    const qs = params.toString();
-    return `/apply/gst${qs ? `?${qs}` : ''}`;
+  const [selectedPlanId, setSelectedPlanId] = useState('standard');
+
+  const scrollToHeroForm = () => {
+    document.getElementById('hero-apply-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('hero-name-input')?.focus({ preventScroll: true });
   };
 
   const handleStartApplication = (e) => {
     if (e) e.preventDefault();
-    setPendingPlan(null);
-    if (isAuthenticated) {
-      navigate('/apply/gst');
-    } else {
-      setAuthModalOpen(true);
-    }
+    scrollToHeroForm();
   };
 
   const handleSelectPlan = (planId) => {
-    if (isAuthenticated) {
-      navigate(applyUrl(planId));
-    } else {
-      setPendingPlan(planId);
-      setAuthModalOpen(true);
+    setSelectedPlanId(planId);
+    scrollToHeroForm();
+  };
+
+  const saveHeroDraftAndGo = (planId) => {
+    const cleanPhone = heroPhone.replace(/\D/g, '');
+    const draft = {
+      name: heroName.trim(),
+      phone: cleanPhone,
+      pan: heroPan.trim().toUpperCase(),
+      state: 'Karnataka',
+      businessType: BUSINESS_NATURES[0],
+      propertyType: '',
+      applyReasons: [],
+      plan: planId,
+    };
+    try {
+      localStorage.setItem('bharatfiling_gst_draft', JSON.stringify(draft));
+    } catch {
+      // Ignore quota error; formData still gets these via the ?phone=&plan= query params
     }
+    navigate(`/apply/gst?step=2&plan=${planId}&phone=${cleanPhone}`);
   };
 
   const handleHeroGetStarted = (e) => {
     e.preventDefault();
+    const errors = {};
     const cleanPhone = heroPhone.replace(/\D/g, '');
-    if (cleanPhone.length !== 10) {
-      setHeroPhoneError('Please enter a valid 10-digit mobile number');
+
+    if (!heroName.trim()) errors.name = 'Please enter your full name as per PAN';
+    if (cleanPhone.length !== 10) errors.phone = 'Please enter a valid 10-digit mobile number';
+    if (!heroPan.trim()) {
+      errors.pan = 'Please enter your 10-character PAN card number';
+    } else if (!heroPanAuth.isValid) {
+      errors.pan = heroPanAuth.message || 'Please check and enter a valid PAN number';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setHeroErrors(errors);
       return;
     }
-    setHeroPhoneError('');
-    setPendingPlan('standard');
+    setHeroErrors({});
+    setPendingPlan(selectedPlanId);
     if (isAuthenticated) {
-      navigate(applyUrl('standard', cleanPhone));
+      saveHeroDraftAndGo(selectedPlanId);
     } else {
       setAuthModalOpen(true);
     }
@@ -227,12 +261,30 @@ export default function GstLandingPage() {
                 Save up to {maxDiscountPercent}% &mdash; Limited Time
               </div>
               <form
+                id="hero-apply-form"
                 onSubmit={handleHeroGetStarted}
-                className="bg-white rounded-3xl p-5 sm:p-6 shadow-[0_12px_36px_rgba(17,24,39,0.06)] border border-slate-200/80 space-y-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_22px_45px_rgba(17,24,39,0.12)] hover:border-[#111827]/30"
+                className="bg-white rounded-3xl p-5 sm:p-6 shadow-[0_12px_36px_rgba(17,24,39,0.06)] border border-slate-200/80 space-y-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_22px_45px_rgba(17,24,39,0.12)] hover:border-[#111827]/30 scroll-mt-24"
               >
                 <h3 className="font-semibold tracking-tight text-lg text-slate-900 text-center">
                   Apply for GST Registration
                 </h3>
+
+                <div className="space-y-1.5">
+                  <input
+                    id="hero-name-input"
+                    type="text"
+                    value={heroName}
+                    onChange={(e) => {
+                      setHeroName(e.target.value);
+                      setHeroErrors((prev) => ({ ...prev, name: '' }));
+                    }}
+                    placeholder="Full Name (as per PAN)"
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827] transition"
+                  />
+                  {heroErrors.name && (
+                    <p className="text-[11px] text-rose-600 font-medium px-1">{heroErrors.name}</p>
+                  )}
+                </div>
 
                 <div className="space-y-1.5">
                   <div className="flex rounded-2xl border border-slate-300 focus-within:ring-2 focus-within:ring-[#111827]/30 focus-within:border-[#111827] overflow-hidden transition bg-white">
@@ -247,14 +299,35 @@ export default function GstLandingPage() {
                       value={heroPhone}
                       onChange={(e) => {
                         setHeroPhone(e.target.value.replace(/\D/g, ''));
-                        setHeroPhoneError('');
+                        setHeroErrors((prev) => ({ ...prev, phone: '' }));
                       }}
                       placeholder="Mobile Number"
                       className="w-full px-4 py-3 text-slate-900 text-sm font-medium focus:outline-none"
                     />
                   </div>
-                  {heroPhoneError && (
-                    <p className="text-[11px] text-rose-600 font-medium px-1">{heroPhoneError}</p>
+                  {heroErrors.phone && (
+                    <p className="text-[11px] text-rose-600 font-medium px-1">{heroErrors.phone}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <input
+                    type="text"
+                    maxLength={10}
+                    autoCapitalize="characters"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    value={heroPan}
+                    onChange={(e) => {
+                      setHeroPan(e.target.value.toUpperCase());
+                      setHeroErrors((prev) => ({ ...prev, pan: '' }));
+                    }}
+                    placeholder="PAN (e.g. ABCDE1234F)"
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-300 text-slate-900 text-sm font-mono font-bold tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827] transition"
+                  />
+                  <PanVerificationBadge pan={heroPan} panAuth={heroPanAuth} />
+                  {heroErrors.pan && (
+                    <p className="text-[11px] text-rose-600 font-medium px-1">{heroErrors.pan}</p>
                   )}
                 </div>
 
@@ -541,8 +614,7 @@ export default function GstLandingPage() {
           period: 'onwards, inclusive of GST',
         }}
         onSuccess={() => {
-          const cleanPhone = heroPhone.replace(/\D/g, '');
-          navigate(pendingPlan ? applyUrl(pendingPlan, cleanPhone.length === 10 ? cleanPhone : '') : '/apply/gst');
+          saveHeroDraftAndGo(pendingPlan || selectedPlanId);
         }}
       />
     </div>

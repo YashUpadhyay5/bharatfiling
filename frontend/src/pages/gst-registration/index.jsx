@@ -154,6 +154,24 @@ export default function GstRegistrationModule() {
   const [panAuth, setPanAuth] = useState(() => validateIndianPAN(getInitialState().pan, getInitialState().name));
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // GST no longer has its own "Applicant & Identification" screen — that's collected
+  // directly on the landing page's lead-capture card. Anyone who lands here without
+  // having gone through that card (no name/phone/PAN yet) is sent back there instead
+  // of seeing a blank old-style Step 1 form.
+  useEffect(() => {
+    if (serviceMeta.type !== 'GST' || currentStep !== 1) return;
+    const cleanPhone = formData.phone.replace(/\D/g, '');
+    const hasIdentity =
+      formData.name.trim() &&
+      cleanPhone.length === 10 &&
+      formData.pan.trim().length === 10 &&
+      validateIndianPAN(formData.pan, formData.name).isValid;
+    if (!hasIdentity) {
+      navigate('/services/gst-registration', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Pre-fill form from user account once authenticated
   useEffect(() => {
     if (user) {
@@ -313,7 +331,11 @@ export default function GstRegistrationModule() {
                 <BusinessJurisdictionPage
                   formData={formData}
                   onInputChange={handleInputChange}
-                  onBack={() => setSearchParams({ step: '1' })}
+                  onBack={() =>
+                    serviceMeta.type === 'GST'
+                      ? navigate('/services/gst-registration')
+                      : setSearchParams({ step: '1' })
+                  }
                   onSubmit={handleStep2Submit}
                   isSubmitting={isSubmitting}
                 />
