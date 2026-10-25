@@ -1,9 +1,10 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { db } from '../../database/db.js';
+import { db } from '../../../database/db.js';
 import crypto from 'crypto';
-import { authenticate, optionalAuth } from '../../middleware/auth.js';
-import { canAccessApplication, GUEST_USER_ID } from '../../middleware/ownership.js';
+import { authenticate, optionalAuth } from '../../../middleware/auth.js';
+import { canAccessApplication, GUEST_USER_ID } from '../../../middleware/ownership.js';
+import { resolveGstPlan } from '../../../config/gstPlans.js';
 
 const router = express.Router();
 
@@ -75,6 +76,9 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
       email = '',
       serviceSlug = 'gst-registration',
       serviceType = 'GST',
+      plan = '',
+      propertyType = '',
+      applyReasons = [],
     } = req.body;
 
     if (!name || !phone) {
@@ -85,14 +89,20 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
     const cleanPhone = String(phone).replace(/\D/g, '').slice(-10);
     const cleanPan = (pan || '').toUpperCase().trim();
     const cleanEmail = email || `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@gmail.com`;
+    const cleanPropertyType = String(propertyType || '').trim().slice(0, 80);
+    const cleanApplyReasons = Array.isArray(applyReasons)
+      ? applyReasons.filter((r) => typeof r === 'string').map((r) => r.trim().slice(0, 100)).slice(0, 10)
+      : [];
 
     // Multi-module configuration catalog
     let moduleType = 'GST';
     let prefix = 'GST-2026-';
-    let serviceName = 'GST Registration (Form REG-01 + Monthly Filing)';
-    let totalAmount = 1769;
-    let subtotal = 1499;
-    let gstAmount = 270;
+    const gstPlan = resolveGstPlan(plan);
+    let selectedPlanId = gstPlan.id;
+    let serviceName = gstPlan.serviceName;
+    let totalAmount = gstPlan.amount;
+    let subtotal = gstPlan.subtotal;
+    let gstAmount = gstPlan.gstAmount;
 
     const slug = (serviceSlug || '').toLowerCase();
     const type = (serviceType || '').toUpperCase();
@@ -134,6 +144,11 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
       gstAmount = 122;
     }
 
+    // Plan tiers (Standard/Premium/Elite) only apply to the GST registration module
+    if (moduleType !== 'GST') {
+      selectedPlanId = null;
+    }
+
     // Unique order ID e.g. est1791262...d
     const orderId = `est${Date.now()}${crypto.randomBytes(8).toString('hex')}`;
     const appId = `app_${moduleType.toLowerCase()}_${uuidv4().replace(/-/g, '').slice(0, 20)}`;
@@ -151,6 +166,7 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
       business_id: `biz_${uuidv4().slice(0, 8)}`,
       business_type: businessType,
       state: state,
+      plan: selectedPlanId,
       customer_status: 'Quote Generated',
       internal_status: 'PAYMENT_PENDING',
       fields_data: {
@@ -160,6 +176,8 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
         email: cleanEmail,
         state: state,
         business_type: businessType,
+        property_type: cleanPropertyType,
+        apply_reasons: cleanApplyReasons,
       },
       assigned_ca_id: null,
       payment_completed: false,
@@ -179,6 +197,7 @@ router.post(['/onboarding-quote', '/quote'], optionalAuth, (req, res) => {
       module_type: moduleType,
       user_id: userId,
       service_name: serviceName,
+      plan: selectedPlanId,
       amount: totalAmount,
       subtotal: subtotal,
       gst_amount: gstAmount,

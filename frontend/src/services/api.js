@@ -351,6 +351,15 @@ export const api = {
     return handleResponse(res);
   },
 
+  updateGstCheckoutPlan: async (orderId, plan) => {
+    const res = await fetchWithRetry(`${API_BASE}/gst/checkout-order/${orderId}/plan`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify({ plan }),
+    });
+    return handleResponse(res);
+  },
+
   verifyUpiPayment: async (payload) => {
     const res = await fetchWithRetry(`${API_BASE}/payments/verify-upi`, {
       method: 'POST',

@@ -22,6 +22,9 @@ const GstRegistrationModule = lazy(() => import('./pages/gst-registration/index.
 const GstCheckoutPage = lazy(() =>
   import('./pages/gst-registration/index.jsx').then((m) => ({ default: m.OrderCheckoutPage }))
 );
+const GstPaymentPage = lazy(() =>
+  import('./pages/gst-registration/index.jsx').then((m) => ({ default: m.GstPaymentPage }))
+);
 const UdyamLandingPage = lazy(() => import('./pages/UdyamLandingPage.jsx'));
 const UdyamRegistrationModule = lazy(() => import('./pages/udyam-registration/index.jsx'));
 const UdyamCheckoutPage = lazy(() =>
@@ -90,6 +93,7 @@ export default function App() {
                 <Route path="/checkout/udyam/:orderId" element={<UdyamCheckoutPage />} />
                 <Route path="/checkout" element={<GstCheckoutPage />} />
                 <Route path="/checkout/:orderId" element={<GstCheckoutPage />} />
+                <Route path="/checkout/:orderId/pay" element={<GstPaymentPage />} />
 
                 <Route path="/ca/dashboard" element={<CaDashboardPage />} />
                 <Route path="/admin" element={<AdminDashboardPage />} />

@@ -1,9 +1,9 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { db } from '../../database/db.js';
+import { db } from '../../../database/db.js';
 import crypto from 'crypto';
-import { authenticate, optionalAuth } from '../../middleware/auth.js';
-import { canAccessApplication, GUEST_USER_ID } from '../../middleware/ownership.js';
+import { authenticate, optionalAuth } from '../../../middleware/auth.js';
+import { canAccessApplication, GUEST_USER_ID } from '../../../middleware/ownership.js';
 
 const router = express.Router();
 

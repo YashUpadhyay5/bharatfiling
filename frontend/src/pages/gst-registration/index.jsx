@@ -12,10 +12,12 @@ import OnboardingHero from './components/OnboardingHero.jsx';
 import TrustFooter from './components/TrustFooter.jsx';
 import ApplicantPanPage from './1-ApplicantPanPage.jsx';
 import BusinessJurisdictionPage from './2-BusinessJurisdictionPage.jsx';
+import { getGstPlan } from './constants.js';
 
 export { default as ApplicantPanPage } from './1-ApplicantPanPage.jsx';
 export { default as BusinessJurisdictionPage } from './2-BusinessJurisdictionPage.jsx';
 export { default as OrderCheckoutPage } from './3-OrderCheckoutPage.jsx';
+export { default as GstPaymentPage } from './4-PaymentPage.jsx';
 
 const SERVICE_CONFIGS = {
   gst: {
@@ -121,9 +123,13 @@ export default function GstRegistrationModule() {
 
   // Retrieve cached draft from localStorage for refresh recovery
   const getInitialState = () => {
+    const urlPlan = searchParams.get('plan');
     try {
       const saved = localStorage.getItem(`bharatfiling_${serviceMeta.slug}_draft`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return urlPlan ? { ...parsed, plan: urlPlan } : parsed;
+      }
     } catch {
       // Ignore parse error
     }
@@ -133,6 +139,9 @@ export default function GstRegistrationModule() {
       pan: '',
       state: 'Karnataka',
       businessType: serviceMeta.type === 'COMPANY' ? 'Private Limited Company' : 'Proprietorship',
+      propertyType: '',
+      applyReasons: [],
+      plan: searchParams.get('plan') || 'standard',
     };
   };
 
@@ -217,6 +226,10 @@ export default function GstRegistrationModule() {
       showError('Please select nature of business');
       return;
     }
+    if (serviceMeta.type === 'GST' && !formData.propertyType) {
+      showError('Please select the type of property where your office is located');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -228,6 +241,9 @@ export default function GstRegistrationModule() {
         businessType: formData.businessType,
         serviceSlug: serviceMeta.slug,
         serviceType: serviceMeta.type,
+        plan: formData.plan,
+        propertyType: formData.propertyType,
+        applyReasons: formData.applyReasons,
       });
 
       if (res.success && res.orderId) {
@@ -255,7 +271,11 @@ export default function GstRegistrationModule() {
           </span>
           <span className="font-medium">
             Professional Filing Package for {serviceMeta.title} from{' '}
-            <strong className="text-slate-900 font-bold">{serviceMeta.priceLabel}</strong>
+            <strong className="text-slate-900 font-bold">
+              {serviceMeta.type === 'GST'
+                ? `₹${getGstPlan(formData.plan).price.toLocaleString('en-IN')} (${getGstPlan(formData.plan).name} Plan)`
+                : serviceMeta.priceLabel}
+            </strong>
           </span>
           <Link
             to="/pricing"

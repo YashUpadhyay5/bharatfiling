@@ -1,7 +1,7 @@
 import express from 'express';
-import { db } from '../../database/db.js';
-import { optionalAuth } from '../../middleware/auth.js';
-import { GUEST_USER_ID } from '../../middleware/ownership.js';
+import { db } from '../../../database/db.js';
+import { optionalAuth } from '../../../middleware/auth.js';
+import { GUEST_USER_ID } from '../../../middleware/ownership.js';
 
 const router = express.Router();
 

@@ -1,17 +1,17 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { db } from '../../database/db.js';
-import { optionalAuth } from '../../middleware/auth.js';
-import { GUEST_USER_ID } from '../../middleware/ownership.js';
-import { emitToCADesk } from '../../services/socket.service.js';
-import { createAndDispatchNotification } from '../../services/notification.service.js';
-import { ENV } from '../../config/env.js';
+import { db } from '../../../database/db.js';
+import { optionalAuth } from '../../../middleware/auth.js';
+import { GUEST_USER_ID } from '../../../middleware/ownership.js';
+import { emitToCADesk } from '../../../services/socket.service.js';
+import { createAndDispatchNotification } from '../../../services/notification.service.js';
+import { ENV } from '../../../config/env.js';
 
 const router = express.Router();
 
 /**
  * POST /verify-payment & POST /payment/verify
- * Confirms Direct One-Time Payment (CCAvenue Gateway - NO AUTOPAY) for Udyam Registration.
+ * Confirms UPI AutoPay / Instant QR payment for GST registration.
  */
 router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => {
   try {
@@ -22,7 +22,7 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
       });
     }
 
-    const { order_id, payment_id, payment_method, billing_info } = req.body;
+    const { order_id, payment_id, vpa, mandate_id } = req.body;
 
     if (!order_id) {
       return res.status(400).json({ success: false, message: 'Order ID is required.' });
@@ -59,9 +59,9 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
       orders[orderIndex] = {
         ...orders[orderIndex],
         status: 'PAID',
-        payment_id: payment_id || `pay_ccav_${uuidv4().slice(0, 8)}`,
-        payment_method: payment_method || 'DIRECT_GATEWAY',
-        billing_info: billing_info || orders[orderIndex].billing_info || null,
+        payment_id: payment_id || `pay_${uuidv4().slice(0, 8)}`,
+        mandate_id: mandate_id || `man_${uuidv4().slice(0, 8)}`,
+        vpa: vpa || orders[orderIndex].customer_phone + '@upi',
         paid_at: new Date().toISOString(),
       };
       updatedOrder = orders[orderIndex];
@@ -93,8 +93,8 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
         events.push({
           id: `evt_${uuidv4().slice(0, 8)}`,
           application_id: appId,
-          title: 'Direct Fee Payment Received (₹3,421)',
-          description: `One-time direct payment verified via CCAvenue Gateway. Assigned to CA Verification Desk.`,
+          title: 'Payment Confirmed & AutoPay Activated',
+          description: `Mandate authorized for ${updatedOrder?.service_name || 'GST Registration'}. Ready for document upload.`,
           actor_role: 'SYSTEM',
           created_at: new Date().toISOString(),
         });
@@ -104,16 +104,16 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
         emitToCADesk('ca:new_case', {
           application_id: appId,
           order_id: updatedOrder?.id,
-          module_type: 'UDYAM',
-          service_name: updatedOrder?.service_name || 'UDYAM Registration (UDYAM + LEDGERS)',
-          customer_name: updatedOrder?.customer_name || 'MSME Applicant',
+          module_type: updatedApp?.module_type || updatedOrder?.module_type || 'GST',
+          service_name: updatedOrder?.service_name || updatedApp?.service_name || 'Statutory Registration',
+          customer_name: updatedOrder?.customer_name || 'New Compliance Applicant',
           customer_phone: updatedOrder?.customer_phone || '9876543210',
-          amount: updatedOrder?.amount || 3421,
+          amount: updatedOrder?.amount || 1769,
           state: updatedApp?.state || 'Karnataka',
           submitted_at: new Date().toISOString(),
         });
 
-        // Persistent Notification to Customer
+        // 1. Persistent Notification to Customer
         if (updatedApp?.user_id) {
           createAndDispatchNotification({
             recipient_id: updatedApp.user_id,
@@ -121,24 +121,44 @@ router.post(['/verify-payment', '/payment/verify'], optionalAuth, (req, res) => 
             application_id: appId,
             order_id: updatedOrder?.id,
             type: 'PAYMENT_SUCCESS',
-            title: 'Payment Confirmed & Udyam Filing Active 💳',
-            message: `Your payment of ₹${updatedOrder?.amount || 3421} has been verified. Case transferred to CA verification desk.`,
+            title: 'Payment Confirmed & Filing Active 💳',
+            message: `Your payment of ₹${updatedOrder?.amount || 1769} has been verified. Case transferred to CA verification desk.`,
             severity: 'success',
             action_url: `/dashboard?app=${appId}`,
             metadata: {
-              amount: updatedOrder?.amount || 3421,
+              amount: updatedOrder?.amount || 1769,
               order_id: updatedOrder?.id,
               service_name: updatedOrder?.service_name,
             },
             dedup_key: `PAYMENT_SUCCESS_${updatedOrder?.id || order_id}`,
-          }).catch((e) => console.error('Customer payment notification error:', e));
+          });
         }
+
+        // 2. Persistent Notification to CA Desk
+        createAndDispatchNotification({
+          recipient_id: null,
+          recipient_role: 'CA',
+          application_id: appId,
+          order_id: updatedOrder?.id,
+          type: 'NEW_PAID_CASE',
+          title: 'New Paid Filing Case Received',
+          message: `${updatedOrder?.customer_name || 'Customer'} paid ₹${updatedOrder?.amount || 1769} for ${updatedOrder?.service_name || 'GST Registration'}.`,
+          severity: 'info',
+          action_url: `/ca/dashboard?caseId=${appId}`,
+          metadata: {
+            customer_name: updatedOrder?.customer_name,
+            customer_phone: updatedOrder?.customer_phone,
+            amount: updatedOrder?.amount || 1769,
+            state: updatedApp?.state,
+          },
+          dedup_key: `NEW_PAID_CASE_${updatedOrder?.id || order_id}`,
+        });
       }
     }
 
     res.json({
       success: true,
-      message: 'Direct payment confirmed successfully. Case transferred to CA desk.',
+      message: 'Payment verified and subscription activated successfully.',
       order: updatedOrder,
       application: updatedApp,
     });

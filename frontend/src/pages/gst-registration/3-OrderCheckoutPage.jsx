@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck,
   Check,
@@ -8,17 +8,15 @@ import {
   CreditCard,
   ChevronDown,
   ChevronUp,
-  ExternalLink,
-  ArrowRight,
-  Sparkles,
+  Award,
+  Loader2,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { api } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
-import PaymentModal from '../../components/checkout/PaymentModal.jsx';
 import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
 import UdyamCheckoutPage from '../udyam-registration/3-UdyamCheckoutPage.jsx';
+import { GST_PLANS } from './constants.js';
 
 export default function OrderCheckoutPage() {
   const { orderId: paramOrderId } = useParams();
@@ -32,7 +30,7 @@ export default function OrderCheckoutPage() {
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDeliverables, setShowDeliverables] = useState(false);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [changingPlan, setChangingPlan] = useState(null);
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -53,10 +51,12 @@ export default function OrderCheckoutPage() {
         setOrder({
           id: orderId || `est${Date.now()}d`,
           order_number: `#${orderId || 'est2026d'}`,
-          service_name: 'GST Registration (GST Registration + Monthly Filing)',
-          subtotal: 1499,
-          gst_amount: 270,
-          amount: 1769,
+          module_type: 'GST',
+          plan: 'standard',
+          service_name: 'GST Registration (Standard — 48 Hour Filing)',
+          subtotal: 338,
+          gst_amount: 61,
+          amount: 399,
           customer_name: draft.name || user?.full_name || 'GST Applicant',
           customer_phone: draft.phone || user?.phone || '9876543210',
           customer_email: user?.email || 'applicant@gmail.com',
@@ -93,15 +93,30 @@ export default function OrderCheckoutPage() {
     showSuccess('Quotation link copied to clipboard!');
   };
 
-  const handlePaymentSuccess = (paymentResult) => {
-    setIsPaymentModalOpen(false);
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
-    showSuccess('Payment verified & GST order confirmed! Redirecting to Dashboard...');
-    navigate('/dashboard');
+  const handleProceedToPay = () => {
+    navigate(`/checkout/${order?.id || orderId}/pay`);
+  };
+
+  const handleSelectPlan = async (planId) => {
+    if (!order?.id || order.status !== 'CREATED') {
+      // Fallback / already-paid order: just proceed with whatever plan is already quoted
+      handleProceedToPay();
+      return;
+    }
+    try {
+      setChangingPlan(planId);
+      const res = await api.updateGstCheckoutPlan(order.id, planId);
+      if (res.success && res.order) {
+        setOrder(res.order);
+        navigate(`/checkout/${order.id}/pay`);
+      } else {
+        showError(res.message || 'Could not switch plans. Please try again.');
+      }
+    } catch (err) {
+      showError(err.message || 'Could not switch plans. Please try again.');
+    } finally {
+      setChangingPlan(null);
+    }
   };
 
   if (loading) {
@@ -170,14 +185,89 @@ export default function OrderCheckoutPage() {
               </div>
             </div>
 
+            {/* Plan Tier Picker (GST module only) */}
+            {order?.module_type === 'GST' && (
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Choose Your Plan
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {GST_PLANS.map((plan) => {
+                    const isActive = (order?.plan || 'standard') === plan.id;
+                    const isBusy = changingPlan === plan.id;
+                    return (
+                      <div
+                        key={plan.id}
+                        className={`relative rounded-2xl p-5 flex flex-col transition-all duration-200 ${
+                          plan.recommended
+                            ? 'bg-[#111827] text-white border border-[#111827] shadow-[0_14px_30px_rgba(17,24,39,0.22)]'
+                            : 'bg-white text-slate-900 border border-slate-200 shadow-xs'
+                        } ${isActive ? 'ring-2 ring-offset-2 ring-emerald-500' : ''}`}
+                      >
+                        {plan.recommended && (
+                          <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-amber-400 text-[#111827] text-[10px] font-bold shadow-xs flex items-center gap-1 whitespace-nowrap">
+                            <Award className="w-3 h-3" /> Recommended
+                          </span>
+                        )}
+                        {isActive && (
+                          <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500">
+                            <Check className="w-3.5 h-3.5" /> Selected
+                          </span>
+                        )}
+
+                        <h4 className={`text-sm font-bold ${plan.recommended ? 'text-white' : 'text-slate-900'}`}>
+                          {plan.name}
+                        </h4>
+                        <div className={`text-xl font-extrabold mt-1 ${plan.recommended ? 'text-white' : 'text-slate-900'}`}>
+                          ₹{plan.price.toLocaleString('en-IN')}
+                        </div>
+                        <div className={`text-[11px] mb-3 ${plan.recommended ? 'text-slate-400' : 'text-slate-400'}`}>
+                          <span className="line-through mr-1">₹{plan.originalPrice.toLocaleString('en-IN')}</span>
+                          {plan.discountPercent}% off
+                        </div>
+
+                        <ul className={`space-y-1.5 text-[11px] flex-1 ${plan.recommended ? 'text-slate-200' : 'text-slate-600'}`}>
+                          {plan.features.slice(0, 4).map((f) => (
+                            <li key={f} className="flex items-start gap-1.5">
+                              <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${plan.recommended ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                              <span>{f}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        <button
+                          type="button"
+                          onClick={() => handleSelectPlan(plan.id)}
+                          disabled={changingPlan !== null}
+                          className={`mt-4 w-full py-2.5 rounded-full text-xs font-bold transition active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-60 ${
+                            plan.recommended
+                              ? 'bg-amber-400 hover:bg-amber-300 text-[#111827]'
+                              : 'bg-[#111827] hover:bg-[#1F2937] text-white'
+                          }`}
+                        >
+                          {isBusy ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : isActive ? (
+                            'Proceed to Pay'
+                          ) : (
+                            'Switch to this Plan'
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Service Package Card */}
             <div className="bg-white rounded-3xl p-6 shadow-[0_8px_25px_rgba(17,24,39,0.04)] border border-slate-200/90 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-slate-100 pb-3">
                 <h2 className="text-base font-extrabold text-slate-900 leading-snug">
-                  GST Registration (GST Registration + Monthly Filing)
+                  {order?.service_name || 'GST Registration'}
                 </h2>
                 <div className="text-lg font-extrabold text-slate-900 whitespace-nowrap">
-                  1,499 <span className="text-xs font-semibold text-slate-500">INR</span>
+                  {(order?.subtotal ?? 338).toLocaleString('en-IN')} <span className="text-xs font-semibold text-slate-500">INR</span>
                 </div>
               </div>
 
@@ -250,26 +340,26 @@ export default function OrderCheckoutPage() {
             <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_12px_40px_rgba(17,24,39,0.08)] border border-slate-200/90 space-y-6 sticky top-8">
               <div>
                 <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold">
-                  Monthly Subscription
+                  {GST_PLANS.find((p) => p.id === order?.plan)?.name || 'Standard'} Plan
                 </span>
                 <h3 className="text-lg font-extrabold text-slate-900 mt-2">
-                  Statutory Compliance Plan
+                  Order Summary
                 </h3>
               </div>
 
               {/* Price Breakdown */}
               <div className="space-y-2.5 border-t border-b border-slate-100 py-4 text-xs">
                 <div className="flex justify-between text-slate-600">
-                  <span>GST Registration + Filing</span>
-                  <span className="font-semibold text-slate-900">₹{order?.subtotal || 1499}</span>
+                  <span>Professional Fees</span>
+                  <span className="font-semibold text-slate-900">₹{order?.subtotal || 338}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>GST (18%)</span>
-                  <span className="font-semibold text-slate-900">₹{order?.gst_amount || 270}</span>
+                  <span className="font-semibold text-slate-900">₹{order?.gst_amount || 61}</span>
                 </div>
                 <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-100">
-                  <span>Total Monthly Fee</span>
-                  <span className="text-[#111827]">₹{order?.amount || 1769} INR</span>
+                  <span>Total Amount Payable</span>
+                  <span className="text-[#111827]">₹{order?.amount || 399} INR</span>
                 </div>
               </div>
 
@@ -277,7 +367,7 @@ export default function OrderCheckoutPage() {
               <div className="space-y-2 text-xs text-slate-600">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Cancel anytime from your UPI mobile app</span>
+                  <span>Pay once via UPI, Card or Net Banking</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -291,29 +381,19 @@ export default function OrderCheckoutPage() {
 
               {/* CTA Button */}
               <SplitGradientButton
-                onClick={() => setIsPaymentModalOpen(true)}
-                label={`Activate Subscription • ₹${order?.amount || 1769} INR`}
+                onClick={handleProceedToPay}
+                label={`Proceed to Pay • ₹${order?.amount || 399} INR`}
                 fullWidth
               />
 
               <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 text-center">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Secure UPI payment over an encrypted connection</span>
+                <span>Secure payment over an encrypted connection</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* UPI AutoPay Modal */}
-      {isPaymentModalOpen && (
-        <PaymentModal
-          isOpen={isPaymentModalOpen}
-          onClose={() => setIsPaymentModalOpen(false)}
-          order={order}
-          onPaymentSuccess={handlePaymentSuccess}
-        />
-      )}
     </div>
   );
 }
