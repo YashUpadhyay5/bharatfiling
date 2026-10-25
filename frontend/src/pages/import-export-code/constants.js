@@ -1,19 +1,19 @@
 export const IEC_PLANS = [
   {
     id: 'starter',
-    name: 'Starter',
+    name: 'Start my IEC registration',
     subtitle: 'Essential DGFT IEC code for new exporters',
-    originalPrice: 2499,
-    discountLabel: '40% off',
-    discountPercent: 40,
+    originalPrice: 1999,
+    discountLabel: 'Exclusive ₹500 off for online payment',
+    discountPercent: 25,
     price: 1499,
     gstRate: 0.18,
-    tat: '2-3 Days',
+    tat: '7 Days',
     features: [
-      '10-Digit IEC Code from DGFT',
-      'Document cross-verification by Export Specialist',
-      'DGFT Portal profile creation & registration',
-      'Digital e-IEC Certificate issuance',
+      'Quick IEC registration in 7 days',
+      'Fully online registration process',
+      'Track application progress update anytime, anywhere',
+      'Get started with statutory requirements',
     ],
   },
   {
