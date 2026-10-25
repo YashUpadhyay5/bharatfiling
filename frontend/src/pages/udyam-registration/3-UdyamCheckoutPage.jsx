@@ -1,352 +1,207 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import {
-  Share2,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
-  Mail,
-  User,
-  Phone,
-  ArrowRight,
-  ShieldCheck,
-} from 'lucide-react';
-import { api } from '../../services/api.js';
-import { useAuth } from '../../context/AuthContext.jsx';
-import { useToast } from '../../context/ToastContext.jsx';
-import DirectPaymentModal from './components/DirectPaymentModal.jsx';
-import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
-import { UDYAM_PRICING } from './constants.js';
+import { Check, ShieldCheck, ArrowRight, ArrowLeft, Star, Clock, Zap } from 'lucide-react';
+import { UDYAM_PLANS, getUdyamPlan } from './constants.js';
 
-export default function UdyamCheckoutPage() {
-  const { orderId: paramOrderId } = useParams();
-  const [searchParams] = useSearchParams();
-  const orderId = paramOrderId || searchParams.get('generator') || searchParams.get('orderId');
+export default function UdyamCheckoutPage({
+  formData = {},
+  selectedPlanId = 'fast-track',
+  onSelectPlan,
+  onProceedToPayment,
+  onBack,
+}) {
+  const [currentPlanId, setCurrentPlanId] = useState(selectedPlanId || 'fast-track');
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { showSuccess, showError } = useToast();
+  const { orderId } = useParams();
 
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [showDeliverables, setShowDeliverables] = useState(true);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [businessNameInput, setBusinessNameInput] = useState('');
+  const currentPlan = getUdyamPlan(currentPlanId);
 
-  useEffect(() => {
-    const loadOrder = async () => {
-      try {
-        setLoading(true);
-        if (orderId) {
-          const res = await api.getUdyamCheckoutOrder(orderId);
-          if (res.success && res.order) {
-            setOrder(res.order);
-            setBusinessNameInput(res.order.enterprise_name || res.order.business_type || '');
-            return;
-          }
-        }
+  const basePrice = currentPlan.price;
+  const gstAmount = Math.round(basePrice * currentPlan.gstRate);
+  const totalAmount = basePrice + gstAmount;
+  const savings = currentPlan.originalPrice - currentPlan.price;
 
-        // Fallback: Check local storage draft
-        const draftStr = localStorage.getItem('bharatfiling_udyam_draft');
-        const draft = draftStr ? JSON.parse(draftStr) : {};
-        setOrder({
-          id: orderId || `est${Date.now()}f1b`,
-          order_number: `#${orderId || 'est1791262017350202692f1b'}`,
-          service_name: UDYAM_PRICING.serviceName,
-          subtotal: UDYAM_PRICING.basePrice,
-          gst_amount: UDYAM_PRICING.gstAmount,
-          amount: UDYAM_PRICING.totalAmount,
-          customer_name: draft.name || draft.enterpriseName || user?.full_name || 'Yash Updhyay',
-          customer_phone: draft.phone || user?.phone || '7668976193',
-          customer_email: user?.email || 'yashupdhyay486@gmail.com',
-          state: draft.state || 'Karnataka',
-          business_type: draft.organizationType || 'Proprietorship',
-          created_at: new Date().toISOString(),
-        });
-      } catch (err) {
-        showError('Loaded order quotation from local session.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadOrder();
-  }, [orderId, user]);
-
-  const maskEmail = (email) => {
-    if (!email || !email.includes('@')) return 'ya********************com';
-    const [namePart, domain] = email.split('@');
-    if (namePart.length <= 2) return `${namePart}****@${domain}`;
-    return `${namePart.slice(0, 2)}${'*'.repeat(Math.max(4, namePart.length - 2))}@${domain}`;
+  const handlePlanSelect = (id) => {
+    setCurrentPlanId(id);
+    if (onSelectPlan) {
+      onSelectPlan(id);
+    }
   };
 
-  const maskPhone = (phone) => {
-    if (!phone) return '+91-*******193';
-    const clean = phone.replace(/\D/g, '');
-    if (clean.length < 10) return `+91-${phone}`;
-    return `+91-*******${clean.slice(-3)}`;
+  const handleContinue = () => {
+    if (onProceedToPayment) {
+      onProceedToPayment(currentPlanId);
+    } else {
+      navigate(`/apply/udyam?step=4&plan=${currentPlanId}`);
+    }
   };
-
-  const handleShare = () => {
-    navigator.clipboard?.writeText(window.location.href);
-    showSuccess('Quotation link copied to clipboard!');
-  };
-
-  if (loading && !order) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center p-8">
-        <div className="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  const currentDateStr = new Date().toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
 
   return (
-    <div className="min-h-screen bg-slate-50/70 font-sans pb-16">
-      {/* Top Company Header matching screenshot */}
-      <div className="bg-white border-b border-slate-200 py-4 px-4 sm:px-8">
+    <div className="min-h-screen bg-[#F5F7F8] font-sans pb-16">
+      {/* Top Header Bar with BharatFiling Logo */}
+      <header className="bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link
-            to="/"
-            title="Return to BharatFiling Homepage"
-            className="flex items-center gap-2 group transition-transform active:scale-95"
-          >
+          <Link to="/" className="inline-flex items-center select-none" title="BharatFiling">
             <img
-              src="/bharatfiling-brand-icon.png"
+              src="/bharatfiling-user-logo.png"
               alt="BharatFiling"
-              className="h-8 w-auto object-contain shrink-0"
+              className="h-8 sm:h-9 w-auto object-contain"
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
               }}
             />
-            <div className="flex items-baseline font-extrabold tracking-tight text-xl leading-none select-none">
-              <span className="text-[#111827]">Bharat</span>
-              <span className="text-[#F26522]">Filing</span>
-            </div>
           </Link>
-          <div className="text-right text-[11px] text-slate-500 leading-tight hidden sm:block">
-            <div className="font-bold text-slate-700">BharatFiling Compliance Private Limited</div>
-            <div>Central Compliance Centre, Bengaluru - 560001</div>
-            <div>CIN: U74140KA2026PTC098978 | GSTIN: 29AADCB16142F1ZX</div>
+
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>100% Secure Checkout</span>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-6 space-y-6">
-        {/* Order Summary Title & Reference */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-bold text-slate-700">Order Summary</h2>
-            <div className="text-xs font-mono font-bold text-emerald-700 mt-0.5">
-              # {order?.order_number?.replace('#', '') || 'est1791262017350202692f1b'}
+      {/* Main Container */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+        {/* Title & Subtitle */}
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-2">
+            Step 3 of 4: Choose Your Registration Tier
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#042D50] tracking-tight">
+            Select Your Udyam Filing Package
+          </h1>
+          <p className="mt-2 text-xs sm:text-sm text-slate-600">
+            All plans include statutory CA review and government portal filing. Choose the speed and advisory tier matching your enterprise needs.
+          </p>
+        </div>
+
+        {/* 3 Pricing Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mb-10">
+          {UDYAM_PLANS.map((plan) => {
+            const isSelected = plan.id === currentPlanId;
+            return (
+              <div
+                key={plan.id}
+                onClick={() => handlePlanSelect(plan.id)}
+                className={`rounded-2xl bg-white border transition-all duration-200 relative flex flex-col justify-between cursor-pointer ${
+                  isSelected
+                    ? 'border-[#2563EB] ring-2 ring-[#2563EB]/20 shadow-xl -translate-y-1'
+                    : 'border-slate-200 hover:border-slate-300 shadow-sm'
+                }`}
+              >
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#022B50] text-white text-[10px] font-extrabold uppercase tracking-wider py-1 px-3.5 rounded-full shadow-sm flex items-center gap-1 select-none">
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <span>Most Popular</span>
+                  </div>
+                )}
+
+                <div className="p-6">
+                  {/* Plan Name & Tagline */}
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-extrabold text-slate-900">{plan.name}</h3>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                      {plan.tat}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500 leading-snug min-h-[36px]">
+                    {plan.tagline}
+                  </p>
+
+                  {/* Pricing Section */}
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex items-baseline gap-2">
+                    <span className="text-3xl font-black text-slate-900">
+                      ₹{plan.price.toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-xs text-slate-400 line-through">
+                      ₹{plan.originalPrice.toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                      {plan.discountPercent}% OFF
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">+ 18% GST Applicable</div>
+
+                  {/* Deliverables Checklist */}
+                  <div className="mt-6 space-y-2.5">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      What&apos;s Included:
+                    </div>
+                    {plan.features.map((feat, i) => (
+                      <div key={i} className="flex items-start gap-2.5 text-xs text-slate-700">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 stroke-[2.5]" />
+                        <span className="leading-tight">{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Card Bottom Select Button */}
+                <div className="p-6 pt-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlanSelect(plan.id);
+                    }}
+                    className={`w-full py-2.5 rounded-lg text-xs font-bold tracking-wide transition cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#022B50] text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {isSelected ? '✓ Plan Selected' : 'Choose Plan'}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Floating / Sticky Order Summary & Proceed CTA Bar */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-lg max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center sm:text-left">
+            <div className="text-xs text-slate-500">
+              Selected Package:{' '}
+              <strong className="text-slate-900 font-bold">{currentPlan.name} Plan</strong>
+            </div>
+            <div className="flex items-baseline gap-2 justify-center sm:justify-start">
+              <span className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                ₹{totalAmount.toLocaleString('en-IN')}
+              </span>
+              <span className="text-xs text-slate-500 font-medium">
+                (₹{basePrice.toLocaleString('en-IN')} + ₹{gstAmount.toLocaleString('en-IN')} GST)
+              </span>
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                Saved ₹{savings.toLocaleString('en-IN')}
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-500">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              <span>{currentDateStr}</span>
-            </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="px-4 py-3 rounded-lg border border-slate-300 text-slate-700 text-xs sm:text-sm font-semibold hover:bg-slate-50 transition cursor-pointer"
+              >
+                Back
+              </button>
+            )}
+
             <button
-              onClick={handleShare}
-              className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer"
-              title="Share quotation"
+              type="button"
+              onClick={handleContinue}
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-[#002B49] hover:bg-[#073866] active:scale-98 text-white text-xs sm:text-sm font-bold shadow-md transition cursor-pointer"
             >
-              <Share2 className="w-3.5 h-3.5" />
+              <span>Proceed to Payment</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* 2-Column Main Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Product Card & Deliverables */}
-          <div className="lg:col-span-8 space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
-                <div className="space-y-1">
-                  <h3 className="text-base font-extrabold text-slate-900">
-                    {order?.service_name || 'UDYAM Registration (UDYAM + LEDGERS)'}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Get UDYAM registration for your business with the LEDGERS platform to track compliance.
-                  </p>
-                </div>
-                <div className="text-left sm:text-right shrink-0">
-                  <div className="text-base font-extrabold text-slate-900">2,899 INR</div>
-                </div>
-              </div>
-
-              {/* Deliverables Accordion */}
-              <div className="border-t border-slate-100 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowDeliverables(!showDeliverables)}
-                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer"
-                >
-                  <span>Deliverables</span>
-                  {showDeliverables ? (
-                    <ChevronUp className="w-3.5 h-3.5" />
-                  ) : (
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  )}
-                </button>
-
-                {showDeliverables && (
-                  <div className="mt-3 space-y-2 text-xs text-slate-700 animate-fade-in pl-1">
-                    {UDYAM_PRICING.deliverables.map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Quantity Stepper & Search */}
-              <div className="border-t border-slate-100 pt-3 flex items-center justify-end gap-3 text-xs text-slate-600">
-                <span className="font-semibold text-slate-400">Qty</span>
-                <div className="inline-flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
-                  <button type="button" className="px-2.5 py-1 text-slate-400 cursor-not-allowed">
-                    -
-                  </button>
-                  <span className="px-2 font-bold text-slate-800">1</span>
-                  <button type="button" className="px-2.5 py-1 text-slate-400 cursor-not-allowed">
-                    +
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Notes & Support Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-3 text-xs text-slate-600">
-              <div>
-                <strong className="text-slate-800 block mb-0.5">Notes:</strong>
-                <p>
-                  Invoices will be issued and service will be initiated on receipt of payment. Read our
-                  terms of service & refund policy online.
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100">
-                <strong className="text-slate-800 block mb-0.5">Support:</strong>
-                <div className="flex items-center gap-1.5 text-blue-600 font-semibold">
-                  <Mail className="w-3.5 h-3.5" />
-                  <span>billing@bharatfiling.com</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Customer Card, Billing Breakdown & Pay Online */}
-          <div className="lg:col-span-4 space-y-4">
-            {/* Customer Information Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h4 className="text-xs font-bold text-slate-800">Customer</h4>
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="text-slate-400 hover:text-slate-600"
-                  title="Share link"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <div className="space-y-2 text-xs text-slate-700">
-                <div className="flex items-center gap-2">
-                  <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="font-semibold text-slate-900">
-                    {order?.customer_name || 'Yash Updhyay'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="font-mono text-slate-600 break-all">
-                    {maskEmail(order?.customer_email || 'yashupdhyay486@gmail.com')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="font-mono text-slate-600">
-                    {maskPhone(order?.customer_phone || '7668976193')}
-                  </span>
-                </div>
-              </div>
-
-              {/* GSTIN / Business Name Input */}
-              <div className="pt-2">
-                <input
-                  type="text"
-                  value={businessNameInput}
-                  onChange={(e) => setBusinessNameInput(e.target.value)}
-                  placeholder="GSTIN or Business Name"
-                  className="w-full px-3 py-2 text-xs bg-[#F0FDF4] border border-emerald-200 rounded-xl text-slate-800 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-            </div>
-
-            {/* Billing Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-3 text-xs">
-              <h4 className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2">
-                Billing
-              </h4>
-
-              <div className="space-y-2 text-slate-600">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span className="font-semibold text-slate-800">2,899 INR</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>GST (18%)</span>
-                  <span className="font-semibold text-slate-800">522 INR</span>
-                </div>
-                <div className="border-t border-slate-200 pt-2 flex justify-between items-center text-sm font-extrabold text-slate-900">
-                  <span>TOTAL DUE</span>
-                  <span className="text-emerald-600">3,421 INR</span>
-                </div>
-              </div>
-
-              {/* Payment Method Badge */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-slate-500 font-medium">Payment Method</span>
-                <span className="font-extrabold text-slate-800 tracking-wider">CC Avenue</span>
-              </div>
-
-              {/* Pay Online Button */}
-              <div className="pt-2">
-                <SplitGradientButton
-                  onClick={() => setIsPaymentModalOpen(true)}
-                  label={`Pay Online ${order?.amount || 3421} INR`}
-                  fullWidth
-                />
-                <div className="text-[10px] text-slate-400 text-center mt-2">
-                  By clicking Pay, you agree to the{' '}
-                  <span className="text-blue-600 underline cursor-pointer">Terms</span> and{' '}
-                  <span className="text-blue-600 underline cursor-pointer">Privacy</span>.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-
-      {/* Direct Payment Gateway Modal (NO AUTOPAY) */}
-      <DirectPaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
-        order={order}
-        onPaymentSuccess={() => {
-          setIsPaymentModalOpen(false);
-          navigate('/dashboard');
-        }}
-      />
     </div>
   );
 }

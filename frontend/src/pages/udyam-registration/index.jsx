@@ -2,32 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
-import AuthRequiredModal from '../../components/common/AuthRequiredModal.jsx';
-import { api } from '../../services/api.js';
 
-// Screen Components
-import OnboardingHero from './components/OnboardingHero.jsx';
-import TrustFooter from './components/TrustFooter.jsx';
-import UdyamBasicDetailsPage from './1-UdyamBasicDetailsPage.jsx';
+// Modular Step Pages
+import UdyamLandingPage from './1-UdyamLandingPage.jsx';
 import EnterpriseDetailsPage from './2-EnterpriseDetailsPage.jsx';
 import UdyamCheckoutPage from './3-UdyamCheckoutPage.jsx';
+import UdyamPaymentPage from './4-UdyamPaymentPage.jsx';
 
-export { default as UdyamBasicDetailsPage } from './1-UdyamBasicDetailsPage.jsx';
-export { default as EnterpriseDetailsPage } from './2-EnterpriseDetailsPage.jsx';
-export { default as UdyamCheckoutPage } from './3-UdyamCheckoutPage.jsx';
+export {
+  UdyamLandingPage,
+  EnterpriseDetailsPage,
+  UdyamCheckoutPage,
+  UdyamPaymentPage,
+};
 
 export default function UdyamRegistrationModule() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
-  const { showError, showSuccess } = useToast();
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const { user } = useAuth();
+  const { showSuccess, showError } = useToast();
 
   const stepParam = parseInt(searchParams.get('step') || '1', 10);
-  const currentStep = stepParam === 2 ? 2 : 1;
+  const currentStep = [1, 2, 3, 4].includes(stepParam) ? stepParam : 1;
 
-  // Initial State from local storage draft or user profile
-  const getInitialState = () => {
+  const initialPlan = searchParams.get('plan') || 'fast-track';
+
+  const getInitialDraft = () => {
     try {
       const saved = localStorage.getItem('bharatfiling_udyam_draft');
       if (saved) return JSON.parse(saved);
@@ -35,44 +35,29 @@ export default function UdyamRegistrationModule() {
       // Ignore
     }
     return {
-      pan: '',
-      aadhaar: '',
-      nicDivision: '',
-      nicSubDivision: '',
-      nicSubClass: '',
-      name: '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      cityPincode: '',
+      whatsappOptIn: true,
       enterpriseName: '',
       organizationType: 'Proprietorship',
       majorActivity: 'Services',
-      plantAddress: '',
-      city: '',
+      pan: '',
+      aadhaar: '',
       state: 'Karnataka',
-      pincode: '',
-      bankAccountNo: '',
-      bankIfsc: '',
+      plan: initialPlan,
     };
   };
 
-  const [formData, setFormData] = useState(getInitialState);
+  const [formData, setFormData] = useState(getInitialDraft);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pre-fill user data
-  useEffect(() => {
-    if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        name: prev.name || user.full_name || '',
-        phone: prev.phone || user.phone || '',
-      }));
-    }
-  }, [user]);
-
-  // Persist draft to local storage
+  // Sync draft to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('bharatfiling_udyam_draft', JSON.stringify(formData));
     } catch {
-      // Ignore quota
+      // Ignore
     }
   }, [formData]);
 
@@ -80,122 +65,91 @@ export default function UdyamRegistrationModule() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Step 1 Validation & Transition
-  const handleStep1Continue = (e) => {
-    e.preventDefault();
+  // Step 1: Lead capture on landing page -> Proceed to Step 2 directly (No login required)
+  const handleStep1GetStarted = (leadData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...leadData,
+    }));
+    setSearchParams({ step: '2', plan: formData.plan || initialPlan });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-    if (!formData.pan.trim()) {
-      showError('Please enter PAN or GSTIN');
+  // Step 2: Enterprise questionnaire -> Proceed to Step 3
+  const handleStep2Submit = (e) => {
+    if (e) e.preventDefault();
+    if (!formData.enterpriseName?.trim()) {
+      showError('Please enter enterprise / firm name');
       return;
     }
-
-    if (!formData.aadhaar.trim() || formData.aadhaar.replace(/\D/g, '').length !== 12) {
+    if (!formData.pan?.trim()) {
+      showError('Please enter business or proprietor PAN');
+      return;
+    }
+    if (!formData.aadhaar?.trim() || formData.aadhaar.replace(/\D/g, '').length !== 12) {
       showError('Please enter a valid 12-digit Aadhaar number');
       return;
     }
 
-    if (!formData.nicDivision) {
-      showError('Please select NIC Division');
-      return;
-    }
-
-    // Advance to Step 2
-    setSearchParams({ step: '2' });
+    setSearchParams({ step: '3', plan: formData.plan || initialPlan });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2 Submission & Order Generation
-  const handleStep2Submit = async (e) => {
-    e.preventDefault();
-
-    if (!formData.enterpriseName.trim()) {
-      showError('Please enter legal enterprise name');
-      return;
-    }
-
-    if (!formData.plantAddress.trim()) {
-      showError('Please enter plant or office address');
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const res = await api.createUdyamQuote({
-        ...formData,
-        name: formData.name || user?.full_name || 'Yash Updhyay',
-        phone: formData.phone || user?.phone || '7668976193',
-        email: user?.email || 'yashupdhyay486@gmail.com',
-      });
-
-      if (res.success && res.orderId) {
-        showSuccess('Udyam quotation generated successfully!');
-        navigate(`/checkout/${res.orderId}`);
-      } else {
-        showError(res.message || 'Failed to generate quotation.');
-      }
-    } catch (err) {
-      showError(err.message || 'Network error while generating quotation.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  // Step 3: Package tier selection -> Proceed to Step 4
+  const handleStep3Proceed = (planId) => {
+    setFormData((prev) => ({ ...prev, plan: planId }));
+    setSearchParams({ step: '4', plan: planId });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-slate-50 font-sans pb-16">
-      {/* Auth Modal */}
-      <AuthRequiredModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        title="Sign In to Complete Udyam Registration"
-        subtitle="Save your Udyam application and track real-time CA filing progress."
-      />
+    <main className="min-h-screen bg-white">
+      {/* Step 1: Landing Page (Exact clone of Image 1, NO login modal) */}
+      {currentStep === 1 && (
+        <UdyamLandingPage
+          initialData={formData}
+          onGetStarted={handleStep1GetStarted}
+        />
+      )}
 
-      <div className="max-w-5xl mx-auto px-3 sm:px-6 pt-5 sm:pt-10">
-        {/* Main Card matching screenshots */}
-        <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-lg p-4 sm:p-8 lg:p-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: Hero & Benefits */}
-            <div className="lg:col-span-5">
-              <OnboardingHero />
-            </div>
+      {/* Step 2: Enterprise Details Questionnaire */}
+      {currentStep === 2 && (
+        <EnterpriseDetailsPage
+          formData={formData}
+          onInputChange={handleInputChange}
+          onBack={() => {
+            setSearchParams({ step: '1' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onSubmit={handleStep2Submit}
+          isSubmitting={isSubmitting}
+        />
+      )}
 
-            {/* Right Column: Screen 1 or Screen 2 Form */}
-            <div className="lg:col-span-7 bg-slate-50/50 p-4 sm:p-6 lg:p-8 rounded-2xl border border-slate-100">
-              <div className="mb-4 flex items-center justify-between border-b border-slate-200/80 pb-3">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                  Step {currentStep} of 3
-                </span>
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
-                  {currentStep === 1 ? 'Applicant & NIC Code' : 'Enterprise & Bank Setup'}
-                </span>
-              </div>
+      {/* Step 3: Package & Plan Selection */}
+      {currentStep === 3 && (
+        <UdyamCheckoutPage
+          formData={formData}
+          selectedPlanId={formData.plan || initialPlan}
+          onSelectPlan={(id) => setFormData((prev) => ({ ...prev, plan: id }))}
+          onProceedToPayment={handleStep3Proceed}
+          onBack={() => {
+            setSearchParams({ step: '2', plan: formData.plan || initialPlan });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      )}
 
-              {currentStep === 1 && (
-                <UdyamBasicDetailsPage
-                  formData={formData}
-                  onInputChange={handleInputChange}
-                  onSubmit={handleStep1Continue}
-                  isSubmitting={isSubmitting}
-                  isAuthenticated={isAuthenticated}
-                  onOpenAuthModal={() => setAuthModalOpen(true)}
-                />
-              )}
-
-              {currentStep === 2 && (
-                <EnterpriseDetailsPage
-                  formData={formData}
-                  onInputChange={handleInputChange}
-                  onSubmit={handleStep2Submit}
-                  onBack={() => setSearchParams({ step: '1' })}
-                  isSubmitting={isSubmitting}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* 4-Item Trust Footer */}
-          <TrustFooter />
-        </div>
-      </div>
-    </div>
+      {/* Step 4: Payment Desk with Dynamic Pricing & Instant Confirmation */}
+      {currentStep === 4 && (
+        <UdyamPaymentPage
+          planId={formData.plan || initialPlan}
+          formData={formData}
+          onPaymentSuccess={() => {
+            showSuccess('Payment confirmed! Udyam registration is being drafted.');
+          }}
+        />
+      )}
+    </main>
   );
 }
