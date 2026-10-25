@@ -328,30 +328,6 @@ export const api = {
     return handleResponse(res);
   },
 
-  // Payments
-  getPricing: async (businessType) => {
-    const res = await fetchWithRetry(`${API_BASE}/payments/pricing/${encodeURIComponent(businessType)}`);
-    return handleResponse(res);
-  },
-
-  createPaymentOrder: async (applicationId) => {
-    const res = await fetchWithRetry(`${API_BASE}/payments/create-order`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ application_id: applicationId }),
-    });
-    return handleResponse(res);
-  },
-
-  verifyPayment: async (verificationPayload) => {
-    const res = await fetchWithRetry(`${API_BASE}/payments/verify`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(verificationPayload),
-    });
-    return handleResponse(res);
-  },
-
   // Screen 1: Applicant & Identification
   checkGstPan: async (pan) => {
     const res = await fetchWithRetry(`${API_BASE}/gst/applicant/check-pan`, {

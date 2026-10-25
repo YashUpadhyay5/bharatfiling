@@ -52,15 +52,6 @@ export const BUSINESS_NATURES = [
   'Other Commercial Services',
 ];
 
-export const GST_DEFAULT_PLAN = {
-  serviceName: 'GST Registration (GST Registration + Monthly Filing)',
-  subtotal: 1499,
-  gstRate: 18,
-  gstAmount: 270,
-  totalAmount: 1769,
-  billingCycle: 'Monthly',
-};
-
 export const PROPERTY_TYPES = [
   'Owned Property',
   'Rented / Leased Property',

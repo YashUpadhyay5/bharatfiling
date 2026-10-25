@@ -15,9 +15,8 @@ const MODE_LABEL = { UPI_QR: 'UPI', AUTOPAY: 'UPI AutoPay', CARD: 'Card', NETBAN
 /**
  * POST /payment/verify (Screen 4: Payment)
  * Confirms UPI / UPI AutoPay / Card / Net Banking payment for a GST registration order.
- * Kept at /verify-payment too for backwards compatibility with older clients.
  */
-router.post(['/payment/verify', '/verify-payment'], optionalAuth, (req, res) => {
+router.post('/payment/verify', optionalAuth, (req, res) => {
   try {
     if (!ENV.ALLOW_SIMULATED_PAYMENTS) {
       return res.status(503).json({

@@ -5,17 +5,9 @@ import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
 import SplitGradientButton from '../components/common/SplitGradientButton.jsx';
 import {
-  FileCheck2,
-  CheckCircle2,
   ShieldCheck,
   ArrowRight,
-  PhoneCall,
   MessageCircle,
-  Building2,
-  Users,
-  Building,
-  HelpCircle,
-  Sparkles,
   Check,
   ChevronDown,
   ChevronUp,

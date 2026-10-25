@@ -11,7 +11,6 @@ import {
   Clock,
   Lock,
   RefreshCw,
-  Loader2,
   BadgeCheck,
 } from 'lucide-react';
 import { api } from '../../services/api.js';
