@@ -2,13 +2,16 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { INDIAN_STATES, BUSINESS_NATURES, PROPERTY_TYPES, GST_APPLY_REASONS } from './constants.js';
 import SplitGradientButton from '../../components/common/SplitGradientButton.jsx';
+import PanVerificationBadge from './components/PanVerificationBadge.jsx';
 
 export default function BusinessJurisdictionPage({
   formData,
+  panAuth,
   onInputChange,
   onBack,
   onSubmit,
   isSubmitting,
+  showIdentityFields = false,
 }) {
   const selectedReasons = formData.applyReasons || [];
 
@@ -21,6 +24,75 @@ export default function BusinessJurisdictionPage({
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
+      {showIdentityFields && (
+        <>
+          {/* Name */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-700">
+              Name <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => onInputChange('name', e.target.value)}
+              placeholder="e.g. Yash Upadhyay"
+              className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827] transition"
+            />
+          </div>
+
+          {/* Phone Number */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-700">
+              Phone Number <span className="text-rose-500">*</span>
+            </label>
+            <div className="flex rounded-2xl border border-slate-300 focus-within:ring-2 focus-within:ring-[#111827]/30 focus-within:border-[#111827] overflow-hidden transition bg-white">
+              <div className="px-3 py-3 bg-slate-50 border-r border-slate-200 flex items-center gap-1.5 text-xs font-bold text-slate-700 shrink-0">
+                <span>+91</span>
+              </div>
+              <input
+                type="tel"
+                inputMode="tel"
+                maxLength={10}
+                value={formData.phone}
+                onChange={(e) => onInputChange('phone', e.target.value.replace(/\D/g, ''))}
+                placeholder="10-digit mobile number"
+                className="w-full px-4 py-3 text-slate-900 text-sm font-medium focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* PAN */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700">
+                PAN <span className="text-rose-500">*</span>
+              </label>
+              {formData.pan.length > 0 && (
+                <span className="text-[10px] font-mono text-slate-400">{formData.pan.length}/10</span>
+              )}
+            </div>
+            <input
+              type="text"
+              maxLength={10}
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck="false"
+              value={formData.pan}
+              onChange={(e) => onInputChange('pan', e.target.value.toUpperCase())}
+              placeholder="ABCDE1234F"
+              className={`w-full px-4 py-3 rounded-2xl bg-white text-sm font-mono font-bold tracking-wider transition uppercase focus:outline-none ${
+                formData.pan.length === 10
+                  ? panAuth?.isValid
+                    ? 'border-2 border-emerald-500 text-emerald-950 focus:ring-2 focus:ring-emerald-200'
+                    : 'border-2 border-rose-500 text-rose-950 focus:ring-2 focus:ring-rose-200'
+                  : 'border border-slate-300 text-slate-900 focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827]'
+              }`}
+            />
+            <PanVerificationBadge pan={formData.pan} panAuth={panAuth} />
+          </div>
+        </>
+      )}
+
       {/* State / UT Dropdown */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-700">

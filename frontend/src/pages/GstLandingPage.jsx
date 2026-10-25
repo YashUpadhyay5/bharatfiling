@@ -19,8 +19,6 @@ import {
 } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
 import { GST_PLANS, BUSINESS_NATURES } from './gst-registration/constants.js';
-import { validateIndianPAN } from '../utils/panValidator.js';
-import PanVerificationBadge from './gst-registration/components/PanVerificationBadge.jsx';
 
 export default function GstLandingPage() {
   const { isAuthenticated, user } = useAuth();
@@ -29,19 +27,16 @@ export default function GstLandingPage() {
   const [selectedEntity, setSelectedEntity] = useState('Proprietorship');
   const [openFaq, setOpenFaq] = useState(0);
   const [pendingPlan, setPendingPlan] = useState(null);
-  const [heroName, setHeroName] = useState('');
-  const [heroPhone, setHeroPhone] = useState('');
-  const [heroPan, setHeroPan] = useState('');
+  // A single field: either a 10-digit mobile number or an email address.
+  // We don't ask for PAN here — that (and OTP / sign-in) happens right after.
+  const [heroContact, setHeroContact] = useState('');
   const [heroWhatsappOptIn, setHeroWhatsappOptIn] = useState(true);
   const [heroErrors, setHeroErrors] = useState({});
 
-  const heroPanAuth = validateIndianPAN(heroPan, heroName);
-
-  // Pre-fill the lead-capture form from the signed-in account, if any
+  // Pre-fill the lead-capture field from the signed-in account, if any
   useEffect(() => {
     if (user) {
-      setHeroName((prev) => prev || user.full_name || '');
-      setHeroPhone((prev) => prev || user.phone || '');
+      setHeroContact((prev) => prev || user.phone || user.email || '');
     }
   }, [user]);
 
@@ -56,7 +51,7 @@ export default function GstLandingPage() {
 
   const scrollToHeroForm = () => {
     document.getElementById('hero-apply-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    document.getElementById('hero-name-input')?.focus({ preventScroll: true });
+    document.getElementById('hero-contact-input')?.focus({ preventScroll: true });
   };
 
   const handleStartApplication = (e) => {
@@ -69,12 +64,18 @@ export default function GstLandingPage() {
     scrollToHeroForm();
   };
 
+  const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  const isPhone = (v) => /^\d{10}$/.test(v.replace(/\D/g, ''));
+
   const saveHeroDraftAndGo = (planId) => {
-    const cleanPhone = heroPhone.replace(/\D/g, '');
+    const contact = heroContact.trim();
+    const cleanPhone = isPhone(contact) ? contact.replace(/\D/g, '') : (user?.phone || '');
+    const email = isEmail(contact) ? contact : '';
     const draft = {
-      name: heroName.trim(),
+      name: user?.full_name || '',
       phone: cleanPhone,
-      pan: heroPan.trim().toUpperCase(),
+      pan: '',
+      email,
       state: 'Karnataka',
       businessType: BUSINESS_NATURES[0],
       propertyType: '',
@@ -86,24 +87,15 @@ export default function GstLandingPage() {
     } catch {
       // Ignore quota error; formData still gets these via the ?phone=&plan= query params
     }
-    navigate(`/apply/gst?step=2&plan=${planId}&phone=${cleanPhone}`);
+    navigate(`/apply/gst?step=2&plan=${planId}${cleanPhone ? `&phone=${cleanPhone}` : ''}`);
   };
 
   const handleHeroGetStarted = (e) => {
     e.preventDefault();
-    const errors = {};
-    const cleanPhone = heroPhone.replace(/\D/g, '');
+    const contact = heroContact.trim();
 
-    if (!heroName.trim()) errors.name = 'Please enter your full name as per PAN';
-    if (cleanPhone.length !== 10) errors.phone = 'Please enter a valid 10-digit mobile number';
-    if (!heroPan.trim()) {
-      errors.pan = 'Please enter your 10-character PAN card number';
-    } else if (!heroPanAuth.isValid) {
-      errors.pan = heroPanAuth.message || 'Please check and enter a valid PAN number';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setHeroErrors(errors);
+    if (!contact || !(isPhone(contact) || isEmail(contact))) {
+      setHeroErrors({ contact: 'Please enter a valid 10-digit mobile number or email address' });
       return;
     }
     setHeroErrors({});
@@ -270,65 +262,29 @@ export default function GstLandingPage() {
                 </h3>
 
                 <div className="space-y-1.5">
-                  <input
-                    id="hero-name-input"
-                    type="text"
-                    value={heroName}
-                    onChange={(e) => {
-                      setHeroName(e.target.value);
-                      setHeroErrors((prev) => ({ ...prev, name: '' }));
-                    }}
-                    placeholder="Full Name (as per PAN)"
-                    className="w-full px-4 py-3 rounded-2xl border border-slate-300 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827] transition"
-                  />
-                  {heroErrors.name && (
-                    <p className="text-[11px] text-rose-600 font-medium px-1">{heroErrors.name}</p>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
                   <div className="flex rounded-2xl border border-slate-300 focus-within:ring-2 focus-within:ring-[#111827]/30 focus-within:border-[#111827] overflow-hidden transition bg-white">
                     <div className="px-3 py-3 bg-slate-50 border-r border-slate-200 flex items-center gap-1.5 text-xs font-bold text-slate-700 shrink-0">
                       <Smartphone className="w-3.5 h-3.5 text-slate-500" />
-                      <span>+91</span>
                     </div>
                     <input
-                      type="tel"
-                      inputMode="tel"
-                      maxLength={10}
-                      value={heroPhone}
+                      id="hero-contact-input"
+                      type="text"
+                      inputMode="email"
+                      value={heroContact}
                       onChange={(e) => {
-                        setHeroPhone(e.target.value.replace(/\D/g, ''));
-                        setHeroErrors((prev) => ({ ...prev, phone: '' }));
+                        setHeroContact(e.target.value);
+                        setHeroErrors({});
                       }}
-                      placeholder="Mobile Number"
+                      placeholder="Mobile Number or Email"
                       className="w-full px-4 py-3 text-slate-900 text-sm font-medium focus:outline-none"
                     />
                   </div>
-                  {heroErrors.phone && (
-                    <p className="text-[11px] text-rose-600 font-medium px-1">{heroErrors.phone}</p>
+                  {heroErrors.contact && (
+                    <p className="text-[11px] text-rose-600 font-medium px-1">{heroErrors.contact}</p>
                   )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <input
-                    type="text"
-                    maxLength={10}
-                    autoCapitalize="characters"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    value={heroPan}
-                    onChange={(e) => {
-                      setHeroPan(e.target.value.toUpperCase());
-                      setHeroErrors((prev) => ({ ...prev, pan: '' }));
-                    }}
-                    placeholder="PAN (e.g. ABCDE1234F)"
-                    className="w-full px-4 py-3 rounded-2xl border border-slate-300 text-slate-900 text-sm font-mono font-bold tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-[#111827]/30 focus:border-[#111827] transition"
-                  />
-                  <PanVerificationBadge pan={heroPan} panAuth={heroPanAuth} />
-                  {heroErrors.pan && (
-                    <p className="text-[11px] text-rose-600 font-medium px-1">{heroErrors.pan}</p>
-                  )}
+                  <p className="text-[11px] text-slate-400 px-1">
+                    We'll send a one-time code to verify &mdash; no PAN needed yet.
+                  </p>
                 </div>
 
                 <label className="flex items-center justify-between text-xs text-slate-600">

@@ -154,19 +154,12 @@ export default function GstRegistrationModule() {
   const [panAuth, setPanAuth] = useState(() => validateIndianPAN(getInitialState().pan, getInitialState().name));
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // GST no longer has its own "Applicant & Identification" screen — that's collected
-  // directly on the landing page's lead-capture card. Anyone who lands here without
-  // having gone through that card (no name/phone/PAN yet) is sent back there instead
-  // of seeing a blank old-style Step 1 form.
+  // GST no longer has its own "Applicant & Identification" screen — the landing
+  // page's lead-capture card (mobile/email + OTP sign-in) replaces it, landing
+  // straight on Step 2 (?step=2). Anyone reaching Step 1 for GST is sent back
+  // to the landing page instead of seeing the old form.
   useEffect(() => {
-    if (serviceMeta.type !== 'GST' || currentStep !== 1) return;
-    const cleanPhone = formData.phone.replace(/\D/g, '');
-    const hasIdentity =
-      formData.name.trim() &&
-      cleanPhone.length === 10 &&
-      formData.pan.trim().length === 10 &&
-      validateIndianPAN(formData.pan, formData.name).isValid;
-    if (!hasIdentity) {
+    if (serviceMeta.type === 'GST' && currentStep === 1) {
       navigate('/services/gst-registration', { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -241,16 +234,37 @@ export default function GstRegistrationModule() {
 
   const handleStep2Submit = async (e) => {
     e.preventDefault();
+
+    if (serviceMeta.type === 'GST') {
+      if (!formData.name.trim()) {
+        showError('Please enter your full name as per PAN');
+        return;
+      }
+      const cleanPhone = formData.phone.replace(/\D/g, '');
+      if (cleanPhone.length < 10) {
+        showError('Please enter a valid 10-digit mobile number');
+        return;
+      }
+      if (!formData.pan.trim()) {
+        showError('Please enter your 10-character PAN card number');
+        return;
+      }
+      if (!validateIndianPAN(formData.pan, formData.name).isValid) {
+        showError(panAuth.message || 'Please check and enter a valid PAN number');
+        return;
+      }
+      if (!formData.propertyType) {
+        showError('Please select the type of property where your office is located');
+        return;
+      }
+    }
+
     if (!formData.state) {
       showError('Please select your state or union territory');
       return;
     }
     if (!formData.businessType) {
       showError('Please select nature of business');
-      return;
-    }
-    if (serviceMeta.type === 'GST' && !formData.propertyType) {
-      showError('Please select the type of property where your office is located');
       return;
     }
 
@@ -260,6 +274,7 @@ export default function GstRegistrationModule() {
         name: formData.name.trim(),
         phone: formData.phone.trim(),
         pan: formData.pan.trim().toUpperCase(),
+        email: (formData.email || '').trim(),
         state: formData.state,
         businessType: formData.businessType,
         serviceSlug: serviceMeta.slug,
@@ -330,6 +345,8 @@ export default function GstRegistrationModule() {
               ) : (
                 <BusinessJurisdictionPage
                   formData={formData}
+                  panAuth={panAuth}
+                  showIdentityFields={serviceMeta.type === 'GST'}
                   onInputChange={handleInputChange}
                   onBack={() =>
                     serviceMeta.type === 'GST'
