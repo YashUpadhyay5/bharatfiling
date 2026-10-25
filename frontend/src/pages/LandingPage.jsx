@@ -35,7 +35,7 @@ export default function LandingPage() {
 
   const handleSelectService = (service) => {
     // /services/* pages are public landing pages that handle their own sign-in
-    if (isAuthenticated || service.path?.startsWith('/services/')) {
+    if (isAuthenticated || service.path?.startsWith('/services/') || service.path?.includes('udyam') || service.path?.includes('msme')) {
       navigate(service.path);
     } else {
       setSelectedServiceForAuth(service);

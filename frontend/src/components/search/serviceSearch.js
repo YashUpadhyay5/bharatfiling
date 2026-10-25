@@ -279,7 +279,7 @@ export const SERVICES_DATA = [
 ];
 
 // Pages that are informational and never require an account.
-export const PUBLIC_INFO_PATHS = ['/about', '/faq', '/pricing', '/contact', '/services'];
+export const PUBLIC_INFO_PATHS = ['/about', '/faq', '/pricing', '/contact', '/services', '/services/udyam-registration', '/services/msme-registration', '/apply/udyam', '/apply/msme'];
 
 /** Ranked matches for a free-text query (empty query -> no results). */
 export function searchServices(query) {

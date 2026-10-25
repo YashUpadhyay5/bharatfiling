@@ -75,6 +75,19 @@ export default function AuthRequiredModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // If opened for Udyam / MSME registration, automatically close and redirect
+  useEffect(() => {
+    const isUdyam =
+      service?.path?.includes('udyam') ||
+      service?.path?.includes('msme') ||
+      service?.title?.toLowerCase().includes('udyam') ||
+      service?.title?.toLowerCase().includes('msme');
+    if (isOpen && isUdyam) {
+      onClose();
+      navigate('/services/udyam-registration');
+    }
+  }, [isOpen, service, onClose, navigate]);
+
   // Prevent background scroll when modal is open
   // (only touches the page while open, so a closed instance can't undo another overlay's lock)
   useEffect(() => {
@@ -87,6 +100,14 @@ export default function AuthRequiredModal({
   }, [isOpen]);
 
   if (!isOpen) return null;
+  if (
+    service?.path?.includes('udyam') ||
+    service?.path?.includes('msme') ||
+    service?.title?.toLowerCase().includes('udyam') ||
+    service?.title?.toLowerCase().includes('msme')
+  ) {
+    return null;
+  }
 
   const handleAuthSuccess = (authenticatedUser) => {
     showSuccess(`Welcome ${authenticatedUser?.full_name || 'back'}! Continuing your filing...`);

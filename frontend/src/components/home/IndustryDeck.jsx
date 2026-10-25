@@ -70,7 +70,7 @@ export default function IndustryDeck({ items = INDUSTRY_SOLUTIONS }) {
   };
 
   const explore = (e, item) => {
-    if (isAuthenticated || item.path.startsWith('/services/')) return; // plain link navigation
+    if (isAuthenticated || item.path.startsWith('/services/') || item.path.includes('udyam') || item.path.includes('msme')) return; // plain link navigation
     e.preventDefault();
     setAuthService({ title: item.title, path: item.path, category: item.category, price: 'Transparent Pricing', period: 'CA Audited Filing' });
   };

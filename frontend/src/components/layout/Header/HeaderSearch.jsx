@@ -235,7 +235,7 @@ const SERVICES_DATA = [
     subtitle: 'Priority government subsidies & collateral-free loans',
     category: 'LICENSES & REGISTRATION',
     badge: 'LICENSES & REGISTRATION',
-    path: '/services',
+    path: '/services/udyam-registration',
     keywords: ['msme', 'udyam', 'small business', 'subsidy', 'priority loan'],
     isTrending: false,
   },
@@ -476,8 +476,12 @@ export default function HeaderSearch({
     if (onCloseMobile) onCloseMobile();
 
     const isInfoPage =
-      ['/about', '/faq', '/pricing', '/contact', '/services'].includes(item.path) ||
-      item.path.startsWith('/services/');
+      ['/about', '/faq', '/pricing', '/contact', '/services', '/services/udyam-registration', '/services/msme-registration', '/apply/udyam', '/apply/msme'].includes(item.path) ||
+      item.path.startsWith('/services/') ||
+      item.path.includes('udyam') ||
+      item.path.includes('msme') ||
+      item.title.toLowerCase().includes('udyam') ||
+      item.title.toLowerCase().includes('msme');
     if (isAuthenticated || isInfoPage) {
       navigate(item.path);
     } else {

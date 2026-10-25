@@ -106,7 +106,7 @@ export const SERVICES = [
     'Get the Udyam certificate with the LEDGERS platform to track compliance.',
     ['Aadhaar of the proprietor or authorised signatory', 'PAN of the business', 'Bank account details', 'Business activity and NIC code'],
     ['Udyam registration', 'Udyam certificate', 'LEDGERS compliance tracking'],
-    { status: 'live', path: '/apply/udyam', priceStatus: 'existing' }),
+    { status: 'live', path: '/services/udyam-registration', priceStatus: 'existing', alsoIn: ['registrations'] }),
   s('import-export-code', 'Import Export Code (IEC)', 'registrations', 1499, 'one-time', '2-4 working days',
     'Obtain the 10-digit IEC from DGFT to import or export goods and services.',
     ['PAN of the entity', 'Aadhaar of the proprietor or director', 'Business address proof', 'Cancelled cheque or bank certificate'],
