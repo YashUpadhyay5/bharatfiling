@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import {
@@ -6,12 +6,16 @@ import {
   Landmark,
   ShieldCheck,
   CheckCircle2,
-  Clock,
+  ChevronDown,
+  ChevronUp,
+  FastForward,
   Lock,
   Loader2,
-  Zap,
+  Check,
+  Building2,
+  Receipt,
+  HelpCircle,
 } from 'lucide-react';
-import { api } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { UDYAM_PLANS, getUdyamPlan } from './constants.js';
 
@@ -40,44 +44,59 @@ export default function UdyamPaymentPage({
   const currentPlan = getUdyamPlan(selectedPlanKey);
 
   const basePrice = currentPlan.price;
-  const gstAmount = Math.round(basePrice * currentPlan.gstRate);
-  const totalAmount = basePrice + gstAmount;
-  const discountSaved = currentPlan.originalPrice - currentPlan.price;
+  const gstOnFee = Math.round(basePrice * 0.18);
 
-  const [paymentMethod, setPaymentMethod] = useState('upi');
-  const [selectedUpiApp, setSelectedUpiApp] = useState('gpay');
-  const [vpaId, setVpaId] = useState('');
-  const [selectedBank, setSelectedBank] = useState('State Bank of India');
+  // Labour welfare addon (default: true as in the reference screenshot)
+  const [includeLabourWelfare, setIncludeLabourWelfare] = useState(true);
+  const labourWelfareAmount = includeLabourWelfare ? 150 : 0;
+  const gstOnLabour = includeLabourWelfare ? Math.round(150 * 0.18) : 0; // 27
+
+  const totalTaxes = gstOnFee + labourWelfareAmount + gstOnLabour;
+  const totalAmount = basePrice + totalTaxes;
+
+  const [isTaxesExpanded, setIsTaxesExpanded] = useState(true);
+
+  // Payment method: 'upi', 'card', 'netbanking', 'emi'
+  const [activeMethod, setActiveMethod] = useState('upi');
+
+  // UPI Apps: 'gpay', 'phonepe', 'paytm', 'other'
+  const [selectedUpiApp, setSelectedUpiApp] = useState('phonepe');
+  const [customUpiId, setCustomUpiId] = useState('');
+
+  // Card fields
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
   const [cardName, setCardName] = useState('');
 
+  // Net banking bank
+  const [selectedBank, setSelectedBank] = useState('State Bank of India');
+
+  // EMI tenure
+  const [selectedEmiTenure, setSelectedEmiTenure] = useState('3 Months - ₹' + Math.round(totalAmount / 3) + '/mo');
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [transactionId, setTransactionId] = useState('');
 
-  // 15-Minute Urgency Countdown Timer
-  const [timeLeft, setTimeLeft] = useState(14 * 60 + 59);
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTimer = (sec) => {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  const getUpiAppName = () => {
+    switch (selectedUpiApp) {
+      case 'gpay':
+        return 'Google pay';
+      case 'phonepe':
+        return 'PhonePe';
+      case 'paytm':
+        return 'Paytm';
+      default:
+        return 'UPI';
+    }
   };
 
-  const handlePayNow = async (e) => {
+  const handlePay = async (e) => {
     if (e) e.preventDefault();
     setIsProcessing(true);
 
     try {
-      // Simulate payment processing
       await new Promise((resolve) => setTimeout(resolve, 1400));
       const refId = `BF-UDYAM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
       setTransactionId(refId);
@@ -97,7 +116,7 @@ export default function UdyamPaymentPage({
         navigate('/dashboard');
       }, 3500);
     } catch {
-      showError('Payment execution failed. Please re-try.');
+      showError('Payment processing failed. Please re-try.');
     } finally {
       setIsProcessing(false);
     }
@@ -112,7 +131,7 @@ export default function UdyamPaymentPage({
           </div>
           <h2 className="text-xl font-extrabold text-slate-900">Payment Successful!</h2>
           <p className="text-xs text-slate-600">
-            Your payment for <strong className="text-slate-800">{currentPlan.name} Plan</strong> has been confirmed.
+            Your statutory filing request for <strong className="text-slate-800">{currentPlan.name} Plan</strong> has been confirmed.
           </p>
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 inline-block font-mono font-bold text-slate-800">
             Ref ID: {transactionId}
@@ -124,7 +143,7 @@ export default function UdyamPaymentPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7F8] font-sans pb-16">
+    <div className="min-h-screen bg-[#F8FAFC] font-sans pb-16">
       {/* Top Header Bar with BharatFiling Logo */}
       <header className="bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -149,114 +168,273 @@ export default function UdyamPaymentPage({
 
       {/* Main Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Headings (Exact match from reference image) */}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Choose Payment Method
+          </h1>
+          <p className="text-sm font-bold text-slate-800 mt-2">
+            Payment Options
+          </p>
+        </div>
+
+        {/* 2-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* LEFT SECTION (8 COLS): Payment Options */}
+          {/* LEFT SECTION (8 COLS): Payment Options Card */}
           <div className="lg:col-span-8">
-            {/* Green Discount Unlocked Floating Tab */}
-            <div className="flex justify-end -mb-px">
-              <div className="bg-[#10B981] text-white text-[11px] font-bold px-3.5 py-1 rounded-t-lg flex items-center gap-1.5 shadow-xs select-none">
-                <Zap className="w-3.5 h-3.5 fill-current" />
-                <span>Special Festive Discount Unlocked: ₹{discountSaved.toLocaleString('en-IN')} Saved</span>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl rounded-tr-none border border-slate-200 shadow-sm overflow-hidden">
-              {/* Method Switcher Header */}
-              <div className="grid grid-cols-3 border-b border-slate-200 text-xs sm:text-sm font-bold bg-slate-50">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row overflow-hidden min-h-[380px]">
+              
+              {/* Left Sidebar inside Card (Payment Methods List) */}
+              <div className="w-full md:w-[260px] shrink-0 border-b md:border-b-0 md:border-r border-slate-200 bg-[#FAFBFD] flex flex-col divide-y divide-slate-100 select-none">
+                
+                {/* 1. UPI */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod('upi')}
-                  className={`py-3.5 px-4 text-center transition cursor-pointer flex items-center justify-center gap-2 ${
-                    paymentMethod === 'upi'
-                      ? 'bg-white text-blue-600 border-b-2 border-blue-600 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                  onClick={() => setActiveMethod('upi')}
+                  className={`p-4 text-left transition relative flex items-center justify-between cursor-pointer ${
+                    activeMethod === 'upi'
+                      ? 'bg-white border-l-4 border-[#002B49]'
+                      : 'hover:bg-slate-100/60'
                   }`}
                 >
-                  <span>UPI / QR</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('card')}
-                  className={`py-3.5 px-4 text-center transition cursor-pointer flex items-center justify-center gap-2 ${
-                    paymentMethod === 'card'
-                      ? 'bg-white text-blue-600 border-b-2 border-blue-600 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>Cards</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('netbanking')}
-                  className={`py-3.5 px-4 text-center transition cursor-pointer flex items-center justify-center gap-2 ${
-                    paymentMethod === 'netbanking'
-                      ? 'bg-white text-blue-600 border-b-2 border-blue-600 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <Landmark className="w-4 h-4" />
-                  <span>Net Banking</span>
-                </button>
-              </div>
-
-              {/* Panel Body */}
-              <div className="p-6 sm:p-8">
-                {paymentMethod === 'upi' && (
-                  <div className="space-y-6">
-                    <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      Select UPI Application:
+                  <div className="flex items-start gap-3">
+                    {/* UPI double triangle icon */}
+                    <div className="text-slate-700 mt-0.5">
+                      <svg className="w-4 h-4 fill-none stroke-current stroke-[2.5]" viewBox="0 0 24 24">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
                     </div>
+                    <div>
+                      <div className="text-sm font-bold text-slate-900">UPI</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Gpay, PhonePe, Paytm &amp; more
+                      </div>
+                    </div>
+                  </div>
+                  {activeMethod === 'upi' && (
+                    <div className="text-[#002B49] text-xs font-black">▶</div>
+                  )}
+                </button>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {[
-                        { id: 'gpay', name: 'Google Pay', badge: 'Fastest' },
-                        { id: 'phonepe', name: 'PhonePe', badge: 'Popular' },
-                        { id: 'paytm', name: 'Paytm UPI' },
-                        { id: 'bhim', name: 'BHIM / CRED' },
-                      ].map((app) => (
+                {/* 2. Credit/Debit/ATM Card */}
+                <button
+                  type="button"
+                  onClick={() => setActiveMethod('card')}
+                  className={`p-4 text-left transition relative flex items-center justify-between cursor-pointer ${
+                    activeMethod === 'card'
+                      ? 'bg-white border-l-4 border-[#002B49]'
+                      : 'hover:bg-slate-100/60'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <CreditCard className="w-4 h-4 text-slate-700 mt-0.5" />
+                    <div>
+                      <div className="text-sm font-bold text-slate-900">
+                        Credit/Debit/ATM Card
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Visa, MasterCard, Rupay &amp; more
+                      </div>
+                    </div>
+                  </div>
+                  {activeMethod === 'card' && (
+                    <div className="text-[#002B49] text-xs font-black">▶</div>
+                  )}
+                </button>
+
+                {/* 3. Net Banking */}
+                <button
+                  type="button"
+                  onClick={() => setActiveMethod('netbanking')}
+                  className={`p-4 text-left transition relative flex items-center justify-between cursor-pointer ${
+                    activeMethod === 'netbanking'
+                      ? 'bg-white border-l-4 border-[#002B49]'
+                      : 'hover:bg-slate-100/60'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <Landmark className="w-4 h-4 text-slate-700 mt-0.5" />
+                    <div>
+                      <div className="text-sm font-bold text-slate-900">Net Banking</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Pay using all Indian banks
+                      </div>
+                    </div>
+                  </div>
+                  {activeMethod === 'netbanking' && (
+                    <div className="text-[#002B49] text-xs font-black">▶</div>
+                  )}
+                </button>
+
+                {/* 4. EMI option */}
+                <button
+                  type="button"
+                  onClick={() => setActiveMethod('emi')}
+                  className={`p-4 text-left transition relative flex items-center justify-between cursor-pointer ${
+                    activeMethod === 'emi'
+                      ? 'bg-white border-l-4 border-[#002B49]'
+                      : 'hover:bg-slate-100/60'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-[10px] font-black border border-slate-400 px-1 py-0.5 rounded text-slate-700 mt-0.5">
+                      EMI
+                    </span>
+                    <div>
+                      <div className="text-sm font-bold text-slate-900">EMI option</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Pay using credit card &amp; Debit card
+                      </div>
+                    </div>
+                  </div>
+                  {activeMethod === 'emi' && (
+                    <div className="text-[#002B49] text-xs font-black">▶</div>
+                  )}
+                </button>
+
+              </div>
+
+              {/* Right Content Area inside Card */}
+              <div className="flex-1 p-6 sm:p-8 bg-white flex flex-col justify-between">
+                
+                {/* Method 1: Pay with UPI */}
+                {activeMethod === 'upi' && (
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-6">
+                      Pay with UPI
+                    </h3>
+
+                    <div className="space-y-4">
+                      <div className="text-xs text-slate-500 font-medium">
+                        Select UPI App
+                      </div>
+
+                      {/* UPI Apps Row (Exact match from reference image) */}
+                      <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                        
+                        {/* 1. Google Pay */}
                         <div
-                          key={app.id}
-                          onClick={() => setSelectedUpiApp(app.id)}
-                          className={`p-3.5 rounded-xl border text-center transition cursor-pointer relative ${
-                            selectedUpiApp === app.id
-                              ? 'border-blue-600 bg-blue-50/50 shadow-xs'
-                              : 'border-slate-200 hover:border-slate-300'
-                          }`}
+                          onClick={() => setSelectedUpiApp('gpay')}
+                          className="flex flex-col items-center gap-2 cursor-pointer group select-none"
                         >
-                          {app.badge && (
-                            <span className="absolute -top-2 right-2 bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.2 rounded">
-                              {app.badge}
-                            </span>
-                          )}
-                          <div className="text-xs sm:text-sm font-bold text-slate-800">
-                            {app.name}
+                          <div
+                            className={`w-14 h-14 rounded-full border flex items-center justify-center transition-all bg-white ${
+                              selectedUpiApp === 'gpay'
+                                ? 'border-[#002B49] ring-2 ring-[#002B49]/20 shadow-sm'
+                                : 'border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            {/* GPay 4-color icon */}
+                            <svg className="w-7 h-7" viewBox="0 0 24 24">
+                              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"/>
+                              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.4 7.34 24 12 24z"/>
+                              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.16 0 9.94 0 12s.45 3.84 1.24 5.42l4.04-3.15z"/>
+                              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.6 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                            </svg>
                           </div>
-                          <div className="text-[10px] text-slate-500 mt-0.5">Instant Approval</div>
+                          <span className="text-xs font-semibold text-slate-800">
+                            Google pay
+                          </span>
                         </div>
-                      ))}
-                    </div>
 
-                    <div className="pt-2 border-t border-slate-100">
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Or Enter UPI ID / VPA
-                      </label>
-                      <input
-                        type="text"
-                        value={vpaId}
-                        onChange={(e) => setVpaId(e.target.value)}
-                        placeholder="e.g. yourname@okhdfcbank"
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400"
-                      />
+                        {/* 2. PhonePe */}
+                        <div
+                          onClick={() => setSelectedUpiApp('phonepe')}
+                          className="flex flex-col items-center gap-2 cursor-pointer group select-none relative"
+                        >
+                          {/* Dark blue checkmark badge on top right */}
+                          {selectedUpiApp === 'phonepe' && (
+                            <div className="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-[#002B49] text-white flex items-center justify-center shadow-xs">
+                              <Check className="w-3 h-3 stroke-[3]" />
+                            </div>
+                          )}
+
+                          <div
+                            className={`w-14 h-14 rounded-full border flex items-center justify-center transition-all bg-[#5F259F] text-white ${
+                              selectedUpiApp === 'phonepe'
+                                ? 'border-[#002B49] ring-2 ring-[#002B49]/20 shadow-sm'
+                                : 'border-purple-600'
+                            }`}
+                          >
+                            <span className="font-extrabold text-xl font-serif">पे</span>
+                          </div>
+                          <span className="text-xs font-semibold text-slate-800">
+                            PhonePe
+                          </span>
+                        </div>
+
+                        {/* 3. Paytm */}
+                        <div
+                          onClick={() => setSelectedUpiApp('paytm')}
+                          className="flex flex-col items-center gap-2 cursor-pointer group select-none"
+                        >
+                          <div
+                            className={`w-14 h-14 rounded-full border flex items-center justify-center transition-all bg-white ${
+                              selectedUpiApp === 'paytm'
+                                ? 'border-[#002B49] ring-2 ring-[#002B49]/20 shadow-sm'
+                                : 'border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            <span className="text-[11px] font-black text-[#002E6E] tracking-tighter">
+                              pay<span className="text-[#00BAF2]">tm</span>
+                            </span>
+                          </div>
+                          <span className="text-xs font-semibold text-slate-800">
+                            Paytm
+                          </span>
+                        </div>
+
+                        {/* 4. Other UPI ID */}
+                        <div
+                          onClick={() => setSelectedUpiApp('other')}
+                          className="flex flex-col items-center gap-2 cursor-pointer group select-none"
+                        >
+                          <div
+                            className={`w-14 h-14 rounded-full border flex items-center justify-center transition-all bg-white ${
+                              selectedUpiApp === 'other'
+                                ? 'border-[#002B49] ring-2 ring-[#002B49]/20 shadow-sm'
+                                : 'border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            <span className="text-[10px] font-extrabold text-slate-700 uppercase tracking-tight">
+                              UPI
+                            </span>
+                          </div>
+                          <span className="text-xs font-semibold text-slate-800">
+                            Other UPI ID
+                          </span>
+                        </div>
+
+                      </div>
+
+                      {/* Custom UPI input if 'other' is selected */}
+                      {selectedUpiApp === 'other' && (
+                        <div className="pt-2 animate-in fade-in duration-150">
+                          <input
+                            type="text"
+                            value={customUpiId}
+                            onChange={(e) => setCustomUpiId(e.target.value)}
+                            placeholder="e.g. mobile@upi or username@okhdfcbank"
+                            className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400"
+                          />
+                        </div>
+                      )}
+
+                      {/* Message below selector (matching reference image) */}
+                      <p className="text-xs sm:text-sm text-slate-500 font-normal pt-4">
+                        Pay through the {getUpiAppName()} pay app on your phone
+                      </p>
                     </div>
                   </div>
                 )}
 
-                {paymentMethod === 'card' && (
+                {/* Method 2: Credit/Debit Card */}
+                {activeMethod === 'card' && (
                   <div className="space-y-4 max-w-md">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2">
+                      Pay with Card
+                    </h3>
                     <div className="space-y-1">
                       <label className="block text-xs font-bold text-slate-700">Card Number</label>
                       <input
@@ -264,7 +442,7 @@ export default function UdyamPaymentPage({
                         maxLength={19}
                         value={cardNumber}
                         onChange={(e) => setCardNumber(e.target.value)}
-                        placeholder="4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 8920"
+                        placeholder="4532 •••• •••• 8920"
                         className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm font-mono focus:outline-none focus:ring-1 focus:ring-slate-400"
                       />
                     </div>
@@ -300,26 +478,27 @@ export default function UdyamPaymentPage({
                         type="text"
                         value={cardName}
                         onChange={(e) => setCardName(e.target.value)}
-                        placeholder="As printed on card"
+                        placeholder="Name as printed on card"
                         className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400"
                       />
                     </div>
                   </div>
                 )}
 
-                {paymentMethod === 'netbanking' && (
+                {/* Method 3: Net Banking */}
+                {activeMethod === 'netbanking' && (
                   <div className="space-y-4">
-                    <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      Popular Indian Banks:
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2">
+                      Pay using Net Banking
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                       {NET_BANKS.map((b) => (
                         <div
                           key={b}
                           onClick={() => setSelectedBank(b)}
                           className={`p-3 rounded-lg border text-center transition cursor-pointer text-xs font-semibold ${
                             selectedBank === b
-                              ? 'border-blue-600 bg-blue-50 text-blue-700'
+                              ? 'border-[#002B49] bg-blue-50/60 text-[#002B49]'
                               : 'border-slate-200 text-slate-700 hover:border-slate-300'
                           }`}
                         >
@@ -329,92 +508,178 @@ export default function UdyamPaymentPage({
                     </div>
                   </div>
                 )}
+
+                {/* Method 4: EMI option */}
+                {activeMethod === 'emi' && (
+                  <div className="space-y-4">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2">
+                      Pay with Easy Monthly Installments (EMI)
+                    </h3>
+                    <div className="space-y-2">
+                      {[
+                        `3 Months - ₹${Math.round(totalAmount / 3)}/month`,
+                        `6 Months - ₹${Math.round(totalAmount / 6)}/month`,
+                        `9 Months - ₹${Math.round(totalAmount / 9)}/month`,
+                        `12 Months - ₹${Math.round(totalAmount / 12)}/month`,
+                      ].map((tenure) => (
+                        <div
+                          key={tenure}
+                          onClick={() => setSelectedEmiTenure(tenure)}
+                          className={`p-3 rounded-lg border text-left transition cursor-pointer text-xs font-semibold flex items-center justify-between ${
+                            selectedEmiTenure === tenure
+                              ? 'border-[#002B49] bg-blue-50/60 text-[#002B49]'
+                              : 'border-slate-200 text-slate-700 hover:border-slate-300'
+                          }`}
+                        >
+                          <span>{tenure}</span>
+                          {selectedEmiTenure === tenure && <Check className="w-4 h-4" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Primary Action Button: PAY ₹[AMOUNT] (Exact clone from reference image) */}
+                <div className="pt-8">
+                  <button
+                    type="button"
+                    onClick={handlePay}
+                    disabled={isProcessing}
+                    className="w-full py-3.5 px-6 rounded-md bg-[#002B49] hover:bg-[#073866] active:scale-[0.99] text-white font-black text-sm sm:text-base tracking-wider uppercase transition shadow-xs cursor-pointer disabled:opacity-75 flex items-center justify-center gap-2"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Processing Payment...</span>
+                      </>
+                    ) : (
+                      <span>PAY ₹{totalAmount}</span>
+                    )}
+                  </button>
+                </div>
+
               </div>
+
             </div>
           </div>
 
-          {/* RIGHT SECTION (4 COLS): Order Summary & Dynamic Pay CTA */}
+          {/* RIGHT SECTION (4 COLS): Order Summary Card (Exact clone of Image) */}
           <div className="lg:col-span-4 space-y-4">
-            {/* Urgency Countdown Timer */}
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between text-xs text-amber-900 font-semibold">
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-700 animate-pulse" />
-                <span>Price Reserved For:</span>
-              </div>
-              <span className="font-mono text-sm font-black text-amber-800">
-                {formatTimer(timeLeft)}
-              </span>
-            </div>
+            
+            {/* White Order Card */}
+            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
+              
+              {/* Card Header Title */}
+              <h2 className="text-base font-bold text-slate-900 text-center">
+                Udyam MSME Registration
+              </h2>
 
-            {/* Order Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Filing Package
+              {/* Price Details Accordion Header */}
+              <div className="pt-2 border-t border-slate-100">
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-900 mb-3">
+                  <div className="w-4 h-4 rounded-full border border-slate-900 flex items-center justify-center text-[10px] font-bold">
+                    ₹
+                  </div>
+                  <span>Price details</span>
+                </div>
+
+                <div className="space-y-3 text-xs sm:text-sm">
+                  {/* Professional Fees */}
+                  <div className="flex justify-between items-center text-slate-700 font-medium">
+                    <span>Professional Fees</span>
+                    <span className="font-bold text-slate-900">₹{basePrice}</span>
+                  </div>
+
+                  {/* Taxes & Charges Dropdown Row */}
+                  <div className="border-t border-slate-100 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsTaxesExpanded(!isTaxesExpanded)}
+                      className="w-full flex justify-between items-center text-slate-700 font-medium cursor-pointer"
+                    >
+                      <div className="flex items-center gap-1.5 text-slate-800">
+                        {isTaxesExpanded ? (
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        )}
+                        <span>Taxes &amp; Charges</span>
+                      </div>
+                      <span className="font-bold text-slate-900">₹{totalTaxes}</span>
+                    </button>
+
+                    {/* Expanded Tax Sub-items (Matching Image) */}
+                    {isTaxesExpanded && (
+                      <div className="mt-3 pl-3 space-y-2.5 text-xs text-slate-600 border-l border-slate-200">
+                        {/* GST on fee */}
+                        <div className="flex justify-between items-center">
+                          <span>GST on professional fee (18%)</span>
+                          <span>₹{gstOnFee}</span>
+                        </div>
+
+                        {/* Labour Welfare Endowment with Remove / Add */}
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <span>Labour Welfare Endowment</span>
+                            {includeLabourWelfare ? (
+                              <button
+                                type="button"
+                                onClick={() => setIncludeLabourWelfare(false)}
+                                className="px-1.5 py-0.5 rounded border border-rose-400 text-[10px] text-rose-600 hover:bg-rose-50 font-bold transition cursor-pointer"
+                              >
+                                Remove
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setIncludeLabourWelfare(true)}
+                                className="px-1.5 py-0.5 rounded border border-emerald-500 text-[10px] text-emerald-700 hover:bg-emerald-50 font-bold transition cursor-pointer"
+                              >
+                                + Add
+                              </button>
+                            )}
+                          </div>
+                          <span>₹{labourWelfareAmount}</span>
+                        </div>
+
+                        {/* GST on labour welfare */}
+                        <div className="flex justify-between items-center">
+                          <span>GST on labour welfare (18%)</span>
+                          <span>₹{gstOnLabour}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Amount Row */}
+              <div className="pt-4 border-t border-slate-200 flex justify-between items-baseline">
+                <span className="text-base font-extrabold text-slate-900">
+                  Total Amount
                 </span>
-                <h3 className="text-base font-extrabold text-slate-900">
-                  MSME / Udyam Registration
-                </h3>
-                <div className="inline-block mt-1 px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold">
-                  {currentPlan.name} Plan ({currentPlan.tat})
-                </div>
+                <span className="text-2xl sm:text-3xl font-black text-slate-900">
+                  ₹{totalAmount}
+                </span>
               </div>
 
-              {/* Line items */}
-              <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
-                <div className="flex justify-between text-slate-600">
-                  <span>Professional Base Fee</span>
-                  <span className="font-semibold text-slate-800 line-through">
-                    ₹{currentPlan.originalPrice.toLocaleString('en-IN')}
-                  </span>
-                </div>
-                <div className="flex justify-between text-emerald-600 font-medium">
-                  <span>Festive Discount ({currentPlan.discountPercent}% OFF)</span>
-                  <span>-₹{discountSaved.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>Discounted Fee</span>
-                  <span className="font-semibold text-slate-800">
-                    ₹{basePrice.toLocaleString('en-IN')}
-                  </span>
-                </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>Applicable GST (18%)</span>
-                  <span className="font-semibold text-slate-800">
-                    ₹{gstAmount.toLocaleString('en-IN')}
-                  </span>
-                </div>
-                <div className="pt-2 border-t border-slate-100 flex justify-between text-sm sm:text-base font-black text-slate-900">
-                  <span>Total Amount</span>
-                  <span>₹{totalAmount.toLocaleString('en-IN')}</span>
-                </div>
+            </div>
+
+            {/* Trust Badges under Card (Matching reference image) */}
+            <div className="flex items-center justify-around pt-2 text-[11px] text-slate-600 font-semibold select-none">
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold italic text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded text-[10px] tracking-tight">
+                  PCI
+                </span>
+                <span>100% Secure Payment</span>
               </div>
 
-              {/* Pay Now Button */}
-              <button
-                type="button"
-                onClick={handlePayNow}
-                disabled={isProcessing}
-                className="w-full py-3.5 px-4 rounded-xl bg-[#002B49] hover:bg-[#073866] active:scale-98 text-white font-bold text-sm shadow-md transition disabled:opacity-75 cursor-pointer flex items-center justify-center gap-2"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Processing Secure Payment...</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    <span>Pay ₹{totalAmount.toLocaleString('en-IN')} Securely</span>
-                  </>
-                )}
-              </button>
-
-              <div className="pt-1 flex items-center justify-center gap-2 text-[11px] text-slate-400">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>256-Bit SSL Encrypted &bull; RBI Regulated</span>
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Guaranteed Satisfaction</span>
               </div>
             </div>
+
           </div>
 
         </div>
