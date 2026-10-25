@@ -825,69 +825,56 @@ export default function IecLandingPage({ initialData = {}, onGetStarted }) {
 
       </div>
 
-      {/* 6. SAMPLE CERTIFICATE PREVIEW MODAL */}
+      {/* 6. SAMPLE CERTIFICATE PREVIEW MODAL (1:1 VAKILSEARCH MATCH) */}
       {showCertModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <button
-              type="button"
-              onClick={() => setShowCertModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-[#022B50] flex items-center justify-center mx-auto">
-                <FileText className="w-6 h-6" />
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6"
+          onClick={() => setShowCertModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-xl w-full p-4 sm:p-5 shadow-2xl relative border border-slate-200 animate-in fade-in zoom-in-95 duration-150 max-h-[94vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900">
+                  Sample Importer-Exporter Code (IEC) Certificate
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  Directorate General of Foreign Trade &bull; Government of India
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-900">
-                DGFT e-IEC Certificate Preview
-              </h3>
-              <p className="text-xs text-slate-500">
-                Official Government of India Importer-Exporter Certificate Format
-              </p>
-            </div>
-
-            {/* Specimen Certificate Box */}
-            <div className="mt-5 p-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 space-y-3 text-xs text-slate-700 font-mono">
-              <div className="text-center border-b border-slate-200 pb-2">
-                <div className="font-bold text-slate-900">GOVERNMENT OF INDIA</div>
-                <div className="text-[10px] text-slate-500">MINISTRY OF COMMERCE &amp; INDUSTRY</div>
-                <div className="text-[11px] font-bold text-[#022B50] mt-1">DIRECTORATE GENERAL OF FOREIGN TRADE</div>
-              </div>
-
-              <div className="space-y-1.5 pt-1">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">IEC Number:</span>
-                  <span className="font-bold text-slate-900">0324XXXX90</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Entity Name:</span>
-                  <span className="font-bold text-slate-900">SAMPLE EXPORTS LLP</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">PAN Number:</span>
-                  <span className="font-bold text-slate-900">AAACSXXXXA</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Validity:</span>
-                  <span className="font-bold text-emerald-700">Permanent (Lifetime)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Regional Authority:</span>
-                  <span className="font-bold text-slate-900">DGFT Zonal Office</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6">
               <button
                 type="button"
                 onClick={() => setShowCertModal(false)}
-                className="w-full py-2.5 rounded-xl bg-[#022B50] text-white text-xs font-bold hover:bg-[#033c70] transition cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                title="Close"
               >
-                Close Preview
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Certificate Display Container */}
+            <div className="overflow-y-auto flex-1 rounded-xl border border-slate-200 bg-[#FAFBFD] p-2 sm:p-4 flex justify-center items-center shadow-inner">
+              <img
+                src="/iec-certificate-sample.png"
+                alt="DGFT Importer Exporter Code Certificate Sample"
+                className="w-full max-w-[480px] h-auto object-contain rounded-lg border border-slate-300 shadow-md bg-white"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-3 mt-2 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500">
+                * Specimen certificate format issued by DGFT
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowCertModal(false)}
+                className="px-5 py-2 rounded-lg bg-[#022B50] hover:bg-[#033c70] text-white text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                Close
               </button>
             </div>
           </div>
