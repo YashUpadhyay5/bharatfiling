@@ -23,6 +23,8 @@ import {
   Smartphone,
   BadgeCheck,
   Lock,
+  FileText,
+  Tag,
 } from 'lucide-react';
 import Breadcrumbs from '../components/common/Breadcrumbs.jsx';
 import { GST_PLANS } from './gst-registration/constants.js';
@@ -37,6 +39,13 @@ export default function GstLandingPage() {
   const [heroPhone, setHeroPhone] = useState('');
   const [heroWhatsappOptIn, setHeroWhatsappOptIn] = useState(true);
   const [heroPhoneError, setHeroPhoneError] = useState('');
+
+  const maxDiscountPercent = Math.max(...GST_PLANS.map((p) => p.discountPercent));
+
+  const scrollToPricing = (e) => {
+    e.preventDefault();
+    document.getElementById('pricing-tiers')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const applyUrl = (planId, phone) => {
     const params = new URLSearchParams();
@@ -148,8 +157,10 @@ export default function GstLandingPage() {
             
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[#111827] text-[11px] sm:text-xs font-semibold">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <div className="inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-[#111827] text-[11px] sm:text-xs font-semibold">
+                <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </span>
                 <span>Secure, Encrypted Filing Platform</span>
               </div>
 
@@ -190,6 +201,15 @@ export default function GstLandingPage() {
                 </div>
               </div>
 
+              <a
+                href="#pricing-tiers"
+                onClick={scrollToPricing}
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-800 underline underline-offset-2 cursor-pointer"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                View Package Details
+              </a>
+
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 pt-2">
                 <SplitGradientButton
@@ -210,7 +230,11 @@ export default function GstLandingPage() {
             </div>
 
             {/* Right: Mobile Lead-Capture Card */}
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 relative pt-5">
+              <div className="absolute -top-1 left-4 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 text-[#111827] text-[11px] font-bold shadow-md -rotate-2">
+                <Tag className="w-3.5 h-3.5" />
+                Save up to {maxDiscountPercent}% &mdash; Limited Time
+              </div>
               <form
                 onSubmit={handleHeroGetStarted}
                 className="bg-white rounded-3xl p-5 sm:p-6 shadow-[0_12px_36px_rgba(17,24,39,0.06)] border border-slate-200/80 space-y-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_22px_45px_rgba(17,24,39,0.12)] hover:border-[#111827]/30"
@@ -290,7 +314,7 @@ export default function GstLandingPage() {
       </section>
 
       {/* 2. PRICING TIERS */}
-      <section className="py-14 sm:py-16 bg-white border-b border-slate-200/80">
+      <section id="pricing-tiers" className="py-14 sm:py-16 bg-white border-b border-slate-200/80 scroll-mt-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 space-y-2">
             <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
@@ -504,6 +528,19 @@ export default function GstLandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Floating Talk-to-CA Tab */}
+      <a
+        href={whatsappLink('Hi BharatFiling Team, I need help with GST Registration.')}
+        target="_blank"
+        rel="noreferrer"
+        className="hidden lg:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-2 px-2 py-4 rounded-l-xl bg-[#111827] hover:bg-[#1F2937] text-white shadow-lg transition cursor-pointer"
+      >
+        <MessageCircle className="w-4 h-4 text-emerald-400" />
+        <span className="text-[11px] font-bold tracking-wide [writing-mode:vertical-rl] rotate-180">
+          Talk to a CA
+        </span>
+      </a>
 
       {/* Authentication Required Modal */}
       <AuthRequiredModal
