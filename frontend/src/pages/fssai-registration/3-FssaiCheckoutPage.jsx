@@ -1,62 +1,28 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Users,
   Check,
   ShieldCheck,
-  ArrowRight,
   ArrowLeft,
-  PhoneCall,
-  Clock,
-  Sparkles,
-  Zap,
-  FileCheck,
-  BadgePercent,
 } from 'lucide-react';
-import { FSSAI_PLANS, getFssaiPlan } from './constants.js';
+import { FSSAI_PLANS } from './constants.js';
 
 export default function FssaiCheckoutPage({
   formData = {},
   onSelectPlan,
   onBack,
 }) {
-  const currentPlanId = formData.plan || 'basic';
-  const [selectedPlanId, setSelectedPlanId] = useState(currentPlanId);
-
-  // Optional Addons
-  const [addons, setAddons] = useState({
-    fastTrack: false, // Priority 48hr drafting (+₹499)
-    fsmsPlan: false,  // Food Safety Management System plan (+₹999)
-    gstCombo: false,  // GST registration combo (+₹999)
-  });
-
-  const [showExpertSuccess, setShowExpertSuccess] = useState(false);
-
-  const selectedPlan = getFssaiPlan(selectedPlanId);
-
-  const toggleAddon = (key) => {
-    setAddons((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const calculateAddonsTotal = () => {
-    let sum = 0;
-    if (addons.fastTrack) sum += 499;
-    if (addons.fsmsPlan) sum += 999;
-    if (addons.gstCombo) sum += 999;
-    return sum;
-  };
-
-  const handleProceed = () => {
+  const handleProceed = (planId) => {
     if (onSelectPlan) {
-      onSelectPlan(selectedPlanId, addons);
+      onSelectPlan(planId);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col justify-between py-6 sm:py-10 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col justify-between py-6 sm:py-10 px-4 sm:px-6 relative">
       
-      {/* Top Header */}
+      {/* Top Header Bar */}
       <header className="max-w-6xl w-full mx-auto flex items-center justify-between pb-6">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <img
             src="/bharatfiling-user-logo.png"
             alt="BharatFiling"
@@ -69,231 +35,318 @@ export default function FssaiCheckoutPage({
           />
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-          <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>Step 3 of 4: Plan Selection</span>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
+          </button>
+          <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-slate-500 border-l pl-4 border-slate-200">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>100% Secure Government Filing</span>
+          </div>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="max-w-4xl w-full mx-auto my-auto py-6">
-        <div className="text-center mb-8">
-          <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#0052CC] bg-blue-50 px-3 py-1 rounded-full mb-2">
-            Recommended Statutory Package
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#002B49] tracking-tight">
-            Select Your FSSAI License Filing Plan
+      {/* Main Container: 1:1 VAKILSEARCH MATCH OF MEDIA_1792999136441_7360A87F.PNG */}
+      <main className="max-w-6xl w-full mx-auto my-auto py-4 sm:py-8">
+        
+        {/* Page Title */}
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#002B49] tracking-tight">
+            Right plan for your Food License
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Choose the legal package suited for your business scale and target turnaround time.
-          </p>
         </div>
 
-        {/* 3 Tier Plan Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {FSSAI_PLANS.map((plan) => {
-            const isSelected = selectedPlanId === plan.id;
-            const isRecommended = plan.recommended;
+        {/* 3-Card Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+          
+          {/* ============================================================== */}
+          {/* CARD 1: Starter (₹799)                                         */}
+          {/* ============================================================== */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-md">
+            <div>
+              {/* Plan Title & Subtitle */}
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                  Starter
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1 min-h-[36px] leading-snug">
+                  Ideal for basic food license customers
+                </p>
+              </div>
 
-            return (
-              <div
-                key={plan.id}
-                onClick={() => setSelectedPlanId(plan.id)}
-                className={`rounded-2xl border-2 p-5 sm:p-6 transition-all cursor-pointer relative flex flex-col justify-between ${
-                  isSelected
-                    ? 'border-[#002B49] bg-white shadow-xl ring-2 ring-[#002B49]/10'
-                    : 'border-slate-200 bg-white hover:border-slate-300 shadow-xs'
-                }`}
-              >
-                {isRecommended && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#E5B54F] text-slate-900 text-[10px] font-extrabold px-3 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
-                    Recommended for Startups
-                  </div>
-                )}
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-sm">
-                      {plan.formType}
-                    </span>
-                    <input
-                      type="radio"
-                      name="selectedPlan"
-                      checked={isSelected}
-                      onChange={() => setSelectedPlanId(plan.id)}
-                      className="text-[#002B49] focus:ring-[#002B49] h-4 w-4"
-                    />
-                  </div>
-
-                  <h3 className="text-lg font-bold text-[#002B49] leading-snug">
-                    {plan.name}
-                  </h3>
-                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
-                    {plan.turnoverLimit}
-                  </p>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl sm:text-3xl font-black text-[#002B49]">
-                        ₹{plan.price.toLocaleString('en-IN')}
-                      </span>
-                      <span className="text-xs text-slate-400 line-through">
-                        ₹{plan.originalPrice.toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-sm inline-block mt-1">
-                      {plan.discountLabel}
-                    </span>
-                  </div>
-
-                  <ul className="mt-4 space-y-2 text-xs text-slate-600">
-                    {plan.features.slice(0, 4).map((f, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                        <span className="line-clamp-1">{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-slate-400" /> {plan.tat}
+              {/* Price Block */}
+              <div className="mt-5 pt-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm text-slate-400 line-through">
+                    ₹999
                   </span>
-                  <span>Govt Fee: ₹{plan.govtFee}/yr</span>
+                  <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span className="text-[10px]">●</span> ₹200 off
+                  </span>
+                </div>
+
+                <div className="flex items-baseline">
+                  <span className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
+                    ₹799
+                  </span>
+                  <span className="text-xs font-medium text-slate-500 ml-2">
+                    + Govt. Fee
+                  </span>
                 </div>
               </div>
-            );
-          })}
-        </div>
 
-        {/* Optional Addons Section */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <h3 className="text-sm font-bold text-slate-900">
-              Popular Add-ons for Food Businesses (Optional)
-            </h3>
-          </div>
+              {/* Proceed to Pay Button (Dark Navy) */}
+              <button
+                type="button"
+                onClick={() => handleProceed('starter')}
+                className="w-full py-3.5 px-6 rounded-lg bg-[#002B49] hover:bg-[#001D32] text-white font-bold text-sm sm:text-base transition-all shadow-sm hover:shadow-md my-6 text-center cursor-pointer"
+              >
+                Proceed to Pay
+              </button>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Addon 1: Fast-track */}
-            <div
-              onClick={() => toggleAddon('fastTrack')}
-              className={`p-3.5 rounded-xl border transition cursor-pointer flex items-start gap-3 ${
-                addons.fastTrack
-                  ? 'border-blue-600 bg-blue-50/40 ring-1 ring-blue-600'
-                  : 'border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={addons.fastTrack}
-                onChange={() => {}}
-                className="mt-1 text-[#002B49] rounded focus:ring-[#002B49]"
-              />
+              {/* What You'll Get Checklist */}
               <div>
-                <p className="text-xs font-bold text-slate-900 flex items-center justify-between">
-                  <span>Priority 48-Hour Filing</span>
-                  <span className="text-[#0052CC] font-mono">+₹499</span>
-                </p>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Fast-track document validation &amp; priority departmental liaison.
-                </p>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-3.5">
+                  What You'll Get
+                </h3>
+                <ul className="space-y-3 text-xs sm:text-sm text-slate-700">
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>15-minutes call with food license experts</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>
+                      Assistance with selecting the <strong className="text-slate-900 font-bold">right license type</strong>
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Your food license application filing done</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Document validation by Food Safety Advocate</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>14-Digit FoSCoS registration certificate delivery</span>
+                  </li>
+                </ul>
               </div>
             </div>
 
-            {/* Addon 2: FSMS Plan */}
-            <div
-              onClick={() => toggleAddon('fsmsPlan')}
-              className={`p-3.5 rounded-xl border transition cursor-pointer flex items-start gap-3 ${
-                addons.fsmsPlan
-                  ? 'border-blue-600 bg-blue-50/40 ring-1 ring-blue-600'
-                  : 'border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={addons.fsmsPlan}
-                onChange={() => {}}
-                className="mt-1 text-[#002B49] rounded focus:ring-[#002B49]"
-              />
+            <div className="pt-6 mt-6 border-t border-slate-100 text-[11px] text-slate-400">
+              TAT: 3-5 Working Days • Lifetime Certificate
+            </div>
+          </div>
+
+          {/* ============================================================== */}
+          {/* CARD 2: Standard (₹3,999)                                      */}
+          {/* ============================================================== */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:shadow-md">
+            <div>
+              {/* Plan Title & Subtitle */}
               <div>
-                <p className="text-xs font-bold text-slate-900 flex items-center justify-between">
-                  <span>FSMS Plan &amp; SOP Drafting</span>
-                  <span className="text-[#0052CC] font-mono">+₹999</span>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                  Standard
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1 min-h-[36px] leading-snug">
+                  Ideal for starting food business with basic food license + GST registration
                 </p>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Complete Food Safety Management System plan drafting required by FSO.
-                </p>
+              </div>
+
+              {/* Price Block */}
+              <div className="mt-5 pt-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm text-slate-400 line-through">
+                    ₹4999
+                  </span>
+                  <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span className="text-[10px]">●</span> 20% off
+                  </span>
+                </div>
+
+                <div className="flex items-baseline">
+                  <span className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
+                    ₹3,999
+                  </span>
+                  <span className="text-xs font-medium text-slate-500 ml-2">
+                    + Govt. Fee
+                  </span>
+                </div>
+
+                {/* EMI Badge Row */}
+                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-500 font-medium">
+                  <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-1.5 py-0.5 rounded-xs border border-slate-200">
+                    EMI
+                  </span>
+                  <span>EMI option available.</span>
+                </div>
+              </div>
+
+              {/* Proceed to Pay Button (Dark Navy) */}
+              <button
+                type="button"
+                onClick={() => handleProceed('standard')}
+                className="w-full py-3.5 px-6 rounded-lg bg-[#002B49] hover:bg-[#001D32] text-white font-bold text-sm sm:text-base transition-all shadow-sm hover:shadow-md my-6 text-center cursor-pointer"
+              >
+                Proceed to Pay
+              </button>
+
+              {/* What You'll Get Checklist */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-3.5">
+                  What You'll Get
+                </h3>
+                <ul className="space-y-3 text-xs sm:text-sm text-slate-700">
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>15-minutes call with food license experts</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>
+                      Assistance with selecting the <strong className="text-slate-900 font-bold">right license type</strong>
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Your food license application filing done</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>GST registration filing &amp; ARN tracking</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Dedicated compliance manager for your food unit</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Assistance with FoSCoS department queries</span>
+                  </li>
+                </ul>
               </div>
             </div>
 
-            {/* Addon 3: GST Combo */}
-            <div
-              onClick={() => toggleAddon('gstCombo')}
-              className={`p-3.5 rounded-xl border transition cursor-pointer flex items-start gap-3 ${
-                addons.gstCombo
-                  ? 'border-blue-600 bg-blue-50/40 ring-1 ring-blue-600'
-                  : 'border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={addons.gstCombo}
-                onChange={() => {}}
-                className="mt-1 text-[#002B49] rounded focus:ring-[#002B49]"
-              />
+            <div className="pt-6 mt-6 border-t border-slate-100 text-[11px] text-slate-400">
+              TAT: 5-7 Working Days • Dedicated Account Manager
+            </div>
+          </div>
+
+          {/* ============================================================== */}
+          {/* CARD 3: Elite (₹4,999) - RECOMMENDED (DARK BLUE CARD)         */}
+          {/* ============================================================== */}
+          <div className="bg-[#00223D] text-white rounded-2xl border border-blue-900 shadow-xl p-6 sm:p-8 flex flex-col justify-between relative transition-all duration-300">
+            
+            {/* Gold Recommended Floating Badge at top */}
+            <div className="absolute -top-3.5 left-6 bg-[#E5B54F] text-slate-950 text-xs font-black px-3.5 py-1 rounded-full shadow-md select-none flex items-center gap-1">
+              <span>★</span>
+              <span>Recommended</span>
+            </div>
+
+            <div>
+              {/* Plan Title & Subtitle */}
               <div>
-                <p className="text-xs font-bold text-slate-900 flex items-center justify-between">
-                  <span>GST Registration Combo</span>
-                  <span className="text-[#0052CC] font-mono">+₹999</span>
-                </p>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Save 50% on commercial GSTIN registration for food vendors.
+                <h2 className="text-2xl font-black text-white tracking-tight">
+                  Elite
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 mt-1 min-h-[36px] leading-snug">
+                  Ideal for starting food business &amp; protection of your brand
                 </p>
               </div>
+
+              {/* Price Block */}
+              <div className="mt-5 pt-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm text-slate-400 line-through">
+                    ₹7690
+                  </span>
+                  <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
+                    <span className="text-[10px]">●</span> 35% off
+                  </span>
+                </div>
+
+                <div className="flex items-baseline">
+                  <span className="text-4xl sm:text-5xl font-black text-white tracking-tight">
+                    ₹4,999
+                  </span>
+                  <span className="text-xs font-medium text-slate-400 ml-2">
+                    + Govt. Fee
+                  </span>
+                </div>
+
+                {/* EMI Badge Row */}
+                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-300 font-medium">
+                  <span className="bg-white/20 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-xs border border-white/20">
+                    EMI
+                  </span>
+                  <span>EMI option available.</span>
+                </div>
+              </div>
+
+              {/* Proceed to Pay Button (BRIGHT YELLOW / GOLD) */}
+              <button
+                type="button"
+                onClick={() => handleProceed('elite')}
+                className="w-full py-3.5 px-6 rounded-lg bg-[#FFCC00] hover:bg-[#F5B800] text-slate-950 font-black text-sm sm:text-base transition-all shadow-lg hover:shadow-xl my-6 text-center cursor-pointer"
+              >
+                Proceed to Pay
+              </button>
+
+              {/* What You'll Get Checklist */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200 mb-3.5">
+                  What You'll Get
+                </h3>
+                <ul className="space-y-3 text-xs sm:text-sm text-slate-200">
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>15-minutes call with food license experts</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>
+                      Assistance with selecting the <strong className="text-white font-bold">right license type</strong>
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>Your food license application filing done</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>GST registration for food business</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>Trademark search &amp; brand protection filing</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>Priority 48-hour filing with senior food law partner</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>Annual food compliance &amp; return filing guidance</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-blue-900/60 text-[11px] text-slate-400">
+              TAT: 5-7 Working Days • Complete Brand Protection Suite
             </div>
           </div>
+
         </div>
 
-        {/* Bottom Total & Proceed Bar */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500">Selected:</span>
-              <span className="text-sm font-bold text-[#002B49]">
-                {selectedPlan.name}
-              </span>
-            </div>
-            <div className="text-xs text-slate-500 mt-0.5">
-              Plan Base: ₹{selectedPlan.price}
-              {calculateAddonsTotal() > 0 && ` + Addons: ₹${calculateAddonsTotal()}`}
-              {' • '}
-              <span className="text-emerald-700 font-semibold">18% GST Applicable</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={onBack}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleProceed}
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-[#002B49] hover:bg-[#001D32] text-white font-bold text-xs sm:text-sm transition shadow-md hover:shadow-lg cursor-pointer"
-            >
-              <span>Proceed to Payment Desk</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
       </main>
 
       <footer className="max-w-6xl w-full mx-auto text-center py-4 text-xs text-slate-400">

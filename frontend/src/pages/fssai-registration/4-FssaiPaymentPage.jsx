@@ -39,14 +39,15 @@ export default function FssaiPaymentPage({
   const { showError, showSuccess } = useToast();
 
   const selectedPlanKey =
-    propPlanId || searchParams.get('plan') || formData.plan || 'basic';
+    propPlanId || searchParams.get('plan') || formData.plan || 'starter';
   const currentPlan = getFssaiPlan(selectedPlanKey);
 
   // Fee calculation matching Vakilsearch model:
   // Base professional fee + 18% GST = Plan Price
-  // e.g. for Basic (₹1,999): Base ~ ₹1,694, GST ~ ₹305
-  // Addons if selected in step 3
-  const planPrice = currentPlan.price || 1999;
+  // Starter: ₹799 (Base ~ ₹677, GST ~ ₹122)
+  // Standard: ₹3,999 (Base ~ ₹3,389, GST ~ ₹610)
+  // Elite: ₹4,999 (Base ~ ₹4,236, GST ~ ₹763)
+  const planPrice = currentPlan.price || 799;
   const basePrice = Math.round(planPrice / 1.18);
   const gstOnFee = planPrice - basePrice;
 

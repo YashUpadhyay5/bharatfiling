@@ -60,18 +60,18 @@ router.post(['/checkout-order/:orderId/plan', '/checkout/:orderId/plan'], option
       return res.status(404).json({ success: false, message: 'FSSAI order not found.' });
     }
 
-    let baseFee = 1694;
-    let gstFee = 305;
-    let planName = 'Basic FSSAI Registration';
+    let baseFee = 677;
+    let gstFee = 122;
+    let planName = 'Starter FSSAI Registration';
 
-    if (plan === 'state') {
+    if (plan === 'standard' || plan === 'state') {
       baseFee = 3389;
       gstFee = 610;
-      planName = 'State FSSAI License';
-    } else if (plan === 'central') {
-      baseFee = 6355;
-      gstFee = 1144;
-      planName = 'Central FSSAI License';
+      planName = 'Standard FSSAI + GST Combo';
+    } else if (plan === 'elite' || plan === 'central') {
+      baseFee = 4236;
+      gstFee = 763;
+      planName = 'Elite Food License + Brand Protection';
     }
 
     const labourWelfare = includeLabourWelfare ? 77 : 0;

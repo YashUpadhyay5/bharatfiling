@@ -105,25 +105,25 @@ router.post(['/quick-quote', '/apply'], optionalAuth, (req, res) => {
       });
     }
 
-    // Determine plan pricing
-    let baseFee = 1694;
-    let gstFee = 305;
-    let planName = 'Basic FSSAI Registration';
-    let formType = 'Form A';
+    // Determine plan pricing matching Vakilsearch model
+    let baseFee = 677;
+    let gstFee = 122;
+    let planName = 'Starter FSSAI Registration';
+    let formType = 'Basic Registration';
     let govtFee = 100 * (Number(validityYears) || 1);
 
-    if (plan === 'state') {
+    if (plan === 'standard' || plan === 'state') {
       baseFee = 3389;
       gstFee = 610;
-      planName = 'State FSSAI License';
-      formType = 'Form B';
-      govtFee = 2000 * (Number(validityYears) || 1);
-    } else if (plan === 'central') {
-      baseFee = 6355;
-      gstFee = 1144;
-      planName = 'Central FSSAI License';
-      formType = 'Form B';
-      govtFee = 7500 * (Number(validityYears) || 1);
+      planName = 'Standard FSSAI + GST Combo';
+      formType = 'License + GST';
+      govtFee = 100 * (Number(validityYears) || 1);
+    } else if (plan === 'elite' || plan === 'central') {
+      baseFee = 4236;
+      gstFee = 763;
+      planName = 'Elite Food License + Brand Protection';
+      formType = 'License + GST + Trademark';
+      govtFee = 100 * (Number(validityYears) || 1);
     }
 
     const labourWelfare = includeLabourWelfare ? 77 : 0;

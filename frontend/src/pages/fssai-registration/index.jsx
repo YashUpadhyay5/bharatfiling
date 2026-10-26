@@ -25,7 +25,7 @@ export default function FssaiRegistrationModule() {
   const stepParam = parseInt(searchParams.get('step') || '1', 10);
   const currentStep = [1, 2, 3, 4].includes(stepParam) ? stepParam : 1;
 
-  const initialPlan = searchParams.get('plan') || 'basic';
+  const initialPlan = searchParams.get('plan') || 'starter';
 
   const getInitialDraft = () => {
     try {
