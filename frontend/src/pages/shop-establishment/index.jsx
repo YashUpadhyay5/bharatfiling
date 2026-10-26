@@ -7,29 +7,9 @@ import { useToast } from '../../context/ToastContext.jsx';
 import ShopLandingPage from './1-ShopLandingPage.jsx';
 import BusinessDetailsPage from './2-BusinessDetailsPage.jsx';
 import ShopCheckoutPage from './3-ShopCheckoutPage.jsx';
+import ShopPaymentPage from './4-ShopPaymentPage.jsx';
 
-// Placeholder / Sub-step components for upcoming pages
-const PlaceholderPage = ({ stepNumber, title, description, onBack }) => (
-  <div className="min-h-[60vh] bg-slate-50 flex items-center justify-center p-6">
-    <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 text-center shadow-lg">
-      <div className="w-12 h-12 rounded-full bg-blue-100 text-[#002B49] flex items-center justify-center mx-auto mb-4 font-bold text-lg">
-        {stepNumber}
-      </div>
-      <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-      <p className="text-sm text-slate-600 mt-2">{description}</p>
-      <div className="mt-6">
-        <button
-          onClick={onBack}
-          className="bg-[#002B49] text-white text-xs font-semibold px-4 py-2.5 rounded-lg cursor-pointer hover:bg-slate-800 transition"
-        >
-          &larr; Back to Step 1
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-export { ShopLandingPage, BusinessDetailsPage, ShopCheckoutPage };
+export { ShopLandingPage, BusinessDetailsPage, ShopCheckoutPage, ShopPaymentPage };
 
 export default function ShopEstablishmentModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -104,6 +84,11 @@ export default function ShopEstablishmentModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleBackToStep3 = () => {
+    setSearchParams({ step: '3', plan: formData.plan || initialPlan });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleBackToStep2 = () => {
     setSearchParams({ step: '2', plan: formData.plan || initialPlan });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -143,13 +128,14 @@ export default function ShopEstablishmentModule() {
         />
       )}
 
-      {/* Step 4: Payment & Invoice (Awaiting Screenshot 4) */}
+      {/* Step 4: Payment & Invoice (Exact 1:1 match of Screenshot 4) */}
       {currentStep === 4 && (
-        <PlaceholderPage
-          stepNumber={4}
-          title="Step 4: Statutory Payment & CA Allocation"
-          description="Awaiting screenshot 4 for the payment screen."
-          onBack={handleBackToStep1}
+        <ShopPaymentPage
+          formData={formData}
+          onBack={handleBackToStep3}
+          onPaymentSuccess={() => {
+            // Optional callback
+          }}
         />
       )}
     </main>
