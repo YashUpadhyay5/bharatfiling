@@ -22,17 +22,20 @@ export default function FssaiCheckoutPage({
       
       {/* Top Header Bar */}
       <header className="max-w-6xl w-full mx-auto flex items-center justify-between pb-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={onBack}>
           <img
-            src="/bharatfiling-user-logo.png"
+            src="/bharatfiling-brand-icon.png"
             alt="BharatFiling"
-            className="h-8 sm:h-9 w-auto object-contain cursor-pointer"
-            onClick={onBack}
+            className="h-8 sm:h-9 w-auto shrink-0 object-contain"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
             }}
           />
+          <span className="flex select-none items-baseline text-lg sm:text-xl font-extrabold leading-none tracking-tight">
+            <span className="text-[#111827]">Bharat</span>
+            <span className="text-[#F26522]">Filing</span>
+          </span>
         </div>
 
         <div className="flex items-center gap-4">

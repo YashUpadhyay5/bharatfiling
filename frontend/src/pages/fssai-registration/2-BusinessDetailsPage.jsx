@@ -108,14 +108,18 @@ export default function BusinessDetailsPage({
       <header className="max-w-6xl w-full mx-auto flex items-center justify-between pb-6 sm:pb-8">
         <div className="flex items-center gap-2 cursor-pointer" onClick={onBack}>
           <img
-            src="/bharatfiling-user-logo.png"
+            src="/bharatfiling-brand-icon.png"
             alt="BharatFiling"
-            className="h-8 sm:h-9 w-auto object-contain"
+            className="h-8 sm:h-9 w-auto shrink-0 object-contain"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
             }}
           />
+          <span className="flex select-none items-baseline text-lg sm:text-xl font-extrabold leading-none tracking-tight">
+            <span className="text-[#111827]">Bharat</span>
+            <span className="text-[#F26522]">Filing</span>
+          </span>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
@@ -199,14 +203,21 @@ export default function BusinessDetailsPage({
         <div className="lg:col-span-6 flex justify-center">
           <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xl p-6 sm:p-9 max-w-md w-full space-y-6">
             
-            {/* Top Brand Tag (Exact style of yellow Vakilsearch logo tag) */}
+            {/* Top Brand Logo matching screenshot */}
             <div className="flex justify-center">
-              <div className="inline-flex items-center gap-1.5 select-none">
-                <span className="bg-[#FFCC00] text-slate-950 text-xs font-black px-2 py-0.5 tracking-tight rounded-xs">
-                  BHARAT
-                </span>
-                <span className="text-slate-900 text-xs font-black tracking-wide">
-                  SEARCH
+              <div className="inline-flex items-center gap-2 select-none">
+                <img
+                  src="/bharatfiling-brand-icon.png"
+                  alt="BharatFiling"
+                  className="h-7 sm:h-8 w-auto shrink-0 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
+                  }}
+                />
+                <span className="flex select-none items-baseline text-base sm:text-lg font-extrabold leading-none tracking-tight">
+                  <span className="text-[#111827]">Bharat</span>
+                  <span className="text-[#F26522]">Filing</span>
                 </span>
               </div>
             </div>

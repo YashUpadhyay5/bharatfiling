@@ -227,14 +227,21 @@ export default function FssaiPaymentPage({
   return (
     <div className="min-h-screen bg-[#FAFBFD] font-sans py-6 sm:py-8 px-4 sm:px-8 text-slate-800">
       
-      {/* Top Brand Tag (Exact match of yellow logo tag) */}
+      {/* Top Brand Logo */}
       <header className="max-w-6xl mx-auto mb-6">
-        <div className="inline-flex items-center gap-1.5 select-none cursor-pointer" onClick={() => navigate(-1)}>
-          <span className="bg-[#FFCC00] text-slate-950 text-xs font-black px-2 py-0.5 tracking-tight rounded-xs">
-            BHARAT
-          </span>
-          <span className="text-slate-900 text-xs font-black tracking-wide">
-            SEARCH
+        <div className="inline-flex items-center gap-2 select-none cursor-pointer" onClick={() => navigate(-1)}>
+          <img
+            src="/bharatfiling-brand-icon.png"
+            alt="BharatFiling"
+            className="h-8 sm:h-9 w-auto shrink-0 object-contain"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/bharatfiling-horizontal-transparent.png';
+            }}
+          />
+          <span className="flex select-none items-baseline text-lg sm:text-xl font-extrabold leading-none tracking-tight">
+            <span className="text-[#111827]">Bharat</span>
+            <span className="text-[#F26522]">Filing</span>
           </span>
         </div>
       </header>
