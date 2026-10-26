@@ -6,6 +6,7 @@ import { useToast } from '../../context/ToastContext.jsx';
 // Modular Step Pages
 import ShopLandingPage from './1-ShopLandingPage.jsx';
 import BusinessDetailsPage from './2-BusinessDetailsPage.jsx';
+import ShopCheckoutPage from './3-ShopCheckoutPage.jsx';
 
 // Placeholder / Sub-step components for upcoming pages
 const PlaceholderPage = ({ stepNumber, title, description, onBack }) => (
@@ -28,7 +29,7 @@ const PlaceholderPage = ({ stepNumber, title, description, onBack }) => (
   </div>
 );
 
-export { ShopLandingPage, BusinessDetailsPage };
+export { ShopLandingPage, BusinessDetailsPage, ShopCheckoutPage };
 
 export default function ShopEstablishmentModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -96,6 +97,18 @@ export default function ShopEstablishmentModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Step 3: Plan selection -> Proceed to Step 4
+  const handleStep3Proceed = (planId) => {
+    setFormData((prev) => ({ ...prev, plan: planId }));
+    setSearchParams({ step: '4', plan: planId });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToStep2 = () => {
+    setSearchParams({ step: '2', plan: formData.plan || initialPlan });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleBackToStep1 = () => {
     setSearchParams({ step: '1' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -121,13 +134,12 @@ export default function ShopEstablishmentModule() {
         />
       )}
 
-      {/* Step 3: Plan Checkout (Awaiting Screenshot 3) */}
+      {/* Step 3: Plan Checkout (Exact 1:1 match of Screenshot 3) */}
       {currentStep === 3 && (
-        <PlaceholderPage
-          stepNumber={3}
-          title="Step 3: Choose the Right Plan"
-          description="Awaiting screenshot 3 for the plan checkout screen."
-          onBack={handleBackToStep1}
+        <ShopCheckoutPage
+          formData={formData}
+          onSelectPlan={handleStep3Proceed}
+          onBack={handleBackToStep2}
         />
       )}
 
