@@ -34,6 +34,10 @@ const IecRegistrationModule = lazy(() => import('./pages/import-export-code/inde
 const IecCheckoutPage = lazy(() =>
   import('./pages/import-export-code/index.jsx').then((m) => ({ default: m.IecCheckoutPage }))
 );
+const FssaiRegistrationModule = lazy(() => import('./pages/fssai-registration/index.jsx'));
+const FssaiCheckoutPage = lazy(() =>
+  import('./pages/fssai-registration/index.jsx').then((m) => ({ default: m.FssaiCheckoutPage }))
+);
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -69,6 +73,10 @@ export default function App() {
                 <Route path="/services/msme-registration" element={<UdyamLandingPage />} />
                 <Route path="/services/import-export-code" element={<IecRegistrationModule />} />
                 <Route path="/services/iec-registration" element={<IecRegistrationModule />} />
+                <Route path="/services/fssai-food-license" element={<FssaiRegistrationModule />} />
+                <Route path="/services/fssai-registration" element={<FssaiRegistrationModule />} />
+                <Route path="/services/fssai" element={<FssaiRegistrationModule />} />
+                <Route path="/services/fassci" element={<FssaiRegistrationModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -88,6 +96,10 @@ export default function App() {
                 <Route path="/apply/msme" element={<UdyamRegistrationModule />} />
                 <Route path="/apply/import-export-code" element={<IecRegistrationModule />} />
                 <Route path="/apply/iec" element={<IecRegistrationModule />} />
+                <Route path="/apply/fssai-food-license" element={<FssaiRegistrationModule />} />
+                <Route path="/apply/fssai-registration" element={<FssaiRegistrationModule />} />
+                <Route path="/apply/fssai" element={<FssaiRegistrationModule />} />
+                <Route path="/apply/fassci" element={<FssaiRegistrationModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
@@ -100,6 +112,7 @@ export default function App() {
               <Route element={<BareLayout />}>
                 <Route path="/checkout/udyam/:orderId" element={<UdyamCheckoutPage />} />
                 <Route path="/checkout/iec/:orderId" element={<IecCheckoutPage />} />
+                <Route path="/checkout/fssai/:orderId" element={<FssaiCheckoutPage />} />
                 <Route path="/checkout" element={<GstCheckoutPage />} />
                 <Route path="/checkout/:orderId" element={<GstCheckoutPage />} />
                 <Route path="/checkout/:orderId/pay" element={<GstPaymentPage />} />
