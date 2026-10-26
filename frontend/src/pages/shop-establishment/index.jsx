@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext.jsx';
 
 // Modular Step Pages
 import ShopLandingPage from './1-ShopLandingPage.jsx';
+import BusinessDetailsPage from './2-BusinessDetailsPage.jsx';
 
 // Placeholder / Sub-step components for upcoming pages
 const PlaceholderPage = ({ stepNumber, title, description, onBack }) => (
@@ -27,7 +28,7 @@ const PlaceholderPage = ({ stepNumber, title, description, onBack }) => (
   </div>
 );
 
-export { ShopLandingPage };
+export { ShopLandingPage, BusinessDetailsPage };
 
 export default function ShopEstablishmentModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -50,6 +51,8 @@ export default function ShopEstablishmentModule() {
       phone: user?.phone || '',
       cityPincode: '',
       whatsappOptIn: true,
+      companyName: '',
+      isCommercialPlace: 'Yes',
       entityType: 'proprietorship',
       operatingState: 'Maharashtra',
       establishmentNature: 'commercial',
@@ -80,6 +83,19 @@ export default function ShopEstablishmentModule() {
     showSuccess('Lead captured! Ready for business details.');
   };
 
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Step 2: Questionnaire submit -> Proceed to Step 3
+  const handleStep2Submit = (step2Data) => {
+    if (step2Data) {
+      setFormData((prev) => ({ ...prev, ...step2Data }));
+    }
+    setSearchParams({ step: '3', plan: formData.plan || initialPlan });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleBackToStep1 = () => {
     setSearchParams({ step: '1' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -95,13 +111,13 @@ export default function ShopEstablishmentModule() {
         />
       )}
 
-      {/* Step 2: Business & Establishment Details (Awaiting Screenshot 2) */}
+      {/* Step 2: Business & Establishment Details (Exact 1:1 match of Screenshot 2) */}
       {currentStep === 2 && (
-        <PlaceholderPage
-          stepNumber={2}
-          title="Step 2: Business & Establishment Details"
-          description="Lead captured successfully! Awaiting your screenshot 2 to build this page 1:1 with your required layout."
+        <BusinessDetailsPage
+          formData={formData}
+          onInputChange={handleInputChange}
           onBack={handleBackToStep1}
+          onSubmit={handleStep2Submit}
         />
       )}
 
