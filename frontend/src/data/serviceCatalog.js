@@ -125,7 +125,7 @@ export const SERVICES = [
     'Shop and Establishment Act licence for offices, shops and commercial units.',
     ['PAN and Aadhaar of the owner', 'Address and rent proof of the premises', 'Employee count details', 'Passport-size photograph'],
     ['Application under the state Act', 'Licence certificate', 'Renewal reminder'],
-    { govt: 'State fee at actuals' }),
+    { govt: 'State fee at actuals', status: 'live', path: '/services/shop-and-establishment-license', priceStatus: 'existing' }),
   s('digital-signature', 'Digital Signature (DSC)', 'registrations', 1199, 'for 2 years', '1 working day',
     'Class 3 digital signature certificate with a USB token for e-filing.',
     ['PAN', 'Aadhaar with registered mobile', 'Passport-size photograph', 'Organisation proof (for organisation DSC)'],

@@ -255,6 +255,16 @@ export const SERVICES_DATA = [
     isTrending: true,
   },
   {
+    id: 'shop-establishment-reg',
+    title: 'Shop and Establishment Certificate (Gumasta License)',
+    subtitle: 'Mandatory commercial license for shops, IT offices, commercial premises & eateries',
+    category: 'LICENSES & REGISTRATION',
+    badge: 'LICENSES & REGISTRATION',
+    path: '/services/shop-and-establishment-license',
+    keywords: ['shop act', 'shop and establishment', 'gumasta', 'gumasta license', 'e-karmika', 'trade license', 'commercial establishment', 'labour license'],
+    isTrending: true,
+  },
+  {
     id: 'dsc-token',
     title: 'Digital Signature Certificate (DSC)',
     subtitle: 'Class 3 USB cryptographic token for MCA & GST',

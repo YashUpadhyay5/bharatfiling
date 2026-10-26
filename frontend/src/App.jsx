@@ -42,6 +42,7 @@ const PtRegistrationModule = lazy(() => import('./pages/professional-tax/index.j
 const PtCheckoutPage = lazy(() =>
   import('./pages/professional-tax/index.jsx').then((m) => ({ default: m.PtCheckoutPage }))
 );
+const ShopEstablishmentModule = lazy(() => import('./pages/shop-establishment/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -85,6 +86,11 @@ export default function App() {
                 <Route path="/services/professional-tax-registration" element={<PtRegistrationModule />} />
                 <Route path="/services/pt-registration" element={<PtRegistrationModule />} />
                 <Route path="/services/pt" element={<PtRegistrationModule />} />
+                <Route path="/services/shop-and-establishment-license" element={<ShopEstablishmentModule />} />
+                <Route path="/services/shop-and-establishment" element={<ShopEstablishmentModule />} />
+                <Route path="/services/shop-establishment" element={<ShopEstablishmentModule />} />
+                <Route path="/services/gumasta-license" element={<ShopEstablishmentModule />} />
+                <Route path="/services/gumasta" element={<ShopEstablishmentModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -111,6 +117,11 @@ export default function App() {
                 <Route path="/apply/professional-tax" element={<PtRegistrationModule />} />
                 <Route path="/apply/pt-registration" element={<PtRegistrationModule />} />
                 <Route path="/apply/pt" element={<PtRegistrationModule />} />
+                <Route path="/apply/shop-and-establishment-license" element={<ShopEstablishmentModule />} />
+                <Route path="/apply/shop-and-establishment" element={<ShopEstablishmentModule />} />
+                <Route path="/apply/shop-establishment" element={<ShopEstablishmentModule />} />
+                <Route path="/apply/gumasta-license" element={<ShopEstablishmentModule />} />
+                <Route path="/apply/gumasta" element={<ShopEstablishmentModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
