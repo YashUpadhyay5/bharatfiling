@@ -44,6 +44,83 @@ npm run dev
 
 ---
 
+## 🧰 Command Reference
+
+### Environment setup
+
+```bash
+# Backend secrets (JWT_SECRET, OTP_PEPPER, CORS_ORIGIN, Razorpay, SMTP, ...)
+cp backend/.env.example backend/.env
+
+# Frontend config (VITE_API_URL, VITE_SOCKET_URL, VITE_SUPABASE_*)
+cp frontend/.env.example frontend/.env
+
+# Generate a strong value for JWT_SECRET / OTP_PEPPER
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+### Install dependencies
+
+```bash
+npm --prefix backend install
+npm --prefix frontend install
+```
+
+### Run in development
+
+| Command | Where | What it does |
+| :--- | :--- | :--- |
+| `npm run dev` | `backend/` | API on port 5000 with auto-reload (`node --watch`) |
+| `npm start` | `backend/` | API on port 5000, no auto-reload |
+| `npm run dev` | `frontend/` | Vite dev server on port 3000, proxies `/api` and `/uploads` to port 5000 |
+| `npm run preview` | `frontend/` | Serve the production build locally (run `npm run build` first) |
+
+### Tests (backend)
+
+```bash
+cd backend
+npm test                                              # full suite, run serially
+node --test src/tests/gstServicesE2E.test.js          # a single test file
+node --test src/tests/shopEstablishmentE2E.test.js
+node --test src/tests/ptRegistrationE2E.test.js
+```
+
+### Build and production start
+
+```bash
+# From the repo root (this is what Render runs, see render.yaml)
+npm run build   # installs backend + frontend deps and builds the frontend into frontend/dist
+npm start       # starts the backend, which serves the API
+```
+
+### Utility scripts
+
+```bash
+cd frontend && npm run catalog:export        # regenerate SERVICE_CATALOG.md from src/data/serviceCatalog.js (run after editing prices)
+cd backend  && node scripts/seedServices.js  # seed services into Supabase
+cd backend  && node scripts/test_supabase.js # check the Supabase connection
+```
+
+> The two Supabase scripts read `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` from `backend/.env`. These are not in `.env.example`, so add them yourself.
+
+### Git: pushing your work to GitHub
+
+```bash
+git status                       # see what changed
+git add -A                       # stage everything (.env and backend/data/ are git-ignored)
+git commit -m "your message"     # commit
+git push origin <your-branch>    # push, e.g. git push origin aman
+git push -u origin <your-branch> # first push of a new branch (sets upstream)
+
+# Keep your branch current with main
+git fetch origin
+git merge origin/main
+```
+
+> Never commit `.env` files. Secrets live in `backend/.env` locally and in the Render dashboard in production.
+
+---
+
 ## 👥 Demo Credentials & One-Click Role Switcher
 
 For seamless review and testing, a discreet floating **Demo Role Switcher** is pinned at the bottom-left of every screen (and also on the login page), allowing 1-click toggling between accounts without cluttering the main navigation:
