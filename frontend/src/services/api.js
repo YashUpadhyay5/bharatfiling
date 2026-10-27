@@ -435,6 +435,25 @@ export const api = {
     return handleResponse(res);
   },
 
+  // GST service flows (returns, GSTR-9, ITC, LUT, notices, e-way bill, composition, cancellation)
+  createGstServiceOrder: async (service, payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/gst-services/${service}/checkout/draft`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  payGstServiceOrder: async (service, orderId, payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/gst-services/${service}/checkout/${orderId}/pay`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
   // CA Portal
   getCACases: async () => {
     const res = await fetchWithRetry(`${API_BASE}/ca/cases`, {

@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import { SocketProvider } from './context/SocketContext.jsx';
 import { MainLayout, BareLayout, ScrollToTop } from './layouts';
+import { GST_SERVICE_ROUTES } from './pages/gst-services/routes.js';
 
 // Critical initial route (eagerly loaded for immediate first paint)
 import LandingPage from './pages/LandingPage.jsx';
@@ -43,6 +44,7 @@ const PtCheckoutPage = lazy(() =>
   import('./pages/professional-tax/index.jsx').then((m) => ({ default: m.PtCheckoutPage }))
 );
 const ShopEstablishmentModule = lazy(() => import('./pages/shop-establishment/index.jsx'));
+const GstServiceModule = lazy(() => import('./pages/gst-services/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -91,6 +93,14 @@ export default function App() {
                 <Route path="/services/shop-establishment" element={<ShopEstablishmentModule />} />
                 <Route path="/services/gumasta-license" element={<ShopEstablishmentModule />} />
                 <Route path="/services/gumasta" element={<ShopEstablishmentModule />} />
+                {/* GST service flows: one shared 4-step flow per service, configured in pages/gst-services */}
+                {GST_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) => [
+                  <Route key={slug} path={`/services/${slug}`} element={<GstServiceModule key={slug} slug={slug} />} />,
+                  <Route key={`apply-${slug}`} path={`/apply/${slug}`} element={<Navigate to={`/services/${slug}`} replace />} />,
+                  ...aliases.map((alias) => (
+                    <Route key={alias} path={`/services/${alias}`} element={<Navigate to={`/services/${slug}`} replace />} />
+                  )),
+                ])}
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />

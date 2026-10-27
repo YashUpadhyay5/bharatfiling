@@ -94,7 +94,7 @@ export default function Footer() {
             <li><Link to="/services/income-tax" className="hover:text-emerald-400 transition py-1 inline-block">Corporate Tax Audit (44AB)</Link></li>
             <li><Link to="/services/gst-registration" className="hover:text-emerald-400 transition py-1 inline-block">GST Registration Online</Link></li>
             <li><Link to="/services/gst-return" className="hover:text-emerald-400 transition py-1 inline-block">GSTR-1 & GSTR-3B Filings</Link></li>
-            <li><Link to="/services/gst-return" className="hover:text-emerald-400 transition py-1 inline-block">GSTR-2B ITC Reconciliation</Link></li>
+            <li><Link to="/services/gstr-2b-itc-reconciliation" className="hover:text-emerald-400 transition py-1 inline-block">GSTR-2B ITC Reconciliation</Link></li>
             <li><Link to="/services/income-tax" className="hover:text-emerald-400 transition py-1 inline-block">TDS & TCS Quarterly Returns</Link></li>
           </ul>
         </div>

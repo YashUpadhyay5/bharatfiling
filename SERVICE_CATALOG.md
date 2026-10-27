@@ -2,9 +2,9 @@
 
 Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then run `npm run catalog:export` in `frontend/`.
 
-- **74 services** in 8 header menus. **4 live** end-to-end, **70 catalogue** (detail page + request via the contact desk).
+- **74 services** in 8 header menus. **16 live** end-to-end, **58 catalogue** (detail page + request via the contact desk).
 - Prices are the professional fee in INR **before 18% GST and government fees**.
-- **6** prices are already used on the live site; **66** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
+- **11** prices are already used on the live site; **61** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
 
 ## Startup
 
@@ -29,12 +29,12 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 
 | Service | Fee (ex GST) | With GST | Unit | Timeline | Govt fee | Status | Price | URL |
 |---|---:|---:|---|---|---|---|---|---|
-| GST Registration | ₹1,499 | ₹1,769 | one-time | 3-7 working days | No government fee | live | existing | `/apply/gst` |
-| MSME / Udyam Registration | ₹2,899 | ₹3,421 | one-time | 1-2 working days | No government fee | live | existing | `/apply/udyam` |
+| GST Registration | ₹1,499 | ₹1,769 | one-time | 3-7 working days | No government fee | live | existing | `/services/gst-registration` |
+| MSME / Udyam Registration | ₹2,899 | ₹3,421 | one-time | 1-2 working days | No government fee | live | existing | `/services/udyam-registration` |
 | Import Export Code (IEC) | ₹1,499 | ₹1,769 | one-time | 2-4 working days | No government fee | catalog | draft | `/services/import-export-code` |
-| FSSAI Food License | ₹1,999 | ₹2,359 | one-time | 5-10 working days | FSSAI fee at actuals (depends on licence type and turnover) | catalog | draft | `/services/fssai-food-license` |
-| Professional Tax (PT) | ₹1,499 | ₹1,769 | one-time | 3-5 working days | State PT fee at actuals | catalog | draft | `/services/professional-tax` |
-| Shop & Establishment | ₹1,999 | ₹2,359 | one-time | 3-7 working days | State fee at actuals | catalog | draft | `/services/shop-establishment` |
+| FSSAI Food License | ₹1,999 | ₹2,359 | one-time | 5-10 working days | FSSAI fee at actuals (depends on licence type and turnover) | live | existing | `/services/fssai-registration` |
+| Professional Tax (PT) | ₹1,499 | ₹1,769 | one-time | 3-5 working days | State PT fee at actuals | live | existing | `/services/professional-tax` |
+| Shop & Establishment | ₹1,999 | ₹2,359 | one-time | 3-7 working days | State fee at actuals | live | existing | `/services/shop-and-establishment-license` |
 | Digital Signature (DSC) | ₹1,199 | ₹1,415 | for 2 years | 1 working day | No government fee | catalog | draft | `/services/digital-signature` |
 | PF & ESI Registration | ₹2,999 | ₹3,539 | one-time | 5-8 working days | No government fee | catalog | draft | `/services/pf-esi-registration` |
 | PAN & TAN Registration | ₹499 | ₹589 | one-time | 3-5 working days | NSDL / UTIITSL fee at actuals | catalog | draft | `/services/pan-tan-registration` |
@@ -63,16 +63,16 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 
 | Service | Fee (ex GST) | With GST | Unit | Timeline | Govt fee | Status | Price | URL |
 |---|---:|---:|---|---|---|---|---|---|
-| GST Registration | ₹1,499 | ₹1,769 | one-time | 3-7 working days | No government fee | live | existing | `/apply/gst` |
-| GST Return Filing (GSTR-1 & 3B) | ₹699 | ₹825 | per month | By the due date | No government fee | catalog | draft | `/services/gst-return` |
-| GSTR-9 Annual Return | ₹2,999 | ₹3,539 | per year | 5-7 working days | No government fee | catalog | draft | `/services/gstr-9-annual-return` |
-| GSTR-2B ITC Reconciliation | ₹999 | ₹1,179 | per month | 2-3 working days | No government fee | catalog | draft | `/services/gstr-2b-itc-reconciliation` |
-| GST LUT for Exporters | ₹799 | ₹943 | per year | 1-2 working days | No government fee | catalog | draft | `/services/gst-lut-exporters` |
-| Clarification (Notice REG-03) | ₹999 | ₹1,179 | per notice | 2-3 working days | No government fee | catalog | draft | `/services/gst-notice-reg-03` |
-| GST Invoicing & E-Way Bill | ₹999 | ₹1,179 | one-time setup | 1-2 working days | No government fee | catalog | draft | `/services/gst-invoicing-eway-bill` |
-| Composition Scheme Opt-in | ₹999 | ₹1,179 | one-time | 1-2 working days | No government fee | catalog | draft | `/services/gst-composition-scheme` |
-| GST Assessment Advisory | ₹2,999 | ₹3,539 | per session | 2-3 working days | No government fee | catalog | draft | `/services/gst-assessment-advisory` |
-| GST Cancellation & Revocation | ₹1,999 | ₹2,359 | per application | 5-7 working days | No government fee | catalog | draft | `/services/gst-cancellation-revocation` |
+| GST Registration | ₹1,499 | ₹1,769 | one-time | 3-7 working days | No government fee | live | existing | `/services/gst-registration` |
+| GST Return Filing (GSTR-1 & 3B) | from ₹999 | ₹1,179 | 3-month plan | By the due date | No government fee | live | existing | `/services/gst-return` |
+| GSTR-9 Annual Return | from ₹2,999 | ₹3,539 | per year | 5-7 working days | No government fee | live | draft | `/services/gstr-9-annual-return` |
+| GSTR-2B ITC Reconciliation | from ₹999 | ₹1,179 | per month | 2-3 working days | No government fee | live | draft | `/services/gstr-2b-itc-reconciliation` |
+| GST LUT for Exporters | from ₹799 | ₹943 | per year | 1-2 working days | No government fee | live | draft | `/services/gst-lut-exporters` |
+| Clarification (Notice REG-03) | from ₹999 | ₹1,179 | per notice | 2-3 working days | No government fee | live | draft | `/services/gst-notice-reg-03` |
+| GST Invoicing & E-Way Bill | from ₹999 | ₹1,179 | one-time setup | 1-2 working days | No government fee | live | draft | `/services/gst-invoicing-eway-bill` |
+| Composition Scheme Opt-in | from ₹999 | ₹1,179 | one-time | 1-2 working days | No government fee | live | draft | `/services/gst-composition-scheme` |
+| GST Assessment Advisory | from ₹2,999 | ₹3,539 | per notice | 2-3 working days | No government fee | live | draft | `/services/gst-assessment-advisory` |
+| GST Cancellation & Revocation | from ₹399 | ₹471 | per application | 5-7 working days | No government fee | live | existing | `/services/gst-cancellation-revocation` |
 
 ## Income Tax
 
