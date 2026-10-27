@@ -46,6 +46,7 @@ const PtCheckoutPage = lazy(() =>
 const ShopEstablishmentModule = lazy(() => import('./pages/shop-establishment/index.jsx'));
 const GstServiceModule = lazy(() => import('./pages/gst-services/index.jsx'));
 const DigitalSignatureModule = lazy(() => import('./pages/digital-signature/index.jsx'));
+const PfRegistrationModule = lazy(() => import('./pages/pf-registration/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -106,6 +107,12 @@ export default function App() {
                 <Route path="/services/dsc-registration" element={<DigitalSignatureModule />} />
                 <Route path="/services/digital-signature" element={<DigitalSignatureModule />} />
                 <Route path="/services/dsc" element={<DigitalSignatureModule />} />
+                <Route path="/services/pf-registration" element={<PfRegistrationModule />} />
+                <Route path="/services/epf-registration" element={<PfRegistrationModule />} />
+                <Route path="/services/provident-fund" element={<PfRegistrationModule />} />
+                <Route path="/services/pf" element={<PfRegistrationModule />} />
+                <Route path="/services/epf" element={<PfRegistrationModule />} />
+                <Route path="/services/pf-esi-registration" element={<PfRegistrationModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -141,6 +148,12 @@ export default function App() {
                 <Route path="/apply/dsc-registration" element={<DigitalSignatureModule />} />
                 <Route path="/apply/digital-signature" element={<DigitalSignatureModule />} />
                 <Route path="/apply/dsc" element={<DigitalSignatureModule />} />
+                <Route path="/apply/pf-registration" element={<PfRegistrationModule />} />
+                <Route path="/apply/epf-registration" element={<PfRegistrationModule />} />
+                <Route path="/apply/provident-fund" element={<PfRegistrationModule />} />
+                <Route path="/apply/pf" element={<PfRegistrationModule />} />
+                <Route path="/apply/epf" element={<PfRegistrationModule />} />
+                <Route path="/apply/pf-esi" element={<PfRegistrationModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
