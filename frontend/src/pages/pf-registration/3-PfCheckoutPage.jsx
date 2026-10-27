@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, ShieldCheck, Check, Sparkles, Plus, CheckSquare, Square } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShieldCheck, Check, Sparkles, CheckSquare, Square } from 'lucide-react';
 import { PF_PLANS } from './constants.js';
 
 export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) {
@@ -33,7 +33,7 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 sm:py-16 text-slate-800">
+    <div className="min-h-screen bg-[#F8FAFC] py-10 sm:py-16 text-slate-800 font-sans">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <button
           type="button"
@@ -45,10 +45,10 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
         </button>
 
         <div className="mb-8">
-          <span className="text-[11px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-3 py-1 rounded-full">
+          <span className="text-[11px] font-black uppercase tracking-wider text-[#002B49] bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
             Step 3 of 4 • Select Plan &amp; Add-ons
           </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-3">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
             Confirm Your Statutory Package
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -66,7 +66,7 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
                 onClick={() => setSelectedPlanId(plan.id)}
                 className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${
                   selectedPlanId === plan.id
-                    ? 'border-purple-600 bg-white shadow-md ring-2 ring-purple-100'
+                    ? 'border-[#002B49] bg-white shadow-md ring-2 ring-blue-50'
                     : 'border-slate-200 bg-white hover:border-slate-300'
                 }`}
               >
@@ -74,7 +74,7 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        selectedPlanId === plan.id ? 'border-purple-600 bg-purple-600' : 'border-slate-300'
+                        selectedPlanId === plan.id ? 'border-[#002B49] bg-[#002B49]' : 'border-slate-300'
                       }`}
                     >
                       {selectedPlanId === plan.id && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -104,8 +104,8 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
 
             {/* Optional Add-ons */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-              <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-purple-600" />
+              <h4 className="text-xs font-extrabold text-[#002B49] uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#002B49]" />
                 <span>Recommended Labour Law Add-ons</span>
               </h4>
 
@@ -113,12 +113,12 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
               <div
                 onClick={() => setAddonDsc(!addonDsc)}
                 className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition ${
-                  addonDsc ? 'border-purple-600 bg-purple-50/30' : 'border-slate-200'
+                  addonDsc ? 'border-[#002B49] bg-slate-50/70' : 'border-slate-200'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   {addonDsc ? (
-                    <CheckSquare className="w-4 h-4 text-purple-600" />
+                    <CheckSquare className="w-4 h-4 text-[#002B49]" />
                   ) : (
                     <Square className="w-4 h-4 text-slate-400" />
                   )}
@@ -130,17 +130,17 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
                 <span className="text-xs font-extrabold text-slate-900">+₹1,499</span>
               </div>
 
-              {/* Addon 2: ESI Registration if not combo */}
+              {/* Addon 2: ESI Registration */}
               {selectedPlanId !== 'combo' && (
                 <div
                   onClick={() => setAddonEsi(!addonEsi)}
                   className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition ${
-                    addonEsi ? 'border-purple-600 bg-purple-50/30' : 'border-slate-200'
+                    addonEsi ? 'border-[#002B49] bg-slate-50/70' : 'border-slate-200'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     {addonEsi ? (
-                      <CheckSquare className="w-4 h-4 text-purple-600" />
+                      <CheckSquare className="w-4 h-4 text-[#002B49]" />
                     ) : (
                       <Square className="w-4 h-4 text-slate-400" />
                     )}
@@ -157,7 +157,7 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
 
           {/* Order Summary (Right 5 Cols) */}
           <div className="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-xl space-y-4">
-            <h3 className="font-extrabold text-base text-slate-900 pb-3 border-b border-slate-100">
+            <h3 className="font-extrabold text-base text-[#002B49] pb-3 border-b border-slate-100">
               Order Summary
             </h3>
 
@@ -200,7 +200,7 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
             <div className="pt-3 border-t-2 border-slate-200 flex justify-between items-baseline">
               <div>
                 <span className="text-xs font-bold text-slate-500">Total Payable:</span>
-                <p className="text-2xl font-black text-slate-900">₹{grandTotal.toLocaleString('en-IN')}</p>
+                <p className="text-2xl font-black text-[#002B49]">₹{grandTotal.toLocaleString('en-IN')}</p>
               </div>
               <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
                 Inclusive of GST
@@ -210,7 +210,7 @@ export default function PfCheckoutPage({ formData = {}, onSelectPlan, onBack }) 
             <button
               type="button"
               onClick={handleProceed}
-              className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer text-sm flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#002B49] hover:bg-[#073866] active:scale-[0.99] text-white font-bold rounded-xl shadow-md transition-all cursor-pointer text-sm flex items-center justify-center gap-2"
             >
               <span>Proceed to Payment</span>
               <ArrowRight className="w-4 h-4" />

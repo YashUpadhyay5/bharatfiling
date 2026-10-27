@@ -47,8 +47,8 @@ export default function PfPaymentPage({
   const totalAmount = professionalFee + totalTaxes;
 
   // UI payment selection state
-  const [activePaymentTab, setActivePaymentTab] = useState('upi'); // 'upi' | 'card' | 'netbanking' | 'emi'
-  const [selectedUpiApp, setSelectedUpiApp] = useState('phonepe'); // 'gpay' | 'phonepe' | 'paytm' | 'other'
+  const [activePaymentTab, setActivePaymentTab] = useState('upi'); // 'upi' | 'card' | 'netbanking'
+  const [selectedUpiApp, setSelectedUpiApp] = useState('phonepe');
   const [customUpiId, setCustomUpiId] = useState('');
   const [isTaxesOpen, setIsTaxesOpen] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -59,12 +59,10 @@ export default function PfPaymentPage({
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
-  const [cardHolder, setCardHolder] = useState('');
 
   // Netbanking state
   const [selectedBank, setSelectedBank] = useState('HDFC');
 
-  // Trigger celebration confetti upon successful payment
   const triggerConfetti = () => {
     try {
       confetti({
@@ -86,7 +84,6 @@ export default function PfPaymentPage({
       const simulatedTxn = `BFP-EPF-${Math.floor(100000 + Math.random() * 900000)}`;
       const simulatedAppNo = `EPFO2026-${Math.floor(10000 + Math.random() * 90000)}`;
 
-      // Post payment to backend endpoint (gracefully handles if offline)
       try {
         await fetch(`/api/v1/pf/checkout/${simulatedOrderId}/pay`, {
           method: 'POST',
@@ -113,7 +110,7 @@ export default function PfPaymentPage({
         labourWelfare,
         gstOnLabour,
         planName: selectedPlan.name,
-        businessName: formData.businessName || 'Business Establishment',
+        businessName: formData.businessName || formData.cinGstin || 'Business Establishment',
         email: formData.email || 'applicant@example.com',
         phone: formData.phone || '+91 98765 43210',
         date: new Date().toLocaleDateString('en-IN', {
@@ -142,7 +139,7 @@ export default function PfPaymentPage({
   // SUCCESS STATE (Post Payment Receipt & Desk Assignment)
   if (isPaid && paidDetails) {
     return (
-      <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6">
+      <div className="min-h-screen bg-[#F8FAFC] py-12 px-4 sm:px-6 font-sans">
         <div className="max-w-2xl mx-auto">
           {/* Success Banner */}
           <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl text-center mb-6">
@@ -152,7 +149,7 @@ export default function PfPaymentPage({
             <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-wider">
               Payment Completed
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-3">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#002B49] mt-3">
               Application Dispatched to EPFO CA Desk!
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-md mx-auto">
@@ -160,17 +157,17 @@ export default function PfPaymentPage({
             </p>
 
             {/* Quick Summary Pill Bar */}
-            <div className="mt-6 p-4 rounded-2xl bg-purple-50/70 border border-purple-100 flex flex-wrap items-center justify-around gap-4 text-xs">
+            <div className="mt-6 p-4 rounded-2xl bg-blue-50/60 border border-blue-100 flex flex-wrap items-center justify-around gap-4 text-xs">
               <div>
                 <span className="text-slate-500 block">Application No.</span>
-                <span className="font-extrabold text-slate-900 font-mono">{paidDetails.applicationNumber}</span>
+                <span className="font-extrabold text-[#002B49] font-mono">{paidDetails.applicationNumber}</span>
               </div>
-              <div className="hidden sm:block w-px h-8 bg-purple-200" />
+              <div className="hidden sm:block w-px h-8 bg-blue-200" />
               <div>
                 <span className="text-slate-500 block">Assigned Officer</span>
-                <span className="font-extrabold text-purple-700">{paidDetails.caAssigned}</span>
+                <span className="font-extrabold text-[#002B49]">{paidDetails.caAssigned}</span>
               </div>
-              <div className="hidden sm:block w-px h-8 bg-purple-200" />
+              <div className="hidden sm:block w-px h-8 bg-blue-200" />
               <div>
                 <span className="text-slate-500 block">Estimated Code Delivery</span>
                 <span className="font-extrabold text-slate-900">3-5 Working Days</span>
@@ -182,7 +179,7 @@ export default function PfPaymentPage({
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
               <div>
-                <h3 className="font-black text-base text-slate-900">Tax Invoice / Receipt</h3>
+                <h3 className="font-black text-base text-[#002B49]">Tax Invoice / Receipt</h3>
                 <p className="text-xs text-slate-400 font-mono mt-0.5">Txn ID: {paidDetails.transactionId}</p>
               </div>
               <div className="flex gap-2">
@@ -223,15 +220,15 @@ export default function PfPaymentPage({
                 </div>
               )}
               <div className="border-t border-slate-100 pt-3 flex justify-between items-baseline text-sm">
-                <span className="font-black text-slate-900">Total Amount Paid:</span>
-                <span className="text-xl font-black text-slate-900">₹{paidDetails.amount.toLocaleString('en-IN')}</span>
+                <span className="font-black text-[#002B49]">Total Amount Paid:</span>
+                <span className="text-xl font-black text-[#002B49]">₹{paidDetails.amount.toLocaleString('en-IN')}</span>
               </div>
             </div>
 
             <div className="space-y-3">
               <Link
                 to="/dashboard"
-                className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-2 text-xs"
+                className="w-full py-3 bg-[#002B49] hover:bg-[#073866] text-white font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-2 text-xs"
               >
                 <span>Track Application in Dashboard</span>
               </Link>
@@ -250,7 +247,7 @@ export default function PfPaymentPage({
 
   // DEFAULT PAYMENT SELECTION VIEW
   return (
-    <div className="min-h-screen bg-slate-50 py-10 sm:py-16 text-slate-800">
+    <div className="min-h-screen bg-[#F8FAFC] py-10 sm:py-16 text-slate-800 font-sans">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <button
           type="button"
@@ -262,10 +259,10 @@ export default function PfPaymentPage({
         </button>
 
         <div className="mb-8">
-          <span className="text-[11px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-3 py-1 rounded-full">
+          <span className="text-[11px] font-black uppercase tracking-wider text-[#002B49] bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
             Step 4 of 4 • Final Payment
           </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-3">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
             Secure Payment Gateway
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -284,7 +281,7 @@ export default function PfPaymentPage({
                 onClick={() => setActivePaymentTab('upi')}
                 className={`pb-3 px-1 border-b-2 transition whitespace-nowrap cursor-pointer ${
                   activePaymentTab === 'upi'
-                    ? 'border-purple-600 text-purple-600'
+                    ? 'border-[#002B49] text-[#002B49]'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -295,7 +292,7 @@ export default function PfPaymentPage({
                 onClick={() => setActivePaymentTab('card')}
                 className={`pb-3 px-1 border-b-2 transition whitespace-nowrap cursor-pointer ${
                   activePaymentTab === 'card'
-                    ? 'border-purple-600 text-purple-600'
+                    ? 'border-[#002B49] text-[#002B49]'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -306,7 +303,7 @@ export default function PfPaymentPage({
                 onClick={() => setActivePaymentTab('netbanking')}
                 className={`pb-3 px-1 border-b-2 transition whitespace-nowrap cursor-pointer ${
                   activePaymentTab === 'netbanking'
-                    ? 'border-purple-600 text-purple-600'
+                    ? 'border-[#002B49] text-[#002B49]'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -324,7 +321,7 @@ export default function PfPaymentPage({
                       onClick={() => setSelectedUpiApp(app)}
                       className={`p-3 rounded-xl border-2 text-center cursor-pointer transition ${
                         selectedUpiApp === app
-                          ? 'border-purple-600 bg-purple-50/40 font-bold'
+                          ? 'border-[#002B49] bg-slate-50/70 font-bold'
                           : 'border-slate-200 hover:border-slate-300'
                       }`}
                     >
@@ -342,7 +339,7 @@ export default function PfPaymentPage({
                     value={customUpiId}
                     onChange={(e) => setCustomUpiId(e.target.value)}
                     placeholder="e.g. mobile@upi or username@okhdfcbank"
-                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-[#002B49] focus:ring-1 focus:ring-[#002B49]"
                   />
                 </div>
               </div>
@@ -359,7 +356,7 @@ export default function PfPaymentPage({
                     value={cardNumber}
                     onChange={(e) => setCardNumber(e.target.value)}
                     placeholder="4532 •••• •••• ••••"
-                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 font-mono"
+                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-[#002B49] focus:ring-1 focus:ring-[#002B49] font-mono"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -370,7 +367,7 @@ export default function PfPaymentPage({
                       placeholder="MM/YY"
                       value={cardExpiry}
                       onChange={(e) => setCardExpiry(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-[#002B49] focus:ring-1 focus:ring-[#002B49]"
                     />
                   </div>
                   <div>
@@ -381,7 +378,7 @@ export default function PfPaymentPage({
                       placeholder="•••"
                       value={cardCvv}
                       onChange={(e) => setCardCvv(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 font-mono"
+                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-[#002B49] focus:ring-1 focus:ring-[#002B49] font-mono"
                     />
                   </div>
                 </div>
@@ -395,7 +392,7 @@ export default function PfPaymentPage({
                 <select
                   value={selectedBank}
                   onChange={(e) => setSelectedBank(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 bg-white"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-[#002B49] focus:ring-1 focus:ring-[#002B49] bg-white"
                 >
                   <option value="HDFC">HDFC Bank</option>
                   <option value="ICICI">ICICI Bank</option>
@@ -411,7 +408,7 @@ export default function PfPaymentPage({
               type="button"
               onClick={handlePay}
               disabled={isProcessing}
-              className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer text-sm flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-[#002B49] hover:bg-[#073866] active:scale-[0.99] text-white font-bold rounded-xl shadow-md transition-all cursor-pointer text-sm flex items-center justify-center gap-2"
             >
               {isProcessing ? (
                 <span>Authorizing Payment...</span>
@@ -423,7 +420,7 @@ export default function PfPaymentPage({
 
           {/* Right: Bill Breakdown (5 Cols) */}
           <div className="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-xl space-y-4">
-            <h3 className="font-extrabold text-base text-slate-900 pb-3 border-b border-slate-100">
+            <h3 className="font-extrabold text-base text-[#002B49] pb-3 border-b border-slate-100">
               Payment Summary
             </h3>
 
@@ -486,15 +483,15 @@ export default function PfPaymentPage({
             <div className="pt-3 border-t-2 border-slate-200 flex justify-between items-baseline">
               <div>
                 <span className="text-xs font-bold text-slate-500">Total Payable:</span>
-                <p className="text-2xl font-black text-slate-900">₹{totalAmount.toLocaleString('en-IN')}</p>
+                <p className="text-2xl font-black text-[#002B49]">₹{totalAmount.toLocaleString('en-IN')}</p>
               </div>
               <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
                 Inclusive of Taxes
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-purple-50 text-[11px] text-purple-900 flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+            <div className="p-3 rounded-xl bg-blue-50/60 text-[11px] text-[#002B49] flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <span>
                 Your 15-digit EPF Establishment Code will be processed directly under Shram Suvidha portal standards.
               </span>

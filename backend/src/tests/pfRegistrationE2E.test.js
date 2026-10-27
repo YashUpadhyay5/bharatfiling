@@ -85,6 +85,8 @@ describe('PF (EPF) Registration Module - End-to-End & Database Verification', ()
         phone: '9876543210',
         whatsappOptIn: true,
         businessName: 'TechCorp Solutions Private Limited',
+        cinGstin: 'U72200KA2023PTC123456',
+        wantDbsAccount: 'yes',
         entityType: 'company',
         coverageType: 'mandatory',
         employeeCount: 25,
@@ -122,6 +124,8 @@ describe('PF (EPF) Registration Module - End-to-End & Database Verification', ()
     assert.strictEqual(savedApp.module_type, 'PF');
     assert.strictEqual(savedApp.fields_data.businessName, 'TechCorp Solutions Private Limited');
     assert.strictEqual(savedApp.fields_data.employeeCount, 25);
+    assert.strictEqual(savedApp.fields_data.cinGstin, 'U72200KA2023PTC123456');
+    assert.strictEqual(savedApp.fields_data.wantDbsAccount, 'yes');
   });
 
   test('5. Order Retrieval API (GET /checkout/:orderId) - Returns persisted order with details', async () => {

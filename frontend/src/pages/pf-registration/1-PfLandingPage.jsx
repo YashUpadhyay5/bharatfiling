@@ -60,7 +60,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Lead Form State (1:1 with Screenshot media_1793090233108_25fe2dac.png)
+  // Lead Form State
   const [name, setName] = useState(initialData.name || '');
   const [email, setEmail] = useState(initialData.email || '');
   const [phone, setPhone] = useState(initialData.phone || '');
@@ -77,15 +77,15 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
     }
   }, [user]);
 
-  // Modals & Interactive States
-  const [activeDocTab, setActiveDocTab] = useState('proprietorship'); // 'proprietorship' | 'partnership' | 'company'
+  // Interactive States
+  const [activeDocTab, setActiveDocTab] = useState('proprietorship');
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
   const [faqSearch, setFaqSearch] = useState('');
   const [calcSalary, setCalcSalary] = useState(15000);
   const [showReferModal, setShowReferModal] = useState(false);
   const [referFriendPhone, setReferFriendPhone] = useState('');
 
-  // Handle Form Submit (Screenshot 1 CTA)
+  // Handle Form Submit
   const handleLeadSubmit = (e) => {
     if (e) e.preventDefault();
 
@@ -117,13 +117,12 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
   };
 
   const handleGoogleContinue = () => {
-    // Standard mock social sign-in or autofill from logged-in account
     if (user?.email) {
       setEmail(user.email);
       if (user.name) setName(user.name);
       showSuccess('Google profile linked successfully!');
     } else {
-      showSuccess('Google authentication popup initialized. Please fill your contact details below.');
+      showSuccess('Google authentication initialized. Please enter your contact details below.');
     }
   };
 
@@ -140,9 +139,14 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
     }
   };
 
+  const scrollToPricing = (e) => {
+    if (e) e.preventDefault();
+    document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   // Salary Calculator computation
   const numericSalary = Math.min(Math.max(Number(calcSalary) || 0, 1000), 100000);
-  const wageCap = Math.min(numericSalary, 15000); // EPFO statutory ceiling
+  const wageCap = Math.min(numericSalary, 15000);
   const employeePf = Math.round(wageCap * 0.12);
   const employerEpf = Math.round(wageCap * 0.0367);
   const employerEps = Math.round(wageCap * 0.0833);
@@ -157,132 +161,169 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans antialiased">
       {/* Floating Side Badge - Refer a Friend */}
       <div className="fixed right-0 top-1/2 -translate-y-1/2 z-40 hidden md:block">
         <button
           onClick={() => setShowReferModal(true)}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-4 rounded-l-xl shadow-2xl transition-all transform hover:-translate-x-1 border-l-2 border-y-2 border-amber-300"
+          className="flex items-center gap-2 bg-[#002B49] hover:bg-[#073866] text-white font-bold px-3 py-4 rounded-l-xl shadow-2xl transition-all transform hover:-translate-x-1 border-l-2 border-y-2 border-amber-300"
           style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
         >
-          <Gift className="w-4 h-4 text-slate-950 rotate-90" />
-          <span className="text-xs uppercase tracking-wider font-extrabold">Refer & Earn ₹500</span>
+          <Gift className="w-4 h-4 text-amber-300 rotate-90" />
+          <span className="text-xs uppercase tracking-wider font-extrabold">Refer &amp; Earn ₹500</span>
         </button>
       </div>
 
-      {/* TOP HERO SECTION - 1:1 WITH SCREENSHOT media_1793090233108_25fe2dac.png */}
+      {/* TOP HERO SECTION - VAKILSEARCH DESIGN WITH STATUTORY INDIAFILINGS CONTENT */}
       <section className="relative bg-gradient-to-br from-[#002B49] via-[#003B64] to-[#011C30] text-white pt-8 pb-16 overflow-hidden">
-        {/* Subtle decorative grid */}
+        {/* Subtle background texture */}
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Breadcrumb Navigation */}
-          <nav className="flex items-center gap-2 text-xs text-sky-200 mb-6">
-            <Link to="/" className="hover:text-white transition-colors">
-              Home
-            </Link>
-            <span>&gt;</span>
-            <Link to="/services" className="hover:text-white transition-colors">
-              Services
-            </Link>
-            <span>&gt;</span>
-            <span className="text-sky-300">Labour Law Registrations</span>
-            <span>&gt;</span>
-            <span className="text-white font-semibold">PF (EPF) Registration</span>
-          </nav>
+          
+          {/* Top Row: Breadcrumbs & ESI Switcher Pill */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <nav className="flex items-center gap-2 text-xs text-sky-200">
+              <Link to="/" className="hover:text-white transition-colors">
+                Home
+              </Link>
+              <span>&gt;</span>
+              <Link to="/services" className="hover:text-white transition-colors">
+                Services
+              </Link>
+              <span>&gt;</span>
+              <span className="text-sky-300">Labour Law Registrations</span>
+              <span>&gt;</span>
+              <span className="text-white font-semibold">PF (EPF) Registration</span>
+            </nav>
 
-          {/* ESI Switcher Pill Alert */}
-          <div className="mb-6 inline-flex flex-wrap items-center gap-3 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-xs text-sky-100 transition shadow-sm">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Looking for Employee State Insurance instead?</span>
-            <Link
-              to="/services/esi-registration"
-              className="font-bold text-amber-300 hover:text-amber-200 underline inline-flex items-center gap-1"
-            >
-              Switch to ESI Registration <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-            <span className="hidden sm:inline text-sky-300/50">|</span>
-            <span className="hidden sm:inline text-sky-200 text-[11px]">
-              Or choose our <strong className="text-white">PF + ESI Combo</strong> to save 30%
-            </span>
+            <div className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-xs text-sky-100 transition shadow-xs">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Looking for ESI Registration?</span>
+              <Link
+                to="/services/esi-registration"
+                className="font-bold text-amber-300 hover:text-amber-200 underline inline-flex items-center gap-1"
+              >
+                Switch to ESI <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
 
-          {/* MAIN HERO CARD CONTAINER - Clean White Card as shown in screenshot */}
+          {/* TOP FLOATING ROCKET PRICE PILL (From Screenshot media_1793095616145_ed3170aa.png) */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-2.5 bg-white text-slate-800 border border-blue-400/60 rounded-full py-1.5 px-6 shadow-md text-xs sm:text-sm font-semibold">
+              <span className="text-base">🚀</span>
+              <span>Get Your PF Registration - starts from <strong>₹1,999</strong></span>
+              <a
+                href="#plans"
+                onClick={scrollToPricing}
+                className="text-blue-600 hover:text-blue-700 underline font-bold ml-1 cursor-pointer"
+              >
+                View Price
+              </a>
+            </div>
+          </div>
+
+          {/* MAIN HERO CARD CONTAINER */}
           <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 lg:p-12 text-slate-800 border border-slate-100 relative">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
               
-              {/* LEFT COLUMN: Headings & 4 Value Points */}
+              {/* LEFT COLUMN: Headings & 4 Value Points (Vakilsearch Double-Ring Icons) */}
               <div className="lg:col-span-6 space-y-6">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#002B49] tracking-tight leading-tight">
                     Apply for PF (EPF) Registration Online
                   </h1>
-                  <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed">
+                  <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
                     EPF registration made easy with BharatFiling. Online process, correct forms, and compliance support for businesses.
                   </p>
                 </div>
 
-                {/* 4 Feature Points with soft circular purple icons (1:1 with Screenshot) */}
-                <div className="space-y-4 pt-2">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0 text-purple-600 shadow-xs">
-                      <FileText className="w-5 h-5" />
+                {/* 4 Feature Points with Site-Wide Double-Ring Target Icons */}
+                <div className="space-y-4 pt-1">
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-5 h-5 rounded-full border-2 border-[#002B49] text-[#002B49] flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 fill-[#002B49] text-white" />
                     </div>
-                    <span className="text-sm font-semibold text-slate-800">
-                      PF (EPF) Registration Application &amp; Documentation
-                    </span>
+                    <div>
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                        PF (EPF) Registration Application &amp; Documentation
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Shram Suvidha portal preparation with expert CA review
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0 text-purple-600 shadow-xs">
-                      <Laptop className="w-5 h-5" />
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-5 h-5 rounded-full border-2 border-[#002B49] text-[#002B49] flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 fill-[#002B49] text-white" />
                     </div>
-                    <span className="text-sm font-semibold text-slate-800">
-                      Eligibility Check &amp; Employee Strength Verification
-                    </span>
+                    <div>
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                        Eligibility Check &amp; Employee Strength Verification
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Mandatory 20+ threshold vetting or voluntary Sec 1(4) structuring
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0 text-purple-600 shadow-xs">
-                      <ShieldCheck className="w-5 h-5" />
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-5 h-5 rounded-full border-2 border-[#002B49] text-[#002B49] flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 fill-[#002B49] text-white" />
                     </div>
-                    <span className="text-sm font-semibold text-slate-800">
-                      EPF Establishment Code &amp; Compliance Support
-                    </span>
+                    <div>
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                        EPF Establishment Code &amp; Compliance Support
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Official 15-digit code allotment, Form 5A return &amp; login setup
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0 text-purple-600 shadow-xs">
-                      <UserCheck className="w-5 h-5" />
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-5 h-5 rounded-full border-2 border-[#002B49] text-[#002B49] flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 fill-[#002B49] text-white" />
                     </div>
-                    <span className="text-sm font-semibold text-slate-800">
-                      End-to-End EPF Assistance
-                    </span>
+                    <div>
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                        End-to-End EPF Assistance
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Dedicated Labour Law officer for monthly ECR return guidance
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Quick Trust badges under left content */}
-                <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-slate-500 border-t border-slate-100">
-                  <span className="flex items-center gap-1.5 font-medium text-slate-700">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    EPFO Shram Suvidha Verified
-                  </span>
-                  <span>&bull;</span>
-                  <span className="flex items-center gap-1.5 font-medium text-slate-700">
-                    <Clock className="w-4 h-4 text-sky-600" />
-                    Code in 3-5 Working Days
-                  </span>
-                  <span>&bull;</span>
-                  <span className="flex items-center gap-1.5 font-medium text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 text-purple-600" />
-                    Form 5A Compliance Included
-                  </span>
+                {/* Exclusive Banking Partner Block (Matching Screenshot media_1793095970956_bce00c26.png) */}
+                <div className="pt-4 border-t border-slate-200">
+                  <div className="text-xs font-semibold text-slate-700 mb-2">
+                    Exclusive banking partner
+                  </div>
+                  <div className="flex items-center gap-2 select-none">
+                    <div className="w-6 h-6 relative shrink-0">
+                      <svg viewBox="0 0 100 100" className="w-full h-full fill-[#E60000]">
+                        <polygon points="50,0 65,15 50,30 35,15" />
+                        <polygon points="100,50 85,65 70,50 85,35" />
+                        <polygon points="50,100 35,85 50,70 65,85" />
+                        <polygon points="0,50 15,35 30,50 15,65" />
+                        <polygon points="50,20 80,50 50,80 20,50" />
+                      </svg>
+                    </div>
+                    <span className="font-black text-xl tracking-tight text-slate-900">
+                      DBS <span className="font-bold text-slate-700 text-lg">BANK</span>
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: Lead Form Card (1:1 with Screenshot) */}
+              {/* RIGHT COLUMN: Lead Form Card with #002B49 Navy Button */}
               <div className="lg:col-span-6" id="lead-form-card">
-                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-md">
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-md">
+                  
                   {/* Continue with Google button */}
                   <button
                     type="button"
@@ -332,7 +373,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Enter your full name"
-                        className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition placeholder:text-slate-400"
+                        className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-[#002B49] focus:ring-1 focus:ring-[#002B49] transition placeholder:text-slate-400"
                         required
                       />
                     </div>
@@ -347,7 +388,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your business email"
-                        className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition placeholder:text-slate-400"
+                        className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-[#002B49] focus:ring-1 focus:ring-[#002B49] transition placeholder:text-slate-400"
                         required
                       />
                     </div>
@@ -357,7 +398,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
                         Phone Number <span className="text-rose-500">*</span>
                       </label>
-                      <div className="flex rounded-lg border border-slate-300 focus-within:ring-2 focus-within:ring-purple-600 focus-within:border-transparent overflow-hidden">
+                      <div className="flex rounded-lg border border-slate-300 focus-within:border-[#002B49] focus-within:ring-1 focus-within:ring-[#002B49] overflow-hidden">
                         <div className="flex items-center gap-1.5 px-3 bg-slate-50 border-r border-slate-300 text-slate-700 text-xs font-bold shrink-0">
                           <span className="text-base leading-none">🇮🇳</span>
                           <ChevronDown className="w-3 h-3 text-slate-400" />
@@ -397,13 +438,14 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                       </button>
                     </div>
 
-                    {/* Purple-to-Pink gradient Continue CTA Button (1:1 with Screenshot) */}
+                    {/* Deep Navy #002B49 Action Button (Vakilsearch Site-Wide Format) */}
                     <div className="pt-2 flex justify-end">
                       <button
                         type="submit"
-                        className="bg-gradient-to-r from-[#6366F1] via-[#8B5CF6] to-[#D946EF] hover:from-[#4F46E5] hover:to-[#C026D3] text-white font-bold py-2.5 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer text-sm"
+                        className="bg-[#002B49] hover:bg-[#073866] active:scale-[0.99] text-white font-bold py-2.5 px-8 rounded-lg shadow-md transition-all duration-200 cursor-pointer text-sm flex items-center gap-2"
                       >
-                        Continue
+                        <span>Continue</span>
+                        <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   </form>
@@ -411,7 +453,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
               </div>
             </div>
 
-            {/* TRUST STATS RIBBON (Bottom bar of Screenshot) */}
+            {/* TRUST STATS RIBBON (Bottom bar) */}
             <div className="mt-10 pt-8 border-t border-slate-100">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
                 
@@ -468,37 +510,37 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
         </div>
       </section>
 
-      {/* STICKY SUB-NAVIGATION BAR */}
+      {/* STICKY SUB-NAVIGATION BAR (VAKILSEARCH THEME) */}
       <nav className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between overflow-x-auto py-3 text-xs font-semibold text-slate-600 gap-6">
-            <a href="#overview" className="hover:text-purple-600 transition whitespace-nowrap">
+            <a href="#overview" className="hover:text-[#002B49] transition whitespace-nowrap">
               Overview
             </a>
-            <a href="#plans" className="hover:text-purple-600 transition whitespace-nowrap">
+            <a href="#plans" className="hover:text-[#002B49] transition whitespace-nowrap">
               Plans &amp; Pricing
             </a>
-            <a href="#pf-vs-esi" className="hover:text-purple-600 transition whitespace-nowrap text-purple-700 font-bold">
+            <a href="#pf-vs-esi" className="hover:text-[#002B49] transition whitespace-nowrap text-[#002B49] font-bold">
               PF vs ESI Differences
             </a>
-            <a href="#contributions" className="hover:text-purple-600 transition whitespace-nowrap">
+            <a href="#contributions" className="hover:text-[#002B49] transition whitespace-nowrap">
               12% Contribution Split
             </a>
-            <a href="#forms" className="hover:text-purple-600 transition whitespace-nowrap">
+            <a href="#forms" className="hover:text-[#002B49] transition whitespace-nowrap">
               EPFO Statutory Forms
             </a>
-            <a href="#documents" className="hover:text-purple-600 transition whitespace-nowrap">
+            <a href="#documents" className="hover:text-[#002B49] transition whitespace-nowrap">
               Required Documents
             </a>
-            <a href="#penalties" className="hover:text-purple-600 transition whitespace-nowrap">
+            <a href="#penalties" className="hover:text-[#002B49] transition whitespace-nowrap">
               Penalty Slabs
             </a>
-            <a href="#faqs" className="hover:text-purple-600 transition whitespace-nowrap">
+            <a href="#faqs" className="hover:text-[#002B49] transition whitespace-nowrap">
               FAQs
             </a>
             <button
               onClick={() => handleSelectPlan('standard')}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded-full font-bold shadow-xs transition"
+              className="bg-[#002B49] hover:bg-[#073866] text-white px-5 py-1.5 rounded-lg font-bold shadow-xs transition"
             >
               Apply Now
             </button>
@@ -506,13 +548,13 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
         </div>
       </nav>
 
-      {/* SECTION 1: OVERVIEW & KEY STATUTORY HIGHLIGHTS */}
+      {/* SECTION 1: OVERVIEW */}
       <section id="overview" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="text-xs font-bold text-purple-600 uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+          <span className="text-xs font-bold text-[#002B49] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
             Employees' Provident Fund Act, 1952
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
             Everything You Need to Know About EPF Registration
           </h2>
           <p className="mt-3 text-sm text-slate-600 leading-relaxed">
@@ -522,8 +564,8 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
 
         {/* 4 Pillars of EPF Scheme */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 mb-4 font-black">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
+            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-[#002B49] mb-4 font-black">
               20+
             </div>
             <h3 className="font-bold text-base text-slate-900 mb-2">Mandatory Threshold</h3>
@@ -532,7 +574,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
             <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 mb-4">
               <TrendingUp className="w-6 h-6" />
             </div>
@@ -542,7 +584,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
             <div className="w-12 h-12 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600 mb-4">
               <ShieldCheck className="w-6 h-6" />
             </div>
@@ -552,7 +594,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition">
             <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 mb-4">
               <Landmark className="w-6 h-6" />
             </div>
@@ -564,14 +606,14 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
         </div>
       </section>
 
-      {/* SECTION 2: PLANS & PRICING */}
+      {/* SECTION 2: PLANS & PRICING (NAVY THEME) */}
       <section id="plans" className="py-16 bg-slate-100/70 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <span className="text-xs font-bold text-purple-600 uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+            <span className="text-xs font-bold text-[#002B49] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
               Clear &amp; Transparent Packages
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
               Choose the Right EPF Plan for Your Business
             </h2>
             <p className="mt-3 text-sm text-slate-600">
@@ -585,12 +627,12 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                 key={plan.id}
                 className={`relative bg-white rounded-3xl p-7 flex flex-col justify-between transition-all duration-300 ${
                   plan.recommended
-                    ? 'border-2 border-purple-600 shadow-xl scale-102 ring-4 ring-purple-100'
+                    ? 'border-2 border-[#002B49] shadow-xl scale-102 ring-4 ring-blue-50'
                     : 'border border-slate-200 shadow-sm hover:shadow-md'
                 }`}
               >
                 {plan.recommended && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-black uppercase px-4 py-1 rounded-full shadow-md tracking-wider">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#002B49] text-white text-xs font-black uppercase px-4 py-1 rounded-full shadow-md tracking-wider">
                     Most Popular Choice
                   </div>
                 )}
@@ -633,7 +675,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                   onClick={() => handleSelectPlan(plan.id)}
                   className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 shadow-sm cursor-pointer ${
                     plan.recommended
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-purple-200 shadow-md'
+                      ? 'bg-[#002B49] hover:bg-[#073866] text-white shadow-md'
                       : 'bg-slate-900 hover:bg-slate-800 text-white'
                   }`}
                 >
@@ -645,9 +687,9 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
         </div>
       </section>
 
-      {/* SECTION 3: PF VS ESI INTERACTIVE COMPARISON MATRIX (CRITICAL DIFFERENTIATION) */}
+      {/* SECTION 3: PF VS ESI COMPARISON */}
       <section id="pf-vs-esi" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-8 sm:p-10 text-white shadow-xl mb-12">
+        <div className="bg-[#002B49] rounded-3xl p-8 sm:p-10 text-white shadow-xl mb-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <span className="text-xs font-bold text-amber-300 uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full border border-white/20">
@@ -676,10 +718,10 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 uppercase tracking-wider text-[11px]">
                 <th className="py-4 px-6 font-bold w-1/4">Feature / Parameter</th>
-                <th className="py-4 px-6 font-bold w-3/8 text-purple-700 bg-purple-50/50">
+                <th className="py-4 px-6 font-bold w-3/8 text-[#002B49] bg-blue-50/40">
                   Provident Fund (PF / EPF)
                 </th>
-                <th className="py-4 px-6 font-bold w-3/8 text-sky-800 bg-sky-50/50">
+                <th className="py-4 px-6 font-bold w-3/8 text-sky-800 bg-sky-50/40">
                   Employee State Insurance (ESI)
                 </th>
               </tr>
@@ -690,7 +732,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                   <td className="py-3.5 px-6 font-bold text-slate-900 bg-slate-50/30">
                     {diff.parameter}
                   </td>
-                  <td className="py-3.5 px-6 bg-purple-50/20 text-slate-800 font-medium">
+                  <td className="py-3.5 px-6 bg-blue-50/20 text-slate-800 font-medium">
                     {diff.pf}
                   </td>
                   <td className="py-3.5 px-6 bg-sky-50/20 text-slate-800 font-medium">
@@ -703,18 +745,18 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
         </div>
       </section>
 
-      {/* SECTION 4: 12% CONTRIBUTION BREAKDOWN & LIVE SALARY CALCULATOR */}
+      {/* SECTION 4: 12% CONTRIBUTION BREAKDOWN & CALCULATOR */}
       <section id="contributions" className="py-16 bg-slate-100/70 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             
-            {/* Left: Statutory Contribution Split Details */}
+            {/* Left: Details */}
             <div className="lg:col-span-7 space-y-6">
               <div>
-                <span className="text-xs font-bold text-purple-600 uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+                <span className="text-xs font-bold text-[#002B49] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
                   Statutory Formula
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
                   How the 12% + 12% Contribution is Split
                 </h2>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">
@@ -728,10 +770,10 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                     <div className="flex items-center justify-between font-bold text-sm text-slate-900 mb-1">
                       <span>{acc.account}</span>
                       <div className="text-xs space-x-2">
-                        <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                        <span className="bg-blue-100 text-[#002B49] px-2 py-0.5 rounded font-bold">
                           Employee: {acc.employeeShare}
                         </span>
-                        <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
+                        <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-bold">
                           Employer: {acc.employerShare}
                         </span>
                       </div>
@@ -742,11 +784,11 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
               </div>
             </div>
 
-            {/* Right: Live Interactive EPF Wage Calculator */}
+            {/* Right: Wage Calculator */}
             <div className="lg:col-span-5">
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-purple-200 shadow-xl">
-                <div className="flex items-center gap-2 mb-4 text-purple-700 font-bold text-base">
-                  <Calculator className="w-5 h-5" />
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl">
+                <div className="flex items-center gap-2 mb-4 text-[#002B49] font-bold text-base">
+                  <Calculator className="w-5 h-5 text-[#002B49]" />
                   <span>EPF Monthly Contribution Calculator</span>
                 </div>
 
@@ -762,7 +804,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                       max={100000}
                       value={calcSalary}
                       onChange={(e) => setCalcSalary(e.target.value)}
-                      className="w-full px-4 py-2.5 text-base font-bold text-slate-900 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-600 focus:outline-none"
+                      className="w-full px-4 py-2.5 text-base font-bold text-slate-900 rounded-xl border border-slate-300 focus:ring-1 focus:ring-[#002B49] focus:outline-none"
                     />
                     <span className="text-[11px] text-slate-500 mt-1 block">
                       * Statutory wage cap is ₹15,000/month for mandatory deductions.
@@ -770,7 +812,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                   </div>
 
                   {/* Calculated Outputs */}
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-slate-600">Considered Wage Base:</span>
                       <span className="font-bold text-slate-900">₹{wageCap.toLocaleString('en-IN')}</span>
@@ -778,7 +820,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
 
                     <div className="border-t border-slate-200 pt-2 flex justify-between items-center text-xs">
                       <span className="font-semibold text-slate-800">Employee Share (12%):</span>
-                      <span className="font-bold text-purple-700 text-sm">₹{employeePf.toLocaleString('en-IN')}</span>
+                      <span className="font-bold text-[#002B49] text-sm">₹{employeePf.toLocaleString('en-IN')}</span>
                     </div>
 
                     <div className="border-t border-slate-200 pt-2 space-y-1.5 text-xs text-slate-600">
@@ -802,19 +844,19 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
 
                     <div className="border-t-2 border-slate-300 pt-2 flex justify-between items-center">
                       <span className="font-bold text-slate-900 text-xs sm:text-sm">Total Employer Deposit:</span>
-                      <span className="font-black text-indigo-700 text-base">₹{totalEmployer.toLocaleString('en-IN')}</span>
+                      <span className="font-black text-[#002B49] text-base">₹{totalEmployer.toLocaleString('en-IN')}</span>
                     </div>
 
-                    <div className="bg-purple-100/70 p-3 rounded-xl flex justify-between items-center text-xs font-bold text-purple-900">
+                    <div className="bg-blue-50 p-3 rounded-xl flex justify-between items-center text-xs font-bold text-[#002B49]">
                       <span>Total Deposited to EPFO:</span>
-                      <span className="text-base">₹{(employeePf + totalEmployer).toLocaleString('en-IN')}</span>
+                      <span className="text-base font-black">₹{(employeePf + totalEmployer).toLocaleString('en-IN')}</span>
                     </div>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => handleSelectPlan('standard')}
-                    className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs transition shadow-xs"
+                    className="w-full py-3 bg-[#002B49] hover:bg-[#073866] text-white rounded-xl font-bold text-xs transition shadow-xs cursor-pointer"
                   >
                     Register Establishment to Start Deductions
                   </button>
@@ -829,10 +871,10 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
       {/* SECTION 5: EPFO STATUTORY FORMS GUIDE */}
       <section id="forms" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="text-xs font-bold text-purple-600 uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+          <span className="text-xs font-bold text-[#002B49] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
             Compliance Forms
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
             Key EPFO Forms Handled by BharatFiling
           </h2>
           <p className="mt-3 text-sm text-slate-600">
@@ -842,9 +884,9 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {STATUTORY_EPF_FORMS.map((item, idx) => (
-            <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-purple-300 transition">
+            <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-[#002B49] transition">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-black bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                <span className="text-xs font-black bg-blue-100 text-[#002B49] px-3 py-1 rounded-full">
                   {item.form}
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium">EPFO Official</span>
@@ -860,10 +902,10 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
       <section id="documents" className="py-16 bg-slate-100/70 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-10">
-            <span className="text-xs font-bold text-purple-600 uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+            <span className="text-xs font-bold text-[#002B49] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
               Checklist
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
               Documents Required for EPF Registration
             </h2>
             <p className="mt-3 text-sm text-slate-600">
@@ -879,7 +921,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                 onClick={() => setActiveDocTab('proprietorship')}
                 className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   activeDocTab === 'proprietorship'
-                    ? 'bg-purple-600 text-white shadow-xs'
+                    ? 'bg-[#002B49] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -890,7 +932,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                 onClick={() => setActiveDocTab('partnership')}
                 className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   activeDocTab === 'partnership'
-                    ? 'bg-purple-600 text-white shadow-xs'
+                    ? 'bg-[#002B49] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -901,7 +943,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                 onClick={() => setActiveDocTab('company')}
                 className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   activeDocTab === 'company'
-                    ? 'bg-purple-600 text-white shadow-xs'
+                    ? 'bg-[#002B49] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -913,7 +955,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
           {/* Selected Entity Documents */}
           <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm max-w-4xl mx-auto">
             <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-purple-600" />
+              <Building2 className="w-5 h-5 text-[#002B49]" />
               <span>{PF_DOCUMENTS[activeDocTab].title} Checklist</span>
             </h3>
 
@@ -932,7 +974,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
         </div>
       </section>
 
-      {/* SECTION 7: PENALTY SLABS UNDER SECTION 14B & 7Q */}
+      {/* SECTION 7: PENALTY SLABS */}
       <section id="penalties" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
@@ -955,7 +997,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 uppercase tracking-wider text-[11px]">
                   <th className="py-3.5 px-6 font-bold">Delay Period</th>
                   <th className="py-3.5 px-6 font-bold text-rose-600">Damages (Section 14B)</th>
-                  <th className="py-3.5 px-6 font-bold text-indigo-700">Simple Interest (Section 7Q)</th>
+                  <th className="py-3.5 px-6 font-bold text-[#002B49]">Simple Interest (Section 7Q)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -979,14 +1021,14 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
         </div>
       </section>
 
-      {/* SECTION 8: 4-STEP FILING PROCEDURE */}
+      {/* SECTION 8: 4-STEP PROCEDURE */}
       <section className="py-16 bg-slate-100/70 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <span className="text-xs font-bold text-purple-600 uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+            <span className="text-xs font-bold text-[#002B49] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
               Simple Workflow
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
               How the EPF Registration Process Works
             </h2>
             <p className="mt-3 text-sm text-slate-600">
@@ -997,10 +1039,10 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {PF_PROCEDURE_STEPS.map((stepItem, idx) => (
               <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs relative">
-                <span className="text-3xl font-black text-purple-200 absolute top-4 right-4">
+                <span className="text-3xl font-black text-slate-200 absolute top-4 right-4">
                   {stepItem.step}
                 </span>
-                <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm mb-4">
+                <div className="w-10 h-10 rounded-xl bg-[#002B49] text-white flex items-center justify-center font-bold text-sm mb-4">
                   {stepItem.step}
                 </div>
                 <h3 className="font-bold text-sm text-slate-900 mb-2">{stepItem.title}</h3>
@@ -1011,20 +1053,19 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
         </div>
       </section>
 
-      {/* SECTION 9: FAQS ACCORDION */}
+      {/* SECTION 9: FAQS */}
       <section id="faqs" className="py-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold text-purple-600 uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+          <span className="text-xs font-bold text-[#002B49] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
             Got Questions?
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
             Frequently Asked Questions
           </h2>
           <p className="mt-3 text-sm text-slate-600">
             Answers to common questions regarding eligibility, deductions, voluntary registration, and penalties.
           </p>
 
-          {/* Search Box */}
           <div className="relative mt-6 max-w-md mx-auto">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -1032,7 +1073,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
               value={faqSearch}
               onChange={(e) => setFaqSearch(e.target.value)}
               placeholder="Search EPF questions..."
-              className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600"
+              className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-[#002B49] focus:ring-1 focus:ring-[#002B49]"
             />
           </div>
         </div>
@@ -1048,11 +1089,11 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                 <button
                   type="button"
                   onClick={() => setOpenFaqIndex(isOpen ? -1 : index)}
-                  className="w-full py-4 px-6 text-left flex items-center justify-between gap-4 font-bold text-sm text-slate-900 hover:text-purple-600 transition"
+                  className="w-full py-4 px-6 text-left flex items-center justify-between gap-4 font-bold text-sm text-slate-900 hover:text-[#002B49] transition"
                 >
                   <span>{faq.question}</span>
                   {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-purple-600 shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-[#002B49] shrink-0" />
                   ) : (
                     <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
                   )}
@@ -1069,7 +1110,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
       </section>
 
       {/* BOTTOM CTA BANNER */}
-      <section className="py-16 bg-gradient-to-r from-[#002B49] to-[#004B7D] text-white text-center">
+      <section className="py-16 bg-[#002B49] text-white text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-extrabold">
             Ready to Obtain Your 15-Digit EPF Establishment Code?
@@ -1081,7 +1122,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => handleSelectPlan('standard')}
-              className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition"
+              className="w-full sm:w-auto bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold py-3 px-8 rounded-xl shadow-lg transition"
             >
               Start Online Registration
             </button>
@@ -1106,7 +1147,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
             >
               <X className="w-5 h-5" />
             </button>
-            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-full bg-blue-100 text-[#002B49] flex items-center justify-center mb-4">
               <Gift className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold text-slate-900">Refer a Business Owner</h3>
@@ -1123,7 +1164,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                 value={referFriendPhone}
                 onChange={(e) => setReferFriendPhone(e.target.value.replace(/\D/g, ''))}
                 placeholder="e.g. 9876543210"
-                className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-600 focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-1 focus:ring-[#002B49] focus:outline-none"
               />
             </div>
             <div className="mt-6 flex justify-end gap-3">
@@ -1145,7 +1186,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
                   setShowReferModal(false);
                   setReferFriendPhone('');
                 }}
-                className="px-5 py-2 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-xs"
+                className="px-5 py-2 text-xs font-bold bg-[#002B49] hover:bg-[#073866] text-white rounded-xl shadow-xs"
               >
                 Send Invitation
               </button>
