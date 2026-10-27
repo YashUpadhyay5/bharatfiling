@@ -43,6 +43,7 @@ const PtCheckoutPage = lazy(() =>
   import('./pages/professional-tax/index.jsx').then((m) => ({ default: m.PtCheckoutPage }))
 );
 const ShopEstablishmentModule = lazy(() => import('./pages/shop-establishment/index.jsx'));
+const DigitalSignatureModule = lazy(() => import('./pages/digital-signature/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -91,6 +92,10 @@ export default function App() {
                 <Route path="/services/shop-establishment" element={<ShopEstablishmentModule />} />
                 <Route path="/services/gumasta-license" element={<ShopEstablishmentModule />} />
                 <Route path="/services/gumasta" element={<ShopEstablishmentModule />} />
+                <Route path="/services/class-3-digital-signature" element={<DigitalSignatureModule />} />
+                <Route path="/services/dsc-registration" element={<DigitalSignatureModule />} />
+                <Route path="/services/digital-signature" element={<DigitalSignatureModule />} />
+                <Route path="/services/dsc" element={<DigitalSignatureModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -122,6 +127,10 @@ export default function App() {
                 <Route path="/apply/shop-establishment" element={<ShopEstablishmentModule />} />
                 <Route path="/apply/gumasta-license" element={<ShopEstablishmentModule />} />
                 <Route path="/apply/gumasta" element={<ShopEstablishmentModule />} />
+                <Route path="/apply/class-3-digital-signature" element={<DigitalSignatureModule />} />
+                <Route path="/apply/dsc-registration" element={<DigitalSignatureModule />} />
+                <Route path="/apply/digital-signature" element={<DigitalSignatureModule />} />
+                <Route path="/apply/dsc" element={<DigitalSignatureModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />

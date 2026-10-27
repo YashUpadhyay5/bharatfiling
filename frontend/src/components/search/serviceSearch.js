@@ -266,12 +266,12 @@ export const SERVICES_DATA = [
   },
   {
     id: 'dsc-token',
-    title: 'Digital Signature Certificate (DSC)',
-    subtitle: 'Class 3 USB cryptographic token for MCA & GST',
+    title: 'Class 3 Digital Signature Certificate (DSC)',
+    subtitle: '100% Online Paperless Video KYC with FIPS Cryptographic USB Token for MCA, Tax, GST & e-Tenders',
     category: 'LICENSES & REGISTRATION',
     badge: 'LICENSES & REGISTRATION',
-    path: '/services',
-    keywords: ['dsc', 'digital signature', 'class 3', 'emsigner', 'usb token'],
+    path: '/services/class-3-digital-signature',
+    keywords: ['dsc', 'digital signature', 'class 3', 'class 3 dsc', 'emsigner', 'usb token', 'epass2003', 'proxkey', 'gem', 'cppp', 'e-tender', 'cca'],
     isTrending: false,
   },
 
