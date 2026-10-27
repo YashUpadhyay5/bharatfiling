@@ -55,7 +55,7 @@ import {
   TRUST_STATS,
 } from './constants.js';
 
-export default function PfLandingPage({ initialData = {}, onGetStarted }) {
+export default function PfLandingPage({ initialData = {}, isEsi = false, onGetStarted }) {
   const { showError, showSuccess } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -194,7 +194,7 @@ export default function PfLandingPage({ initialData = {}, onGetStarted }) {
               <span>&gt;</span>
               <span className="text-sky-300">Labour Law Registrations</span>
               <span>&gt;</span>
-              <span className="text-white font-semibold">PF (EPF) Registration</span>
+              <span className="text-white font-semibold">{isEsi ? "ESI & PF Registration" : "PF (EPF) Registration"}</span>
             </nav>
 
             <div className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-xs text-sky-100 transition shadow-xs">

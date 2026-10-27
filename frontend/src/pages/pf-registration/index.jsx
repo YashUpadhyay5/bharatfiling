@@ -11,7 +11,7 @@ import PfPaymentPage from './4-PfPaymentPage.jsx';
 
 export { PfLandingPage, PfDetailsPage, PfCheckoutPage, PfPaymentPage };
 
-export default function PfRegistrationModule() {
+export default function PfRegistrationModule({ isEsi = false }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { showSuccess } = useToast();
@@ -20,7 +20,7 @@ export default function PfRegistrationModule() {
   const potentialIdParam = searchParams.get('potential_id');
   const initialStep = stepParam ? parseInt(stepParam, 10) : (potentialIdParam ? 4 : 1);
   const currentStep = [1, 2, 3, 4].includes(initialStep) ? initialStep : 1;
-  const initialPlan = searchParams.get('plan') || 'standard';
+  const initialPlan = searchParams.get('plan') || (isEsi ? 'combo' : 'standard');
 
   const getInitialDraft = () => {
     try {
@@ -47,11 +47,11 @@ export default function PfRegistrationModule() {
       businessName: '',
       cinGstin: '',
       wantDbsAccount: 'yes',
-      employeeCoverage: 'twenty_plus',
+      employeeCoverage: isEsi ? 'ten_plus' : 'twenty_plus',
       entityType: 'company',
       coverageType: 'mandatory',
-      employeeCount: 20,
-      eligibleWageEmployees: 15,
+      employeeCount: isEsi ? 12 : 20,
+      eligibleWageEmployees: 10,
       entityPan: '',
       state: 'Karnataka',
       authorizedSignatory: user?.name || user?.full_name || '',
@@ -127,6 +127,7 @@ export default function PfRegistrationModule() {
       {currentStep === 1 && (
         <PfLandingPage
           initialData={formData}
+          isEsi={isEsi}
           onGetStarted={handleStep1GetStarted}
         />
       )}
@@ -135,6 +136,7 @@ export default function PfRegistrationModule() {
       {currentStep === 2 && (
         <PfDetailsPage
           formData={formData}
+          isEsi={isEsi}
           onInputChange={handleInputChange}
           onBack={handleBackToStep1}
           onSubmit={handleStep2Submit}
@@ -145,6 +147,7 @@ export default function PfRegistrationModule() {
       {currentStep === 3 && (
         <PfCheckoutPage
           formData={formData}
+          isEsi={isEsi}
           onSelectPlan={handleStep3Proceed}
           onBack={handleBackToStep2}
         />
@@ -154,6 +157,7 @@ export default function PfRegistrationModule() {
       {currentStep === 4 && (
         <PfPaymentPage
           formData={formData}
+          isEsi={isEsi}
           onBack={handleBackToStep3}
           onPaymentSuccess={() => {
             // Optional callback

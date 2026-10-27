@@ -140,7 +140,7 @@ export const SERVICES = [
     'Get 17-digit ESIC Employer Code for medical and sickness benefits (10+ employees).',
     ['Entity PAN and incorporation proof', 'List of employees earning <= Rs 21,000/mo', 'Bank statement or cheque', 'Address proof of establishment'],
     ['17-Digit ESIC Employer Code', 'ESIC employer portal registration', 'Pehchan Card guidance', 'Dedicated Labour Law CA review'],
-    { status: 'catalog', path: '/services/esi-registration', priceStatus: 'existing', aliases: ['esic-registration', 'esic', 'esi'] }),
+    { status: 'live', path: '/services/esi-registration', priceStatus: 'existing', aliases: ['esic-registration', 'esic', 'esi'] }),
   s('pf-esi-registration', 'PF & ESI Compliance Combo', 'registrations', 4499, 'one-time', '4-6 working days',
     'Simultaneous 15-digit EPF Code and 17-digit ESIC Employer Code allotment on Shram Suvidha.',
     ['PAN and incorporation documents', 'Bank account proof', 'List of employees with salary', 'Address proof of the establishment'],

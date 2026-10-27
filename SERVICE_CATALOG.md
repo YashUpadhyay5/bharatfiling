@@ -2,9 +2,9 @@
 
 Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then run `npm run catalog:export` in `frontend/`.
 
-- **74 services** in 8 header menus. **16 live** end-to-end, **58 catalogue** (detail page + request via the contact desk).
+- **76 services** in 8 header menus. **20 live** end-to-end, **56 catalogue** (detail page + request via the contact desk).
 - Prices are the professional fee in INR **before 18% GST and government fees**.
-- **11** prices are already used on the live site; **61** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
+- **15** prices are already used on the live site; **59** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
 
 ## Startup
 
@@ -35,8 +35,10 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 | FSSAI Food License | ₹1,999 | ₹2,359 | one-time | 5-10 working days | FSSAI fee at actuals (depends on licence type and turnover) | live | existing | `/services/fssai-registration` |
 | Professional Tax (PT) | ₹1,499 | ₹1,769 | one-time | 3-5 working days | State PT fee at actuals | live | existing | `/services/professional-tax` |
 | Shop & Establishment | ₹1,999 | ₹2,359 | one-time | 3-7 working days | State fee at actuals | live | existing | `/services/shop-and-establishment-license` |
-| Digital Signature (DSC) | ₹1,199 | ₹1,415 | for 2 years | 1 working day | No government fee | catalog | draft | `/services/digital-signature` |
-| PF & ESI Registration | ₹2,999 | ₹3,539 | one-time | 5-8 working days | No government fee | catalog | draft | `/services/pf-esi-registration` |
+| Class 3 Digital Signature (DSC) | ₹1,499 | ₹1,769 | for 2 years | 1 working day | No government fee | live | existing | `/services/class-3-digital-signature` |
+| PF (EPF) Registration | ₹1,999 | ₹2,359 | one-time | 3-5 working days | No government fee | live | existing | `/services/pf-registration` |
+| ESI Registration | ₹1,999 | ₹2,359 | one-time | 3-5 working days | No government fee | live | existing | `/services/esi-registration` |
+| PF & ESI Compliance Combo | ₹4,499 | ₹5,309 | one-time | 4-6 working days | No government fee | live | existing | `/services/pf-registration?plan=combo` |
 | PAN & TAN Registration | ₹499 | ₹589 | one-time | 3-5 working days | NSDL / UTIITSL fee at actuals | catalog | draft | `/services/pan-tan-registration` |
 | APEDA Registration | ₹2,499 | ₹2,949 | one-time | 5-7 working days | APEDA fee at actuals | catalog | draft | `/services/apeda-registration` |
 
