@@ -8,7 +8,7 @@
     "dev": "node --watch src/index.js",
     "build": "echo 'Backend dependencies ready'",
     "start": "node src/index.js",
-    "test": "node --test --test-concurrency=1 src/tests/hraCalculator.test.js src/tests/incomeTaxCalculator.test.js src/tests/authRegistration.test.js src/tests/ptRegistrationE2E.test.js src/tests/shopEstablishmentE2E.test.js src/tests/gstServicesE2E.test.js"
+    "test": "node --test --test-concurrency=1 src/tests/hraCalculator.test.js src/tests/incomeTaxCalculator.test.js src/tests/authRegistration.test.js src/tests/ptRegistrationE2E.test.js src/tests/shopEstablishmentE2E.test.js src/tests/gstServicesE2E.test.js src/tests/digitalSignatureE2E.test.js"
   },
   "keywords": [
     "gst",
