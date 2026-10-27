@@ -45,8 +45,27 @@ describe('PF (EPF) Registration Module - End-to-End & Database Verification', ()
     assert.ok(supabase, 'Supabase client must exist');
   });
 
-  test('3. Quotation API (POST /quote) - Computes exact fees & 12% statutory splits', async () => {
-    const res = await fetch(`${baseUrl}/quote`, {
+  test('3. Quotation API (POST /quote) - Computes exact fees for all 3 Service Types & 12% statutory splits', async () => {
+    // 3A. Service 1: Starter (EPF Allotment) — ₹1,999
+    const starterRes = await fetch(`${baseUrl}/quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan: 'starter',
+        includeLabourWelfare: true,
+      }),
+    });
+    assert.strictEqual(starterRes.status, 200);
+    const starterData = await starterRes.json();
+    assert.strictEqual(starterData.success, true);
+    assert.strictEqual(starterData.quote.professionalFee, 1999);
+    assert.strictEqual(starterData.quote.gstOnFee, 360);
+    assert.strictEqual(starterData.quote.labourWelfare, 120);
+    assert.strictEqual(starterData.quote.gstOnLabour, 22);
+    assert.strictEqual(starterData.quote.totalAmount, 2501); // 1999 + 360 + 120 + 22 = 2501
+
+    // 3B. Service 2: Standard (EPF + 3 Months ECR) — ₹2,999
+    const standardRes = await fetch(`${baseUrl}/quote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -55,24 +74,41 @@ describe('PF (EPF) Registration Module - End-to-End & Database Verification', ()
         includeLabourWelfare: true,
       }),
     });
-
-    assert.strictEqual(res.status, 200);
-    const data = await res.json();
-    assert.strictEqual(data.success, true);
-    assert.strictEqual(data.quote.professionalFee, 2999);
-    assert.strictEqual(data.quote.gstOnFee, 540); // 18% of 2999
-    assert.strictEqual(data.quote.labourWelfare, 120);
-    assert.strictEqual(data.quote.gstOnLabour, 22);
-    assert.strictEqual(data.quote.totalAmount, 3681); // 2999 + 540 + 120 + 22 = 3681
+    assert.strictEqual(standardRes.status, 200);
+    const standardData = await standardRes.json();
+    assert.strictEqual(standardData.success, true);
+    assert.strictEqual(standardData.quote.professionalFee, 2999);
+    assert.strictEqual(standardData.quote.gstOnFee, 540); // 18% of 2999
+    assert.strictEqual(standardData.quote.labourWelfare, 120);
+    assert.strictEqual(standardData.quote.gstOnLabour, 22);
+    assert.strictEqual(standardData.quote.totalAmount, 3681); // 2999 + 540 + 120 + 22 = 3681
 
     // Verify statutory EPFO split on ₹15,000 wage ceiling
-    const stat = data.quote.statutoryContribution;
+    const stat = standardData.quote.statutoryContribution;
     assert.strictEqual(stat.wageBase, 15000);
     assert.strictEqual(stat.employeeDeduction, 1800); // 12% of 15,000 = 1,800
     assert.strictEqual(stat.employerEpf, 551); // 3.67% of 15,000 = 550.5 -> 551
     assert.strictEqual(stat.employerEps, 1250); // 8.33% of 15,000 = 1249.5 -> 1250
     assert.strictEqual(stat.employerEdli, 75); // 0.50% of 15,000 = 75
     assert.strictEqual(stat.employerAdmin, 75); // 0.50% of 15,000 = 75
+
+    // 3C. Service 3: PF + ESI Compliance Combo — ₹4,499
+    const comboRes = await fetch(`${baseUrl}/quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan: 'combo',
+        includeLabourWelfare: true,
+      }),
+    });
+    assert.strictEqual(comboRes.status, 200);
+    const comboData = await comboRes.json();
+    assert.strictEqual(comboData.success, true);
+    assert.strictEqual(comboData.quote.professionalFee, 4499);
+    assert.strictEqual(comboData.quote.gstOnFee, 810); // 18% of 4499
+    assert.strictEqual(comboData.quote.labourWelfare, 120);
+    assert.strictEqual(comboData.quote.gstOnLabour, 22);
+    assert.strictEqual(comboData.quote.totalAmount, 5451); // 4499 + 810 + 120 + 22 = 5451
   });
 
   test('4. Draft Order API (POST /checkout/draft) - Creates and persists EPF application & order to DB', async () => {

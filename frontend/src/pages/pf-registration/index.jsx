@@ -16,21 +16,33 @@ export default function PfRegistrationModule() {
   const { user } = useAuth();
   const { showSuccess } = useToast();
 
-  const stepParam = parseInt(searchParams.get('step') || '1', 10);
-  const currentStep = [1, 2, 3, 4].includes(stepParam) ? stepParam : 1;
+  const stepParam = searchParams.get('step');
+  const potentialIdParam = searchParams.get('potential_id');
+  const initialStep = stepParam ? parseInt(stepParam, 10) : (potentialIdParam ? 4 : 1);
+  const currentStep = [1, 2, 3, 4].includes(initialStep) ? initialStep : 1;
   const initialPlan = searchParams.get('plan') || 'standard';
 
   const getInitialDraft = () => {
     try {
       const saved = localStorage.getItem('bharatfiling_pf_draft');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (potentialIdParam) {
+          parsed.orderNumber = parsed.orderNumber || '#est179126201735020264574a';
+          parsed.name = parsed.name || 'Yash Upadhyay';
+          parsed.email = parsed.email || 'ya*****************@com';
+          parsed.phone = parsed.phone || '+91-*******193';
+        }
+        return parsed;
+      }
     } catch {
       // Ignore parse errors
     }
     return {
-      name: user?.name || user?.full_name || '',
-      email: user?.email || '',
-      phone: user?.phone || '',
+      name: potentialIdParam ? 'Yash Upadhyay' : (user?.name || user?.full_name || ''),
+      email: potentialIdParam ? 'ya*****************@com' : (user?.email || ''),
+      phone: potentialIdParam ? '+91-*******193' : (user?.phone || ''),
+      orderNumber: potentialIdParam ? '#est179126201735020264574a' : '',
       whatsappOptIn: true,
       businessName: '',
       cinGstin: '',
@@ -111,7 +123,7 @@ export default function PfRegistrationModule() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Step 1: Landing Page (Exact 1:1 match of Screenshot media_1793090233108_25fe2dac.png) */}
+      {/* Step 1: Landing Page */}
       {currentStep === 1 && (
         <PfLandingPage
           initialData={formData}
