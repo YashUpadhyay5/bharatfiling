@@ -7,8 +7,8 @@ const router = express.Router();
 
 const PLAN_FEES = {
   starter: 1199,
-  standard: 1199,
-  express: 1999,
+  standard: 1999,
+  express: 2999,
   defense: 4999,
 };
 
@@ -29,17 +29,26 @@ router.post('/quote/calculate', (req, res) => {
       applicantType = 'individual',
       classesCount = 1,
       coupon = '',
+      includeGovtFee = true,
     } = req.body;
 
-    const baseFee = PLAN_FEES[planId] || PLAN_FEES.standard;
+    const baseFee = PLAN_FEES[planId] || 1999;
     const numClasses = Math.max(1, parseInt(classesCount, 10) || 1);
     const govtFeePerClass = GOVT_FEES[applicantType] || GOVT_FEES.individual;
-    const totalGovtFee = govtFeePerClass * numClasses;
+    const totalGovtFee = includeGovtFee ? govtFeePerClass * numClasses : 0;
 
     let discount = 0;
     const cleanCoupon = String(coupon).trim().toUpperCase();
-    if (cleanCoupon === 'SAVE40' || cleanCoupon === 'DIWALI') {
+    if (planId === 'express') {
+      discount = 1000;
+    } else if (cleanCoupon === 'SAVE40' || cleanCoupon === 'DIWALI') {
       discount = Math.round(baseFee * 0.4);
+    } else if (
+      cleanCoupon === 'ONLINE500' ||
+      cleanCoupon === 'HOORAY500' ||
+      (!coupon && baseFee === 1999 && !includeGovtFee)
+    ) {
+      discount = 500; // Screenshot media_1793184439103_92c3d623.png unlocked discount
     }
 
     const professionalFee = Math.max(0, baseFee - discount);

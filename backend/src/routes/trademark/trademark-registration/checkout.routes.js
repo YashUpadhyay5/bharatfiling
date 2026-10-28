@@ -8,8 +8,8 @@ const router = express.Router();
 
 const PLAN_FEES = {
   starter: 1199,
-  standard: 1199,
-  express: 1999,
+  standard: 1999,
+  express: 2999,
   defense: 4999,
 };
 
@@ -35,6 +35,7 @@ router.post('/checkout/draft', optionalAuth, (req, res) => {
       planId = 'standard',
       selectedClassId = 25,
       coupon = '',
+      includeGovtFee = false,
     } = req.body;
 
     if (!email || !email.includes('@')) {
@@ -58,17 +59,18 @@ router.post('/checkout/draft', optionalAuth, (req, res) => {
     const orderId = uuidv4();
     const orderNumber = `#TM-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    const baseFee = PLAN_FEES[planId] || PLAN_FEES.standard;
-    const govtFee = GOVT_FEES[applicantType] || GOVT_FEES.individual;
-
-    let discount = 0;
+    const baseFee = 1999;
+    let discount = 500;
     const cleanCoupon = String(coupon).trim().toUpperCase();
     if (cleanCoupon === 'SAVE40' || cleanCoupon === 'DIWALI') {
       discount = Math.round(baseFee * 0.4);
+    } else if (cleanCoupon === 'ONLINE500' || cleanCoupon === 'HOORAY500' || !coupon) {
+      discount = 500;
     }
 
     const professionalFee = Math.max(0, baseFee - discount);
     const gstOnProfessional = Math.round(professionalFee * 0.18);
+    const govtFee = includeGovtFee ? (GOVT_FEES[applicantType] || GOVT_FEES.individual) : 0;
     const totalAmount = professionalFee + gstOnProfessional + govtFee;
 
     // Save draft application

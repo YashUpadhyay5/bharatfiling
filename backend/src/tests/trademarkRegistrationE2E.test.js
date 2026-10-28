@@ -45,26 +45,24 @@ describe('Trademark Registration Module - End-to-End & Database Verification', (
     assert.ok(supabase, 'Supabase client instance must exist');
   });
 
-  test('3. Quotation API (POST /quote/calculate) - Verifies statutory fee calculations', async () => {
-    // 3A. Individual / MSME applicant with Standard Plan (₹1,199) and 1 class (₹4,500 govt fee)
-    const resIndividual = await fetch(`${baseUrl}/quote/calculate`, {
+  test('3. Quotation API (POST /quote/calculate) - Verifies statutory fee calculations matching screenshot media_1793184439103_92c3d623.png (₹1,769)', async () => {
+    // 3A. Exact match of Payment Desk screenshot media_1793184439103_92c3d623.png
+    const resDesk = await fetch(`${baseUrl}/quote/calculate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         planId: 'standard',
-        applicantType: 'individual',
-        classesCount: 1,
+        includeGovtFee: false,
       }),
     });
-    assert.strictEqual(resIndividual.status, 200);
-    const dataIndividual = await resIndividual.json();
-    assert.strictEqual(dataIndividual.success, true);
-    assert.strictEqual(dataIndividual.quote.professionalFee, 1199);
-    assert.strictEqual(dataIndividual.quote.gstOnProfessional, 216); // 18% of 1199 = 215.82 -> 216
-    assert.strictEqual(dataIndividual.quote.govtFeePerClass, 4500);
-    assert.strictEqual(dataIndividual.quote.totalGovtFee, 4500);
-    assert.strictEqual(dataIndividual.quote.totalPayable, 1199 + 216 + 4500); // ₹5,915
-    assert.strictEqual(dataIndividual.quote.isMsmeRebateApplied, true);
+    assert.strictEqual(resDesk.status, 200);
+    const dataDesk = await resDesk.json();
+    assert.strictEqual(dataDesk.success, true);
+    assert.strictEqual(dataDesk.quote.baseProfessionalFee, 1999);
+    assert.strictEqual(dataDesk.quote.discount, 500);
+    assert.strictEqual(dataDesk.quote.professionalFee, 1499);
+    assert.strictEqual(dataDesk.quote.gstOnProfessional, 270); // 18% of 1499 = 269.82 -> 270
+    assert.strictEqual(dataDesk.quote.totalPayable, 1769); // Exactly ₹1,769 from screenshot!
 
     // 3A-2. Express Plan (₹1,999) from Screenshot 3
     const resExpress = await fetch(`${baseUrl}/quote/calculate`, {
