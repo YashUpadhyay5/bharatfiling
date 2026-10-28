@@ -101,4 +101,16 @@ export const SERVICE_FAQS = {
   ],
   'itr-filing': [{ q: 'Which ITR form applies to me?', a: 'It depends on your income sources. We choose the form after reviewing your documents.' }],
   'trademark-registration': [{ q: 'Which class should I file in?', a: 'Your goods or services decide the class. We recommend the right class and can file in more than one.' }],
+  'pan-registration': [
+    { q: 'Who is legally required to obtain a PAN card in India?', a: 'Every individual or business entity earning taxable income, conducting transactions with turnover exceeding ₹5,00,000, opening current or savings accounts, or executing specified financial transactions must obtain a PAN under Section 139A of the Income Tax Act.' },
+    { q: 'What is the difference between an e-PAN and a physical PVC PAN card?', a: 'Both hold equal statutory validity. An e-PAN is a digitally signed PDF issued quickly by the Income Tax Department via email, while the physical PVC card is embossed with high-security QR and dispatched by post to your registered address.' },
+    { q: 'Can I apply for PAN correction, update, or re-print?', a: 'Yes. If your name, father\'s name, date of birth, or photograph contains errors or needs an update, or if your physical card is lost or damaged, you can apply for correction or duplicate re-print using this service.' },
+    { q: 'Which application form is used for PAN registration?', a: 'Indian citizens, HUFs, companies, LLPs, and partnership firms apply using Form 49A. Foreign nationals, non-resident entities, and foreign companies apply using Form 49AA.' },
+  ],
+  'tan-registration': [
+    { q: 'What is TAN and why is it mandatory?', a: 'Tax Deduction and Collection Account Number (TAN) is a unique 10-digit alphanumeric code issued by the Income Tax Department. Under Section 203A, it is mandatory for any person or entity deducting tax (TDS) or collecting tax (TCS) on salary, contractor, rent, or professional fees.' },
+    { q: 'Can I quote PAN instead of TAN when depositing TDS?', a: 'No. PAN cannot be quoted in place of TAN. Failing to obtain TAN or quoting PAN instead of TAN on TDS challans and returns attracts a mandatory penalty of ₹10,000 under Section 272BB of the Income Tax Act.' },
+    { q: 'Do sole proprietors and professionals need a TAN?', a: 'Yes, if a sole proprietor or professional makes payments subject to TDS provisions (such as Section 194C for contractors, 194J for professional fees, 194I for commercial rent, or 194IB for high residential rent), obtaining a TAN is mandatory.' },
+    { q: 'How long does it take to get a TAN allotted?', a: 'Once Form 49B is submitted on the Income Tax Protean / NSDL portal, the 10-digit TAN allotment letter is typically issued within 2 to 3 working days.' },
+  ],
 };

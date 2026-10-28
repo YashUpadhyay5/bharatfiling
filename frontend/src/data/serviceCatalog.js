@@ -149,11 +149,16 @@ export const SERVICES = [
 
 
 
-  s('pan-tan-registration', 'PAN & TAN Registration', 'registrations', 499, 'one-time', '3-5 working days',
-    'Apply for a new PAN or TAN for individuals, firms and companies.',
-    ['Identity and address proof', 'Photograph', 'Incorporation documents for entities', 'Authorised signatory details'],
-    ['Form 49A / 49B / TAN application', 'e-PAN delivery', 'Correction support'],
-    { govt: 'NSDL / UTIITSL fee at actuals' }),
+  s('pan-registration', 'PAN Registration', 'registrations', 499, 'one-time', '2-4 working days',
+    'Apply for a new Permanent Account Number (PAN Card) or correction for Individuals, Firms, LLPs, Companies and Trusts.',
+    ['Identity proof (Aadhaar / Passport / Voter ID)', 'Address proof (Utility bill / Bank statement)', 'Proof of Date of Birth or Incorporation Certificate', 'Passport-size photograph of applicant or signatory'],
+    ['Form 49A / Form 49AA online preparation and filing', 'Instant e-PAN digital delivery via email', 'Physical PVC card dispatched to communication address', 'Expert tax vetting & name mismatch correction support'],
+    { govt: 'Govt fee Rs 107 (within India) / Rs 1,017 (outside India) at actuals', aliases: ['pan-tan-registration', 'pan', 'pan-card', 'new-pan'] }),
+  s('tan-registration', 'TAN Registration', 'registrations', 999, 'one-time', '2-3 working days',
+    'Obtain 10-digit Tax Deduction and Collection Account Number (TAN) mandatory under Section 203A for TDS/TCS compliance.',
+    ['Entity PAN (Company / LLP / Partnership / Proprietor)', 'Certificate of Incorporation / Partnership Deed / Business Proof', 'Authorised signatory PAN, Aadhaar & Designation', 'Proof of registered business address'],
+    ['Form 49B online preparation and NSDL submission', '10-Digit Alphanumeric TAN allotment letter from IT Dept', 'TRACES portal registration & activation support', 'First quarterly TDS deduction & filing consultation'],
+    { govt: 'Govt fee Rs 65 (inclusive of GST) at actuals', aliases: ['tan', 'tan-card', 'tan-allotment', 'tds-tan'] }),
   s('apeda-registration', 'APEDA Registration', 'registrations', 2499, 'one-time', '5-7 working days',
     'RCMC from APEDA for exporters of agricultural and processed food products.',
     ['IEC certificate', 'PAN and bank certificate', 'Proof of business address', 'Product list with HS codes'],
