@@ -48,6 +48,7 @@ const GstServiceModule = lazy(() => import('./pages/gst-services/index.jsx'));
 const DigitalSignatureModule = lazy(() => import('./pages/digital-signature/index.jsx'));
 const PfRegistrationModule = lazy(() => import('./pages/pf-registration/index.jsx'));
 const EsiRegistrationModule = lazy(() => import('./pages/esi-registration/index.jsx'));
+const PanRegistrationModule = lazy(() => import('./pages/pan-registration/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -117,6 +118,9 @@ export default function App() {
                 <Route path="/services/esi-registration" element={<EsiRegistrationModule />} />
                 <Route path="/services/esic-registration" element={<EsiRegistrationModule />} />
                 <Route path="/services/esi" element={<EsiRegistrationModule />} />
+                <Route path="/services/pan-registration" element={<PanRegistrationModule />} />
+                <Route path="/services/pan" element={<PanRegistrationModule />} />
+                <Route path="/services/pan-card" element={<PanRegistrationModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -160,6 +164,8 @@ export default function App() {
                 <Route path="/apply/pf-esi" element={<PfRegistrationModule />} />
                 <Route path="/apply/esi-registration" element={<EsiRegistrationModule />} />
                 <Route path="/apply/esi" element={<EsiRegistrationModule />} />
+                <Route path="/apply/pan-registration" element={<PanRegistrationModule />} />
+                <Route path="/apply/pan" element={<PanRegistrationModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
