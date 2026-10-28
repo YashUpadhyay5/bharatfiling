@@ -46,7 +46,7 @@ describe('Trademark Registration Module - End-to-End & Database Verification', (
   });
 
   test('3. Quotation API (POST /quote/calculate) - Verifies statutory fee calculations', async () => {
-    // 3A. Individual / MSME applicant with Standard Plan (₹1,999) and 1 class (₹4,500 govt fee)
+    // 3A. Individual / MSME applicant with Standard Plan (₹1,199) and 1 class (₹4,500 govt fee)
     const resIndividual = await fetch(`${baseUrl}/quote/calculate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -59,12 +59,27 @@ describe('Trademark Registration Module - End-to-End & Database Verification', (
     assert.strictEqual(resIndividual.status, 200);
     const dataIndividual = await resIndividual.json();
     assert.strictEqual(dataIndividual.success, true);
-    assert.strictEqual(dataIndividual.quote.professionalFee, 1999);
-    assert.strictEqual(dataIndividual.quote.gstOnProfessional, 360); // 18% of 1999 = 359.82 -> 360
+    assert.strictEqual(dataIndividual.quote.professionalFee, 1199);
+    assert.strictEqual(dataIndividual.quote.gstOnProfessional, 216); // 18% of 1199 = 215.82 -> 216
     assert.strictEqual(dataIndividual.quote.govtFeePerClass, 4500);
     assert.strictEqual(dataIndividual.quote.totalGovtFee, 4500);
-    assert.strictEqual(dataIndividual.quote.totalPayable, 1999 + 360 + 4500); // ₹6,859
+    assert.strictEqual(dataIndividual.quote.totalPayable, 1199 + 216 + 4500); // ₹5,915
     assert.strictEqual(dataIndividual.quote.isMsmeRebateApplied, true);
+
+    // 3A-2. Express Plan (₹1,999) from Screenshot 3
+    const resExpress = await fetch(`${baseUrl}/quote/calculate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        planId: 'express',
+        applicantType: 'individual',
+        classesCount: 1,
+      }),
+    });
+    assert.strictEqual(resExpress.status, 200);
+    const dataExpress = await resExpress.json();
+    assert.strictEqual(dataExpress.quote.professionalFee, 1999);
+    assert.strictEqual(dataExpress.quote.gstOnProfessional, 360);
 
     // 3B. Starter Plan (₹1,199) with Diwali discount coupon
     const resStarterCoupon = await fetch(`${baseUrl}/quote/calculate`, {

@@ -557,6 +557,188 @@ export const TRUST_STATS = [
   { value: '24 Hours', label: 'Form TM-A Filing & ™ Generation' },
 ];
 
+export const PROTECTION_TYPES = [
+  {
+    id: 'brand_name',
+    title: 'Brand name',
+    subtitle: '',
+    previewType: 'text',
+    previewText: 'NIKE™',
+  },
+  {
+    id: 'brand_name_logo',
+    title: 'Brand name + Logo',
+    subtitle: 'Name + Graphic representation of brand',
+    previewType: 'logo_text',
+    previewText: 'NIKE™',
+  },
+  {
+    id: 'logo',
+    title: 'Logo',
+    subtitle: 'Graphic representation of your brand',
+    previewType: 'logo_only',
+    previewText: '™',
+  },
+  {
+    id: 'slogan',
+    title: 'Slogan',
+    subtitle: "Your brand's catchy tagline",
+    previewType: 'slogan',
+    previewText: 'Just do it',
+  },
+  {
+    id: 'other',
+    title: 'Other Options',
+    subtitle: 'Unique sounds/marks/patterns for brand recognition',
+    previewType: 'other',
+    previewText: '♫ / ❖',
+  },
+];
+
+export const BUSINESS_CATEGORIES = [
+  {
+    id: 'restaurant_cafe',
+    name: 'Restaurant & Café',
+    recommendedClass: 43,
+    className: 'Class 43',
+    classTitle: 'Restaurants, cafes, cloud kitchens, and food catering services.',
+    alsoProtectIn: [
+      { classId: 30, name: 'Class 30', desc: 'Packaged signature sauces, spices & bakery snacks' },
+      { classId: 35, name: 'Class 35', desc: 'Franchising & restaurant business administration' },
+    ],
+  },
+  {
+    id: 'clothing_fashion',
+    name: 'Clothing & Fashion',
+    recommendedClass: 25,
+    className: 'Class 25',
+    classTitle: 'Clothing, footwear, headgear, apparel and fashion garments.',
+    alsoProtectIn: [
+      { classId: 18, name: 'Class 18', desc: 'Leather goods, bags, wallets & travel luggage' },
+      { classId: 35, name: 'Class 35', desc: 'Retail store and e-commerce fashion marketplace' },
+    ],
+  },
+  {
+    id: 'it_software',
+    name: 'IT & Software',
+    recommendedClass: 42,
+    className: 'Class 42',
+    classTitle: 'SaaS platforms, software development, cloud computing and tech solutions.',
+    alsoProtectIn: [
+      { classId: 9, name: 'Class 9', desc: 'Downloadable mobile apps & computer apparatus' },
+      { classId: 35, name: 'Class 35', desc: 'Digital marketing, CRM and business consultancy' },
+    ],
+  },
+  {
+    id: 'beauty_cosmetics',
+    name: 'Beauty & Cosmetics',
+    recommendedClass: 3,
+    className: 'Class 3',
+    classTitle: 'Cosmetics, skincare lotions, perfumes, soaps, and beauty preparations.',
+    alsoProtectIn: [
+      { classId: 44, name: 'Class 44', desc: 'Salons, spas & hygienic beauty care services' },
+      { classId: 35, name: 'Class 35', desc: 'Retail and online cosmetic sales' },
+    ],
+  },
+  {
+    id: 'education_coaching',
+    name: 'Education & Coaching',
+    recommendedClass: 41,
+    className: 'Class 41',
+    classTitle: 'Education, EdTech training academies, online courses and cultural events.',
+    alsoProtectIn: [
+      { classId: 16, name: 'Class 16', desc: 'Printed study books, stationery & course materials' },
+      { classId: 42, name: 'Class 42', desc: 'E-learning LMS platform & software' },
+    ],
+  },
+  {
+    id: 'pharma_supplements',
+    name: 'Pharma & Supplements',
+    recommendedClass: 5,
+    className: 'Class 5',
+    classTitle: 'Pharmaceuticals, medical preparations, herbal ayurvedic and dietary supplements.',
+    alsoProtectIn: [
+      { classId: 10, name: 'Class 10', desc: 'Medical devices, testing kits & diagnostic tools' },
+      { classId: 35, name: 'Class 35', desc: 'Wholesale pharmacy & online medical distribution' },
+    ],
+  },
+  {
+    id: 'online_store',
+    name: 'Online Store & Retail',
+    recommendedClass: 35,
+    className: 'Class 35',
+    classTitle: 'E-commerce marketplace, multi-brand retail, advertising and business promotion.',
+    alsoProtectIn: [
+      { classId: 39, name: 'Class 39', desc: 'Logistics, delivery, courier & warehousing services' },
+      { classId: 42, name: 'Class 42', desc: 'Web portal hosting, website design & development' },
+    ],
+  },
+  {
+    id: 'packaged_food',
+    name: 'Packaged Food & Beverages',
+    recommendedClass: 30,
+    className: 'Class 30',
+    classTitle: 'Snacks, spices, tea, coffee, bakery and confectionery products.',
+    alsoProtectIn: [
+      { classId: 29, name: 'Class 29', desc: 'Dairy, edible oils, meat & processed foods' },
+      { classId: 35, name: 'Class 35', desc: 'Online store, distribution & retail services' },
+    ],
+  },
+  {
+    id: 'construction_realestate',
+    name: 'Construction & Real Estate',
+    recommendedClass: 37,
+    className: 'Class 37',
+    classTitle: 'Building construction, civil infrastructure, maintenance and repairs.',
+    alsoProtectIn: [
+      { classId: 36, name: 'Class 36', desc: 'Real estate leasing, brokering & property valuation' },
+      { classId: 19, name: 'Class 19', desc: 'Cement, bricks, tiles & non-metallic building materials' },
+    ],
+  },
+  {
+    id: 'finance_insurance',
+    name: 'Finance & Insurance',
+    recommendedClass: 36,
+    className: 'Class 36',
+    classTitle: 'Fintech apps, banking, investment funds, loans and insurance broking.',
+    alsoProtectIn: [
+      { classId: 9, name: 'Class 9', desc: 'Fintech mobile apps, POS terminals & crypto software' },
+      { classId: 35, name: 'Class 35', desc: 'Financial audit, accounting & business administration' },
+    ],
+  },
+  {
+    id: 'others',
+    name: 'Others',
+    recommendedClass: 35,
+    className: 'Class 35',
+    classTitle: 'General commercial trading, advertising and corporate business services.',
+    alsoProtectIn: [
+      { classId: 42, name: 'Class 42', desc: 'Specialized scientific & technical development' },
+    ],
+  },
+];
+
+export const ONBOARDING_PLANS = [
+  {
+    id: 'standard',
+    name: 'Standard',
+    speed: '⌛ Filing within 24 hours',
+    originalPrice: 1999,
+    price: 1199,
+    discountAmount: 800,
+    offerText: "Great news! You're eligible for a ₹800 discount as part of our limited-time offer.",
+  },
+  {
+    id: 'express',
+    name: 'Express',
+    speed: '⚡ Filing within 6 hours',
+    originalPrice: 2999,
+    price: 1999,
+    discountAmount: 1000,
+    offerText: "Great news! You're eligible for a ₹1000 discount as part of our limited-time offer.",
+  },
+];
+
 export const TRADEMARK_FAQS = [
   {
     q: 'Can I use the ™ symbol immediately after filing?',

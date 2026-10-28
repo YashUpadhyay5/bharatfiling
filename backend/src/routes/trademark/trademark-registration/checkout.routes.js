@@ -8,7 +8,8 @@ const router = express.Router();
 
 const PLAN_FEES = {
   starter: 1199,
-  standard: 1999,
+  standard: 1199,
+  express: 1999,
   defense: 4999,
 };
 
