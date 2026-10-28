@@ -47,6 +47,7 @@ const ShopEstablishmentModule = lazy(() => import('./pages/shop-establishment/in
 const GstServiceModule = lazy(() => import('./pages/gst-services/index.jsx'));
 const DigitalSignatureModule = lazy(() => import('./pages/digital-signature/index.jsx'));
 const PfRegistrationModule = lazy(() => import('./pages/pf-registration/index.jsx'));
+const EsiRegistrationModule = lazy(() => import('./pages/esi-registration/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -113,9 +114,9 @@ export default function App() {
                 <Route path="/services/pf" element={<PfRegistrationModule />} />
                 <Route path="/services/epf" element={<PfRegistrationModule />} />
                 <Route path="/services/pf-esi-registration" element={<PfRegistrationModule />} />
-                <Route path="/services/esi-registration" element={<PfRegistrationModule isEsi={true} />} />
-                <Route path="/services/esic-registration" element={<PfRegistrationModule isEsi={true} />} />
-                <Route path="/services/esi" element={<PfRegistrationModule isEsi={true} />} />
+                <Route path="/services/esi-registration" element={<EsiRegistrationModule />} />
+                <Route path="/services/esic-registration" element={<EsiRegistrationModule />} />
+                <Route path="/services/esi" element={<EsiRegistrationModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -157,8 +158,8 @@ export default function App() {
                 <Route path="/apply/pf" element={<PfRegistrationModule />} />
                 <Route path="/apply/epf" element={<PfRegistrationModule />} />
                 <Route path="/apply/pf-esi" element={<PfRegistrationModule />} />
-                <Route path="/apply/esi-registration" element={<PfRegistrationModule isEsi={true} />} />
-                <Route path="/apply/esi" element={<PfRegistrationModule isEsi={true} />} />
+                <Route path="/apply/esi-registration" element={<EsiRegistrationModule />} />
+                <Route path="/apply/esi" element={<EsiRegistrationModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
