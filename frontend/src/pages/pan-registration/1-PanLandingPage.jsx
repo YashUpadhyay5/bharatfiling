@@ -152,9 +152,9 @@ export default function PanLandingPage({
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-[#002B49] text-xs font-bold shadow-2xs">
               <span className="text-sm">🚀</span>
               <span>Apply for PAN Card Online — Starts from ₹299 / ₹499</span>
-              <a href="#pricing" className="text-[#002B49] underline ml-1 hover:text-blue-700">
-                View Price
-              </a>
+              <span className="text-emerald-700 font-bold ml-1">48 Hr e-PAN Delivery</span>
+
+
             </div>
 
             <div className="hidden md:flex items-center gap-2 text-xs text-slate-500 font-semibold">
@@ -266,6 +266,7 @@ export default function PanLandingPage({
                     <FileCheck2 className="w-4 h-4" />
                     <span>View Required Documents by Entity (Aadhaar, COI, Deed) →</span>
                   </a>
+    
                 </div>
 
                 {/* Partner Trust Block */}
@@ -452,115 +453,7 @@ export default function PanLandingPage({
         </div>
       </section>
 
-      {/* 3. VAKILSEARCH 3-COLUMN PRICING SECTION */}
-      <section id="pricing" className="py-12 px-4 sm:px-6 lg:px-8 bg-white border-y border-slate-200">
-        <div className="max-w-6xl mx-auto space-y-8">
-          
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-bold text-[#002B49] bg-blue-50 border border-blue-200 px-3 py-1 rounded-full uppercase tracking-wider">
-              Transparent Pricing Packages
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-              Select Your PAN Registration Package
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500">
-              No hidden charges. Includes Form 49A/49AA preparation, CA vetting, and official NSDL/UTIITSL processing.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-            {PAN_PLANS.map((plan) => {
-              const isRecommended = plan.recommended;
-
-              return (
-                <div
-                  key={plan.id}
-                  className={`rounded-2xl p-6 flex flex-col justify-between transition-all relative ${
-                    isRecommended
-                      ? 'bg-[#002B49] text-white shadow-2xl ring-2 ring-[#002B49] scale-102 z-10'
-                      : 'bg-white text-slate-800 border border-slate-200 shadow-sm hover:shadow-md'
-                  }`}
-                >
-                  {/* Recommended Ribbon */}
-                  {isRecommended && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#FFCC00] text-slate-950 text-[11px] font-extrabold uppercase px-4 py-1 rounded-full shadow-md tracking-wider flex items-center gap-1">
-                      <span>★</span> RECOMMENDED
-                    </div>
-                  )}
-
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className={`text-lg font-bold ${isRecommended ? 'text-white' : 'text-slate-900'}`}>
-                        {plan.name}
-                      </h3>
-                      <p className={`text-xs mt-1 leading-relaxed ${isRecommended ? 'text-blue-200' : 'text-slate-500'}`}>
-                        {plan.subtitle}
-                      </p>
-                    </div>
-
-                    {/* Price Block */}
-                    <div className="pt-2 border-t border-slate-200/20">
-                      <div className="flex items-baseline gap-2">
-                        <span className={`text-3xl font-black ${isRecommended ? 'text-white' : 'text-slate-950'}`}>
-                          ₹{plan.price.toLocaleString('en-IN')}
-                        </span>
-                        <span className={`text-xs line-through ${isRecommended ? 'text-blue-300' : 'text-slate-400'}`}>
-                          ₹{plan.originalPrice.toLocaleString('en-IN')}
-                        </span>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                          isRecommended ? 'bg-blue-800/80 text-[#FFCC00]' : 'bg-emerald-50 text-emerald-700'
-                        }`}>
-                          {plan.discountLabel}
-                        </span>
-                      </div>
-                      <span className={`text-[11px] block mt-1 ${isRecommended ? 'text-blue-200' : 'text-slate-500'}`}>
-                        + 18% GST • Delivery in {plan.tat}
-                      </span>
-                    </div>
-
-                    {/* Features List */}
-                    <ul className="space-y-2.5 pt-4 text-xs">
-                      {plan.features.map((feat, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <Check className={`w-4 h-4 shrink-0 mt-0.5 ${
-                            isRecommended ? 'text-[#FFCC00]' : 'text-emerald-600'
-                          }`} />
-                          <span className={isRecommended ? 'text-blue-100' : 'text-slate-700'}>
-                            {feat}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Plan CTA */}
-                  <div className="pt-6">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedPlanId(plan.id);
-                        handleLeadSubmit();
-                      }}
-                      className={`w-full py-3 px-4 rounded-xl font-bold text-xs tracking-wide transition shadow-md cursor-pointer flex items-center justify-center gap-1.5 ${
-                        isRecommended
-                          ? 'bg-[#FFCC00] hover:bg-amber-400 text-slate-950 font-extrabold'
-                          : 'bg-[#002B49] hover:bg-[#001D33] text-white'
-                      }`}
-                    >
-                      <span>Proceed with {plan.id === 'combo' ? 'Combo' : plan.id === 'starter' ? 'e-PAN' : 'Physical Card'}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                </div>
-              );
-            })}
-          </div>
-
-        </div>
-      </section>
-
-      {/* 4. INTERACTIVE PAN STRUCTURE DECODER WIDGET */}
+      {/* 3. INTERACTIVE PAN STRUCTURE DECODER WIDGET */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
         <div className="max-w-4xl mx-auto space-y-6">
           

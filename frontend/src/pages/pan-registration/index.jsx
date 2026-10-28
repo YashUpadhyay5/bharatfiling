@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
-import { CheckCircle2, ArrowLeft, ArrowRight, ShieldCheck, FileText } from 'lucide-react';
 
 import PanLandingPage from './1-PanLandingPage.jsx';
+import PanCheckoutPage from './2-PanCheckoutPage.jsx';
+import PanPaymentPage from './3-PanPaymentPage.jsx';
 
-export { PanLandingPage };
+export { PanLandingPage, PanCheckoutPage, PanPaymentPage };
 
 export default function PanRegistrationModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,23 +15,32 @@ export default function PanRegistrationModule() {
   const { showSuccess } = useToast();
 
   const stepParam = searchParams.get('step');
-  const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
-  const currentStep = [1, 2, 3, 4].includes(initialStep) ? initialStep : 1;
+  const potentialIdParam = searchParams.get('potential_id');
+  const initialStep = stepParam ? parseInt(stepParam, 10) : (potentialIdParam ? 3 : 1);
+  const currentStep = [1, 2, 3].includes(initialStep) ? initialStep : 1;
   const initialPlan = searchParams.get('plan') || 'standard';
 
   const getInitialDraft = () => {
     try {
       const saved = localStorage.getItem('bharatfiling_pan_draft');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (potentialIdParam) {
+          parsed.orderNumber = parsed.orderNumber || '#est179126201735020268491p';
+          parsed.name = parsed.name || 'Yash Upadhyay';
+          parsed.email = parsed.email || 'ya*****************@com';
+          parsed.phone = parsed.phone || '+91-*******193';
+        }
+        return parsed;
       }
     } catch {
       // Ignore parse errors
     }
     return {
-      name: user?.name || user?.full_name || 'Yash Upadhyay',
-      email: user?.email || 'ya*****************@com',
-      phone: user?.phone || '+91 7668976193',
+      name: potentialIdParam ? 'Yash Upadhyay' : (user?.name || user?.full_name || 'Yash Upadhyay'),
+      email: potentialIdParam ? 'ya*****************@com' : (user?.email || 'ya*****************@com'),
+      phone: potentialIdParam ? '+91-*******193' : (user?.phone || '+91 7668976193'),
+      orderNumber: potentialIdParam ? '#est179126201735020268491p' : '',
       entityType: 'individual',
       appType: 'new',
       state: 'Karnataka',
@@ -50,7 +60,7 @@ export default function PanRegistrationModule() {
     }
   }, [formData]);
 
-  // Step 1: Lead capture on landing page -> Save and move to Step 2
+  // Step 1: Lead capture on landing page -> Proceed to Step 2 (Plan Selection)
   const handleStep1GetStarted = (leadData) => {
     setFormData((prev) => ({
       ...prev,
@@ -58,7 +68,18 @@ export default function PanRegistrationModule() {
     }));
     setSearchParams({ step: '2', plan: leadData.plan || formData.plan || initialPlan });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess('Lead recorded! Application draft saved to your browser.');
+    showSuccess('Lead recorded! Select your PAN delivery package.');
+  };
+
+  // Step 2: Plan Selection -> Proceed to Step 3 (Payment Desk)
+  const handleStep2SelectPlan = (planId, checkoutDetails = {}) => {
+    setFormData((prev) => ({
+      ...prev,
+      plan: planId,
+      ...checkoutDetails,
+    }));
+    setSearchParams({ step: '3', plan: planId });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToStep1 = () => {
@@ -66,9 +87,14 @@ export default function PanRegistrationModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleBackToStep2 = () => {
+    setSearchParams({ step: '2', plan: formData.plan || initialPlan });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <main className="min-h-screen bg-white">
-      {/* Step 1: Complete Landing Page */}
+      {/* Step 1: PAN Landing Page (without pricing, with Hero, Decoder, Matrix, FAQs) */}
       {currentStep === 1 && (
         <PanLandingPage
           initialData={formData}
@@ -76,73 +102,24 @@ export default function PanRegistrationModule() {
         />
       )}
 
-      {/* Step 2 Standby Screen (Awaiting User's Second Page Screenshot) */}
-      {currentStep > 1 && (
-        <div className="min-h-screen bg-[#F8FAFC] py-16 px-4 sm:px-6 font-sans">
-          <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-slate-200 p-8 sm:p-10 shadow-xl text-center space-y-6">
-            
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
+      {/* Step 2: 3-Column Pricing & Package Selection (matches screenshot media_1793171735368_c0cf7cef.png) */}
+      {currentStep === 2 && (
+        <PanCheckoutPage
+          formData={formData}
+          onSelectPlan={handleStep2SelectPlan}
+          onBack={handleBackToStep1}
+        />
+      )}
 
-            <div>
-              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-wider">
-                Step 1 Completed Successfully
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#002B49] mt-3">
-                Lead &amp; Application Profile Saved
-              </h1>
-              <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto">
-                Applicant <strong className="text-slate-800">{formData.name}</strong> ({formData.entityType.toUpperCase()}) profile recorded. Ready for Step 2 applicant details.
-              </p>
-            </div>
-
-            {/* Lead Summary Card */}
-            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 text-left text-xs sm:text-sm space-y-2.5">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Applicant Legal Name:</span>
-                <span className="font-bold text-slate-800">{formData.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Contact Number:</span>
-                <span className="font-mono font-semibold text-slate-700">{formData.phone}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Entity Category:</span>
-                <span className="font-semibold text-slate-700">{formData.entityType}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Selected State:</span>
-                <span className="font-semibold text-slate-700">{formData.state}</span>
-              </div>
-              <div className="flex justify-between border-t border-slate-200 pt-2">
-                <span className="text-slate-500">Selected Plan:</span>
-                <span className="font-bold text-[#002B49] uppercase">{formData.plan}</span>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900 text-left space-y-1">
-              <div className="font-bold flex items-center gap-1.5 text-[#002B49]">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Ready for Step 2 Layout</span>
-              </div>
-              <p className="text-slate-600 leading-relaxed">
-                Step 1 is 100% operational. Provide the second screenshot anytime to build the Step 2 details wizard.
-              </p>
-            </div>
-
-            <div className="flex justify-center pt-2">
-              <button
-                type="button"
-                onClick={handleBackToStep1}
-                className="py-3 px-6 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-2 transition cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" /> Back to PAN Overview
-              </button>
-            </div>
-
-          </div>
-        </div>
+      {/* Step 3: Vakilsearch 2-Column Payment Desk (matches payment structure) */}
+      {currentStep === 3 && (
+        <PanPaymentPage
+          formData={formData}
+          onBack={handleBackToStep2}
+          onPaymentSuccess={() => {
+            // Optional callback
+          }}
+        />
       )}
     </main>
   );
