@@ -158,7 +158,7 @@ export const SERVICES = [
     'Obtain 10-digit Tax Deduction and Collection Account Number (TAN) mandatory under Section 203A for TDS/TCS compliance.',
     ['Entity PAN (Company / LLP / Partnership / Proprietor)', 'Certificate of Incorporation / Partnership Deed / Business Proof', 'Authorised signatory PAN, Aadhaar & Designation', 'Proof of registered business address'],
     ['Form 49B online preparation and NSDL submission', '10-Digit Alphanumeric TAN allotment letter from IT Dept', 'TRACES portal registration & activation support', 'First quarterly TDS deduction & filing consultation'],
-    { govt: 'Govt fee Rs 65 (inclusive of GST) at actuals', aliases: ['tan', 'tan-card', 'tan-allotment', 'tds-tan'] }),
+    { status: 'live', path: '/services/tan-registration', priceStatus: 'existing', govt: 'Govt fee Rs 65 (inclusive of GST) at actuals', aliases: ['tan', 'form-49b', 'tan-card', 'tan-allotment', 'tds-tan'] }),
   s('apeda-registration', 'APEDA Registration', 'registrations', 2499, 'one-time', '5-7 working days',
     'RCMC from APEDA for exporters of agricultural and processed food products.',
     ['IEC certificate', 'PAN and bank certificate', 'Proof of business address', 'Product list with HS codes'],
