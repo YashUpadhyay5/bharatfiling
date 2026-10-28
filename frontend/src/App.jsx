@@ -50,6 +50,7 @@ const PfRegistrationModule = lazy(() => import('./pages/pf-registration/index.js
 const EsiRegistrationModule = lazy(() => import('./pages/esi-registration/index.jsx'));
 const PanRegistrationModule = lazy(() => import('./pages/pan-registration/index.jsx'));
 const TanRegistrationModule = lazy(() => import('./pages/tan-registration/index.jsx'));
+const ApedaRegistrationModule = lazy(() => import('./pages/apeda-registration/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -125,6 +126,9 @@ export default function App() {
                 <Route path="/services/tan-registration" element={<TanRegistrationModule />} />
                 <Route path="/services/tan" element={<TanRegistrationModule />} />
                 <Route path="/services/form-49b" element={<TanRegistrationModule />} />
+                <Route path="/services/apeda-registration" element={<ApedaRegistrationModule />} />
+                <Route path="/services/apeda" element={<ApedaRegistrationModule />} />
+                <Route path="/services/rcmc" element={<ApedaRegistrationModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -173,6 +177,9 @@ export default function App() {
                 <Route path="/apply/tan-registration" element={<TanRegistrationModule />} />
                 <Route path="/apply/tan" element={<TanRegistrationModule />} />
                 <Route path="/apply/form-49b" element={<TanRegistrationModule />} />
+                <Route path="/apply/apeda-registration" element={<ApedaRegistrationModule />} />
+                <Route path="/apply/apeda" element={<ApedaRegistrationModule />} />
+                <Route path="/apply/rcmc" element={<ApedaRegistrationModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />

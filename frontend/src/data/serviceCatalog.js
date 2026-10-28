@@ -163,7 +163,7 @@ export const SERVICES = [
     'RCMC from APEDA for exporters of agricultural and processed food products.',
     ['IEC certificate', 'PAN and bank certificate', 'Proof of business address', 'Product list with HS codes'],
     ['APEDA application', 'RCMC certificate', 'Export documentation guidance'],
-    { govt: 'APEDA fee at actuals' }),
+    { status: 'live', path: '/services/apeda-registration', priceStatus: 'existing', govt: 'Govt fee Rs 5,000 + 18% GST (Rs 5,900) at actuals', aliases: ['apeda', 'rcmc', 'apeda-license', 'apeda-rcmc'] }),
 
   /* ---------------------------------------------------------------- Trademark */
   s('trademark-registration', 'Trademark Registration', 'trademark', 1999, 'per class', '1-2 working days to file',

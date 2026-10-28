@@ -2,9 +2,9 @@
 
 Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then run `npm run catalog:export` in `frontend/`.
 
-- **77 services** in 8 header menus. **22 live** end-to-end, **55 catalogue** (detail page + request via the contact desk).
+- **77 services** in 8 header menus. **23 live** end-to-end, **54 catalogue** (detail page + request via the contact desk).
 - Prices are the professional fee in INR **before 18% GST and government fees**.
-- **17** prices are already used on the live site; **58** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
+- **18** prices are already used on the live site; **57** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
 
 ## Startup
 
@@ -41,7 +41,7 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 | PF & ESI Compliance Combo | ₹4,499 | ₹5,309 | one-time | 4-6 working days | No government fee | live | existing | `/services/pf-registration?plan=combo` |
 | PAN Registration | ₹499 | ₹589 | one-time | 2-4 working days | Govt fee Rs 107 (within India) / Rs 1,017 (outside India) at actuals | live | existing | `/services/pan-registration` |
 | TAN Registration | ₹999 | ₹1,179 | one-time | 2-3 working days | Govt fee Rs 65 (inclusive of GST) at actuals | live | existing | `/services/tan-registration` |
-| APEDA Registration | ₹2,499 | ₹2,949 | one-time | 5-7 working days | APEDA fee at actuals | catalog | draft | `/services/apeda-registration` |
+| APEDA Registration | ₹2,499 | ₹2,949 | one-time | 5-7 working days | Govt fee Rs 5,000 + 18% GST (Rs 5,900) at actuals | live | existing | `/services/apeda-registration` |
 
 ## Trademark
 
