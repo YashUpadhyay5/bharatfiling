@@ -49,7 +49,7 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 
 | Service | Fee (ex GST) | With GST | Unit | Timeline | Govt fee | Status | Price | URL |
 |---|---:|---:|---|---|---|---|---|---|
-| Trademark Registration | ₹1,999 | ₹2,359 | per class | 1-2 working days to file | Govt fee Rs 4,500 per class (individual / startup / MSME), Rs 9,000 (others) | catalog | draft | `/services/trademark-registration` |
+| Trademark Registration | ₹1,199 | ₹1,415 | per class | 1-2 working days to file | Govt fee Rs 4,500 per class (individual / startup / MSME), Rs 9,000 (others) | live | existing | `/services/trademark-registration` |
 | Trademark Search | ₹499 | ₹589 | per search | Same day | No government fee | catalog | draft | `/services/trademark-search` |
 | Trademark Objection Reply | ₹2,999 | ₹3,539 | per reply | 3-5 working days | No government fee | catalog | draft | `/services/trademark-objection-reply` |
 | Trademark Opposition | ₹5,999 | ₹7,079 | per stage | 5-7 working days per stage | Registry fee at actuals | catalog | draft | `/services/trademark-opposition` |

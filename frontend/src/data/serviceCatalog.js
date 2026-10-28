@@ -166,11 +166,11 @@ export const SERVICES = [
     { status: 'live', path: '/services/apeda-registration', priceStatus: 'existing', govt: 'Govt fee Rs 5,000 + 18% GST (Rs 5,900) at actuals', aliases: ['apeda', 'rcmc', 'apeda-license', 'apeda-rcmc'] }),
 
   /* ---------------------------------------------------------------- Trademark */
-  s('trademark-registration', 'Trademark Registration', 'trademark', 1999, 'per class', '1-2 working days to file',
+  s('trademark-registration', 'Trademark Registration', 'trademark', 1199, 'per class', '1-2 working days to file',
     'File your trademark under the right Nice class with a prior-use check.',
     ['PAN and Aadhaar of the applicant', 'Logo or word mark', 'Business and class details', 'Power of attorney (we provide)'],
     ['Basic availability check', 'TM-A filing and TM number', 'Status tracking until registration'],
-    { govt: 'Govt fee Rs 4,500 per class (individual / startup / MSME), Rs 9,000 (others)', aliases: ['trademark'] }),
+    { status: 'live', path: '/services/trademark-registration', priceStatus: 'existing', govt: 'Govt fee Rs 4,500 per class (individual / startup / MSME), Rs 9,000 (others)', aliases: ['trademark', 'brand-registration'] }),
   s('trademark-search', 'Trademark Search', 'trademark', 499, 'per search', 'Same day',
     'Public-database search report to judge how likely your mark is to be objected.',
     ['Proposed brand name or logo', 'Goods or services description'],

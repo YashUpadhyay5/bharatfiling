@@ -51,6 +51,7 @@ const EsiRegistrationModule = lazy(() => import('./pages/esi-registration/index.
 const PanRegistrationModule = lazy(() => import('./pages/pan-registration/index.jsx'));
 const TanRegistrationModule = lazy(() => import('./pages/tan-registration/index.jsx'));
 const ApedaRegistrationModule = lazy(() => import('./pages/apeda-registration/index.jsx'));
+const TrademarkRegistrationModule = lazy(() => import('./pages/trademark/trademark-registration/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -129,6 +130,9 @@ export default function App() {
                 <Route path="/services/apeda-registration" element={<ApedaRegistrationModule />} />
                 <Route path="/services/apeda" element={<ApedaRegistrationModule />} />
                 <Route path="/services/rcmc" element={<ApedaRegistrationModule />} />
+                <Route path="/services/trademark-registration" element={<TrademarkRegistrationModule />} />
+                <Route path="/services/trademark" element={<TrademarkRegistrationModule />} />
+                <Route path="/services/brand-registration" element={<TrademarkRegistrationModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -180,6 +184,9 @@ export default function App() {
                 <Route path="/apply/apeda-registration" element={<ApedaRegistrationModule />} />
                 <Route path="/apply/apeda" element={<ApedaRegistrationModule />} />
                 <Route path="/apply/rcmc" element={<ApedaRegistrationModule />} />
+                <Route path="/apply/trademark-registration" element={<TrademarkRegistrationModule />} />
+                <Route path="/apply/trademark" element={<TrademarkRegistrationModule />} />
+                <Route path="/apply/brand-registration" element={<TrademarkRegistrationModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
