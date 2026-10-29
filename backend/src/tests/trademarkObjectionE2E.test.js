@@ -95,7 +95,32 @@ describe('Trademark Objection Module - End-to-End & Database Verification', () =
     assert.strictEqual(dataComp.quote.discount, 2400); // 40% of 5999 = 2399.6 -> 2400
     assert.strictEqual(dataComp.quote.professionalFee, 3599);
     assert.strictEqual(dataComp.quote.gstOnProfessional, 648); // 18% of 3599 = 647.82 -> 648
-    assert.strictEqual(dataComp.quote.totalPayable, 4247);
+    // 3D. New Plans from Screenshot: Starter (₹3,499), Standard (₹7,999), Premium (₹13,999)
+    const resPremium = await fetch(`${baseUrl}/quote/calculate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ packageId: 'premium' }),
+    });
+    assert.strictEqual(resPremium.status, 200);
+    const dataPremium = await resPremium.json();
+    assert.strictEqual(dataPremium.quote.baseProfessionalFee, 13999);
+    assert.strictEqual(dataPremium.quote.discount, 500);
+    assert.strictEqual(dataPremium.quote.professionalFee, 13499);
+    assert.strictEqual(dataPremium.quote.gstOnProfessional, 2430);
+    assert.strictEqual(dataPremium.quote.totalPayable, 15929);
+
+    const resStarter = await fetch(`${baseUrl}/quote/calculate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ packageId: 'starter' }),
+    });
+    assert.strictEqual(resStarter.status, 200);
+    const dataStarter = await resStarter.json();
+    assert.strictEqual(dataStarter.quote.baseProfessionalFee, 3499);
+    assert.strictEqual(dataStarter.quote.discount, 500);
+    assert.strictEqual(dataStarter.quote.professionalFee, 2999);
+    assert.strictEqual(dataStarter.quote.gstOnProfessional, 540);
+    assert.strictEqual(dataStarter.quote.totalPayable, 3539);
   });
 
   test('4. Checkout Draft API (POST /checkout/draft) - Validates inputs and stores lead', async () => {

@@ -6,6 +6,9 @@ import { canAccessApplication, GUEST_USER_ID } from '../../../middleware/ownersh
 const router = express.Router();
 
 const PACKAGE_FEES = {
+  starter: 3499,
+  standard: 7999,
+  premium: 13999,
   procedural: 1499,
   substantive: 2999,
   comprehensive: 5999,

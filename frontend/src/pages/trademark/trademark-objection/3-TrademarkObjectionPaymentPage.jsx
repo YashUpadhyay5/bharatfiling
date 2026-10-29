@@ -6,6 +6,7 @@ import {
   Check,
   Clock,
   Lock,
+  ArrowLeft,
 } from 'lucide-react';
 
 export default function TrademarkObjectionPaymentPage({
@@ -42,7 +43,14 @@ export default function TrademarkObjectionPaymentPage({
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
-  const professionalFees = formData.professionalFee || 2999;
+  const getBaseFee = () => {
+    if (formData.professionalFee) return formData.professionalFee;
+    if (formData.packageId === 'starter') return 3499;
+    if (formData.packageId === 'standard') return 7999;
+    return 13999;
+  };
+
+  const professionalFees = getBaseFee();
   const onlineDiscount = 500;
   const discountedSubtotal = Math.max(0, professionalFees - onlineDiscount);
   const gstAmount = Math.round(discountedSubtotal * 0.18);
@@ -77,6 +85,16 @@ export default function TrademarkObjectionPaymentPage({
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Main Title & Subtitle */}
         <div>
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#002B49] transition-colors cursor-pointer mb-2"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Plans</span>
+            </button>
+          )}
           <h1 className="text-2xl sm:text-[28px] font-extrabold text-[#002B49] tracking-tight">
             Choose Payment Method
           </h1>
@@ -466,8 +484,16 @@ export default function TrademarkObjectionPaymentPage({
           {/* Right Column: Price Details Card */}
           <div className="lg:col-span-4 space-y-4">
             <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-2xs space-y-4">
-              <h2 className="text-center font-bold text-base text-slate-900 pb-3 border-b border-gray-200">
-                Trademark Objection Reply
+              <h2 className="text-center font-bold text-sm sm:text-base text-slate-900 pb-3 border-b border-gray-200">
+                Trademark Objection Reply &bull;{' '}
+                <span className="text-[#002B49] font-black">
+                  {formData.packageName ||
+                    (formData.packageId === 'starter'
+                      ? 'Starter Plan'
+                      : formData.packageId === 'standard'
+                        ? 'Standard Plan'
+                        : 'Premium Plan')}
+                </span>
               </h2>
 
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 pt-1">

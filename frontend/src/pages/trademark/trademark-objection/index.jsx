@@ -5,11 +5,13 @@ import { useToast } from '../../../context/ToastContext.jsx';
 
 import TrademarkObjectionLandingPage from './1-TrademarkObjectionLandingPage.jsx';
 import TrademarkObjectionCheckoutPage from './2-TrademarkObjectionCheckoutPage.jsx';
+import TrademarkObjectionPlansPage from './3-TrademarkObjectionPlansPage.jsx';
 import TrademarkObjectionPaymentPage from './3-TrademarkObjectionPaymentPage.jsx';
 
 export {
   TrademarkObjectionLandingPage,
   TrademarkObjectionCheckoutPage,
+  TrademarkObjectionPlansPage,
   TrademarkObjectionPaymentPage,
 };
 
@@ -20,7 +22,7 @@ export default function TrademarkObjectionModule() {
 
   const stepParam = searchParams.get('step');
   const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
-  const currentStep = [1, 2, 3].includes(initialStep) ? initialStep : 1;
+  const currentStep = [1, 2, 3, 4].includes(initialStep) ? initialStep : 1;
 
   const getInitialDraft = () => {
     try {
@@ -36,9 +38,15 @@ export default function TrademarkObjectionModule() {
       phone: user?.phone || '+91 7668976193',
       cityPincode: 'Bengaluru, 560001',
       whatsappUpdates: true,
-      applicationNumber: '',
+      applicationNumber: 'i7q3r7325',
+      brandName: 'i7q3r7325',
       objectionType: 'section_11',
-      packageId: 'substantive',
+      hasDocuments: 'no',
+      packageId: 'premium',
+      packageName: 'Premium Plan',
+      professionalFee: 13999,
+      onlineDiscount: 500,
+      totalAmount: 15929,
       orderNumber: `#TM-OBJ-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -57,7 +65,7 @@ export default function TrademarkObjectionModule() {
     }
   }, [formData]);
 
-  // Step 1: Lead capture -> Step 2
+  // Page 1: Lead captured -> Navigate to Page 2 (Onboarding questions)
   const handleLeadSubmit = (leadData) => {
     setFormData((prev) => ({
       ...prev,
@@ -65,10 +73,10 @@ export default function TrademarkObjectionModule() {
     }));
     setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess('Lead recorded! Please configure your objection details.');
+    showSuccess('Lead recorded! Please complete your brand details.');
   };
 
-  // Step 1: Package chosen directly from landing pricing section
+  // Page 1: Plan picked from landing footer -> Navigate to Page 2
   const handleSelectPlan = (packageId) => {
     setFormData((prev) => ({
       ...prev,
@@ -78,30 +86,46 @@ export default function TrademarkObjectionModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Back to Step 1
+  // Page 2: Back to Page 1
   const handleBackToStep1 = () => {
     setSearchParams({ step: '1' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Proceed to Payment -> Step 3
-  const handleProceedToPayment = (checkoutData) => {
+  // Page 2: Onboarding Questions Complete -> Navigate to Page 3 (Plans Page)
+  const handleOnboardingComplete = (onboardingData) => {
     setFormData((prev) => ({
       ...prev,
-      ...checkoutData,
+      ...onboardingData,
     }));
     setSearchParams({ step: '3' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess('Order generated! Please select payment mode.');
   };
 
-  // Step 3: Back to Step 2
+  // Page 3: Back to Page 2
   const handleBackToStep2 = () => {
     setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 3: Payment Success
+  // Page 3: Plan Selected -> Navigate to Page 4 (Payment Desk)
+  const handlePlanSelected = (planData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...planData,
+    }));
+    setSearchParams({ step: '4' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showSuccess(`${planData.packageName} selected! Please choose payment mode.`);
+  };
+
+  // Page 4: Back to Page 3
+  const handleBackToStep3 = () => {
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Page 4: Payment Success
   const handlePaymentSuccess = (paymentResult) => {
     showSuccess(`Payment successful! Order ref: ${paymentResult.orderNumber}`);
     setFormData((prev) => ({
@@ -122,20 +146,29 @@ export default function TrademarkObjectionModule() {
         />
       )}
 
-      {/* Page 2: Trademark Objection Details & Package Configuration */}
+      {/* Page 2: Onboarding 3-Step Flow (matches media_1793257125351_a8d786bc.png & media_1793257284316_a774657a.png) */}
       {currentStep === 2 && (
         <TrademarkObjectionCheckoutPage
           formData={formData}
           onBack={handleBackToStep1}
-          onProceedToPayment={handleProceedToPayment}
+          onProceedToPayment={handleOnboardingComplete}
         />
       )}
 
-      {/* Page 3: Payment Desk matching exact 1:1 format */}
+      {/* Page 3: Plan Selection (matches media_1793257941620_593b2a96.png "Right plan for for Brand Protection") */}
       {currentStep === 3 && (
-        <TrademarkObjectionPaymentPage
+        <TrademarkObjectionPlansPage
           formData={formData}
           onBack={handleBackToStep2}
+          onSelectPlanAndProceed={handlePlanSelected}
+        />
+      )}
+
+      {/* Page 4: Final Payment Desk (UPI PhonePe default, ₹500 Discount, Countdown Timer, Card, NetBanking) */}
+      {currentStep === 4 && (
+        <TrademarkObjectionPaymentPage
+          formData={formData}
+          onBack={handleBackToStep3}
           onPaymentSuccess={handlePaymentSuccess}
         />
       )}
