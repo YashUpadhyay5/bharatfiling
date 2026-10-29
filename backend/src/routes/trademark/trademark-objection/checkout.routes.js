@@ -30,6 +30,7 @@ router.post('/checkout/draft', optionalAuth, (req, res) => {
       objectionType = 'section_11',
       packageId = 'substantive',
       coupon = '',
+      includeLabourWelfare = false,
     } = req.body;
 
     if (!email || !email.includes('@')) {
@@ -59,13 +60,19 @@ router.post('/checkout/draft', optionalAuth, (req, res) => {
     const cleanCoupon = String(coupon).trim().toUpperCase();
     if (cleanCoupon === 'SAVE40' || cleanCoupon === 'DIWALI') {
       discount = Math.round(baseFee * 0.4);
-    } else if (cleanCoupon === 'ONLINE500' || cleanCoupon === 'HOORAY500' || !coupon) {
+    } else if (cleanCoupon === 'ONLINE500' || cleanCoupon === 'HOORAY500') {
+      discount = 500;
+    } else if (!coupon && packageId === 'premium' && includeLabourWelfare) {
+      discount = 0;
+    } else if (!coupon) {
       discount = 500;
     }
 
     const professionalFee = Math.max(0, baseFee - discount);
     const gstOnProfessional = Math.round(professionalFee * 0.18);
-    const totalAmount = professionalFee + gstOnProfessional;
+    const labourWelfare = includeLabourWelfare ? 399 : 0;
+    const gstOnLabour = includeLabourWelfare ? Math.round(399 * 0.18) : 0;
+    const totalAmount = professionalFee + gstOnProfessional + labourWelfare + gstOnLabour;
 
     // Save draft application
     const applicationRecord = {

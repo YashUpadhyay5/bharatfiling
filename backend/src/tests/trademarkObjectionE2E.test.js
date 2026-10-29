@@ -109,6 +109,26 @@ describe('Trademark Objection Module - End-to-End & Database Verification', () =
     assert.strictEqual(dataPremium.quote.gstOnProfessional, 2430);
     assert.strictEqual(dataPremium.quote.totalPayable, 15929);
 
+    // 3E. Exact match for Screenshot media_1793260498575_eb574aee.png:
+    // Premium plan (₹13,999) + Labour Welfare (₹399) + GST (₹2,520 + ₹72) = ₹16,990
+    const resExactScreenshot = await fetch(`${baseUrl}/quote/calculate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        packageId: 'premium',
+        includeLabourWelfare: true,
+      }),
+    });
+    assert.strictEqual(resExactScreenshot.status, 200);
+    const dataExact = await resExactScreenshot.json();
+    assert.strictEqual(dataExact.quote.baseProfessionalFee, 13999);
+    assert.strictEqual(dataExact.quote.professionalFee, 13999);
+    assert.strictEqual(dataExact.quote.gstOnProfessional, 2520);
+    assert.strictEqual(dataExact.quote.labourWelfare, 399);
+    assert.strictEqual(dataExact.quote.gstOnLabour, 72);
+    assert.strictEqual(dataExact.quote.totalTaxesAndCharges, 2991);
+    assert.strictEqual(dataExact.quote.totalPayable, 16990);
+
     const resStarter = await fetch(`${baseUrl}/quote/calculate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

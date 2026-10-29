@@ -20,7 +20,11 @@ const PACKAGE_FEES = {
  */
 router.post('/quote/calculate', (req, res) => {
   try {
-    const { packageId = 'substantive', coupon = '' } = req.body;
+    const {
+      packageId = 'substantive',
+      coupon = '',
+      includeLabourWelfare = false,
+    } = req.body;
 
     const baseFee = PACKAGE_FEES[packageId] || PACKAGE_FEES.substantive;
 
@@ -28,13 +32,20 @@ router.post('/quote/calculate', (req, res) => {
     const cleanCoupon = String(coupon).trim().toUpperCase();
     if (cleanCoupon === 'SAVE40' || cleanCoupon === 'DIWALI') {
       discount = Math.round(baseFee * 0.4);
-    } else if (cleanCoupon === 'ONLINE500' || cleanCoupon === 'HOORAY500' || !coupon) {
+    } else if (cleanCoupon === 'ONLINE500' || cleanCoupon === 'HOORAY500') {
+      discount = 500;
+    } else if (!coupon && packageId === 'premium' && includeLabourWelfare) {
+      discount = 0;
+    } else if (!coupon) {
       discount = 500;
     }
 
     const professionalFee = Math.max(0, baseFee - discount);
     const gstOnProfessional = Math.round(professionalFee * 0.18);
-    const totalPayable = professionalFee + gstOnProfessional;
+    const labourWelfare = includeLabourWelfare ? 399 : 0;
+    const gstOnLabour = includeLabourWelfare ? Math.round(399 * 0.18) : 0; // 72
+    const totalTaxesAndCharges = gstOnProfessional + labourWelfare + gstOnLabour;
+    const totalPayable = professionalFee + totalTaxesAndCharges;
 
     res.json({
       success: true,
@@ -44,6 +55,9 @@ router.post('/quote/calculate', (req, res) => {
         discount,
         professionalFee,
         gstOnProfessional,
+        labourWelfare,
+        gstOnLabour,
+        totalTaxesAndCharges,
         totalPayable,
       },
     });
