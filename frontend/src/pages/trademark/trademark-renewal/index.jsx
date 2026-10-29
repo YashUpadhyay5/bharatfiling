@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
-import { useToast } from '../../../context/ToastContext.jsx';
 
 import TrademarkRenewalLandingPage from './1-TrademarkRenewalLandingPage.jsx';
 import TrademarkRenewalPlansPage from './2-TrademarkRenewalPlansPage.jsx';
@@ -18,7 +17,6 @@ export {
 export default function TrademarkRenewalModule() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
-  const { showSuccess } = useToast();
 
   const stepParam = searchParams.get('step');
   const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
@@ -71,7 +69,6 @@ export default function TrademarkRenewalModule() {
     }));
     setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess('Lead recorded! Please choose your renewal plan.');
   };
 
   // Step 1: Package chosen from pricing table
@@ -98,7 +95,6 @@ export default function TrademarkRenewalModule() {
     }));
     setSearchParams({ step: '3' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess(`${planData.packageName} selected! Proceed to payment.`);
   };
 
   // Step 3: Back to Step 2
@@ -109,7 +105,6 @@ export default function TrademarkRenewalModule() {
 
   // Step 3: Payment Success
   const handlePaymentSuccess = (paymentResult) => {
-    showSuccess(`Payment successful! Order ref: ${paymentResult.orderNumber}`);
     setFormData((prev) => ({
       ...prev,
       ...paymentResult,

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
-import { useToast } from '../../../context/ToastContext.jsx';
 
 import TrademarkObjectionLandingPage from './1-TrademarkObjectionLandingPage.jsx';
 import TrademarkObjectionCheckoutPage from './2-TrademarkObjectionCheckoutPage.jsx';
@@ -18,7 +17,6 @@ export {
 export default function TrademarkObjectionModule() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
-  const { showSuccess } = useToast();
 
   const stepParam = searchParams.get('step');
   const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
@@ -73,7 +71,6 @@ export default function TrademarkObjectionModule() {
     }));
     setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess('Lead recorded! Please complete your brand details.');
   };
 
   // Page 1: Plan picked from landing footer -> Navigate to Page 2
@@ -116,7 +113,6 @@ export default function TrademarkObjectionModule() {
     }));
     setSearchParams({ step: '4' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess(`${planData.packageName} selected! Please choose payment mode.`);
   };
 
   // Page 4: Back to Page 3
@@ -127,7 +123,6 @@ export default function TrademarkObjectionModule() {
 
   // Page 4: Payment Success
   const handlePaymentSuccess = (paymentResult) => {
-    showSuccess(`Payment successful! Order ref: ${paymentResult.orderNumber}`);
     setFormData((prev) => ({
       ...prev,
       ...paymentResult,

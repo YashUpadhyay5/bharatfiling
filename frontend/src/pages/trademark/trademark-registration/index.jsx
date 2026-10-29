@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
-import { useToast } from '../../../context/ToastContext.jsx';
 
 import TrademarkLandingPage from './1-TrademarkLandingPage.jsx';
 import TrademarkCheckoutPage from './2-TrademarkCheckoutPage.jsx';
@@ -12,7 +11,6 @@ export { TrademarkLandingPage, TrademarkCheckoutPage, TrademarkPaymentPage };
 export default function TrademarkRegistrationModule() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
-  const { showSuccess, showError } = useToast();
 
   const stepParam = searchParams.get('step');
   const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
@@ -58,7 +56,6 @@ export default function TrademarkRegistrationModule() {
     }));
     setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess('Lead recorded! 40% Diwali discount unlocked.');
   };
 
   // Step 1 -> Quick plan chosen from landing page pricing section -> Step 2
@@ -85,7 +82,6 @@ export default function TrademarkRegistrationModule() {
     }));
     setSearchParams({ step: '3' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess('Order generated! Please select payment mode.');
   };
 
   // Step 3 -> Back to Step 2
@@ -96,7 +92,6 @@ export default function TrademarkRegistrationModule() {
 
   // Step 3 -> Payment completed
   const handlePaymentSuccess = (paymentResult) => {
-    showSuccess(`Payment successful! Order ref: ${paymentResult.orderNumber}`);
     setFormData((prev) => ({
       ...prev,
       ...paymentResult,
