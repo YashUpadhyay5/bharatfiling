@@ -6,12 +6,8 @@ import {
   Check,
   Lock,
   ArrowLeft,
-  ChevronDown,
-  ChevronUp,
-  FileCheck2,
   Sparkles,
   Download,
-  AlertCircle,
 } from 'lucide-react';
 
 export default function CopyrightPaymentPage({
@@ -38,7 +34,6 @@ export default function CopyrightPaymentPage({
 
   // Labour Welfare Endowment toggle (Default: true matching screenshot)
   const [includeLabourWelfare, setIncludeLabourWelfare] = useState(true);
-  const [showTaxesDetails, setShowTaxesDetails] = useState(true);
 
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState(14 * 60 + 59);
@@ -60,17 +55,25 @@ export default function CopyrightPaymentPage({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const isConsultation = formData.packageId === 'consultation';
+  const isRegistration = formData.packageId === 'registration' || !formData.packageId;
+
   // Base Fee determination
   const getBaseFee = () => {
     if (formData.professionalFee) return formData.professionalFee;
+    if (formData.packageId === 'consultation') return 499;
     if (formData.packageId === 'commercial') return 8999;
     if (formData.packageId === 'starter') return 2499;
-    return 4999; // Standard package default
+    return 2999; // Default to Copyright Registration plan
   };
 
-  const baseFee = getBaseFee();
-  const onlineDiscount = 500;
-  const discountedFee = Math.max(0, baseFee - onlineDiscount);
+  const discountedFee = getBaseFee();
+  const originalDisplayPrice = isConsultation
+    ? 599
+    : isRegistration
+    ? 4048
+    : discountedFee + 1000;
+  const onlineDiscount = originalDisplayPrice - discountedFee;
   const gstOnFee = Math.round(discountedFee * 0.18);
 
   // Labour Welfare is optional and removable
@@ -99,7 +102,7 @@ export default function CopyrightPaymentPage({
           whatsappUpdates: formData.whatsappUpdates ?? true,
           workTitle: formData.workTitle || 'Software Application Source Code',
           category: formData.category || 'software',
-          packageId: formData.packageId || 'standard',
+          packageId: formData.packageId || 'registration',
           coupon: 'ONLINE500',
           includeLabourWelfare,
         }),
@@ -202,7 +205,7 @@ export default function CopyrightPaymentPage({
               <div className="py-2.5 flex justify-between">
                 <span className="text-slate-500">Service</span>
                 <span className="font-semibold text-slate-800">
-                  Copyright Registration (Form XIV)
+                  {formData.packageName || 'Copyright Registration (Form XIV)'}
                 </span>
               </div>
               <div className="py-2.5 flex justify-between">
@@ -278,7 +281,7 @@ export default function CopyrightPaymentPage({
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#002B49] transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Selection</span>
+              <span>Back to Plans</span>
             </button>
           )}
         </div>
@@ -756,7 +759,7 @@ export default function CopyrightPaymentPage({
               <div className="flex items-start justify-between pb-3 border-b border-gray-100">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-                    Copyright Registration
+                    {formData.packageName || 'Copyright Registration'}
                   </h3>
                   <p className="text-xs text-blue-800 font-semibold mt-0.5">
                     {formData.categoryTitle || 'Software/Website/Apps'}
@@ -772,7 +775,7 @@ export default function CopyrightPaymentPage({
                 <div className="flex justify-between">
                   <span>Professional Fees</span>
                   <span className="font-semibold text-slate-800 line-through">
-                    ₹{baseFee.toLocaleString('en-IN')}
+                    ₹{originalDisplayPrice.toLocaleString('en-IN')}
                   </span>
                 </div>
 

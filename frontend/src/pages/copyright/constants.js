@@ -308,6 +308,46 @@ export const COPYRIGHT_ATTORNEY_CARD = {
     "I'm La**********, your IP Attorney with over 6+ years of experience! in Intellectual Property. I'll be assisting you with your IP registrations process end-to-end . Simply fill in the basic details and complete the payment to get started.",
 };
 
+/**
+ * 1:1 Plans matching media_1793299512438_010db9f1.png
+ * "Right plan to protect your work"
+ */
+export const COPYRIGHT_CHOOSE_PLANS = [
+  {
+    id: 'registration',
+    name: 'Copyright Registration',
+    tagline: 'Ideal for application filing & start using © symbol',
+    price: 2999,
+    originalPrice: 4048,
+    discountBadge: '35% off',
+    limitedOfferBadge: 'LIMITED TIME OFFER',
+    popularBadge: 'Most Popular',
+    discountPercent: '50%↓',
+    isPopular: true,
+    emiAvailable: true,
+    features: [
+      '30-minute expert consultation with an IP lawyer',
+      'Expert assisted process',
+      'Application filing across india within 5 business days',
+      'Copyright certificate',
+    ],
+  },
+  {
+    id: 'consultation',
+    name: 'Talk to an Expert',
+    tagline: 'Ideal for consultation with IP lawyer',
+    price: 499,
+    originalPrice: 599,
+    discountBadge: '₹100 off',
+    isPopular: false,
+    emiAvailable: false,
+    features: [
+      '30-minute expert consultation with an IP lawyer',
+      'Thorough evaluation of your work to guide the next steps',
+    ],
+  },
+];
+
 export const COPYRIGHT_FAQS = [
   {
     q: 'What is copyright registration in India, and which law governs it?',

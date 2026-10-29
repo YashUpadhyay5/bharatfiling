@@ -1,11 +1,10 @@
 import express from 'express';
-import { db } from '../../database/db.js';
-import { authenticate } from '../../middleware/auth.js';
-import { canAccessApplication, GUEST_USER_ID } from '../../middleware/ownership.js';
 
 const router = express.Router();
 
 const PACKAGE_FEES = {
+  registration: 2999,
+  consultation: 499,
   starter: 2499,
   standard: 4999,
   commercial: 8999,
@@ -61,66 +60,39 @@ router.post('/quote/calculate', (req, res) => {
       ? professionalFee + taxesAndCharges + totalGovtFee
       : professionalFee + taxesAndCharges;
 
-    res.json({
+    const quoteObj = {
+      packageId,
+      category,
+      worksCount: count,
+      baseFee,
+      baseProfessionalFee: baseFee,
+      discount,
+      couponApplied: coupon || (discount > 0 ? 'AUTO500' : null),
+      professionalFee,
+      gstRate: 0.18,
+      gstOnProfessional,
+      statutoryGovtFee: statutoryFeePerWork,
+      statutoryFeePerWork,
+      totalGovtFee: includeGovtFee ? totalGovtFee : 0,
+      labourWelfare,
+      gstOnLabour,
+      taxesAndCharges,
+      totalTaxesAndCharges: taxesAndCharges,
+      totalPayable,
+      totalAmount: totalPayable,
+      savings: discount,
+    };
+
+    return res.status(200).json({
       success: true,
-      quote: {
-        packageId,
-        category,
-        worksCount: count,
-        baseProfessionalFee: baseFee,
-        discount,
-        professionalFee,
-        gstOnProfessional,
-        labourWelfare,
-        gstOnLabour,
-        taxesAndCharges,
-        totalTaxesAndCharges: taxesAndCharges,
-        statutoryFeePerWork,
-        totalGovtFee,
-        includeGovtFee,
-        includeLabourWelfare,
-        totalPayable,
-      },
+      quote: quoteObj,
+      data: quoteObj,
     });
   } catch (err) {
-    res.status(500).json({
+    console.error('Error calculating copyright quotation:', err);
+    return res.status(500).json({
       success: false,
-      message: 'Failed to calculate copyright registration quote.',
-      error: err.message,
-    });
-  }
-});
-
-/**
- * GET /applications
- * Retrieves customer copyright applications.
- */
-router.get('/applications', authenticate, (req, res) => {
-  try {
-    const apps = db.getApplications().filter((a) => {
-      if (req.user.role === 'ADMIN') return true;
-      if (a.user_id === req.user.id) return a.payment_completed === true;
-      if (
-        a.user_id === GUEST_USER_ID &&
-        a.fields_data?.email &&
-        a.fields_data.email.toLowerCase() === req.user.email?.toLowerCase() &&
-        a.payment_completed === true
-      ) {
-        a.user_id = req.user.id;
-        return true;
-      }
-      return false;
-    });
-
-    res.json({
-      success: true,
-      count: apps.length,
-      applications: apps,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve copyright applications.',
+      message: 'Failed to calculate quotation.',
       error: err.message,
     });
   }

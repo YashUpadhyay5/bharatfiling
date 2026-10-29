@@ -4,11 +4,13 @@ import { useAuth } from '../../context/AuthContext.jsx';
 
 import CopyrightLandingPage from './1-CopyrightLandingPage.jsx';
 import CopyrightTypeSelection from './2-CopyrightTypeSelection.jsx';
-import CopyrightPaymentPage from './3-CopyrightPaymentPage.jsx';
+import CopyrightPlansPage from './3-CopyrightPlansPage.jsx';
+import CopyrightPaymentPage from './4-CopyrightPaymentPage.jsx';
 
 export {
   CopyrightLandingPage,
   CopyrightTypeSelection,
+  CopyrightPlansPage,
   CopyrightPaymentPage,
 };
 
@@ -18,7 +20,7 @@ export default function CopyrightRegistrationModule() {
 
   const stepParam = searchParams.get('step');
   const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
-  const currentStep = [1, 2, 3].includes(initialStep) ? initialStep : 1;
+  const currentStep = [1, 2, 3, 4].includes(initialStep) ? initialStep : 1;
 
   const getInitialDraft = () => {
     try {
@@ -37,11 +39,11 @@ export default function CopyrightRegistrationModule() {
       category: 'software',
       categoryTitle: 'Software/Website/Apps',
       workTitle: 'Proprietary Software Source Code & Database',
-      packageId: 'standard',
-      packageName: 'Comprehensive Protection',
-      professionalFee: 4999,
-      onlineDiscount: 500,
-      totalAmount: 5779,
+      packageId: 'registration',
+      packageName: 'Copyright Registration',
+      professionalFee: 2999,
+      onlineDiscount: 1049,
+      totalAmount: 3539,
       orderNumber: `#CR-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -83,8 +85,8 @@ export default function CopyrightRegistrationModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Proceed from Type Selection to Step 3 (Payment)
-  const handleProceedToPayment = (typeData) => {
+  // Step 2: Proceed from Type Selection to Step 3 (Plans)
+  const handleProceedToPlans = (typeData) => {
     setFormData((prev) => ({
       ...prev,
       ...typeData,
@@ -99,7 +101,23 @@ export default function CopyrightRegistrationModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 3: Payment Success
+  // Step 3: Plan chosen -> Proceed to Step 4 (Payment)
+  const handleSelectPlanAndProceed = (planData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...planData,
+    }));
+    setSearchParams({ step: '4' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 4: Back to Step 3
+  const handleBackToStep3 = () => {
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 4: Payment Success
   const handlePaymentSuccess = (paymentResult) => {
     setFormData((prev) => ({
       ...prev,
@@ -124,15 +142,24 @@ export default function CopyrightRegistrationModule() {
         <CopyrightTypeSelection
           formData={formData}
           onBack={handleBackToStep1}
-          onProceed={handleProceedToPayment}
+          onProceed={handleProceedToPlans}
         />
       )}
 
-      {/* Page 3: Final Payment Desk (UPI PhonePe default, NetBanking, Cards, EMI, 18% GST) */}
+      {/* Page 3: Right plan to protect your work (1:1 with media_1793299512438_010db9f1.png) */}
       {currentStep === 3 && (
-        <CopyrightPaymentPage
+        <CopyrightPlansPage
           formData={formData}
           onBack={handleBackToStep2}
+          onSelectPlan={handleSelectPlanAndProceed}
+        />
+      )}
+
+      {/* Page 4: Final Payment Desk (UPI PhonePe default, NetBanking, Cards, EMI, 18% GST) */}
+      {currentStep === 4 && (
+        <CopyrightPaymentPage
+          formData={formData}
+          onBack={handleBackToStep3}
           onPaymentSuccess={handlePaymentSuccess}
         />
       )}

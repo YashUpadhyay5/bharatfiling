@@ -7,6 +7,8 @@ import { GUEST_USER_ID } from '../../middleware/ownership.js';
 const router = express.Router();
 
 const PACKAGE_FEES = {
+  registration: 2999,
+  consultation: 499,
   starter: 2499,
   standard: 4999,
   commercial: 8999,
@@ -99,44 +101,51 @@ router.post('/checkout/draft', optionalAuth, (req, res) => {
     apps.push(applicationRecord);
     db.saveApplications(apps);
 
-    // Save order
+    // Save pending order
     const orderRecord = {
       id: orderId,
       order_number: orderNumber,
       user_id: userId,
       application_id: appId,
-      service_id: 'copyright-registration',
+      service_name: `Copyright Registration - ${String(category).toUpperCase()}`,
+      category,
+      package_id: packageId,
       amount: totalAmount,
       currency: 'INR',
       status: 'PENDING',
-      payment_status: 'PENDING',
-      breakdown: {
-        baseFee,
-        discount,
-        professionalFee,
-        gstOnProfessional,
-        labourWelfare,
-        gstOnLabour,
-        totalAmount,
-      },
+      payment_method: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      breakdown: {
+        base_fee: baseFee,
+        discount,
+        professional_fee: professionalFee,
+        gst: gstOnProfessional,
+        labour_welfare: labourWelfare,
+        gst_on_labour: gstOnLabour,
+        total_amount: totalAmount,
+      },
     };
 
     const orders = db.getOrders();
     orders.push(orderRecord);
     db.saveOrders(orders);
 
-    res.json({
+    return res.status(200).json({
       success: true,
       message: 'Copyright draft order created successfully.',
       order: orderRecord,
       application: applicationRecord,
+      data: {
+        application: applicationRecord,
+        order: orderRecord,
+      },
     });
   } catch (err) {
-    res.status(500).json({
+    console.error('Error creating copyright draft checkout:', err);
+    return res.status(500).json({
       success: false,
-      message: 'Failed to create copyright checkout draft.',
+      message: 'Failed to create copyright draft order.',
       error: err.message,
     });
   }
@@ -144,29 +153,36 @@ router.post('/checkout/draft', optionalAuth, (req, res) => {
 
 /**
  * GET /checkout/:orderId
- * Fetches order details by ID.
+ * Retrieves saved copyright order with details and payment status.
  */
 router.get('/checkout/:orderId', (req, res) => {
   try {
     const { orderId } = req.params;
-    const order = db.getOrders().find((o) => o.id === orderId || o.order_number === orderId);
+    const orders = db.getOrders();
+    const order = orders.find((o) => o.id === orderId || o.order_number === orderId);
 
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Copyright order not found.',
+        message: 'Order not found.',
       });
     }
 
-    const application = db.getApplications().find((a) => a.id === order.application_id);
+    const apps = db.getApplications();
+    const app = apps.find((a) => a.id === order.application_id);
 
-    res.json({
+    return res.status(200).json({
       success: true,
       order,
-      application,
+      application: app || null,
+      data: {
+        order,
+        application: app || null,
+      },
     });
   } catch (err) {
-    res.status(500).json({
+    console.error('Error retrieving copyright order:', err);
+    return res.status(500).json({
       success: false,
       message: 'Failed to retrieve order.',
       error: err.message,
