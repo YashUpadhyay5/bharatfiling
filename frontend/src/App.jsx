@@ -52,6 +52,7 @@ const PanRegistrationModule = lazy(() => import('./pages/pan-registration/index.
 const TanRegistrationModule = lazy(() => import('./pages/tan-registration/index.jsx'));
 const ApedaRegistrationModule = lazy(() => import('./pages/apeda-registration/index.jsx'));
 const TrademarkRegistrationModule = lazy(() => import('./pages/trademark/trademark-registration/index.jsx'));
+const TrademarkObjectionModule = lazy(() => import('./pages/trademark/trademark-objection/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -133,6 +134,9 @@ export default function App() {
                 <Route path="/services/trademark-registration" element={<TrademarkRegistrationModule />} />
                 <Route path="/services/trademark" element={<TrademarkRegistrationModule />} />
                 <Route path="/services/brand-registration" element={<TrademarkRegistrationModule />} />
+                <Route path="/services/trademark-objection" element={<TrademarkObjectionModule />} />
+                <Route path="/services/tm-objection" element={<TrademarkObjectionModule />} />
+                <Route path="/services/trademark-objection-reply" element={<TrademarkObjectionModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -187,6 +191,9 @@ export default function App() {
                 <Route path="/apply/trademark-registration" element={<TrademarkRegistrationModule />} />
                 <Route path="/apply/trademark" element={<TrademarkRegistrationModule />} />
                 <Route path="/apply/brand-registration" element={<TrademarkRegistrationModule />} />
+                <Route path="/apply/trademark-objection" element={<TrademarkObjectionModule />} />
+                <Route path="/apply/tm-objection" element={<TrademarkObjectionModule />} />
+                <Route path="/apply/trademark-objection-reply" element={<TrademarkObjectionModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />
