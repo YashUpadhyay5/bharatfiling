@@ -53,6 +53,7 @@ const TanRegistrationModule = lazy(() => import('./pages/tan-registration/index.
 const ApedaRegistrationModule = lazy(() => import('./pages/apeda-registration/index.jsx'));
 const TrademarkRegistrationModule = lazy(() => import('./pages/trademark/trademark-registration/index.jsx'));
 const TrademarkObjectionModule = lazy(() => import('./pages/trademark/trademark-objection/index.jsx'));
+const TrademarkRenewalModule = lazy(() => import('./pages/trademark/trademark-renewal/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
@@ -137,6 +138,8 @@ export default function App() {
                 <Route path="/services/trademark-objection" element={<TrademarkObjectionModule />} />
                 <Route path="/services/tm-objection" element={<TrademarkObjectionModule />} />
                 <Route path="/services/trademark-objection-reply" element={<TrademarkObjectionModule />} />
+                <Route path="/services/trademark-renewal" element={<TrademarkRenewalModule />} />
+                <Route path="/services/tm-renewal" element={<TrademarkRenewalModule />} />
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -194,6 +197,8 @@ export default function App() {
                 <Route path="/apply/trademark-objection" element={<TrademarkObjectionModule />} />
                 <Route path="/apply/tm-objection" element={<TrademarkObjectionModule />} />
                 <Route path="/apply/trademark-objection-reply" element={<TrademarkObjectionModule />} />
+                <Route path="/apply/trademark-renewal" element={<TrademarkRenewalModule />} />
+                <Route path="/apply/tm-renewal" element={<TrademarkRenewalModule />} />
                 <Route path="/apply/gst" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug" element={<GstRegistrationModule />} />
                 <Route path="/apply/:serviceSlug/:appId" element={<ApplicationRedirect />} />

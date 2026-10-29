@@ -53,7 +53,7 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 | Trademark Search | ₹499 | ₹589 | per search | Same day | No government fee | catalog | draft | `/services/trademark-search` |
 | Trademark Objection Reply | ₹2,999 | ₹3,539 | per reply | 3-5 working days | No government fee | live | existing | `/services/trademark-objection` |
 | Trademark Opposition | ₹5,999 | ₹7,079 | per stage | 5-7 working days per stage | Registry fee at actuals | catalog | draft | `/services/trademark-opposition` |
-| Trademark Renewal | ₹2,499 | ₹2,949 | per class | 1-2 working days | Renewal fee at actuals | catalog | draft | `/services/trademark-renewal` |
+| Trademark Renewal | ₹1,999 | ₹2,359 | per class | 1-2 working days | Govt fee Rs 9,000 per class via Form TM-R at actuals | live | existing | `/services/trademark-renewal` |
 | Copyright Registration | ₹2,999 | ₹3,539 | per work | 7-10 working days to file | Copyright Office fee at actuals | catalog | draft | `/services/copyright-registration` |
 | Patent Registration | ₹14,999 | ₹17,699 | per application | 10-15 working days to file | Patent Office fee at actuals | catalog | draft | `/services/patent-registration` |
 | Logo Design & IP Protection | ₹2,999 | ₹3,539 | one-time | 4-6 working days | No government fee | catalog | draft | `/services/logo-design-ip` |

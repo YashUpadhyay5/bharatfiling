@@ -150,6 +150,7 @@ app.use('/api/v1/tan', tanRoutes);
 app.use('/api/v1/apeda', apedaRoutes);
 app.use('/api/v1/trademark', trademarkRoutes);
 app.use('/api/v1/trademark-registration', trademarkRoutes);
+app.use('/api/v1/trademark-renewal', trademarkRoutes);
 app.use('/api/v1/documents', documentRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/ca', caRoutes);
