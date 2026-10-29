@@ -195,19 +195,19 @@ function ExtraCheckboxes({ extra, value = [], onChange }) {
 const QUESTION_TYPES = { suggest: SuggestQuestion, select: SelectQuestion, radio: RadioQuestion };
 
 export default function QuestionnairePage({ config, answers: savedAnswers, onSubmit }) {
-  const { headline, tagline, points, questions } = config.questionnaire;
+  // singlePage: every question is shown together, without the progress bar and Back button.
+  const { headline, tagline, points, questions, singlePage = false } = config.questionnaire;
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState(() => ({ ...savedAnswers }));
 
-  const question = questions[index];
-  const QuestionInput = QUESTION_TYPES[question.type];
-  const canProceed = isAnswered(question, answers[question.id]);
+  const visibleQuestions = singlePage ? questions : [questions[index]];
+  const canProceed = visibleQuestions.every((q) => isAnswered(q, answers[q.id]));
   const setAnswer = (id, value) => setAnswers((prev) => ({ ...prev, [id]: value }));
 
   const handleNext = (e) => {
     e.preventDefault();
     if (!canProceed) return;
-    if (index < questions.length - 1) {
+    if (!singlePage && index < questions.length - 1) {
       setIndex(index + 1);
       return;
     }
@@ -250,37 +250,47 @@ export default function QuestionnairePage({ config, answers: savedAnswers, onSub
               <BrandLogo />
             </div>
 
-            <div className="border border-slate-200 rounded-lg p-4 mb-8">
-              <div className="flex items-center justify-between text-xs sm:text-sm mb-3">
-                <span className="font-bold text-slate-900">
-                  {index}/{questions.length} complete
-                </span>
-                <span className="text-slate-500">Takes less than 1 min</span>
+            {!singlePage && (
+              <div className="border border-slate-200 rounded-lg p-4 mb-8">
+                <div className="flex items-center justify-between text-xs sm:text-sm mb-3">
+                  <span className="font-bold text-slate-900">
+                    {index}/{questions.length} complete
+                  </span>
+                  <span className="text-slate-500">Takes less than 1 min</span>
+                </div>
+                <div className="flex gap-2" aria-hidden="true">
+                  {questions.map((q, i) => (
+                    <div key={q.id} className={`h-1 flex-1 rounded-full ${i < index ? 'bg-[#22C55E]' : 'bg-slate-200'}`} />
+                  ))}
+                </div>
               </div>
-              <div className="flex gap-2" aria-hidden="true">
-                {questions.map((q, i) => (
-                  <div key={q.id} className={`h-1 flex-1 rounded-full ${i < index ? 'bg-[#22C55E]' : 'bg-slate-200'}`} />
-                ))}
-              </div>
-            </div>
+            )}
 
             <form onSubmit={handleNext} className="flex-1 flex flex-col">
-              <QuestionInput
-                key={question.id}
-                question={question}
-                value={answers[question.id]}
-                onChange={(v) => setAnswer(question.id, v)}
-              />
-              {question.extra && (
-                <ExtraCheckboxes
-                  extra={question.extra}
-                  value={answers[question.extra.id]}
-                  onChange={(v) => setAnswer(question.extra.id, v)}
-                />
-              )}
+              <div className="space-y-8">
+                {visibleQuestions.map((question) => {
+                  const QuestionInput = QUESTION_TYPES[question.type];
+                  return (
+                    <div key={question.id}>
+                      <QuestionInput
+                        question={question}
+                        value={answers[question.id]}
+                        onChange={(v) => setAnswer(question.id, v)}
+                      />
+                      {question.extra && (
+                        <ExtraCheckboxes
+                          extra={question.extra}
+                          value={answers[question.extra.id]}
+                          onChange={(v) => setAnswer(question.extra.id, v)}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
 
               <div className="mt-auto pt-10 grid grid-cols-2 gap-4">
-                {index > 0 && (
+                {!singlePage && index > 0 && (
                   <button
                     type="button"
                     onClick={() => setIndex(index - 1)}

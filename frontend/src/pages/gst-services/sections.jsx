@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, Check, ChevronDown, ChevronUp } from 'lucide-react';
 
 const TONES = { white: 'bg-white', tint: 'bg-slate-50' };
 const GRID_COLS = { 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4', 5: 'lg:grid-cols-5' };
@@ -133,7 +133,56 @@ function TracksBody({ section }) {
   );
 }
 
+// A list of topics on the left; the chosen topic's explanation on the right.
+function ExplorerBody({ section }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const item = section.items[activeIndex];
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-5xl mx-auto">
+      <div
+        className="md:col-span-4 self-start max-h-80 overflow-y-auto rounded-lg border border-slate-300 bg-white"
+        role="tablist"
+        aria-orientation="vertical"
+        aria-label={section.title.join('')}
+      >
+        {section.items.map((it, i) => {
+          const active = i === activeIndex;
+          return (
+            <button
+              key={it.title}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setActiveIndex(i)}
+              className={`w-full text-left px-4 py-3 text-sm transition cursor-pointer ${
+                active ? 'bg-[#022B50] text-white font-semibold' : 'text-slate-800 hover:bg-blue-50'
+              }`}
+            >
+              {it.title}
+            </button>
+          );
+        })}
+      </div>
+      <div className="md:col-span-8 bg-white rounded-xl border border-slate-200 p-6" role="tabpanel">
+        <h3 className="text-base font-bold text-slate-900">{item.title}</h3>
+        <p className="mt-2 text-sm text-slate-700 leading-relaxed">{item.intro}</p>
+        <ul className="mt-4 space-y-4">
+          {item.points.map((p) => (
+            <li key={p.title} className="flex items-start gap-3">
+              <Check className="w-4 h-4 mt-1 shrink-0 text-[#022B50]" aria-hidden="true" />
+              <p className="text-sm text-slate-700 leading-relaxed">
+                <strong className="text-slate-900">{p.title}</strong> {p.text}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 const BODIES = {
+  explorer: ExplorerBody,
   table: TableBody,
   cards: CardsBody,
   documents: DocumentsBody,
@@ -144,7 +193,7 @@ const BODIES = {
 export function ContentSection({ section, tone }) {
   const Body = BODIES[section.type];
   return (
-    <section className={`py-14 ${TONES[tone]} border-b border-slate-200`}>
+    <section id={section.id} className={`scroll-mt-4 py-14 ${TONES[tone]} border-b border-slate-200`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-8">
           <Title title={section.title} />
@@ -162,10 +211,10 @@ export function ContentSection({ section, tone }) {
   );
 }
 
-export function FaqSection({ faqs }) {
+export function FaqSection({ faqs, id }) {
   const [openIndex, setOpenIndex] = useState(0);
   return (
-    <section className="py-14 bg-[#FAFBFD] border-b border-slate-200">
+    <section id={id} className="scroll-mt-4 py-14 bg-[#FAFBFD] border-b border-slate-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-[#022B50] tracking-tight text-center mb-10">
           Frequently Asked Questions (FAQs)

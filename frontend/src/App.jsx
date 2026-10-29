@@ -5,6 +5,9 @@ import { ToastProvider } from './context/ToastContext.jsx';
 import { SocketProvider } from './context/SocketContext.jsx';
 import { MainLayout, BareLayout, ScrollToTop } from './layouts';
 import { GST_SERVICE_ROUTES } from './pages/gst-services/routes.js';
+import { ITR_SERVICE_ROUTES } from './pages/itr-services/routes.js';
+import { TDS_ROUTE } from './pages/tds-return-filing/routes.js';
+import { NOTICE_ROUTE } from './pages/notice-response/routes.js';
 
 // Critical initial route (eagerly loaded for immediate first paint)
 import LandingPage from './pages/LandingPage.jsx';
@@ -54,11 +57,24 @@ const ApedaRegistrationModule = lazy(() => import('./pages/apeda-registration/in
 const TrademarkRegistrationModule = lazy(() => import('./pages/trademark/trademark-registration/index.jsx'));
 const TrademarkObjectionModule = lazy(() => import('./pages/trademark/trademark-objection/index.jsx'));
 const TrademarkRenewalModule = lazy(() => import('./pages/trademark/trademark-renewal/index.jsx'));
+const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
+const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
+const NoticeResponseModule = lazy(() => import('./pages/notice-response/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage.jsx'));
 const HRACalculatorPage = lazy(() => import('./pages/tools/HRACalculatorPage.jsx'));
 const IncomeTaxCalculatorPage = lazy(() => import('./pages/tools/IncomeTaxCalculatorPage.jsx'));
 const FirmNameCheckerPage = lazy(() => import('./pages/tools/FirmNameCheckerPage.jsx'));
+
+// The canonical /services/<slug> route of a flow, plus redirects to it from /apply/<slug> and from any aliases.
+const flowRoutes = (slug, aliases, element) => [
+  <Route key={slug} path={`/services/${slug}`} element={element} />,
+  <Route key={`apply-${slug}`} path={`/apply/${slug}`} element={<Navigate to={`/services/${slug}`} replace />} />,
+  ...aliases.flatMap((alias) => [
+    <Route key={alias} path={`/services/${alias}`} element={<Navigate to={`/services/${slug}`} replace />} />,
+    <Route key={`apply-${alias}`} path={`/apply/${alias}`} element={<Navigate to={`/services/${slug}`} replace />} />,
+  ]),
+];
 
 function ApplicationRedirect() {
   const { appId } = useParams();
@@ -140,6 +156,14 @@ export default function App() {
                 <Route path="/services/trademark-objection-reply" element={<TrademarkObjectionModule />} />
                 <Route path="/services/trademark-renewal" element={<TrademarkRenewalModule />} />
                 <Route path="/services/tm-renewal" element={<TrademarkRenewalModule />} />
+                {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
+                {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
+                  flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)
+                )}
+                {/* TDS return filing flow: the same 3 steps with its own checkout */}
+                {flowRoutes(TDS_ROUTE.slug, TDS_ROUTE.aliases, <TdsReturnFilingModule />)}
+                {/* Income tax notice response: landing page, date and time booking, payment dialog */}
+                {flowRoutes(NOTICE_ROUTE.slug, NOTICE_ROUTE.aliases, <NoticeResponseModule />)}
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
