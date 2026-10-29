@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   CreditCard,
   Building2,
-  ShieldCheck,
-  Check,
   Lock,
-  ArrowLeft,
-  Sparkles,
+  Check,
   Download,
+  Sparkles,
 } from 'lucide-react';
 
 export default function CopyrightPaymentPage({
@@ -32,56 +30,32 @@ export default function CopyrightPaymentPage({
   const [selectedEmiBank, setSelectedEmiBank] = useState('HDFC');
   const [selectedEmiTenure, setSelectedEmiTenure] = useState(6);
 
-  // Labour Welfare Endowment toggle (Default: true matching screenshot)
+  // Labour Welfare Endowment toggle (Default: true matching screenshot media_1793300069897_1a323af3.png)
   const [includeLabourWelfare, setIncludeLabourWelfare] = useState(true);
-
-  // Countdown timer state
-  const [timeLeft, setTimeLeft] = useState(14 * 60 + 59);
+  const [showTaxesDetails, setShowTaxesDetails] = useState(true);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPaidSuccess, setIsPaidSuccess] = useState(false);
   const [paymentResultData, setPaymentResultData] = useState(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTimer = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const isConsultation = formData.packageId === 'consultation';
-  const isRegistration = formData.packageId === 'registration' || !formData.packageId;
 
-  // Base Fee determination
-  const getBaseFee = () => {
-    if (formData.professionalFee) return formData.professionalFee;
-    if (formData.packageId === 'consultation') return 499;
-    if (formData.packageId === 'commercial') return 8999;
-    if (formData.packageId === 'starter') return 2499;
-    return 2999; // Default to Copyright Registration plan
-  };
+  // Base Fee determination matching screenshot media_1793300069897_1a323af3.png:
+  // In the screenshot:
+  // Professional Fees: ₹2541
+  // GST (18% of 2541): ₹458
+  // Labour Welfare Endowment: ₹153
+  // GST on labour welfare (18% of 153): ₹28
+  // Taxes & Charges total: 458 + 153 + 28 = ₹639
+  // Total Amount: 2541 + 639 = ₹3180
+  const professionalFees = isConsultation ? 423 : 2541;
+  const gstOnFee = Math.round(professionalFees * 0.18); // 458 for registration, 76 for consultation
 
-  const discountedFee = getBaseFee();
-  const originalDisplayPrice = isConsultation
-    ? 599
-    : isRegistration
-    ? 4048
-    : discountedFee + 1000;
-  const onlineDiscount = originalDisplayPrice - discountedFee;
-  const gstOnFee = Math.round(discountedFee * 0.18);
+  const labourWelfareAmount = includeLabourWelfare ? 153 : 0;
+  const gstOnLabour = includeLabourWelfare ? Math.round(153 * 0.18) : 0; // 28
 
-  // Labour Welfare is optional and removable
-  const labourWelfareAmount = includeLabourWelfare ? 399 : 0;
-  const gstOnLabour = includeLabourWelfare ? Math.round(399 * 0.18) : 0; // 72
-
-  const taxesAndCharges = gstOnFee + labourWelfareAmount + gstOnLabour;
-  const totalAmount = discountedFee + taxesAndCharges;
+  const taxesAndCharges = gstOnFee + labourWelfareAmount + gstOnLabour; // 639
+  const totalAmount = professionalFees + taxesAndCharges; // 3180
 
   const orderNumber =
     formData.orderNumber || `#CR-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -109,7 +83,7 @@ export default function CopyrightPaymentPage({
       });
 
       const draftData = await draftRes.json();
-      const generatedOrderId = draftData?.data?.order?.id || `ord_${Date.now()}`;
+      const generatedOrderId = draftData?.data?.order?.id || draftData?.order?.id || `ord_${Date.now()}`;
 
       // 2. Complete payment via backend API
       const payRes = await fetch(
@@ -127,7 +101,7 @@ export default function CopyrightPaymentPage({
 
       const payData = await payRes.json();
       const result = {
-        orderNumber: draftData?.data?.order?.order_number || orderNumber,
+        orderNumber: draftData?.data?.order?.order_number || draftData?.order?.order_number || orderNumber,
         orderId: generatedOrderId,
         transactionId: `TXN-CR-${Date.now()}`,
         paymentMethod: activeTab,
@@ -169,7 +143,7 @@ export default function CopyrightPaymentPage({
     }
   };
 
-  // If already paid, display the verified confirmation receipt screen
+  // If already paid, display the verified confirmation receipt screen without any toast popups
   if (isPaidSuccess && paymentResultData) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] py-12 px-4 sm:px-6 lg:px-8">
@@ -205,7 +179,7 @@ export default function CopyrightPaymentPage({
               <div className="py-2.5 flex justify-between">
                 <span className="text-slate-500">Service</span>
                 <span className="font-semibold text-slate-800">
-                  {formData.packageName || 'Copyright Registration (Form XIV)'}
+                  Consult an Copyright Registration Expert
                 </span>
               </div>
               <div className="py-2.5 flex justify-between">
@@ -261,16 +235,16 @@ export default function CopyrightPaymentPage({
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-[#002B49] selection:text-white">
       {/* ========================================================= */}
-      {/* 1. TOP NAVBAR                                             */}
+      {/* 1. TOP NAVBAR (1:1 with media_1793300069897_1a323af3.png)  */}
       {/* ========================================================= */}
       <header className="bg-white border-b border-gray-100 px-4 sm:px-8 py-3.5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-1.5 select-none">
-            <span className="bg-[#FDB813] text-slate-950 font-black text-xs sm:text-sm px-2 py-1 rounded tracking-wider uppercase">
-              BHARAT
+          <div className="flex items-center select-none cursor-pointer">
+            <span className="bg-[#FECB00] text-black font-extrabold px-2.5 py-0.5 tracking-tight text-lg leading-snug">
+              VAKIL
             </span>
-            <span className="text-[#002B49] font-black text-base sm:text-lg tracking-tight">
-              FILING
+            <span className="text-black font-extrabold ml-1.5 tracking-tight text-lg leading-snug">
+              SEARCH
             </span>
           </div>
 
@@ -278,22 +252,21 @@ export default function CopyrightPaymentPage({
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#002B49] transition-colors cursor-pointer"
+              className="text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Plans</span>
+              ← Back to Plans
             </button>
           )}
         </div>
       </header>
 
       {/* ========================================================= */}
-      {/* 2. MAIN PAYMENT DESK                                      */}
+      {/* 2. MAIN PAYMENT DESK (1:1 with Screenshot)                */}
       {/* ========================================================= */}
       <main className="max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
-        {/* Title */}
+        {/* Main Title & Subtitle */}
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-[28px] font-extrabold text-[#002B49] tracking-tight">
+          <h1 className="text-2xl sm:text-[28px] font-extrabold text-[#111827] tracking-tight">
             Choose Payment Method
           </h1>
           <div className="text-sm font-bold text-slate-800 mt-2">
@@ -304,7 +277,7 @@ export default function CopyrightPaymentPage({
         {/* 2-Column Responsive Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* ------------------------------------------------------- */}
-          {/* Left Column: Payment Options (8 of 12 cols)             */}
+          {/* Left Column: Payment Options Box (8 of 12 cols)         */}
           {/* ------------------------------------------------------- */}
           <div className="lg:col-span-8 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-2xs grid grid-cols-1 md:grid-cols-12">
             {/* Left Vertical Tabs (5 of 12 cols) */}
@@ -417,7 +390,7 @@ export default function CopyrightPaymentPage({
                         EMI option
                       </div>
                       <div className="text-[11px] text-slate-500 mt-1">
-                        Pay using credit &amp; debit card
+                        Pay using credit card &amp; Debit card
                       </div>
                     </div>
                   </div>
@@ -426,209 +399,313 @@ export default function CopyrightPaymentPage({
                   )}
                 </button>
               </div>
+
+              <div className="p-4 text-[11px] text-slate-400 font-medium">
+                🔒 256-Bit SSL Secured
+              </div>
             </div>
 
-            {/* Right Pane: Option Detail Content (7 of 12 cols) */}
-            <div className="md:col-span-7 p-6 sm:p-8 bg-white min-h-[380px] flex flex-col justify-between">
-              {/* UPI Tab */}
+            {/* Right Active Panel (7 of 12 cols) */}
+            <div className="md:col-span-7 p-6 sm:p-8 space-y-6 bg-white">
+              {/* =================================================== */}
+              {/* VIEW: Pay with UPI (1:1 with Screenshot)            */}
+              {/* =================================================== */}
               {activeTab === 'upi' && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900 mb-3">
-                      Select UPI App
-                    </h3>
-                    <div className="space-y-3">
-                      {/* PhonePe (Selected by default) */}
-                      <label
-                        className={`flex items-center justify-between p-3.5 border rounded-lg cursor-pointer transition-all ${
-                          selectedUpiApp === 'phonepe'
-                            ? 'border-[#002B49] bg-blue-50/20 ring-1 ring-[#002B49]'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            name="upiApp"
-                            checked={selectedUpiApp === 'phonepe'}
-                            onChange={() => setSelectedUpiApp('phonepe')}
-                            className="w-4 h-4 text-[#002B49] focus:ring-[#002B49]"
-                          />
-                          <span className="text-sm font-bold text-slate-800">
-                            PhonePe
-                          </span>
-                        </div>
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-purple-100 text-purple-800">
-                          INSTANT
-                        </span>
-                      </label>
+                <div className="space-y-5">
+                  <h3 className="font-bold text-base sm:text-lg text-slate-900 pb-3 border-b border-gray-200">
+                    Pay with UPI
+                  </h3>
 
-                      {/* Google Pay */}
-                      <label
-                        className={`flex items-center justify-between p-3.5 border rounded-lg cursor-pointer transition-all ${
+                  <div className="text-xs sm:text-sm text-slate-600 font-medium pt-1">
+                    Select UPI App
+                  </div>
+
+                  {/* 4 UPI Apps (1:1 with Screenshot) */}
+                  <div className="grid grid-cols-4 gap-2 sm:gap-4 text-center items-start pt-1">
+                    {/* 1. Google Pay */}
+                    <div
+                      onClick={() => setSelectedUpiApp('gpay')}
+                      className="flex flex-col items-center gap-2 cursor-pointer group"
+                    >
+                      <div
+                        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border flex items-center justify-center transition-all bg-white relative ${
                           selectedUpiApp === 'gpay'
-                            ? 'border-[#002B49] bg-blue-50/20 ring-1 ring-[#002B49]'
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-slate-800 ring-2 ring-[#002B49] shadow-sm'
+                            : 'border-gray-200 hover:border-gray-400'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            name="upiApp"
-                            checked={selectedUpiApp === 'gpay'}
-                            onChange={() => setSelectedUpiApp('gpay')}
-                            className="w-4 h-4 text-[#002B49] focus:ring-[#002B49]"
+                        {selectedUpiApp === 'gpay' && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#002B49] text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+                            ✓
+                          </div>
+                        )}
+                        {/* GPay multicolored logo */}
+                        <svg className="w-7 h-7" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
                           />
-                          <span className="text-sm font-bold text-slate-800">
-                            Google Pay
-                          </span>
-                        </div>
-                      </label>
+                          <path
+                            fill="#34A853"
+                            d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                          />
+                        </svg>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-800">
+                        Google pay
+                      </span>
+                    </div>
 
-                      {/* Paytm */}
-                      <label
-                        className={`flex items-center justify-between p-3.5 border rounded-lg cursor-pointer transition-all ${
-                          selectedUpiApp === 'paytm'
-                            ? 'border-[#002B49] bg-blue-50/20 ring-1 ring-[#002B49]'
-                            : 'border-gray-200 hover:border-gray-300'
+                    {/* 2. PhonePe (Selected in Screenshot) */}
+                    <div
+                      onClick={() => setSelectedUpiApp('phonepe')}
+                      className="flex flex-col items-center gap-2 cursor-pointer group"
+                    >
+                      <div
+                        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border flex items-center justify-center transition-all bg-white relative ${
+                          selectedUpiApp === 'phonepe'
+                            ? 'border-slate-800 ring-2 ring-[#002B49] shadow-sm'
+                            : 'border-gray-200 hover:border-gray-400'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            name="upiApp"
-                            checked={selectedUpiApp === 'paytm'}
-                            onChange={() => setSelectedUpiApp('paytm')}
-                            className="w-4 h-4 text-[#002B49] focus:ring-[#002B49]"
-                          />
-                          <span className="text-sm font-bold text-slate-800">
-                            Paytm UPI
-                          </span>
+                        {selectedUpiApp === 'phonepe' && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#002B49] text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+                            ✓
+                          </div>
+                        )}
+                        {/* PhonePe Purple Icon */}
+                        <div className="w-9 h-9 rounded-full bg-[#5f259f] flex items-center justify-center text-white font-bold text-base leading-none">
+                          पे
                         </div>
-                      </label>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-800">
+                        PhonePe
+                      </span>
+                    </div>
+
+                    {/* 3. Paytm */}
+                    <div
+                      onClick={() => setSelectedUpiApp('paytm')}
+                      className="flex flex-col items-center gap-2 cursor-pointer group"
+                    >
+                      <div
+                        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border flex items-center justify-center transition-all bg-white relative ${
+                          selectedUpiApp === 'paytm'
+                            ? 'border-slate-800 ring-2 ring-[#002B49] shadow-sm'
+                            : 'border-gray-200 hover:border-gray-400'
+                        }`}
+                      >
+                        {selectedUpiApp === 'paytm' && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#002B49] text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+                            ✓
+                          </div>
+                        )}
+                        {/* Paytm Text Icon */}
+                        <span className="text-[12px] font-black text-[#002970] tracking-tight">
+                          pay<span className="text-[#00b9f5]">tm</span>
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-800">
+                        Paytm
+                      </span>
+                    </div>
+
+                    {/* 4. Other UPI ID */}
+                    <div
+                      onClick={() => setSelectedUpiApp('other')}
+                      className="flex flex-col items-center gap-2 cursor-pointer group"
+                    >
+                      <div
+                        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border flex items-center justify-center transition-all bg-white relative ${
+                          selectedUpiApp === 'other'
+                            ? 'border-slate-800 ring-2 ring-[#002B49] shadow-sm'
+                            : 'border-gray-200 hover:border-gray-400'
+                        }`}
+                      >
+                        {selectedUpiApp === 'other' && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#002B49] text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+                            ✓
+                          </div>
+                        )}
+                        {/* UPI Arrow Icon */}
+                        <svg
+                          className="w-7 h-7 text-slate-500"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-800">
+                        Other UPI ID
+                      </span>
                     </div>
                   </div>
 
-                  {/* Or Enter Custom VPA / UPI ID */}
-                  <div className="pt-2 border-t border-gray-100">
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Or Pay via UPI ID / VPA
-                    </label>
-                    <div className="flex gap-2">
+                  {/* App instruction or Custom UPI ID field */}
+                  {selectedUpiApp === 'other' ? (
+                    <div className="pt-2">
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        Enter UPI ID / VPA
+                      </label>
                       <input
                         type="text"
                         value={customUpiId}
                         onChange={(e) => setCustomUpiId(e.target.value)}
-                        placeholder="yourname@okaxis"
-                        className="flex-1 px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#002B49]"
+                        placeholder="e.g. yourname@okhdfcbank"
+                        className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-[#002B49] focus:outline-none"
                       />
                     </div>
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {['@okhdfcbank', '@okaxis', '@paytm', '@ybl'].map((h) => (
-                        <button
-                          key={h}
-                          type="button"
-                          onClick={() => {
-                            const name = customUpiId.split('@')[0] || 'user';
-                            setCustomUpiId(`${name}${h}`);
-                          }}
-                          className="text-[11px] text-slate-600 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded cursor-pointer transition-colors"
-                        >
-                          {h}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  ) : (
+                    <p className="text-xs sm:text-sm text-slate-500 pt-3">
+                      Pay through the{' '}
+                      <span className="font-semibold text-slate-800">
+                        {selectedUpiApp === 'phonepe'
+                          ? 'PhonePe pay app'
+                          : selectedUpiApp === 'gpay'
+                          ? 'Google pay app'
+                          : 'Paytm app'}
+                      </span>{' '}
+                      on your phone
+                    </p>
+                  )}
+
+                  {/* CTA Button (1:1 with Screenshot: PAY ₹3180) */}
+                  <button
+                    type="button"
+                    onClick={handlePay}
+                    disabled={isProcessing}
+                    className="w-full bg-[#002B49] hover:bg-[#001D33] active:scale-[0.99] text-white font-extrabold py-3.5 px-6 rounded-md text-sm sm:text-base tracking-wide transition-all shadow-sm cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2 mt-4"
+                  >
+                    <Lock className="w-4 h-4 text-emerald-400" />
+                    <span>
+                      {isProcessing ? 'Processing...' : `PAY ₹${totalAmount}`}
+                    </span>
+                  </button>
                 </div>
               )}
 
-              {/* Card Tab */}
+              {/* =================================================== */}
+              {/* VIEW: Credit/Debit/ATM Card                         */}
+              {/* =================================================== */}
               {activeTab === 'card' && (
-                <div className="space-y-4">
-                  <h3 className="text-sm font-bold text-slate-900">
-                    Enter Card Details
+                <form onSubmit={handlePay} className="space-y-4">
+                  <h3 className="font-bold text-base sm:text-lg text-slate-900 pb-3 border-b border-gray-200">
+                    Pay with Card
                   </h3>
+
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
                       Card Number
                     </label>
                     <input
                       type="text"
-                      maxLength={19}
                       value={cardNumber}
-                      onChange={(e) => {
-                        const val = e.target.value
-                          .replace(/\D/g, '')
-                          .replace(/(.{4})/g, '$1 ')
-                          .trim();
-                        setCardNumber(val);
-                      }}
-                      placeholder="4532 •••• •••• 8910"
-                      className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#002B49]"
+                      onChange={(e) =>
+                        setCardNumber(
+                          e.target.value
+                            .replace(/\D/g, '')
+                            .replace(/(\d{4})/g, '$1 ')
+                            .trim()
+                            .slice(0, 19)
+                        )
+                      }
+                      placeholder="1234 5678 9012 3456"
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-[#002B49] focus:outline-none"
+                      required
                     />
                   </div>
+
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Expiry (MM/YY)
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Expiry Date
                       </label>
                       <input
                         type="text"
-                        maxLength={5}
                         value={cardExpiry}
-                        onChange={(e) => setCardExpiry(e.target.value)}
-                        placeholder="12/28"
-                        className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#002B49]"
+                        onChange={(e) => setCardExpiry(e.target.value.slice(0, 5))}
+                        placeholder="MM/YY"
+                        className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-[#002B49] focus:outline-none"
+                        required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
                         CVV
                       </label>
                       <input
                         type="password"
-                        maxLength={4}
                         value={cardCvv}
-                        onChange={(e) => setCardCvv(e.target.value)}
+                        onChange={(e) =>
+                          setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))
+                        }
                         placeholder="•••"
-                        className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#002B49]"
+                        className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-[#002B49] focus:outline-none"
+                        required
                       />
                     </div>
                   </div>
+
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
                       Name on Card
                     </label>
                     <input
                       type="text"
                       value={cardName}
                       onChange={(e) => setCardName(e.target.value)}
-                      placeholder="Yash Upadhyay"
-                      className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#002B49]"
+                      placeholder="e.g. YASH UPADHYAY"
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm uppercase focus:ring-2 focus:ring-[#002B49] focus:outline-none"
+                      required
                     />
                   </div>
-                </div>
+
+                  <button
+                    type="submit"
+                    disabled={isProcessing}
+                    className="w-full bg-[#002B49] hover:bg-[#001D33] active:scale-[0.99] text-white font-extrabold py-3.5 px-6 rounded-md text-sm sm:text-base tracking-wide transition-all shadow-sm cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2 mt-4"
+                  >
+                    <Lock className="w-4 h-4 text-emerald-400" />
+                    <span>
+                      {isProcessing ? 'Processing...' : `PAY ₹${totalAmount}`}
+                    </span>
+                  </button>
+                </form>
               )}
 
-              {/* Net Banking Tab */}
+              {/* =================================================== */}
+              {/* VIEW: Net Banking                                   */}
+              {/* =================================================== */}
               {activeTab === 'netbanking' && (
                 <div className="space-y-4">
-                  <h3 className="text-sm font-bold text-slate-900 mb-2">
-                    Popular Banks
+                  <h3 className="font-bold text-base sm:text-lg text-slate-900 pb-3 border-b border-gray-200">
+                    Net Banking
                   </h3>
+
                   <div className="grid grid-cols-2 gap-2.5">
-                    {['HDFC', 'ICICI', 'SBI', 'Axis'].map((b) => (
+                    {['HDFC', 'ICICI', 'SBI', 'Axis'].map((bank) => (
                       <button
-                        key={b}
+                        key={bank}
                         type="button"
-                        onClick={() => setSelectedBank(b)}
+                        onClick={() => setSelectedBank(bank)}
                         className={`p-3 text-center border rounded-lg text-xs font-bold cursor-pointer transition-all ${
-                          selectedBank === b
+                          selectedBank === bank
                             ? 'border-[#002B49] bg-blue-50/20 ring-1 ring-[#002B49]'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
-                        {b} Bank
+                        {bank} Bank
                       </button>
                     ))}
                   </div>
@@ -652,15 +729,30 @@ export default function CopyrightPaymentPage({
                       <option value="IndusInd">IndusInd Bank</option>
                     </select>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={handlePay}
+                    disabled={isProcessing}
+                    className="w-full bg-[#002B49] hover:bg-[#001D33] active:scale-[0.99] text-white font-extrabold py-3.5 px-6 rounded-md text-sm sm:text-base tracking-wide transition-all shadow-sm cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2 mt-4"
+                  >
+                    <Lock className="w-4 h-4 text-emerald-400" />
+                    <span>
+                      {isProcessing ? 'Processing...' : `PAY ₹${totalAmount}`}
+                    </span>
+                  </button>
                 </div>
               )}
 
-              {/* EMI Tab */}
+              {/* =================================================== */}
+              {/* VIEW: EMI Option                                    */}
+              {/* =================================================== */}
               {activeTab === 'emi' && (
                 <div className="space-y-4">
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="font-bold text-base sm:text-lg text-slate-900 pb-3 border-b border-gray-200">
                     Credit Card EMI
                   </h3>
+
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Select Bank
@@ -726,144 +818,150 @@ export default function CopyrightPaymentPage({
                       );
                     })}
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={handlePay}
+                    disabled={isProcessing}
+                    className="w-full bg-[#002B49] hover:bg-[#001D33] active:scale-[0.99] text-white font-extrabold py-3.5 px-6 rounded-md text-sm sm:text-base tracking-wide transition-all shadow-sm cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2 mt-4"
+                  >
+                    <Lock className="w-4 h-4 text-emerald-400" />
+                    <span>
+                      {isProcessing ? 'Processing...' : `PAY ₹${totalAmount}`}
+                    </span>
+                  </button>
                 </div>
               )}
-
-              {/* Bottom Pay Action inside Left Column */}
-              <div className="pt-6 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={handlePay}
-                  disabled={isProcessing}
-                  className="w-full bg-[#002B49] hover:bg-[#003860] active:scale-[0.99] text-white font-bold text-sm py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer disabled:opacity-75"
-                >
-                  <Lock className="w-4 h-4" />
-                  {isProcessing ? (
-                    <span>Processing Secure Payment...</span>
-                  ) : (
-                    <span>
-                      Pay ₹{totalAmount.toLocaleString('en-IN')} Securely
-                    </span>
-                  )}
-                </button>
-              </div>
             </div>
           </div>
 
           {/* ------------------------------------------------------- */}
-          {/* Right Column: Price Summary Card (4 of 12 cols)         */}
+          {/* Right Column: Price Summary Box (4 of 12 cols)          */}
+          {/* 1:1 with media_1793300069897_1a323af3.png               */}
           {/* ------------------------------------------------------- */}
           <div className="lg:col-span-4 space-y-4">
             <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-2xs">
-              {/* Category / Plan Header */}
-              <div className="flex items-start justify-between pb-3 border-b border-gray-100">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">
-                    {formData.packageName || 'Copyright Registration'}
-                  </h3>
-                  <p className="text-xs text-blue-800 font-semibold mt-0.5">
-                    {formData.categoryTitle || 'Software/Website/Apps'}
-                  </p>
-                </div>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
-                  Form XIV
+              {/* Title (1:1 with Screenshot) */}
+              <h2 className="font-bold text-base sm:text-lg text-slate-900 leading-snug pb-3 border-b border-gray-100">
+                Consult an Copyright Registration Expert
+              </h2>
+
+              {/* Price Details header */}
+              <div className="flex items-center gap-2 pt-3 pb-2 text-xs sm:text-sm font-bold text-slate-800">
+                <span className="w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center text-[10px] font-bold">
+                  ₹
                 </span>
+                <span>Price details</span>
               </div>
 
-              {/* Fee Breakdown */}
-              <div className="py-3 space-y-2.5 text-xs text-slate-600">
-                <div className="flex justify-between">
+              {/* Breakdown lines */}
+              <div className="space-y-3 text-xs sm:text-sm">
+                {/* Professional Fees */}
+                <div className="flex justify-between text-slate-700">
                   <span>Professional Fees</span>
-                  <span className="font-semibold text-slate-800 line-through">
-                    ₹{originalDisplayPrice.toLocaleString('en-IN')}
+                  <span className="font-semibold text-slate-900">
+                    ₹{professionalFees}
                   </span>
                 </div>
 
-                <div className="flex justify-between text-emerald-600">
-                  <span>Special Online Discount</span>
-                  <span className="font-bold">
-                    -₹{onlineDiscount.toLocaleString('en-IN')}
-                  </span>
-                </div>
+                {/* Taxes & Charges dropdown (with ▲ toggle) */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowTaxesDetails(!showTaxesDetails)}
+                    className="w-full flex justify-between items-center text-slate-700 font-medium hover:text-slate-900 cursor-pointer focus:outline-none"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-slate-600">
+                        {showTaxesDetails ? '▲' : '▼'}
+                      </span>
+                      <span>Taxes &amp; Charges</span>
+                    </span>
+                    <span className="font-semibold text-slate-900">
+                      ₹{taxesAndCharges}
+                    </span>
+                  </button>
 
-                <div className="flex justify-between font-medium text-slate-700 pt-1 border-t border-gray-50">
-                  <span>Discounted Fee</span>
-                  <span>₹{discountedFee.toLocaleString('en-IN')}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span>GST @ 18%</span>
-                  <span>₹{gstOnFee.toLocaleString('en-IN')}</span>
-                </div>
-
-                {/* Labour Welfare Endowment (Optional / Removable) */}
-                <div className="pt-2 border-t border-gray-100">
-                  <label className="flex items-start gap-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={includeLabourWelfare}
-                      onChange={(e) => setIncludeLabourWelfare(e.target.checked)}
-                      className="w-3.5 h-3.5 text-[#002B49] rounded mt-0.5"
-                    />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="font-medium text-slate-700">
-                          Labour Welfare Endowment
-                        </span>
-                        <span className="font-semibold text-slate-800">
-                          ₹{includeLabourWelfare ? '399' : '0'}
+                  {/* Collapsible Details */}
+                  {showTaxesDetails && (
+                    <div className="mt-2 space-y-2 pl-4 text-xs text-slate-600 bg-slate-50/70 p-2.5 rounded border border-slate-100">
+                      {/* GST on professional fee */}
+                      <div className="flex justify-between">
+                        <span>GST on professional fee (18%)</span>
+                        <span className="font-medium text-slate-800">
+                          ₹{gstOnFee}
                         </span>
                       </div>
-                      <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
-                        Voluntary fund for gig-workers legal aid (optional)
-                      </p>
-                    </div>
-                  </label>
-                  {includeLabourWelfare && (
-                    <div className="flex justify-between text-[11px] text-slate-500 mt-1 pl-5">
-                      <span>GST on Endowment (18%)</span>
-                      <span>₹72</span>
+
+                      {/* Labour Welfare Endowment with [Remove] button */}
+                      <div className="flex justify-between items-center">
+                        <span className="flex items-center gap-2">
+                          <span>Labour Welfare Endowment</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setIncludeLabourWelfare(!includeLabourWelfare)
+                            }
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-semibold cursor-pointer transition-colors ${
+                              includeLabourWelfare
+                                ? 'border border-rose-400 text-rose-500 hover:bg-rose-50'
+                                : 'border border-slate-300 text-slate-600 hover:bg-slate-100'
+                            }`}
+                          >
+                            {includeLabourWelfare ? 'Remove' : '+ Add'}
+                          </button>
+                        </span>
+                        <span className="font-medium text-slate-800">
+                          ₹{labourWelfareAmount}
+                        </span>
+                      </div>
+
+                      {/* GST on labour welfare */}
+                      {includeLabourWelfare && (
+                        <div className="flex justify-between">
+                          <span>GST on labour welfare (18%)</span>
+                          <span className="font-medium text-slate-800">
+                            ₹{gstOnLabour}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* Total Payable Box */}
-              <div className="pt-3 border-t-2 border-gray-100 flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-slate-500 block">
-                    Total Payable Amount
+                <div className="border-b border-gray-200 my-2" />
+
+                {/* Total Amount (1:1 with Screenshot: ₹3180) */}
+                <div className="flex justify-between items-baseline pt-1">
+                  <span className="font-extrabold text-base text-slate-900">
+                    Total Amount
                   </span>
-                  <span className="text-xs font-semibold text-emerald-600">
-                    Includes all statutory taxes
+                  <span className="text-2xl font-black text-slate-900">
+                    ₹{totalAmount}
                   </span>
                 </div>
-                <div className="text-right">
-                  <span className="text-xl font-extrabold text-[#002B49]">
-                    ₹{totalAmount.toLocaleString('en-IN')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Countdown timer */}
-              <div className="mt-4 p-2.5 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center gap-1.5 text-xs text-amber-800 font-medium">
-                <span>⚡ Diwali Festive Offer expires in</span>
-                <span className="font-mono font-bold text-amber-900">
-                  {formatTimer(timeLeft)}
-                </span>
               </div>
             </div>
 
-            {/* Trust badge card */}
-            <div className="bg-[#F8FAFC] border border-slate-200 rounded-lg p-3.5 text-xs text-slate-500 space-y-2">
-              <div className="flex items-center gap-2 text-slate-700 font-semibold">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>BharatFiling Protection Guarantee</span>
+            {/* Trust Badges (1:1 with Screenshot) */}
+            <div className="flex items-center justify-around pt-3 text-center text-xs text-slate-700 font-medium">
+              <div className="flex flex-col items-center gap-1.5">
+                <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-800 flex items-center justify-center font-black text-xs border border-teal-200">
+                  PCI
+                </div>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                  PCI-DSS
+                </span>
               </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Govt Portal Diary Number issuance guaranteed within 24 hours of
-                Form XIV verification. ISO 27001 certified data security.
-              </p>
+
+              <div className="flex flex-col items-center gap-1.5">
+                <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold text-xs border border-emerald-200">
+                  <Lock className="w-4 h-4 text-emerald-600" />
+                </div>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                  256-Bit SSL
+                </span>
+              </div>
             </div>
           </div>
         </div>
