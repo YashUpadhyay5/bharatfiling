@@ -4,11 +4,13 @@ import { useAuth } from '../../../context/AuthContext.jsx';
 import { useToast } from '../../../context/ToastContext.jsx';
 
 import TrademarkRenewalLandingPage from './1-TrademarkRenewalLandingPage.jsx';
+import TrademarkRenewalPlansPage from './2-TrademarkRenewalPlansPage.jsx';
 import TrademarkRenewalOnboardingPage from './2-TrademarkRenewalOnboardingPage.jsx';
 import TrademarkRenewalPaymentPage from './3-TrademarkRenewalPaymentPage.jsx';
 
 export {
   TrademarkRenewalLandingPage,
+  TrademarkRenewalPlansPage,
   TrademarkRenewalOnboardingPage,
   TrademarkRenewalPaymentPage,
 };
@@ -38,11 +40,11 @@ export default function TrademarkRenewalModule() {
       whatsappUpdates: true,
       trademarkNumber: '',
       renewalTiming: 'timely',
-      packageId: 'standard',
-      packageName: 'Standard Renewal',
-      professionalFee: 1999,
+      packageId: 'full_service',
+      packageName: 'Full Service & Fulfilment',
+      professionalFee: 24999,
       onlineDiscount: 500,
-      totalAmount: 1769,
+      totalAmount: 28909,
       orderNumber: `#TM-REN-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -69,7 +71,7 @@ export default function TrademarkRenewalModule() {
     }));
     setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess('Lead recorded! Please complete your trademark renewal details.');
+    showSuccess('Lead recorded! Please choose your renewal plan.');
   };
 
   // Step 1: Package chosen from pricing table
@@ -88,15 +90,15 @@ export default function TrademarkRenewalModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Proceed to Payment -> Step 3
-  const handleProceedToPayment = (checkoutData) => {
+  // Step 2: Plan chosen on Choose the Right Plan -> Proceed to Payment Step 3
+  const handleSelectPlanAndProceed = (planData) => {
     setFormData((prev) => ({
       ...prev,
-      ...checkoutData,
+      ...planData,
     }));
     setSearchParams({ step: '3' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showSuccess('Renewal draft created! Please choose payment mode.');
+    showSuccess(`${planData.packageName} selected! Proceed to payment.`);
   };
 
   // Step 3: Back to Step 2
@@ -126,12 +128,12 @@ export default function TrademarkRenewalModule() {
         />
       )}
 
-      {/* Page 2: Trademark Renewal Onboarding (3 sub-steps) */}
+      {/* Page 2: Trademark Renewal Plans Page (1:1 with media_1793259313274_4d18cdf8.png "Choose the Right Plan") */}
       {currentStep === 2 && (
-        <TrademarkRenewalOnboardingPage
+        <TrademarkRenewalPlansPage
           formData={formData}
           onBack={handleBackToStep1}
-          onProceedToPayment={handleProceedToPayment}
+          onSelectPlan={handleSelectPlanAndProceed}
         />
       )}
 

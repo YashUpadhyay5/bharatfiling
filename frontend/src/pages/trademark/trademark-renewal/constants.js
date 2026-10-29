@@ -80,6 +80,47 @@ export const RENEWAL_WINDOWS = [
   },
 ];
 
+export const RENEWAL_CHOOSE_PLANS = [
+  {
+    id: 'consultation',
+    name: 'Expert Consultation (Fee Adjustable)',
+    price: 499,
+    originalPrice: 999,
+    discountBadge: '₹500 off',
+    recommended: false,
+    isDark: false,
+    ctaText: 'Get Started',
+    hasGovtFee: false,
+    hasEmi: false,
+    featuresHeader: "What You'll Get",
+    features: [
+      'Direct, 1:1 expert consultation to clarify all doubts',
+      'Receive clear, personalized guidance on the best next steps',
+    ],
+    disclaimer:
+      'Disclaimer: The consultation fee will be fully adjusted (credited) against the purchase of the Full Service & Fulfilment package.',
+  },
+  {
+    id: 'full_service',
+    name: 'Full Service & Fulfilment',
+    price: 24999,
+    originalPrice: 31249,
+    discountBadge: '20% off',
+    recommended: true,
+    isDark: true,
+    ctaText: 'Get Started',
+    hasGovtFee: true,
+    hasEmi: true,
+    featuresHeader: "What You'll Get",
+    features: [
+      'Trademark audit and status check',
+      'Drafting and filing of Form TM-R',
+      'Confirmation of renewal and updated certificate delivery',
+    ],
+    disclaimer: null,
+  },
+];
+
 export const RENEWAL_PACKAGES = [
   {
     id: 'standard',

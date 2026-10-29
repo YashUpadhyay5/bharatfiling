@@ -46,7 +46,42 @@ describe('Trademark Renewal Module - End-to-End & Database Verification', () => 
   });
 
   test('3. Quotation API (POST /quote/calculate) - Verifies statutory fee calculations and discounts', async () => {
-    // 3A. Standard Timely Renewal (₹1,999) with default ₹500 discount
+    // 3A. Expert Consultation Plan (₹499)
+    const resConsult = await fetch(`${baseUrl}/quote/calculate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        packageId: 'consultation',
+        renewalTiming: 'timely',
+      }),
+    });
+    assert.strictEqual(resConsult.status, 200);
+    const dataConsult = await resConsult.json();
+    assert.strictEqual(dataConsult.success, true);
+    assert.strictEqual(dataConsult.quote.baseProfessionalFee, 499);
+    assert.strictEqual(dataConsult.quote.discount, 0);
+    assert.strictEqual(dataConsult.quote.professionalFee, 499);
+    assert.strictEqual(dataConsult.quote.gstOnProfessional, 90); // 18% of 499 = 89.82 -> 90
+    assert.strictEqual(dataConsult.quote.totalPayable, 589);
+
+    // 3B. Full Service & Fulfilment Plan (₹24,999) with ₹500 discount
+    const resFull = await fetch(`${baseUrl}/quote/calculate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        packageId: 'full_service',
+        renewalTiming: 'timely',
+      }),
+    });
+    assert.strictEqual(resFull.status, 200);
+    const dataFull = await resFull.json();
+    assert.strictEqual(dataFull.quote.baseProfessionalFee, 24999);
+    assert.strictEqual(dataFull.quote.discount, 500);
+    assert.strictEqual(dataFull.quote.professionalFee, 24499);
+    assert.strictEqual(dataFull.quote.gstOnProfessional, 4410); // 18% of 24499 = 4409.82 -> 4410
+    assert.strictEqual(dataFull.quote.totalPayable, 28909);
+
+    // 3C. Standard Timely Renewal (₹1,999) with default ₹500 discount
     const resStandard = await fetch(`${baseUrl}/quote/calculate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -66,7 +101,7 @@ describe('Trademark Renewal Module - End-to-End & Database Verification', () => 
     assert.strictEqual(dataStandard.quote.govtFeePerClass, 9000);
     assert.strictEqual(dataStandard.quote.statutorySurcharge, 0);
 
-    // 3B. Renewal with Late Surcharge (₹3,499) with ₹4,500 statutory surcharge
+    // 3D. Renewal with Late Surcharge (₹3,499) with ₹4,500 statutory surcharge
     const resLate = await fetch(`${baseUrl}/quote/calculate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -84,7 +119,7 @@ describe('Trademark Renewal Module - End-to-End & Database Verification', () => 
     assert.strictEqual(dataLate.quote.totalPayable, 3539);
     assert.strictEqual(dataLate.quote.statutorySurcharge, 4500);
 
-    // 3C. Restoration & Renewal (₹5,999) with SAVE40 coupon (40% discount)
+    // 3E. Restoration & Renewal (₹5,999) with SAVE40 coupon (40% discount)
     const resRestoration = await fetch(`${baseUrl}/quote/calculate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

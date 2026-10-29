@@ -43,15 +43,19 @@ export default function TrademarkRenewalPaymentPage({
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
+  const isConsultation = formData.packageId === 'consultation';
+
   const getBaseFee = () => {
     if (formData.professionalFee) return formData.professionalFee;
+    if (formData.packageId === 'consultation') return 499;
+    if (formData.packageId === 'full_service') return 24999;
     if (formData.packageId === 'late_renewal') return 3499;
     if (formData.packageId === 'restoration') return 5999;
-    return 1999;
+    return 24999;
   };
 
   const professionalFees = getBaseFee();
-  const onlineDiscount = 500;
+  const onlineDiscount = isConsultation ? 0 : 500;
   const discountedSubtotal = Math.max(0, professionalFees - onlineDiscount);
   const gstAmount = Math.round(discountedSubtotal * 0.18);
   const totalAmount = discountedSubtotal + gstAmount;
@@ -109,7 +113,11 @@ export default function TrademarkRenewalPaymentPage({
             <div className="flex justify-end pr-2 sm:pr-4">
               <div className="bg-[#28A745] text-white font-extrabold text-xs sm:text-sm px-6 py-2 rounded-t-2xl shadow-xs inline-flex items-center gap-1.5 z-10">
                 <span>🎉</span>
-                <span>Hooray! ₹500 Discount Unlocked!</span>
+                <span>
+                  {isConsultation
+                    ? 'Special Offer: ₹500 Off Applied (Introductory Fee: ₹499)!'
+                    : 'Hooray! ₹500 Discount Unlocked!'}
+                </span>
               </div>
             </div>
 
@@ -458,11 +466,13 @@ export default function TrademarkRenewalPaymentPage({
                 Trademark Renewal &bull;{' '}
                 <span className="text-[#002B49] font-black">
                   {formData.packageName ||
-                    (formData.packageId === 'late_renewal'
-                      ? 'Renewal with Surcharge'
-                      : formData.packageId === 'restoration'
-                        ? 'Restoration & Renewal'
-                        : 'Standard Renewal')}
+                    (formData.packageId === 'consultation'
+                      ? 'Expert Consultation'
+                      : formData.packageId === 'late_renewal'
+                        ? 'Renewal with Surcharge'
+                        : formData.packageId === 'restoration'
+                          ? 'Restoration & Renewal'
+                          : 'Full Service & Fulfilment')}
                 </span>
               </h2>
 
@@ -476,25 +486,37 @@ export default function TrademarkRenewalPaymentPage({
               <div className="space-y-3 text-xs sm:text-sm">
                 <div className="flex justify-between text-slate-700">
                   <span>Professional Legal Fee</span>
-                  <span className="font-semibold text-slate-900">₹{professionalFees}</span>
+                  <span className="font-semibold text-slate-900">₹{professionalFees.toLocaleString('en-IN')}</span>
                 </div>
 
-                <div className="flex justify-between text-[#28A745] font-medium">
-                  <span>Online Discount</span>
-                  <span className="font-bold">-₹{onlineDiscount}</span>
-                </div>
+                {onlineDiscount > 0 && (
+                  <div className="flex justify-between text-[#28A745] font-medium">
+                    <span>Online Discount</span>
+                    <span className="font-bold">-₹{onlineDiscount.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between text-slate-700">
                   <span>GST @ 18%</span>
-                  <span className="font-semibold text-slate-900">₹{gstAmount}</span>
+                  <span className="font-semibold text-slate-900">₹{gstAmount.toLocaleString('en-IN')}</span>
                 </div>
 
                 <div className="border-b border-gray-200 my-2" />
 
                 <div className="flex justify-between items-baseline pt-1">
                   <span className="font-extrabold text-base text-slate-900">Total Amount</span>
-                  <span className="text-2xl font-black text-slate-900">₹{totalAmount}</span>
+                  <span className="text-2xl font-black text-slate-900">₹{totalAmount.toLocaleString('en-IN')}</span>
                 </div>
+
+                {isConsultation ? (
+                  <p className="text-[11px] text-slate-500 italic pt-2 leading-relaxed border-t border-slate-100">
+                    *The ₹499 consultation fee will be fully adjusted against the purchase of the Full Service & Fulfilment package.
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-slate-500 italic pt-2 leading-relaxed border-t border-slate-100">
+                    *Statutory Government Fee (₹9,000 / class) payable as applicable upon Form TM-R submission on the IP India Gateway.
+                  </p>
+                )}
               </div>
             </div>
 

@@ -6,6 +6,8 @@ import { canAccessApplication, GUEST_USER_ID } from '../../../middleware/ownersh
 const router = express.Router();
 
 const PACKAGE_FEES = {
+  consultation: 499,
+  full_service: 24999,
   standard: 1999,
   late_renewal: 3499,
   restoration: 5999,
@@ -33,11 +35,13 @@ router.post('/quote/calculate', (req, res) => {
 
     const baseFee = PACKAGE_FEES[packageId] || PACKAGE_FEES.standard;
 
-    let discount = 500;
+    let discount = packageId === 'consultation' ? 0 : 500;
     const cleanCoupon = String(coupon).trim().toUpperCase();
     if (cleanCoupon === 'SAVE40' || cleanCoupon === 'DIWALI') {
       discount = Math.round(baseFee * 0.4);
-    } else if (cleanCoupon === 'ONLINE500' || cleanCoupon === 'HOORAY500' || !coupon) {
+    } else if (cleanCoupon === 'ONLINE500' || cleanCoupon === 'HOORAY500') {
+      discount = Math.min(500, baseFee);
+    } else if (!coupon && packageId !== 'consultation') {
       discount = 500;
     }
 
