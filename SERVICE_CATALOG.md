@@ -2,9 +2,9 @@
 
 Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then run `npm run catalog:export` in `frontend/`.
 
-- **74 services** in 8 header menus. **16 live** end-to-end, **58 catalogue** (detail page + request via the contact desk).
+- **75 services** in 8 header menus. **20 live** end-to-end, **55 catalogue** (detail page + request via the contact desk).
 - Prices are the professional fee in INR **before 18% GST and government fees**.
-- **11** prices are already used on the live site; **61** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
+- **10** prices are already used on the live site; **63** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
 
 ## Startup
 
@@ -82,11 +82,12 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 |---|---:|---:|---|---|---|---|---|---|
 | Income Tax Calculator & Slab Checker | Free | - | free tool | Instant | No government fee | live | existing | `/tools/income-tax-calculator` |
 | HRA Tax Calculator (Sec 10(13A)) | Free | - | free tool | Instant | No government fee | live | existing | `/tools/hra-calculator` |
-| Income Tax Return (ITR 1-4) | ₹999 | ₹1,179 | per filing | 1-3 working days | No government fee | catalog | existing | `/services/itr-filing` |
+| Income Tax Return (ITR 1-4) | from ₹2,499 | ₹2,949 | per filing | 1-3 working days | No government fee | live | draft | `/services/itr-filing` |
+| ITR Filing for Sole Proprietorship | from ₹2,499 | ₹2,949 | per filing | 1-3 working days | No government fee | live | draft | `/services/itr-sole-proprietorship` |
 | Business Tax Return (ITR 5-7) | ₹5,999 | ₹7,079 | per filing | 5-7 working days | No government fee | catalog | draft | `/services/business-itr` |
-| TDS Return Filing (24Q / 26Q) | ₹1,499 | ₹1,769 | per quarter | By the quarterly due date | No government fee | catalog | draft | `/services/tds-return-filing` |
+| TDS Return Filing (24Q / 26Q) | ₹1,499 | ₹1,769 | per quarter | By the quarterly due date | No government fee | live | draft | `/services/tds-return-filing` |
 | 15CA / 15CB Certification | ₹2,499 | ₹2,949 | per certificate | 1-2 working days | No government fee | catalog | draft | `/services/form-15ca-15cb` |
-| Income Tax Notice Response | ₹2,999 | ₹3,539 | per notice | 3-7 working days | No government fee | catalog | draft | `/services/income-tax-notice-response` |
+| Income Tax Notice Response | ₹2,999 | ₹3,539 | per notice | 3-7 working days | No government fee | live | draft | `/services/income-tax-notice-response` |
 | Capital Gains Advisory | ₹1,999 | ₹2,359 | per session | 2-3 working days | No government fee | catalog | draft | `/services/capital-gains-advisory` |
 | Advance Tax Computation | ₹999 | ₹1,179 | per quarter | 1-2 working days | No government fee | catalog | draft | `/services/advance-tax-computation` |
 | Form 16 Generation | ₹999 | ₹1,179 | per batch (up to 10 employees) | 2-3 working days | No government fee | catalog | draft | `/services/form-16-generation` |
