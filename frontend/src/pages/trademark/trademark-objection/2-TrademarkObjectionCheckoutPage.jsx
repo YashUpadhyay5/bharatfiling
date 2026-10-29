@@ -11,36 +11,40 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-import { OBJECTION_PACKAGES, OBJECTION_GROUNDS } from './constants.js';
+import { OBJECTION_GROUNDS, OBJECTION_PACKAGES } from './constants.js';
 
 export default function TrademarkObjectionCheckoutPage({
   formData = {},
   onBack,
   onProceedToPayment,
 }) {
-  // 3-step internal flow: 1 -> 2 -> 3
+  // 3-step onboarding flow: 1/3 -> 2/3 -> 3/3 (matching media_1793257125351_a8d786bc.png & media_1793257284316_a774657a.png)
   const [subStep, setSubStep] = useState(1);
 
   // Step 1: Identifier (App No. or Brand Name)
   const [identifier, setIdentifier] = useState(
-    formData.applicationNumber || formData.brandName || ''
+    formData.applicationNumber || formData.brandName || 'i7q3r7325'
   );
   const [identifierError, setIdentifierError] = useState('');
 
-  // Step 2: Objection Ground & Notice Upload
+  // Step 2: Objection Grounds (Section 11 / 9 / Formalities / Not sure)
   const [selectedGround, setSelectedGround] = useState(
     formData.objectionType || 'section_11'
   );
-  const [uploadedFile, setUploadedFile] = useState(null);
 
-  // Step 3: Package Selection
+  // Step 3: Brand Documents (Yes / No / Need help - matching media_1793257284316_a774657a.png)
+  const [hasDocuments, setHasDocuments] = useState(
+    formData.hasDocuments || 'no' // 'no' is selected in the screenshot
+  );
+
+  // Selected Legal Package (default substantive ₹2,999)
   const [selectedPackageId, setSelectedPackageId] = useState(
     formData.packageId || 'substantive'
   );
 
   const activePackage =
     OBJECTION_PACKAGES.find((p) => p.id === selectedPackageId) ||
-    OBJECTION_PACKAGES[1]; // Substantive defense default
+    OBJECTION_PACKAGES[1];
 
   const professionalFee = activePackage.price;
   const onlineDiscount = 500;
@@ -48,7 +52,7 @@ export default function TrademarkObjectionCheckoutPage({
   const gstOnFee = Math.round(discountedFee * 0.18);
   const totalAmount = discountedFee + gstOnFee;
 
-  // Handle Step 1 Next
+  // Handle Step 1 -> Step 2
   const handleNextStep1 = (e) => {
     if (e) e.preventDefault();
     if (!identifier.trim()) {
@@ -60,25 +64,14 @@ export default function TrademarkObjectionCheckoutPage({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Handle Step 2 Next
+  // Handle Step 2 -> Step 3
   const handleNextStep2 = (e) => {
     if (e) e.preventDefault();
     setSubStep(3);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Handle File Upload Simulation
-  const handleFileUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setUploadedFile({
-        name: file.name,
-        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-      });
-    }
-  };
-
-  // Handle Proceed to Payment Desk (Step 3 Final)
+  // Handle Step 3 -> Proceed to Payment Desk
   const handleFinalSubmit = (e) => {
     if (e) e.preventDefault();
     if (onProceedToPayment) {
@@ -87,9 +80,9 @@ export default function TrademarkObjectionCheckoutPage({
         applicationNumber: identifier.trim(),
         brandName: identifier.trim(),
         objectionType: selectedGround,
+        hasDocuments,
         packageId: selectedPackageId,
         packageName: activePackage.name,
-        uploadedReportName: uploadedFile?.name || null,
         professionalFee,
         onlineDiscount,
         discountedFee,
@@ -101,7 +94,7 @@ export default function TrademarkObjectionCheckoutPage({
 
   return (
     <div className="relative min-h-screen bg-[#F8FAFC] text-slate-800 flex items-center justify-center p-4 sm:p-6 lg:p-12 overflow-hidden selection:bg-[#002B49] selection:text-white">
-      {/* Decorative Stepped Pixels / Polygonal Corner Blocks (matching media_1793257125351_a8d786bc.png) */}
+      {/* Decorative Stepped Pixels / Polygonal Corner Blocks (matching screenshot) */}
       <div className="absolute top-0 right-0 pointer-events-none select-none opacity-40">
         <svg
           width="260"
@@ -226,7 +219,7 @@ export default function TrademarkObjectionCheckoutPage({
                   </span>
                 </div>
 
-                {/* Progress Bar Header */}
+                {/* Progress Bar Header with 3 Discrete Segmented Lines (Exact match of screenshot) */}
                 <div className="space-y-1.5 mb-6">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-slate-700">
@@ -236,23 +229,32 @@ export default function TrademarkObjectionCheckoutPage({
                       Takes less than 1 min
                     </span>
                   </div>
-                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  {/* 3 Discrete Progress Line Segments */}
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {/* Segment 1 */}
                     <div
-                      className="h-full bg-[#22c55e] rounded-full transition-all duration-300 ease-out"
-                      style={{
-                        width:
-                          subStep === 1
-                            ? '33.33%'
-                            : subStep === 2
-                              ? '66.66%'
-                              : '100%',
-                      }}
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        subStep >= 1 ? 'bg-[#22c55e]' : 'bg-slate-200'
+                      }`}
+                    />
+                    {/* Segment 2 */}
+                    <div
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        subStep >= 2 ? 'bg-[#22c55e]' : 'bg-slate-200'
+                      }`}
+                    />
+                    {/* Segment 3 */}
+                    <div
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        subStep >= 3 ? 'bg-[#22c55e]' : 'bg-slate-200'
+                      }`}
                     />
                   </div>
                 </div>
 
                 {/* ======================================================= */}
                 {/* SUB-STEP 1: Trademark Application No. OR Brand Name */}
+                {/* (Matches media_1793257125351_a8d786bc.png) */}
                 {/* ======================================================= */}
                 {subStep === 1 && (
                   <div className="space-y-4">
@@ -268,7 +270,7 @@ export default function TrademarkObjectionCheckoutPage({
                           if (identifierError) setIdentifierError('');
                         }}
                         placeholder="e.g. 5839201 OR Brand Name"
-                        className={`w-full border rounded-lg px-3.5 py-2.5 text-sm sm:text-base text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#002B49] transition-all shadow-2xs ${
+                        className={`w-full border rounded-md px-3.5 py-2.5 text-sm sm:text-base text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#002B49] transition-all shadow-2xs ${
                           identifierError
                             ? 'border-red-400 bg-red-50/30'
                             : 'border-slate-300 bg-white'
@@ -289,15 +291,15 @@ export default function TrademarkObjectionCheckoutPage({
                 )}
 
                 {/* ======================================================= */}
-                {/* SUB-STEP 2: Objection Grounds & Examination Notice */}
+                {/* SUB-STEP 2: Objection Grounds Cited */}
                 {/* ======================================================= */}
                 {subStep === 2 && (
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm sm:text-[15px] font-bold text-slate-800 mb-2 leading-snug">
-                        What objection is raised in your Examination Report?
+                        What type of objection is mentioned in your examination report?
                       </label>
-                      <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                      <div className="space-y-2">
                         {OBJECTION_GROUNDS.map((ground) => {
                           const isSelected = selectedGround === ground.id;
                           return (
@@ -305,21 +307,21 @@ export default function TrademarkObjectionCheckoutPage({
                               key={ground.id}
                               type="button"
                               onClick={() => setSelectedGround(ground.id)}
-                              className={`w-full text-left p-3 rounded-lg border text-xs transition-all cursor-pointer flex items-start gap-2.5 ${
+                              className={`w-full text-left p-3 rounded-md border text-xs transition-all cursor-pointer flex items-start gap-2.5 ${
                                 isSelected
-                                  ? 'border-[#002B49] bg-blue-50/50 shadow-2xs'
+                                  ? 'border-slate-400 bg-[#E8EDF2] shadow-2xs'
                                   : 'border-slate-200 hover:border-slate-300 bg-white'
                               }`}
                             >
                               <div
                                 className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
                                   isSelected
-                                    ? 'border-[#002B49] bg-[#002B49]'
+                                    ? 'border-[#002B49] bg-white'
                                     : 'border-slate-300'
                                 }`}
                               >
                                 {isSelected && (
-                                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                  <div className="w-2 h-2 rounded-full bg-[#002B49]" />
                                 )}
                               </div>
                               <div>
@@ -334,25 +336,25 @@ export default function TrademarkObjectionCheckoutPage({
                           );
                         })}
 
-                        {/* Option 4: Not Sure */}
+                        {/* Option: Not Sure */}
                         <button
                           type="button"
                           onClick={() => setSelectedGround('not_sure')}
-                          className={`w-full text-left p-3 rounded-lg border text-xs transition-all cursor-pointer flex items-start gap-2.5 ${
+                          className={`w-full text-left p-3 rounded-md border text-xs transition-all cursor-pointer flex items-start gap-2.5 ${
                             selectedGround === 'not_sure'
-                              ? 'border-[#002B49] bg-blue-50/50 shadow-2xs'
+                              ? 'border-slate-400 bg-[#E8EDF2] shadow-2xs'
                               : 'border-slate-200 hover:border-slate-300 bg-white'
                           }`}
                         >
                           <div
                             className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
                               selectedGround === 'not_sure'
-                                ? 'border-[#002B49] bg-[#002B49]'
+                                ? 'border-[#002B49] bg-white'
                                 : 'border-slate-300'
                             }`}
                           >
                             {selectedGround === 'not_sure' && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                              <div className="w-2 h-2 rounded-full bg-[#002B49]" />
                             )}
                           </div>
                           <div>
@@ -360,172 +362,164 @@ export default function TrademarkObjectionCheckoutPage({
                               I need help identifying the cited objection
                             </span>
                             <span className="text-[11px] text-slate-500 mt-0.5">
-                              Our IP Counsel will review your notice report from IP India registry
+                              Our Senior IP Counsel will review your notice report from IP India
                             </span>
                           </div>
                         </button>
                       </div>
                     </div>
-
-                    {/* Examination Report Upload (Optional) */}
-                    <div className="pt-1">
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        Upload Examination Report / Notice (Optional PDF or Image)
-                      </label>
-                      <label className="border border-dashed border-slate-300 hover:border-[#002B49] rounded-lg p-3 text-center block cursor-pointer bg-slate-50/70 hover:bg-slate-50 transition-colors">
-                        <input
-                          type="file"
-                          accept=".pdf,.png,.jpg,.jpeg"
-                          onChange={handleFileUpload}
-                          className="hidden"
-                        />
-                        <div className="flex items-center justify-center gap-2 text-xs text-slate-600">
-                          <Upload className="w-3.5 h-3.5 text-[#002B49]" />
-                          <span className="font-semibold text-[#002B49]">
-                            {uploadedFile ? uploadedFile.name : 'Click to attach report file'}
-                          </span>
-                        </div>
-                      </label>
-                    </div>
                   </div>
                 )}
 
                 {/* ======================================================= */}
-                {/* SUB-STEP 3: Defense Package Selection & Order Summary */}
+                {/* SUB-STEP 3: Brand Documents Question (1:1 with media_1793257284316_a774657a.png) */}
                 {/* ======================================================= */}
                 {subStep === 3 && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm sm:text-[15px] font-bold text-slate-800 mb-2 leading-snug">
-                        Choose your Legal Defense Package
+                      <label className="block text-sm sm:text-[15px] font-bold text-slate-900 mb-3 leading-snug">
+                        Do you have any documents for your brand (invoices, ads, or website)?
                       </label>
-                      <div className="space-y-2">
-                        {OBJECTION_PACKAGES.map((pkg) => {
-                          const isSelected = selectedPackageId === pkg.id;
-                          return (
-                            <button
-                              key={pkg.id}
-                              type="button"
-                              onClick={() => setSelectedPackageId(pkg.id)}
-                              className={`w-full text-left p-3 rounded-lg border text-xs transition-all cursor-pointer flex items-center justify-between ${
-                                isSelected
-                                  ? 'border-[#002B49] bg-blue-50/40 shadow-2xs ring-1 ring-[#002B49]'
-                                  : 'border-slate-200 hover:border-slate-300 bg-white'
-                              }`}
-                            >
-                              <div className="flex items-start gap-2.5">
-                                <div
-                                  className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
-                                    isSelected
-                                      ? 'border-[#002B49] bg-[#002B49]'
-                                      : 'border-slate-300'
-                                  }`}
-                                >
-                                  {isSelected && (
-                                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                                  )}
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="font-bold text-slate-900">
-                                      {pkg.name}
-                                    </span>
-                                    {pkg.popular && (
-                                      <span className="bg-amber-100 text-amber-800 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full">
-                                        Popular
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="text-[11px] text-slate-500 block mt-0.5 line-clamp-1">
-                                    {pkg.tagline}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="text-right pl-2">
-                                <span className="text-sm font-black text-slate-900 block">
-                                  ₹{pkg.price}
-                                </span>
-                                <span className="text-[10px] text-slate-400 line-through">
-                                  ₹{pkg.originalPrice}
-                                </span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
 
-                    {/* Order Price Details Box */}
-                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1.5 text-xs">
-                      <div className="flex justify-between text-slate-600">
-                        <span>Professional Legal Fee:</span>
-                        <span className="font-semibold text-slate-800">₹{professionalFee}</span>
+                      {/* 3 Radio Options */}
+                      <div className="space-y-2.5">
+                        {/* Option 1: Yes */}
+                        <button
+                          type="button"
+                          onClick={() => setHasDocuments('yes')}
+                          className={`w-full text-left p-3.5 rounded-md border text-sm font-semibold transition-all cursor-pointer flex items-center gap-3 ${
+                            hasDocuments === 'yes'
+                              ? 'border-slate-400 bg-[#E8EDF2] text-slate-900 shadow-2xs'
+                              : 'border-slate-300 hover:border-slate-400 bg-white text-slate-700'
+                          }`}
+                        >
+                          <div
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                              hasDocuments === 'yes'
+                                ? 'border-[#002B49] bg-white'
+                                : 'border-slate-400'
+                            }`}
+                          >
+                            {hasDocuments === 'yes' && (
+                              <div className="w-2 h-2 rounded-full bg-[#002B49]" />
+                            )}
+                          </div>
+                          <span>Yes</span>
+                        </button>
+
+                        {/* Option 2: No (Default selected in screenshot) */}
+                        <button
+                          type="button"
+                          onClick={() => setHasDocuments('no')}
+                          className={`w-full text-left p-3.5 rounded-md border text-sm font-semibold transition-all cursor-pointer flex items-center gap-3 ${
+                            hasDocuments === 'no'
+                              ? 'border-slate-400 bg-[#E8EDF2] text-slate-900 shadow-2xs'
+                              : 'border-slate-300 hover:border-slate-400 bg-white text-slate-700'
+                          }`}
+                        >
+                          <div
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                              hasDocuments === 'no'
+                                ? 'border-[#002B49] bg-white'
+                                : 'border-slate-400'
+                            }`}
+                          >
+                            {hasDocuments === 'no' && (
+                              <div className="w-2 h-2 rounded-full bg-[#002B49]" />
+                            )}
+                          </div>
+                          <span>No</span>
+                        </button>
+
+                        {/* Option 3: Need help */}
+                        <button
+                          type="button"
+                          onClick={() => setHasDocuments('need_help')}
+                          className={`w-full text-left p-3.5 rounded-md border text-sm font-semibold transition-all cursor-pointer flex items-center gap-3 ${
+                            hasDocuments === 'need_help'
+                              ? 'border-slate-400 bg-[#E8EDF2] text-slate-900 shadow-2xs'
+                              : 'border-slate-300 hover:border-slate-400 bg-white text-slate-700'
+                          }`}
+                        >
+                          <div
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                              hasDocuments === 'need_help'
+                                ? 'border-[#002B49] bg-white'
+                                : 'border-slate-400'
+                            }`}
+                          >
+                            {hasDocuments === 'need_help' && (
+                              <div className="w-2 h-2 rounded-full bg-[#002B49]" />
+                            )}
+                          </div>
+                          <span>Need help</span>
+                        </button>
                       </div>
-                      <div className="flex justify-between text-[#28A745] font-semibold">
-                        <span>🎉 Online Discount:</span>
-                        <span>-₹{onlineDiscount}</span>
-                      </div>
-                      <div className="flex justify-between text-slate-600">
-                        <span>GST @ 18%:</span>
-                        <span className="font-semibold text-slate-800">₹{gstOnFee}</span>
-                      </div>
-                      <div className="border-t border-slate-200 pt-1.5 flex justify-between items-baseline font-black text-slate-900 text-sm">
-                        <span>Total Payable:</span>
-                        <span className="text-base text-[#002B49]">₹{totalAmount}</span>
-                      </div>
+
+                      <p className="text-[11px] text-slate-400 mt-3 leading-relaxed">
+                        Commercial invoices, domain registration, and social media ads strengthen
+                        the User Affidavit by proving prior use under Section 12.
+                      </p>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Card Bottom CTA Navigation */}
-              <div className="pt-6 mt-4 flex items-center justify-between border-t border-slate-100">
-                {subStep > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => setSubStep((prev) => prev - 1)}
-                    className="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer transition-colors"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Back</span>
-                  </button>
-                ) : (
-                  <span className="text-[11px] text-slate-400">
-                    Step 1 of 3
-                  </span>
-                )}
-
+              {/* Card Bottom CTA Navigation (1:1 matching screenshot button layout) */}
+              <div className="pt-8 mt-auto">
                 {subStep === 1 && (
-                  <button
-                    type="button"
-                    onClick={handleNextStep1}
-                    className="px-7 py-2.5 bg-[#002B49] hover:bg-[#001f35] text-white font-bold text-xs sm:text-sm rounded-lg flex items-center gap-2 shadow-xs transition-all cursor-pointer"
-                  >
-                    <span>Next</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleNextStep1}
+                      className="px-8 py-2.5 bg-[#002B49] hover:bg-[#001f35] text-white font-bold text-sm rounded-md flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                    >
+                      <span>Next</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
 
                 {subStep === 2 && (
-                  <button
-                    type="button"
-                    onClick={handleNextStep2}
-                    className="px-7 py-2.5 bg-[#002B49] hover:bg-[#001f35] text-white font-bold text-xs sm:text-sm rounded-lg flex items-center gap-2 shadow-xs transition-all cursor-pointer"
-                  >
-                    <span>Next</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSubStep(1)}
+                      className="py-2.5 px-6 rounded-md border border-[#002B49] text-[#002B49] bg-white hover:bg-slate-50 font-bold text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Back</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextStep2}
+                      className="py-2.5 px-6 rounded-md bg-[#002B49] hover:bg-[#001f35] text-white font-bold text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <span>Next</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
 
                 {subStep === 3 && (
-                  <button
-                    type="button"
-                    onClick={handleFinalSubmit}
-                    className="px-7 py-2.5 bg-[#002B49] hover:bg-[#001f35] text-white font-bold text-xs sm:text-sm rounded-lg flex items-center gap-2 shadow-xs transition-all cursor-pointer"
-                  >
-                    <span>Proceed to Payment</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSubStep(2)}
+                      className="py-2.5 px-6 rounded-md border border-[#002B49] text-[#002B49] bg-white hover:bg-slate-50 font-bold text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Back</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleFinalSubmit}
+                      className="py-2.5 px-6 rounded-md bg-[#002B49] hover:bg-[#001f35] text-white font-bold text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    >
+                      <span>Next</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
