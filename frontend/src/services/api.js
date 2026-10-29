@@ -454,6 +454,63 @@ export const api = {
     return handleResponse(res);
   },
 
+  // Income Tax Return service flows (individual ITR, sole proprietorship ITR)
+  createItrOrder: async (service, payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/itr-services/${service}/checkout/draft`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  payItrOrder: async (service, orderId, payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/itr-services/${service}/checkout/${orderId}/pay`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  // TDS return filing flow
+  createTdsOrder: async (payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/tds-return-filing/checkout/draft`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  payTdsOrder: async (orderId, payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/tds-return-filing/checkout/${orderId}/pay`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  // Income tax notice response consultation flow
+  createNoticeOrder: async (payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/notice-response/checkout/draft`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  payNoticeOrder: async (orderId, payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/notice-response/checkout/${orderId}/pay`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
   // CA Portal
   getCACases: async () => {
     const res = await fetchWithRetry(`${API_BASE}/ca/cases`, {

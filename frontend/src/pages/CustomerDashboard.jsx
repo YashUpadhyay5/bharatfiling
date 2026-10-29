@@ -769,9 +769,9 @@ export default function CustomerDashboard() {
                         </p>
                       </div>
                       <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                        <span className="font-bold text-amber-700 text-xs">₹999 All-Inclusive</span>
+                        <span className="font-bold text-amber-700 text-xs">From ₹2,499 + GST</span>
                         <Link
-                          to="/apply/income-tax"
+                          to="/services/itr-filing"
                           className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold"
                         >
                           Apply Now &rarr;
