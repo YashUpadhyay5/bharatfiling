@@ -60,6 +60,7 @@ const TrademarkRenewalModule = lazy(() => import('./pages/trademark/trademark-re
 const TrademarkAssignmentModule = lazy(() => import('./pages/trademark/trademark-assignment/index.jsx'));
 const CopyrightRegistrationModule = lazy(() => import('./pages/copyright/index.jsx'));
 const PatentRegistrationModule = lazy(() => import('./pages/patent/index.jsx'));
+const ProvisionalPatentModule = lazy(() => import('./pages/patent/provisional-patent/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
 const NoticeResponseModule = lazy(() => import('./pages/notice-response/index.jsx'));
@@ -174,6 +175,12 @@ export default function App() {
                 <Route path="/patent-registration" element={<PatentRegistrationModule />} />
                 <Route path="/apply/patent-registration" element={<PatentRegistrationModule />} />
                 <Route path="/apply/patent" element={<PatentRegistrationModule />} />
+                <Route path="/services/provisional-patent-application" element={<ProvisionalPatentModule />} />
+                <Route path="/services/provisional-patent" element={<ProvisionalPatentModule />} />
+                <Route path="/provisional-patent-application" element={<ProvisionalPatentModule />} />
+                <Route path="/provisional-patent" element={<ProvisionalPatentModule />} />
+                <Route path="/apply/provisional-patent-application" element={<ProvisionalPatentModule />} />
+                <Route path="/apply/provisional-patent" element={<ProvisionalPatentModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

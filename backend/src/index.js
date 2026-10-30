@@ -161,6 +161,8 @@ app.use('/api/v1/copyright', copyrightRoutes);
 app.use('/api/v1/copyright-registration', copyrightRoutes);
 app.use('/api/v1/patent', patentRoutes);
 app.use('/api/v1/patent-registration', patentRoutes);
+app.use('/api/v1/provisional-patent', patentRoutes);
+app.use('/api/v1/provisional-patent-application', patentRoutes);
 app.use('/api/v1/itr-services', itrServicesRoutes);
 app.use('/api/v1/tds-return-filing', tdsReturnFilingRoutes);
 app.use('/api/v1/notice-response', noticeResponseRoutes);
