@@ -85,7 +85,15 @@ export default function ServicesDirectory() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {servicesInCategory(c.key).map((svc) => (
                 <Link key={svc.slug} to={servicePath(svc)} onClick={open(svc)} className={`group rounded-2xl border border-slate-200/80 bg-white p-5 transition hover:-translate-y-0.5 hover:border-slate-300 ${SOFT_SHADOW}`}>
-                  <p className={`text-[15px] font-semibold ${INK}`}>{svc.name}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className={`text-[15px] font-semibold ${INK}`}>{svc.name}</p>
+                    {svc.status === 'live' && (
+                      <span className="shrink-0 inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Live
+                      </span>
+                    )}
+                  </div>
                   <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-slate-500">{svc.summary}</p>
                   <p className="mt-4 flex items-center justify-between text-sm">
                     <span>
