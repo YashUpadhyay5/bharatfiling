@@ -4,8 +4,13 @@ import { useAuth } from '../../../context/AuthContext.jsx';
 
 import ProvisionalPatentLandingPage from './1-ProvisionalPatentLandingPage.jsx';
 import ProvisionalPatentJurisdictionSelection from './2-ProvisionalPatentJurisdictionSelection.jsx';
+import ProvisionalPatentPaymentPage from './3-ProvisionalPatentPaymentPage.jsx';
 
-export { ProvisionalPatentLandingPage, ProvisionalPatentJurisdictionSelection };
+export {
+  ProvisionalPatentLandingPage,
+  ProvisionalPatentJurisdictionSelection,
+  ProvisionalPatentPaymentPage,
+};
 
 export default function ProvisionalPatentModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,7 +18,7 @@ export default function ProvisionalPatentModule() {
 
   const stepParam = searchParams.get('step');
   const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
-  const currentStep = [1, 2, 3, 4].includes(initialStep) ? initialStep : 1;
+  const currentStep = [1, 2, 3].includes(initialStep) ? initialStep : 1;
 
   const getInitialDraft = () => {
     try {
@@ -35,10 +40,10 @@ export default function ProvisionalPatentModule() {
       fieldOfInvention: 'Mechanical / Medical / AI',
       applicantType: 'individual_startup',
       packageId: 'standard',
-      packageName: 'Startup / Individual Provisional Patent',
-      professionalFee: 7999,
-      onlineDiscount: 4000,
-      totalAmount: 525,
+      packageName: 'Provisional Patent Application Filing Advisory',
+      professionalFee: 499,
+      onlineDiscount: 0,
+      totalAmount: 619,
       orderNumber: `#PPA-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -74,7 +79,7 @@ export default function ProvisionalPatentModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Proceed from Jurisdiction Selection to Step 3
+  // Step 2: Proceed from Jurisdiction Selection to Step 3 (Payment Desk)
   const handleJurisdictionProceed = (updatedData) => {
     setFormData((prev) => ({
       ...prev,
@@ -86,6 +91,11 @@ export default function ProvisionalPatentModule() {
 
   const handleBackToStep1 = () => {
     setSearchParams({ step: '1' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToStep2 = () => {
+    setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -109,29 +119,13 @@ export default function ProvisionalPatentModule() {
         />
       )}
 
-      {/* Placeholder for subsequent step(s) until user uploads next screenshot */}
-      {currentStep > 2 && (
-        <div className="max-w-3xl mx-auto py-16 px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-[#002B49] text-xs font-semibold mb-4">
-            Step {currentStep} In Progress
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            Provisional Patent Application Filing Desk
-          </h2>
-          <p className="text-sm text-slate-600 mb-2">
-            Configured for Lead: <span className="font-semibold">{formData.email}</span> ({formData.phone})
-          </p>
-          <p className="text-xs text-slate-500 mb-6">
-            Protection Jurisdiction: <span className="font-semibold text-slate-800">{formData.targetCountry || formData.jurisdictionType}</span>
-          </p>
-          <button
-            type="button"
-            onClick={() => setSearchParams({ step: '2' })}
-            className="px-5 py-2.5 bg-[#002B49] text-white text-xs font-semibold rounded-lg hover:bg-[#001D3D] cursor-pointer"
-          >
-            ← Return to Step 2
-          </button>
-        </div>
+      {/* Page 3: Payment Desk (1:1 with media_1793359209528_791e525d.png) */}
+      {currentStep === 3 && (
+        <ProvisionalPatentPaymentPage
+          formData={formData}
+          orderId={formData.orderNumber}
+          onBack={handleBackToStep2}
+        />
       )}
     </main>
   );

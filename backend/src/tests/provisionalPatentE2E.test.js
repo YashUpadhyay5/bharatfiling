@@ -45,7 +45,7 @@ describe('Provisional Patent Application Module - End-to-End & Database Verifica
     assert.ok(supabase, 'Supabase client instance must exist');
   });
 
-  test('3. Quotation API (POST /quote/calculate) - Verifies provisional patent fees and discount', async () => {
+  test('3. Quotation API (POST /quote/calculate) - Verifies provisional patent fees matching screenshot media_1793359209528_791e525d.png (₹619)', async () => {
     // 3A. Provisional Patent (₹9,999) with ₹500 default coupon
     const resProvisional = await fetch(`${baseUrl}/quote/calculate`, {
       method: 'POST',
@@ -63,18 +63,39 @@ describe('Provisional Patent Application Module - End-to-End & Database Verifica
     assert.strictEqual(dataProvisional.professionalFee, 9499);
     assert.strictEqual(dataProvisional.gstOnProfessional, Math.round(9499 * 0.18));
 
-    // 3B. 15-Minute Attorney Consultation (₹499)
-    const resConsult = await fetch(`${baseUrl}/quote/calculate`, {
+    // 3B. Provisional Patent Advisory matching screenshot (₹499 + ₹120 taxes = ₹619)
+    const resAdvisory = await fetch(`${baseUrl}/quote/calculate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         packageId: 'consultation',
+        includeLabourWelfare: true,
       }),
     });
-    assert.strictEqual(resConsult.status, 200);
-    const dataConsult = await resConsult.json();
-    assert.strictEqual(dataConsult.success, true);
-    assert.strictEqual(dataConsult.baseProfessionalFee, 499);
+    assert.strictEqual(resAdvisory.status, 200);
+    const dataAdvisory = await resAdvisory.json();
+    assert.strictEqual(dataAdvisory.success, true);
+    assert.strictEqual(dataAdvisory.baseProfessionalFee, 499);
+    assert.strictEqual(dataAdvisory.professionalFee, 499);
+    assert.strictEqual(dataAdvisory.gstOnProfessional, 90);
+    assert.strictEqual(dataAdvisory.labourWelfareAmount, 25);
+    assert.strictEqual(dataAdvisory.gstOnLabour, 5);
+    assert.strictEqual(dataAdvisory.taxesAndCharges, 120);
+    assert.strictEqual(dataAdvisory.totalAmount, 619);
+
+    // 3C. When Labour Welfare removed: ₹499 + ₹90 = ₹589
+    const resWithoutLabour = await fetch(`${baseUrl}/quote/calculate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        packageId: 'consultation',
+        includeLabourWelfare: false,
+      }),
+    });
+    assert.strictEqual(resWithoutLabour.status, 200);
+    const dataWithoutLabour = await resWithoutLabour.json();
+    assert.strictEqual(dataWithoutLabour.taxesAndCharges, 90);
+    assert.strictEqual(dataWithoutLabour.totalAmount, 589);
   });
 
   test('4. Checkout Draft API (POST /checkout/draft) - Validates inputs and stores provisional lead', async () => {
