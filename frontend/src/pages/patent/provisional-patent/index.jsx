@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
 
 import ProvisionalPatentLandingPage from './1-ProvisionalPatentLandingPage.jsx';
+import ProvisionalPatentJurisdictionSelection from './2-ProvisionalPatentJurisdictionSelection.jsx';
 
-export { ProvisionalPatentLandingPage };
+export { ProvisionalPatentLandingPage, ProvisionalPatentJurisdictionSelection };
 
 export default function ProvisionalPatentModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,6 +29,8 @@ export default function ProvisionalPatentModule() {
       phone: user?.phone || '+91 7668976193',
       cityPincode: 'Bengaluru, 560001',
       whatsappUpdates: true,
+      jurisdictionType: 'international',
+      targetCountry: 'International (PCT/WIPO)',
       inventionTitle: '',
       fieldOfInvention: 'Mechanical / Medical / AI',
       applicantType: 'individual_startup',
@@ -71,6 +74,21 @@ export default function ProvisionalPatentModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Step 2: Proceed from Jurisdiction Selection to Step 3
+  const handleJurisdictionProceed = (updatedData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...updatedData,
+    }));
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToStep1 = () => {
+    setSearchParams({ step: '1' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <main className="min-h-screen bg-white">
       {/* Page 1: Provisional Patent Landing Page (1:1 with media_1793356788090_8e592c5c.png) */}
@@ -82,8 +100,17 @@ export default function ProvisionalPatentModule() {
         />
       )}
 
-      {/* Step 2 placeholder awaiting next page from user */}
-      {currentStep > 1 && (
+      {/* Page 2: Jurisdiction Selection (1:1 with media_1793358166819_dfe8a923.png) */}
+      {currentStep === 2 && (
+        <ProvisionalPatentJurisdictionSelection
+          formData={formData}
+          onBack={handleBackToStep1}
+          onProceed={handleJurisdictionProceed}
+        />
+      )}
+
+      {/* Placeholder for subsequent step(s) until user uploads next screenshot */}
+      {currentStep > 2 && (
         <div className="max-w-3xl mx-auto py-16 px-4 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-[#002B49] text-xs font-semibold mb-4">
             Step {currentStep} In Progress
@@ -91,15 +118,18 @@ export default function ProvisionalPatentModule() {
           <h2 className="text-2xl font-bold text-slate-900 mb-2">
             Provisional Patent Application Filing Desk
           </h2>
-          <p className="text-sm text-slate-600 mb-6">
+          <p className="text-sm text-slate-600 mb-2">
             Configured for Lead: <span className="font-semibold">{formData.email}</span> ({formData.phone})
+          </p>
+          <p className="text-xs text-slate-500 mb-6">
+            Protection Jurisdiction: <span className="font-semibold text-slate-800">{formData.targetCountry || formData.jurisdictionType}</span>
           </p>
           <button
             type="button"
-            onClick={() => setSearchParams({ step: '1' })}
+            onClick={() => setSearchParams({ step: '2' })}
             className="px-5 py-2.5 bg-[#002B49] text-white text-xs font-semibold rounded-lg hover:bg-[#001D3D] cursor-pointer"
           >
-            ← Return to Overview
+            ← Return to Step 2
           </button>
         </div>
       )}

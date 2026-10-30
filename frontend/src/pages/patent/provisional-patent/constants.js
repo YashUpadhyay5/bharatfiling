@@ -340,3 +340,43 @@ export const FAQS = [
     a: 'A provisional application filed in India acts as a valid priority application under the Paris Convention. Within 12 months of filing your Indian provisional application, you can file an international PCT application or convention applications in foreign countries claiming priority from your Indian provisional date.',
   },
 ];
+
+
+export const PROVISIONAL_PATENT_ONBOARDING_LEFT_BENEFITS = {
+  headline: '1 Lakh+ Successful Provisional Applications Filed',
+  subheading: 'Protect your invention with us',
+  bullets: [
+    {
+      title: 'File your Provisional Patent application in under 6 days',
+      subtitle: 'With Our IP experts its simpler, faster and easier',
+    },
+    {
+      title: '24x7 expert support',
+      subtitle: 'Minimize challenges & maximize productivity',
+    },
+    {
+      title: '100% online process',
+      subtitle: 'Start filing returns from the comfort of your home',
+    },
+  ],
+};
+
+export const PATENT_COUNTRIES_LIST = [
+  { id: 'IN', name: 'India', flag: '🇮🇳' },
+  { id: 'US', name: 'United States', flag: '🇺🇸' },
+  { id: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
+  { id: 'DE', name: 'Germany', flag: '🇩🇪' },
+  { id: 'EP', name: 'European Patent Office (EPO)', flag: '🇪🇺' },
+  { id: 'JP', name: 'Japan', flag: '🇯🇵' },
+  { id: 'CA', name: 'Canada', flag: '🇨🇦' },
+  { id: 'AU', name: 'Australia', flag: '🇦🇺' },
+  { id: 'SG', name: 'Singapore', flag: '🇸🇬' },
+  { id: 'FR', name: 'France', flag: '🇫🇷' },
+  { id: 'AE', name: 'United Arab Emirates', flag: '🇦🇪' },
+  { id: 'KR', name: 'South Korea', flag: '🇰🇷' },
+  { id: 'CN', name: 'China', flag: '🇨🇳' },
+  { id: 'CH', name: 'Switzerland', flag: '🇨🇭' },
+  { id: 'IL', name: 'Israel', flag: '🇮🇱' },
+  { id: 'NL', name: 'Netherlands', flag: '🇳🇱' },
+  { id: 'SE', name: 'Sweden', flag: '🇸🇪' },
+];
