@@ -400,3 +400,42 @@ export const TRUSTED_METRICS = [
   { value: '100%', label: 'Strict NDA & Data Protection' },
   { value: '4.8 / 5', label: 'Average Client Rating' },
 ];
+
+export const PATENT_ONBOARDING_LEFT_BENEFITS = {
+  headline: '25,000+ Successful Applications Filed',
+  subheading: 'Protect your invention with us',
+  bullets: [
+    {
+      title: 'File your application in under 5 days',
+      subtitle: 'With Our IP experts its simpler, faster and easier',
+    },
+    {
+      title: '24x7 expert support',
+      subtitle: 'Minimize challenges & maximize productivity',
+    },
+    {
+      title: '100% online process',
+      subtitle: 'Start filing returns from the comfort of your home',
+    },
+  ],
+};
+
+export const PATENT_COUNTRIES_LIST = [
+  { id: 'IN', name: 'India', flag: '🇮🇳' },
+  { id: 'US', name: 'United States', flag: '🇺🇸' },
+  { id: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
+  { id: 'DE', name: 'Germany', flag: '🇩🇪' },
+  { id: 'EP', name: 'European Patent Office (EPO)', flag: '🇪🇺' },
+  { id: 'JP', name: 'Japan', flag: '🇯🇵' },
+  { id: 'CA', name: 'Canada', flag: '🇨🇦' },
+  { id: 'AU', name: 'Australia', flag: '🇦🇺' },
+  { id: 'SG', name: 'Singapore', flag: '🇸🇬' },
+  { id: 'FR', name: 'France', flag: '🇫🇷' },
+  { id: 'AE', name: 'United Arab Emirates', flag: '🇦🇪' },
+  { id: 'KR', name: 'South Korea', flag: '🇰🇷' },
+  { id: 'CN', name: 'China', flag: '🇨🇳' },
+  { id: 'CH', name: 'Switzerland', flag: '🇨🇭' },
+  { id: 'IL', name: 'Israel', flag: '🇮🇱' },
+  { id: 'NL', name: 'Netherlands', flag: '🇳🇱' },
+  { id: 'SE', name: 'Sweden', flag: '🇸🇪' },
+];

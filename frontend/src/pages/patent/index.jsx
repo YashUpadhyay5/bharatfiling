@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 import PatentLandingPage from './1-PatentLandingPage.jsx';
+import PatentJurisdictionSelection from './2-PatentJurisdictionSelection.jsx';
 
-export { PatentLandingPage };
+export { PatentLandingPage, PatentJurisdictionSelection };
 
 export default function PatentRegistrationModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,6 +29,8 @@ export default function PatentRegistrationModule() {
       phone: user?.phone || '+91 7668976193',
       cityPincode: 'Bengaluru, 560001',
       whatsappUpdates: true,
+      jurisdictionType: 'specific',
+      targetCountry: 'India',
       category: 'provisional',
       categoryTitle: 'Provisional Patent Application',
       inventionTitle: 'Novel Method & System for Automated Compliance',
@@ -71,6 +74,22 @@ export default function PatentRegistrationModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Step 2: Back to Step 1
+  const handleBackToStep1 = () => {
+    setSearchParams({ step: '1' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 2: Proceed from Jurisdiction to Step 3
+  const handleProceedToStep3 = (jurisdictionData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...jurisdictionData,
+    }));
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <main className="min-h-screen bg-white">
       {/* Page 1: Patent Registration Landing Page (1:1 with media_1793335856897_1cea0a8e.png) */}
@@ -82,24 +101,33 @@ export default function PatentRegistrationModule() {
         />
       )}
 
-      {/* Fallback placeholder if user advances to step 2 before uploading step 2 screenshot */}
-      {currentStep > 1 && (
+      {/* Page 2: Jurisdiction Selection (1:1 with media_1793337695538_5f490a93.png) */}
+      {currentStep === 2 && (
+        <PatentJurisdictionSelection
+          formData={formData}
+          onBack={handleBackToStep1}
+          onProceed={handleProceedToStep3}
+        />
+      )}
+
+      {/* Placeholder for Step 3 until user uploads Step 3 */}
+      {currentStep > 2 && (
         <div className="max-w-3xl mx-auto py-16 px-4 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-[#002B49] text-xs font-semibold mb-4">
             Step {currentStep} In Progress
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            Patent Filing Information Desk
+            Selected Jurisdiction: {formData.targetCountry || 'India'}
           </h2>
           <p className="text-sm text-slate-600 mb-6">
             Configured for Lead: <span className="font-semibold">{formData.email}</span> ({formData.phone})
           </p>
           <button
             type="button"
-            onClick={() => setSearchParams({ step: '1' })}
+            onClick={() => setSearchParams({ step: '2' })}
             className="px-5 py-2.5 bg-[#002B49] text-white text-xs font-semibold rounded-lg hover:bg-[#001D3D]"
           >
-            ← Return to Step 1
+            ← Return to Step 2
           </button>
         </div>
       )}
