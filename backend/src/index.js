@@ -156,6 +156,7 @@ app.use('/api/v1/apeda', apedaRoutes);
 app.use('/api/v1/trademark', trademarkRoutes);
 app.use('/api/v1/trademark-registration', trademarkRoutes);
 app.use('/api/v1/trademark-renewal', trademarkRoutes);
+app.use('/api/v1/trademark-assignment', trademarkRoutes);
 app.use('/api/v1/copyright', copyrightRoutes);
 app.use('/api/v1/copyright-registration', copyrightRoutes);
 app.use('/api/v1/patent', patentRoutes);

@@ -2,8 +2,13 @@ import express from 'express';
 import trademarkRegistrationRoutes from './trademark-registration/index.js';
 import trademarkObjectionRoutes from './trademark-objection/index.js';
 import trademarkRenewalRoutes from './trademark-renewal/index.js';
+import trademarkAssignmentRoutes from './trademark-assignment/index.js';
 
 const router = express.Router();
+
+// Mount trademark assignment routes
+router.use('/assignment', trademarkAssignmentRoutes);
+router.use('/trademark-assignment', trademarkAssignmentRoutes);
 
 // Mount trademark renewal routes
 router.use('/renewal', trademarkRenewalRoutes);

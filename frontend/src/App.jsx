@@ -57,6 +57,7 @@ const ApedaRegistrationModule = lazy(() => import('./pages/apeda-registration/in
 const TrademarkRegistrationModule = lazy(() => import('./pages/trademark/trademark-registration/index.jsx'));
 const TrademarkObjectionModule = lazy(() => import('./pages/trademark/trademark-objection/index.jsx'));
 const TrademarkRenewalModule = lazy(() => import('./pages/trademark/trademark-renewal/index.jsx'));
+const TrademarkAssignmentModule = lazy(() => import('./pages/trademark/trademark-assignment/index.jsx'));
 const CopyrightRegistrationModule = lazy(() => import('./pages/copyright/index.jsx'));
 const PatentRegistrationModule = lazy(() => import('./pages/patent/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
@@ -158,6 +159,11 @@ export default function App() {
                 <Route path="/services/trademark-objection-reply" element={<TrademarkObjectionModule />} />
                 <Route path="/services/trademark-renewal" element={<TrademarkRenewalModule />} />
                 <Route path="/services/tm-renewal" element={<TrademarkRenewalModule />} />
+                <Route path="/services/trademark-assignment" element={<TrademarkAssignmentModule />} />
+                <Route path="/services/tm-assignment" element={<TrademarkAssignmentModule />} />
+                <Route path="/trademark-assignment" element={<TrademarkAssignmentModule />} />
+                <Route path="/apply/trademark-assignment" element={<TrademarkAssignmentModule />} />
+                <Route path="/apply/tm-assignment" element={<TrademarkAssignmentModule />} />
                 <Route path="/services/copyright-registration" element={<CopyrightRegistrationModule />} />
                 <Route path="/services/copyright" element={<CopyrightRegistrationModule />} />
                 <Route path="/copyright-registration" element={<CopyrightRegistrationModule />} />
