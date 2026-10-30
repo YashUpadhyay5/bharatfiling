@@ -36,7 +36,7 @@ export default function PatentRegistrationModule() {
       phone: user?.phone || '+91 7668976193',
       cityPincode: 'Bengaluru, 560001',
       whatsappUpdates: true,
-      jurisdictionType: 'specific',
+      jurisdictionType: '',
       targetCountry: '',
       category: 'standard',
       categoryTitle: 'Standard Patent Search & Drafting',

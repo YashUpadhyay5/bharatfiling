@@ -7,12 +7,12 @@ export default function PatentJurisdictionSelection({
   onBack,
   onProceed,
 }) {
-  // Jurisdiction type: 'specific' (default matching screenshot) or 'international'
+  // Jurisdiction type: '' by default so only two unselected options show initially
   const [jurisdictionType, setJurisdictionType] = useState(
-    formData.jurisdictionType || 'specific'
+    formData.jurisdictionType || ''
   );
 
-  // Selected country (EMPTY by default so "Search or select country" shows as in reference screenshot)
+  // Selected country: empty by default so 'Search or select country' shows
   const [selectedCountry, setSelectedCountry] = useState(
     formData.targetCountry || ''
   );
@@ -39,6 +39,9 @@ export default function PatentJurisdictionSelection({
   const handleNext = (e) => {
     if (e) e.preventDefault();
     if (jurisdictionType === 'specific' && !selectedCountry) {
+      return;
+    }
+    if (!jurisdictionType) {
       return;
     }
 
@@ -159,14 +162,16 @@ export default function PatentJurisdictionSelection({
 
                 {/* Radio Option 2: Specific Country (1:1 with Screenshot) */}
                 <div
-                  onClick={() => setJurisdictionType('specific')}
+                  onClick={() => {
+                    setJurisdictionType('specific');
+                  }}
                   className={`p-3.5 rounded-lg border transition-all cursor-pointer ${
                     jurisdictionType === 'specific'
                       ? 'border-[1.8px] border-[#002B49] bg-white shadow-2xs'
                       : 'border-slate-200 hover:border-slate-300 bg-white'
                   }`}
                 >
-                  <div className="flex items-center gap-3.5 mb-2.5">
+                  <div className={`flex items-center gap-3.5 ${jurisdictionType === 'specific' ? 'mb-2.5' : ''}`}>
                     <div
                       className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                         jurisdictionType === 'specific'
@@ -183,73 +188,74 @@ export default function PatentJurisdictionSelection({
                     </span>
                   </div>
 
-                  {/* Dropdown Field inside Specific Country Card (1:1 with Screenshot) */}
-                  <div className="pl-7 relative" ref={dropdownRef}>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setJurisdictionType('specific');
-                        setIsDropdownOpen(!isDropdownOpen);
-                      }}
-                      className="w-full flex items-center justify-between px-3 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-md text-slate-800 hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-[#002B49] transition-all cursor-pointer"
-                    >
-                      <span className="truncate">
-                        {selectedCountry ? (
-                          <span className="font-medium text-slate-800">
-                            {selectedCountry}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 font-normal">
-                            Search or select country
-                          </span>
-                        )}
-                      </span>
-                      <ChevronDown className="w-4 h-4 text-slate-400 shrink-0 ml-2" />
-                    </button>
+                  {/* Dropdown Field ONLY appears when Specific Country is clicked/selected! */}
+                  {jurisdictionType === 'specific' && (
+                    <div className="pl-7 relative" ref={dropdownRef}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsDropdownOpen(!isDropdownOpen);
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-md text-slate-800 hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-[#002B49] transition-all cursor-pointer"
+                      >
+                        <span className="truncate">
+                          {selectedCountry ? (
+                            <span className="font-medium text-slate-800">
+                              {selectedCountry}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 font-normal">
+                              Search or select country
+                            </span>
+                          )}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-slate-400 shrink-0 ml-2" />
+                      </button>
 
-                    {/* Dropdown Menu */}
-                    {isDropdownOpen && (
-                      <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-30 max-h-56 overflow-y-auto">
-                        <div className="p-2 border-b border-slate-100 sticky top-0 bg-white z-10">
-                          <div className="relative">
-                            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                            <input
-                              type="text"
-                              value={countrySearch}
-                              onChange={(e) => setCountrySearch(e.target.value)}
-                              placeholder="Search country..."
-                              className="w-full pl-8 pr-2 py-1 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#002B49]"
-                              autoFocus
-                            />
+                      {/* Dropdown Menu */}
+                      {isDropdownOpen && (
+                        <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-30 max-h-56 overflow-y-auto">
+                          <div className="p-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+                            <div className="relative">
+                              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                              <input
+                                type="text"
+                                value={countrySearch}
+                                onChange={(e) => setCountrySearch(e.target.value)}
+                                placeholder="Search country..."
+                                className="w-full pl-8 pr-2 py-1 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#002B49]"
+                                autoFocus
+                              />
+                            </div>
+                          </div>
+                          <div className="py-1">
+                            {filteredCountries.map((c) => (
+                              <button
+                                key={c.id}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedCountry(c.name);
+                                  setIsDropdownOpen(false);
+                                }}
+                                className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-[#F5FAFF] transition-colors cursor-pointer ${
+                                  selectedCountry === c.name
+                                    ? 'bg-blue-50/60 font-semibold text-[#002B49]'
+                                    : 'text-slate-700'
+                                }`}
+                              >
+                                <span>{c.name}</span>
+                                {selectedCountry === c.name && (
+                                  <Check className="w-3.5 h-3.5 text-[#002B49]" />
+                                )}
+                              </button>
+                            ))}
                           </div>
                         </div>
-                        <div className="py-1">
-                          {filteredCountries.map((c) => (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedCountry(c.name);
-                                setIsDropdownOpen(false);
-                              }}
-                              className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-[#F5FAFF] transition-colors cursor-pointer ${
-                                selectedCountry === c.name
-                                  ? 'bg-blue-50/60 font-semibold text-[#002B49]'
-                                  : 'text-slate-700'
-                              }`}
-                            >
-                              <span>{c.name}</span>
-                              {selectedCountry === c.name && (
-                                <Check className="w-3.5 h-3.5 text-[#002B49]" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Next CTA Button (1:1 with Screenshot) */}
