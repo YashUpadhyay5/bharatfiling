@@ -37,7 +37,7 @@ export default function PatentRegistrationModule() {
       cityPincode: 'Bengaluru, 560001',
       whatsappUpdates: true,
       jurisdictionType: 'specific',
-      targetCountry: 'India',
+      targetCountry: '',
       category: 'standard',
       categoryTitle: 'Standard Patent Search & Drafting',
       inventionTitle: 'Novel Method & System for Automated Compliance',

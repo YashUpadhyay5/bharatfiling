@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CheckCircle2, ChevronDown, ChevronUp, Search, Check, Globe, MapPin } from 'lucide-react';
+import { ChevronDown, Search, Check } from 'lucide-react';
 import { PATENT_ONBOARDING_LEFT_BENEFITS, PATENT_COUNTRIES_LIST } from './constants.js';
 
 export default function PatentJurisdictionSelection({
@@ -12,9 +12,9 @@ export default function PatentJurisdictionSelection({
     formData.jurisdictionType || 'specific'
   );
 
-  // Selected country (default 'India' or from formData)
+  // Selected country (EMPTY by default so "Search or select country" shows as in reference screenshot)
   const [selectedCountry, setSelectedCountry] = useState(
-    formData.targetCountry || 'India'
+    formData.targetCountry || ''
   );
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -52,7 +52,9 @@ export default function PatentJurisdictionSelection({
     }
   };
 
-  const isFormValid = jurisdictionType === 'international' || (jurisdictionType === 'specific' && Boolean(selectedCountry));
+  const isFormValid =
+    jurisdictionType === 'international' ||
+    (jurisdictionType === 'specific' && Boolean(selectedCountry));
 
   return (
     <div className="min-h-screen bg-[#F6F8FA] flex flex-col items-center justify-center p-4 sm:p-6 lg:p-10 relative overflow-hidden font-sans selection:bg-[#002B49] selection:text-white">
@@ -70,11 +72,11 @@ export default function PatentJurisdictionSelection({
 
       {/* Main Centered Onboarding Modal Box (1:1 with media_1793337695538_5f490a93.png) */}
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden relative z-10 my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[500px]">
+        <div className="grid grid-cols-1 md:grid-cols-12 min-h-[480px]">
           {/* ========================================================= */}
           {/* LEFT COLUMN: 25,000+ Applications & Value Props (5 cols)  */}
           {/* ========================================================= */}
-          <div className="lg:col-span-5 p-8 sm:p-10 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-slate-100 bg-white">
+          <div className="md:col-span-5 p-8 sm:p-10 flex flex-col justify-center border-b md:border-b-0 md:border-r border-slate-100 bg-white">
             <h1 className="text-2xl sm:text-[26px] font-extrabold text-[#002B49] tracking-tight leading-snug mb-2">
               {PATENT_ONBOARDING_LEFT_BENEFITS.headline}
             </h1>
@@ -106,7 +108,7 @@ export default function PatentJurisdictionSelection({
           {/* ========================================================= */}
           {/* RIGHT COLUMN: Question & Radio Selection Box (7 cols)     */}
           {/* ========================================================= */}
-          <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-center bg-white">
+          <div className="md:col-span-7 p-6 sm:p-10 flex flex-col justify-center bg-white">
             <div className="w-full max-w-md mx-auto">
               {/* Inner Card Container */}
               <div className="rounded-xl border border-slate-200/90 p-6 sm:p-7 shadow-2xs relative bg-white">
@@ -122,21 +124,17 @@ export default function PatentJurisdictionSelection({
                   </div>
                 </div>
 
-                {/* Subtle right scroll arrow icons (1:1 with Screenshot) */}
-                <div className="absolute right-3 top-20 flex flex-col items-center gap-1 text-slate-400 pointer-events-none opacity-60">
-                  <ChevronUp className="w-3 h-3" />
-                  <div className="w-1 h-8 bg-slate-200 rounded-full" />
-                  <ChevronDown className="w-3 h-3" />
-                </div>
-
                 {/* Question Title (1:1 with Screenshot) */}
-                <h2 className="text-sm sm:text-[15px] font-bold text-slate-900 leading-snug mb-5 pr-4">
+                <h2 className="text-sm sm:text-[15px] font-bold text-slate-900 leading-snug mb-5">
                   Are you looking for international patent protection or just within a specific country or region?
                 </h2>
 
                 {/* Radio Option 1: International */}
                 <div
-                  onClick={() => setJurisdictionType('international')}
+                  onClick={() => {
+                    setJurisdictionType('international');
+                    setIsDropdownOpen(false);
+                  }}
                   className={`p-3.5 rounded-lg border transition-all cursor-pointer flex items-center gap-3.5 mb-3.5 ${
                     jurisdictionType === 'international'
                       ? 'border-[1.8px] border-[#002B49] bg-white shadow-2xs'
@@ -191,20 +189,20 @@ export default function PatentJurisdictionSelection({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        setJurisdictionType('specific');
                         setIsDropdownOpen(!isDropdownOpen);
                       }}
                       className="w-full flex items-center justify-between px-3 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-md text-slate-800 hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-[#002B49] transition-all cursor-pointer"
                     >
                       <span className="truncate">
                         {selectedCountry ? (
-                          <span className="flex items-center gap-1.5 font-medium">
-                            <span className="text-sm">
-                              {PATENT_COUNTRIES_LIST.find((c) => c.name === selectedCountry)?.flag || '🇮🇳'}
-                            </span>
-                            <span>{selectedCountry}</span>
+                          <span className="font-medium text-slate-800">
+                            {selectedCountry}
                           </span>
                         ) : (
-                          <span className="text-slate-400">Search or select country</span>
+                          <span className="text-slate-400 font-normal">
+                            Search or select country
+                          </span>
                         )}
                       </span>
                       <ChevronDown className="w-4 h-4 text-slate-400 shrink-0 ml-2" />
@@ -212,7 +210,7 @@ export default function PatentJurisdictionSelection({
 
                     {/* Dropdown Menu */}
                     {isDropdownOpen && (
-                      <div className="absolute left-7 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-30 max-h-56 overflow-y-auto">
+                      <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-30 max-h-56 overflow-y-auto">
                         <div className="p-2 border-b border-slate-100 sticky top-0 bg-white z-10">
                           <div className="relative">
                             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -220,7 +218,7 @@ export default function PatentJurisdictionSelection({
                               type="text"
                               value={countrySearch}
                               onChange={(e) => setCountrySearch(e.target.value)}
-                              placeholder="Type country name..."
+                              placeholder="Search country..."
                               className="w-full pl-8 pr-2 py-1 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#002B49]"
                               autoFocus
                             />
@@ -242,10 +240,7 @@ export default function PatentJurisdictionSelection({
                                   : 'text-slate-700'
                               }`}
                             >
-                              <span className="flex items-center gap-2">
-                                <span className="text-sm">{c.flag}</span>
-                                <span>{c.name}</span>
-                              </span>
+                              <span>{c.name}</span>
                               {selectedCountry === c.name && (
                                 <Check className="w-3.5 h-3.5 text-[#002B49]" />
                               )}
@@ -266,7 +261,7 @@ export default function PatentJurisdictionSelection({
                     className={`w-full max-w-[200px] py-2.5 px-6 rounded-md text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
                       isFormValid
                         ? 'bg-[#002B49] hover:bg-[#001D3D] text-white shadow-sm cursor-pointer'
-                        : 'bg-[#E2E8F0] text-slate-400 cursor-not-allowed'
+                        : 'bg-[#ECEFF3] text-[#A6B0BE] cursor-not-allowed'
                     }`}
                   >
                     <span>Next</span>
