@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
 
 import TrademarkAssignmentLandingPage from './1-TrademarkAssignmentLandingPage.jsx';
+import TrademarkAssignmentPaymentPage from './2-TrademarkAssignmentPaymentPage.jsx';
 
-export { TrademarkAssignmentLandingPage };
+export { TrademarkAssignmentLandingPage, TrademarkAssignmentPaymentPage };
 
 export default function TrademarkAssignmentModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -12,7 +13,7 @@ export default function TrademarkAssignmentModule() {
 
   const stepParam = searchParams.get('step');
   const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
-  const currentStep = [1, 2, 3, 4].includes(initialStep) ? initialStep : 1;
+  const currentStep = [1, 2].includes(initialStep) ? initialStep : 1;
 
   const getInitialDraft = () => {
     try {
@@ -37,7 +38,7 @@ export default function TrademarkAssignmentModule() {
       packageName: 'Trademark Assignment Filing',
       professionalFee: 4999,
       onlineDiscount: 3000,
-      totalAmount: 5899,
+      totalAmount: 525,
       orderNumber: `#TMA-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -63,13 +64,18 @@ export default function TrademarkAssignmentModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 1: Package chosen from pricing section
+  // Step 1: Package chosen from pricing section -> Proceed to Step 2
   const handleSelectPlan = (packageId) => {
     setFormData((prev) => ({
       ...prev,
       packageId,
     }));
     setSearchParams({ step: '2' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToStep1 = () => {
+    setSearchParams({ step: '1' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -84,26 +90,13 @@ export default function TrademarkAssignmentModule() {
         />
       )}
 
-      {/* Placeholder for Step 2 until user uploads Step 2 */}
-      {currentStep > 1 && (
-        <div className="max-w-3xl mx-auto py-16 px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-[#002B49] text-xs font-semibold mb-4">
-            Step {currentStep} In Progress
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            Trademark Assignment Information Desk
-          </h2>
-          <p className="text-sm text-slate-600 mb-6">
-            Configured for Lead: <span className="font-semibold">{formData.email}</span> ({formData.phone})
-          </p>
-          <button
-            type="button"
-            onClick={() => setSearchParams({ step: '1' })}
-            className="px-5 py-2.5 bg-[#002B49] text-white text-xs font-semibold rounded-lg hover:bg-[#001D3D]"
-          >
-            ← Return to Step 1
-          </button>
-        </div>
+      {/* Page 2: Trademark Assignment Payment Page (1:1 with media_1793355462422_0d96057f.png) */}
+      {currentStep === 2 && (
+        <TrademarkAssignmentPaymentPage
+          formData={formData}
+          orderId={formData.orderNumber}
+          onBack={handleBackToStep1}
+        />
       )}
     </main>
   );
