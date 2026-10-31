@@ -5,11 +5,13 @@ import { useAuth } from '../../../context/AuthContext.jsx';
 import PartnershipLandingPage from './1-PartnershipLandingPage.jsx';
 import PartnershipOnboardingPage from './2-PartnershipOnboardingPage.jsx';
 import PartnershipPlansPage from './3-PartnershipPlansPage.jsx';
+import PartnershipPaymentPage from './4-PartnershipPaymentPage.jsx';
 
 export {
   PartnershipLandingPage,
   PartnershipOnboardingPage,
   PartnershipPlansPage,
+  PartnershipPaymentPage,
 };
 
 export default function PartnershipModule() {
@@ -18,7 +20,7 @@ export default function PartnershipModule() {
 
   const stepParam = searchParams.get('step');
   const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
-  const currentStep = [1, 2, 3].includes(initialStep) ? initialStep : 1;
+  const currentStep = [1, 2, 3, 4].includes(initialStep) ? initialStep : 1;
 
   const getInitialDraft = () => {
     try {
@@ -86,7 +88,7 @@ export default function PartnershipModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Onboarding proceed -> Advances to Step 3 (Plan Selection & Checkout)
+  // Step 2: Onboarding proceed -> Advances to Step 3 (Plan Selection)
   const handleOnboardingProceed = (onboardingData) => {
     setFormData((prev) => ({
       ...prev,
@@ -102,7 +104,26 @@ export default function PartnershipModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 3: Payment verified
+  // Step 3: Proceed to Payment Page (Step 4)
+  const handleProceedToPayment = (plan) => {
+    setFormData((prev) => ({
+      ...prev,
+      packageId: plan.id,
+      packageName: plan.name,
+      professionalFee: plan.price,
+      totalAmount: Math.round(plan.price * 1.18),
+    }));
+    setSearchParams({ step: '4' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 4: Back to Step 3
+  const handleBackToStep3 = () => {
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 4: Payment verified
   const handlePaymentSuccess = (receiptData) => {
     setFormData((prev) => ({
       ...prev,
@@ -131,11 +152,23 @@ export default function PartnershipModule() {
         />
       )}
 
-      {/* Page 3: Partnership Plan Selection & Checkout (1:1 with media_1793442667305_e946b79c.png) */}
+      {/* Page 3: Partnership Plan Selection (1:1 with media_1793442667305_e946b79c.png) */}
       {currentStep === 3 && (
         <PartnershipPlansPage
           formData={formData}
           onBack={handleBackToStep2}
+          onProceedToPayment={handleProceedToPayment}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      )}
+
+      {/* Page 4: Final Payment Page (Motivated by GST Registration Payment Page) */}
+      {currentStep === 4 && (
+        <PartnershipPaymentPage
+          formData={formData}
+          orderId={formData.orderNumber}
+          onBack={handleBackToStep3}
+          onChangePlan={handleBackToStep3}
           onPaymentSuccess={handlePaymentSuccess}
         />
       )}

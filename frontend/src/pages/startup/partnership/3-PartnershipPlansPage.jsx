@@ -21,6 +21,7 @@ import { BUNDLED_PLANS } from './constants.js';
 export default function PartnershipPlansPage({
   formData = {},
   onBack,
+  onProceedToPayment,
   onPaymentSuccess,
 }) {
   const [selectedPlan, setSelectedPlan] = useState(
@@ -34,7 +35,11 @@ export default function PartnershipPlansPage({
 
   const handleSelectPlanAndProceed = (plan) => {
     setSelectedPlan(plan);
-    setIsPaymentModalOpen(true);
+    if (onProceedToPayment) {
+      onProceedToPayment(plan);
+    } else {
+      setIsPaymentModalOpen(true);
+    }
   };
 
   // Pricing math
