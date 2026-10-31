@@ -61,6 +61,7 @@ const TrademarkAssignmentModule = lazy(() => import('./pages/trademark/trademark
 const CopyrightRegistrationModule = lazy(() => import('./pages/copyright/index.jsx'));
 const PatentRegistrationModule = lazy(() => import('./pages/patent/index.jsx'));
 const ProvisionalPatentModule = lazy(() => import('./pages/patent/provisional-patent/index.jsx'));
+const PartnershipModule = lazy(() => import('./pages/startup/partnership/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
 const NoticeResponseModule = lazy(() => import('./pages/notice-response/index.jsx'));
@@ -181,6 +182,14 @@ export default function App() {
                 <Route path="/provisional-patent" element={<ProvisionalPatentModule />} />
                 <Route path="/apply/provisional-patent-application" element={<ProvisionalPatentModule />} />
                 <Route path="/apply/provisional-patent" element={<ProvisionalPatentModule />} />
+                <Route path="/services/partnership-firm" element={<PartnershipModule />} />
+                <Route path="/services/partnership" element={<PartnershipModule />} />
+                <Route path="/services/partnership-firm-registration" element={<PartnershipModule />} />
+                <Route path="/partnership-firm" element={<PartnershipModule />} />
+                <Route path="/partnership" element={<PartnershipModule />} />
+                <Route path="/apply/partnership-firm" element={<PartnershipModule />} />
+                <Route path="/apply/partnership" element={<PartnershipModule />} />
+                <Route path="/apply/partnership-firm-registration" element={<PartnershipModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

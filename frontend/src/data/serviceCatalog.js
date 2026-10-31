@@ -54,7 +54,7 @@ export const SERVICES = [
     'Form a partnership firm with a drafted deed, firm PAN and registration support.',
     ['PAN and Aadhaar of all partners', 'Address proof of the registered office', 'Rent agreement or ownership proof', 'Passport-size photographs'],
     ['Partnership deed drafting', 'Firm PAN application', 'Registrar of Firms filing support'],
-    { govt: 'Stamp duty on the deed at actuals (state-wise)' }),
+    { status: 'live', path: '/services/partnership-firm', priceStatus: 'existing', govt: 'Stamp duty on the deed at actuals (state-wise)', aliases: ['partnership', 'partnership-firm-registration'] }),
   s('one-person-company', 'One Person Company', 'startup', 5499, 'one-time', '10-14 working days',
     'Incorporate an OPC for a single founder with limited liability and a nominee.',
     ['PAN and Aadhaar of the director and nominee', 'Address proof and photographs', 'Registered office proof with NOC', 'Latest utility bill of the office'],
