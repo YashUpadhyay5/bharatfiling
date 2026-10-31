@@ -4,8 +4,13 @@ import { useAuth } from '../../../context/AuthContext.jsx';
 
 import PartnershipLandingPage from './1-PartnershipLandingPage.jsx';
 import PartnershipOnboardingPage from './2-PartnershipOnboardingPage.jsx';
+import PartnershipPlansPage from './3-PartnershipPlansPage.jsx';
 
-export { PartnershipLandingPage, PartnershipOnboardingPage };
+export {
+  PartnershipLandingPage,
+  PartnershipOnboardingPage,
+  PartnershipPlansPage,
+};
 
 export default function PartnershipModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,15 +37,14 @@ export default function PartnershipModule() {
       whatsappUpdates: true,
       stateCode: 'MH',
       stateName: 'Maharashtra',
-      firmName: '',
-      natureOfBusiness: '',
-      capitalContribution: '₹1 Lakh - ₹5 Lakhs',
+      firmName: 'yash',
+      industryType: 'tech',
       numberOfPartners: '3-5',
-      packageId: 'standard_registration',
-      packageName: 'Partnership Registration & PAN',
-      professionalFee: 2499,
+      packageId: 'standard',
+      packageName: 'Standard (Partnership + GST Registration)',
+      professionalFee: 4999,
       onlineDiscount: 0,
-      totalAmount: 2949, // 2499 + 18% GST (450) = 2949
+      totalAmount: 5899, // 4999 + 18% GST (900) = 5899
       orderNumber: `#PTR-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -66,13 +70,13 @@ export default function PartnershipModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 1: Package chosen from pricing section -> Advances to Step 2
+  // Step 1: Package chosen from pricing section -> Advances to Step 3
   const handleSelectPlan = (packageId) => {
     setFormData((prev) => ({
       ...prev,
       packageId,
     }));
-    setSearchParams({ step: '2' });
+    setSearchParams({ step: '3' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -82,13 +86,29 @@ export default function PartnershipModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Onboarding proceed -> keeps state updated
+  // Step 2: Onboarding proceed -> Advances to Step 3 (Plan Selection & Checkout)
   const handleOnboardingProceed = (onboardingData) => {
     setFormData((prev) => ({
       ...prev,
       ...onboardingData,
     }));
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 3: Back to Step 2
+  const handleBackToStep2 = () => {
     setSearchParams({ step: '2' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 3: Payment verified
+  const handlePaymentSuccess = (receiptData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...receiptData,
+      status: 'paid',
+    }));
   };
 
   return (
@@ -102,12 +122,21 @@ export default function PartnershipModule() {
         />
       )}
 
-      {/* Page 2: Partnership Onboarding Questionnaire (1:1 with media_1793437760958_a855c27e.png) */}
+      {/* Page 2: Partnership Onboarding Questionnaire (1:1 with media_1793437760958_a855c27e.png, media_1793438008589_986a59cd.png, media_1793438026631_c42a93b3.png) */}
       {currentStep === 2 && (
         <PartnershipOnboardingPage
           formData={formData}
           onBack={handleBackToStep1}
           onProceed={handleOnboardingProceed}
+        />
+      )}
+
+      {/* Page 3: Partnership Plan Selection & Checkout (1:1 with media_1793442667305_e946b79c.png) */}
+      {currentStep === 3 && (
+        <PartnershipPlansPage
+          formData={formData}
+          onBack={handleBackToStep2}
+          onPaymentSuccess={handlePaymentSuccess}
         />
       )}
     </main>
