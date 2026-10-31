@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
 
 import PartnershipLandingPage from './1-PartnershipLandingPage.jsx';
+import PartnershipOnboardingPage from './2-PartnershipOnboardingPage.jsx';
 
-export { PartnershipLandingPage };
+export { PartnershipLandingPage, PartnershipOnboardingPage };
 
 export default function PartnershipModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,8 +34,8 @@ export default function PartnershipModule() {
       stateName: 'Maharashtra',
       firmName: '',
       natureOfBusiness: '',
-      capitalContribution: '100000',
-      numberOfPartners: '2',
+      capitalContribution: '₹1 Lakh - ₹5 Lakhs',
+      numberOfPartners: '3-5',
       packageId: 'standard_registration',
       packageName: 'Partnership Registration & PAN',
       professionalFee: 2499,
@@ -55,26 +56,39 @@ export default function PartnershipModule() {
     }
   }, [formData]);
 
-  // Step 1: Lead capture submit
+  // Step 1: Lead capture submit -> Advances to Step 2
   const handleLeadSubmit = (leadData) => {
     setFormData((prev) => ({
       ...prev,
       ...leadData,
     }));
-    // Note: When Step 2 is provided by the user, this will route to step 2.
-    // For now, it updates the draft state and smooth scrolls to top or sets searchParams.
-    setSearchParams({ step: '1' });
+    setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 1: Package chosen from pricing section
+  // Step 1: Package chosen from pricing section -> Advances to Step 2
   const handleSelectPlan = (packageId) => {
     setFormData((prev) => ({
       ...prev,
       packageId,
     }));
+    setSearchParams({ step: '2' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 2: Back to Step 1
+  const handleBackToStep1 = () => {
     setSearchParams({ step: '1' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 2: Onboarding proceed -> keeps state updated
+  const handleOnboardingProceed = (onboardingData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...onboardingData,
+    }));
+    setSearchParams({ step: '2' });
   };
 
   return (
@@ -85,6 +99,15 @@ export default function PartnershipModule() {
           initialData={formData}
           onSubmitLead={handleLeadSubmit}
           onSelectPlan={handleSelectPlan}
+        />
+      )}
+
+      {/* Page 2: Partnership Onboarding Questionnaire (1:1 with media_1793437760958_a855c27e.png) */}
+      {currentStep === 2 && (
+        <PartnershipOnboardingPage
+          formData={formData}
+          onBack={handleBackToStep1}
+          onProceed={handleOnboardingProceed}
         />
       )}
     </main>
