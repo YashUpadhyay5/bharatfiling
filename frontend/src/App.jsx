@@ -62,6 +62,7 @@ const CopyrightRegistrationModule = lazy(() => import('./pages/copyright/index.j
 const PatentRegistrationModule = lazy(() => import('./pages/patent/index.jsx'));
 const ProvisionalPatentModule = lazy(() => import('./pages/patent/provisional-patent/index.jsx'));
 const PartnershipModule = lazy(() => import('./pages/startup/partnership/index.jsx'));
+const OnePersonCompanyModule = lazy(() => import('./pages/startup/one-person-company/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
 const NoticeResponseModule = lazy(() => import('./pages/notice-response/index.jsx'));
@@ -190,6 +191,18 @@ export default function App() {
                 <Route path="/apply/partnership-firm" element={<PartnershipModule />} />
                 <Route path="/apply/partnership" element={<PartnershipModule />} />
                 <Route path="/apply/partnership-firm-registration" element={<PartnershipModule />} />
+                <Route path="/services/one-person-company" element={<OnePersonCompanyModule />} />
+                <Route path="/services/one-person-company-registration" element={<OnePersonCompanyModule />} />
+                <Route path="/services/opc" element={<OnePersonCompanyModule />} />
+                <Route path="/services/opc-registration" element={<OnePersonCompanyModule />} />
+                <Route path="/one-person-company" element={<OnePersonCompanyModule />} />
+                <Route path="/one-person-company-registration" element={<OnePersonCompanyModule />} />
+                <Route path="/opc" element={<OnePersonCompanyModule />} />
+                <Route path="/opc-registration" element={<OnePersonCompanyModule />} />
+                <Route path="/apply/one-person-company" element={<OnePersonCompanyModule />} />
+                <Route path="/apply/opc" element={<OnePersonCompanyModule />} />
+                <Route path="/apply/one-person-company-registration" element={<OnePersonCompanyModule />} />
+                <Route path="/apply/opc-registration" element={<OnePersonCompanyModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

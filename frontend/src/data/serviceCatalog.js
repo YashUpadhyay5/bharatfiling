@@ -59,7 +59,7 @@ export const SERVICES = [
     'Incorporate an OPC for a single founder with limited liability and a nominee.',
     ['PAN and Aadhaar of the director and nominee', 'Address proof and photographs', 'Registered office proof with NOC', 'Latest utility bill of the office'],
     ['Name approval (RUN)', 'DSC and DIN for the director', 'MOA, AOA and Certificate of Incorporation with CIN'],
-    { govt: GOVT_MCA }),
+    { status: 'live', path: '/services/one-person-company', priceStatus: 'existing', govt: GOVT_MCA, aliases: ['opc', 'opc-registration', 'one-person-company-registration'] }),
   s('llp-registration', 'Limited Liability Partnership', 'startup', 4499, 'one-time', '10-14 working days',
     'Register an LLP with limited liability protection and lower compliance than a private company.',
     ['PAN and Aadhaar of all designated partners', 'Address proof and photographs', 'Registered office proof with NOC', 'Latest utility bill of the office'],
