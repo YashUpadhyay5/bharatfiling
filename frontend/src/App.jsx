@@ -65,6 +65,7 @@ const PartnershipModule = lazy(() => import('./pages/startup/partnership/index.j
 const OnePersonCompanyModule = lazy(() => import('./pages/startup/one-person-company/index.jsx'));
 const PrivateLimitedCompanyModule = lazy(() => import('./pages/startup/private-limited-company/index.jsx'));
 const PublicCompanyModule = lazy(() => import('./pages/startup/public-limited-company/index.jsx'));
+const ProducerCompanyModule = lazy(() => import('./pages/startup/producer-company/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
 const NoticeResponseModule = lazy(() => import('./pages/notice-response/index.jsx'));
@@ -230,6 +231,18 @@ export default function App() {
                 <Route path="/apply/public-limited-company-registration" element={<PublicCompanyModule />} />
                 <Route path="/apply/public-limited" element={<PublicCompanyModule />} />
                 <Route path="/apply/public-company" element={<PublicCompanyModule />} />
+                <Route path="/services/producer-company" element={<ProducerCompanyModule />} />
+                <Route path="/services/producer-company-registration" element={<ProducerCompanyModule />} />
+                <Route path="/services/fpo-registration" element={<ProducerCompanyModule />} />
+                <Route path="/services/farmer-producer-company" element={<ProducerCompanyModule />} />
+                <Route path="/services/kisan-producer-company" element={<ProducerCompanyModule />} />
+                <Route path="/producer-company" element={<ProducerCompanyModule />} />
+                <Route path="/producer-company-registration" element={<ProducerCompanyModule />} />
+                <Route path="/fpo-registration" element={<ProducerCompanyModule />} />
+                <Route path="/farmer-producer-company" element={<ProducerCompanyModule />} />
+                <Route path="/apply/producer-company" element={<ProducerCompanyModule />} />
+                <Route path="/apply/producer-company-registration" element={<ProducerCompanyModule />} />
+                <Route path="/apply/fpo-registration" element={<ProducerCompanyModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

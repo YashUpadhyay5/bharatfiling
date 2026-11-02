@@ -89,7 +89,7 @@ export const SERVICES = [
     'Incorporate a producer company for farmers, artisans and primary producers.',
     ['PAN and Aadhaar of ten or more producer members', 'Proof of primary-produce activity', 'Address proof of directors', 'Registered office proof'],
     ['Name approval (RUN)', 'MOA and AOA for producer objects', 'Certificate of Incorporation with CIN'],
-    { govt: GOVT_MCA }),
+    { status: 'live', path: '/services/producer-company', govt: GOVT_MCA, priceStatus: 'existing', aliases: ['producer-company-registration', 'fpo-registration', 'farmer-producer-company', 'kisan-producer-company'] }),
   s('indian-subsidiary', 'Indian Subsidiary', 'startup', 9999, 'one-time', '15-25 working days',
     'Set up an Indian subsidiary of a foreign company, including FEMA and foreign-investment reporting.',
     ['Apostilled incorporation documents of the parent', 'Passport and address proof of foreign directors', 'Board resolution of the parent', 'Registered office proof in India'],
