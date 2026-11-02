@@ -10,15 +10,14 @@ import {
   Lock,
   Loader2,
   ArrowLeft,
-  Sparkles,
+  ChevronUp,
+  ChevronDown,
   Printer,
   Check,
   QrCode,
   Tag,
   Building2,
-  UserCheck,
   Smartphone,
-  ChevronDown,
 } from 'lucide-react';
 import { OPC_PLANS_FOR_PREBUNDLE } from './3-OpcPreBundlePage.jsx';
 
@@ -53,20 +52,12 @@ export default function OpcPaymentPage({
 }) {
   const navigate = useNavigate();
 
-  // Resolve active plan based on formData.packageId or default to 'starter_opc'
-  const activePlanId = formData.packageId || 'starter_opc';
-  const currentPlan = useMemo(() => {
-    return (
-      OPC_PLANS_FOR_PREBUNDLE.find((p) => p.id === activePlanId) ||
-      OPC_PLANS_FOR_PREBUNDLE[0]
-    );
-  }, [activePlanId]);
+  // Active payment method tab matching screenshot: 'upi' | 'card' | 'netbanking'
+  const [activeMethod, setActiveMethod] = useState('upi');
 
-  // Payment method state
-  const [activeMethod, setActiveMethod] = useState('upi'); // 'upi' | 'card' | 'netbanking' | 'emi'
+  // Selected UPI App (defaults to 'phonepe' matching screenshot)
   const [selectedUpiApp, setSelectedUpiApp] = useState('phonepe');
   const [customVpa, setCustomVpa] = useState('');
-  const [showQrCode, setShowQrCode] = useState(false);
 
   // Card details state
   const [cardDetails, setCardDetails] = useState({
@@ -76,29 +67,22 @@ export default function OpcPaymentPage({
     cvv: '',
   });
 
-  // Bank selection state
+  // Net banking state
   const [selectedBank, setSelectedBank] = useState(POPULAR_BANKS[0].name);
 
-  // EMI tenure state
-  const [selectedEmiTenure, setSelectedEmiTenure] = useState(3);
+  // Labour Welfare Endowment optional charge (₹50 + ₹9 GST = ₹59) matching screenshot
+  const [includeLabourWelfare, setIncludeLabourWelfare] = useState(true);
+  const [isTaxesOpen, setIsTaxesOpen] = useState(true);
 
-  // Coupon state
-  const [couponCode, setCouponCode] = useState('FESTIVE500');
-  const [couponApplied, setCouponApplied] = useState(true);
-  const [couponDiscount, setCouponDiscount] = useState(
-    currentPlan.discountAmount || 500
-  );
+  // 14:58 minute countdown timer matching screenshot
+  const [secondsLeft, setSecondsLeft] = useState(898);
 
-  // Dynamic 15-minute timer
-  const [secondsLeft, setSecondsLeft] = useState(900);
-
-  // Processing & Success State
+  // Payment processing state
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [transactionId, setTransactionId] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
 
-  // 15-min countdown timer
+  // 15-minute timer decrement
   useEffect(() => {
     if (secondsLeft <= 0 || isSuccess) return;
     const timer = setInterval(() => {
@@ -113,56 +97,35 @@ export default function OpcPaymentPage({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Cost calculations
-  const originalPlanPrice = currentPlan.price;
-  const appliedDiscount = couponApplied ? couponDiscount : 0;
-  const taxableAmount = Math.max(0, originalPlanPrice - appliedDiscount);
-  const gstRate = 0.18;
-  const gstAmount = Math.round(taxableAmount * gstRate);
-  const totalAmountToPay = taxableAmount + gstAmount;
+  // Pricing calculations (1:1 with media_1793612413664_68e48cd4.png)
+  const professionalFee = 1499;
+  const onlineDiscount = 500;
+  const subTotalAmount = professionalFee - onlineDiscount; // 999
 
-  // Coupon Handler
-  const handleApplyCoupon = (e) => {
-    e.preventDefault();
-    if (
-      couponCode.trim().toUpperCase() === 'FESTIVE500' ||
-      couponCode.trim().toUpperCase() === 'OPC500' ||
-      couponCode.trim().toUpperCase() === 'DIWALI'
-    ) {
-      setCouponApplied(true);
-      setCouponDiscount(500);
-      setErrorMessage('');
-    } else {
-      setErrorMessage('Invalid coupon code. Try FESTIVE500 or OPC500.');
-    }
-  };
+  const gstOnFee = 180; // 18% of 999 is ~180
+  const labourWelfare = includeLabourWelfare ? 50 : 0;
+  const gstOnLabour = includeLabourWelfare ? 9 : 0;
+  const totalTaxes = gstOnFee + labourWelfare + gstOnLabour; // 239 when included, 180 when removed
 
-  const handleRemoveCoupon = () => {
-    setCouponApplied(false);
-    setCouponDiscount(0);
-    setCouponCode('');
-  };
+  const totalAmountToPay = subTotalAmount + totalTaxes; // 1238 when included, 1179 when removed
 
-  // Simulated Payment Trigger
+  // Payment simulation
   const handlePayNow = () => {
     setIsProcessing(true);
-    setErrorMessage('');
-
     setTimeout(() => {
       setIsProcessing(false);
       setIsSuccess(true);
       const generatedTxnId = `TXN-OPC-${Date.now().toString().slice(-8)}`;
       setTransactionId(generatedTxnId);
 
-      // Trigger celebration confetti
       try {
         confetti({
-          particleCount: 120,
-          spread: 70,
+          particleCount: 130,
+          spread: 80,
           origin: { y: 0.6 },
         });
       } catch {
-        // Safe confetti fallback
+        // Safe fallback
       }
 
       if (onPaymentSuccess) {
@@ -173,32 +136,32 @@ export default function OpcPaymentPage({
           paymentMethod: activeMethod.toUpperCase(),
         });
       }
-    }, 1800);
+    }, 1700);
   };
 
-  // SUCCESS SCREEN
+  // SUCCESS CONFIRMATION VIEW
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-        <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-xl p-8 sm:p-10 text-center animate-in zoom-in-95 duration-300">
+      <div className="min-h-screen bg-[#F8FAFC] py-12 px-4 sm:px-6 lg:px-8 font-sans">
+        <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-xl p-8 sm:p-10 text-center animate-in zoom-in-95 duration-200">
           <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-10 h-10" />
           </div>
 
           <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 mb-3">
-            Payment Confirmed • Incorporation Initiated
+            Payment Verified • Incorporation In Progress
           </span>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
-            One Person Company Order Placed!
+            OPC Registration Order Placed!
           </h2>
           <p className="text-slate-600 text-sm max-w-md mx-auto mb-6">
-            Thank you! Your payment of{' '}
+            Your payment of{' '}
             <strong className="text-slate-900 font-bold">
               ₹{totalAmountToPay.toLocaleString('en-IN')}
             </strong>{' '}
-            has been securely processed. Our MCA legal team has started your
-            incorporation process.
+            has been received. Our legal experts have initiated your MCA SPICe+
+            filing.
           </p>
 
           <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 text-left mb-6 space-y-2.5 text-xs sm:text-sm">
@@ -219,19 +182,19 @@ export default function OpcPaymentPage({
               <span className="font-semibold text-slate-800">
                 {formData.proposedCompanyName
                   ? `${formData.proposedCompanyName} (OPC) Private Limited`
-                  : 'To be finalized'}
+                  : 'yash (OPC) Private Limited'}
               </span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200">
-              <span className="text-slate-500">Selected Plan</span>
-              <span className="font-semibold text-blue-900">
-                {currentPlan.name}
+              <span className="text-slate-500">Payment Channel</span>
+              <span className="font-semibold text-slate-800 uppercase">
+                {activeMethod === 'upi' ? `UPI (${selectedUpiApp.toUpperCase()})` : activeMethod}
               </span>
             </div>
             <div className="flex justify-between py-1">
-              <span className="text-slate-500">Business Age</span>
-              <span className="font-semibold text-slate-800">
-                {formData.businessAge || 'Less than 1 year'}
+              <span className="text-slate-500">Amount Paid</span>
+              <span className="font-bold text-emerald-700">
+                ₹{totalAmountToPay.toLocaleString('en-IN')} (Incl. All Taxes)
               </span>
             </div>
           </div>
@@ -258,516 +221,647 @@ export default function OpcPaymentPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] py-8 px-4 sm:px-6 lg:px-8 font-sans text-slate-800">
-      {/* Top Header / Timer Bar */}
-      <div className="max-w-6xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Plan Details</span>
-        </button>
+    <div className="min-h-screen bg-[#FDFDFE] relative overflow-hidden font-sans text-slate-800 py-8 px-4 sm:px-6 lg:px-12">
+      {/* Decorative festive confetti ribbons in background matching screenshot */}
+      <div className="absolute top-12 left-1/4 w-3 h-8 bg-rose-300/40 rotate-45 rounded-sm pointer-events-none" />
+      <div className="absolute top-20 right-1/4 w-3 h-8 bg-purple-300/40 -rotate-45 rounded-sm pointer-events-none" />
+      <div className="absolute top-48 left-16 w-2 h-6 bg-yellow-400/50 rotate-12 rounded-sm pointer-events-none" />
+      <div className="absolute top-72 left-1/3 w-2.5 h-7 bg-amber-400/50 -rotate-12 rounded-sm pointer-events-none" />
+      <div className="absolute top-36 right-16 w-2.5 h-6 bg-rose-400/40 45 rounded-sm pointer-events-none" />
+      <div className="absolute bottom-28 left-1/2 w-2 h-6 bg-amber-300/40 rotate-45 rounded-sm pointer-events-none" />
 
-        {/* 15-Minute Expiry Countdown */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-2xs">
-          <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
-          <span>Offer Expires in:</span>
-          <span className="font-mono font-bold text-amber-700">
-            {formatTimer(secondsLeft)}
-          </span>
+      {/* Top Header Bar */}
+      <div className="max-w-6xl mx-auto mb-6 flex items-center justify-between">
+        {/* Brand Logo (Matching yellow VAKIL SEARCH pill in screenshot) */}
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#FFD200] text-slate-950 font-black text-xs tracking-wider uppercase shadow-2xs">
+          <span>VAKIL</span>
+          <span className="font-semibold text-slate-900">SEARCH</span>
         </div>
+
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Plan Selection</span>
+          </button>
+        )}
       </div>
 
-      {/* Main Grid: Left Payment Desk (col-7), Right Order Summary (col-5) */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* LEFT COLUMN: Payment Methods */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden p-6 sm:p-8">
-          <div className="flex items-center justify-between pb-5 border-b border-slate-100">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-                Payment Desk
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                All transactions are encrypted with 256-bit bank-grade SSL.
-              </p>
+      {/* Main Container */}
+      <div className="max-w-6xl mx-auto">
+        {/* Heading: Choose Payment Method */}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-[28px] font-extrabold text-slate-900 tracking-tight">
+            Choose Payment Method
+          </h1>
+          <p className="text-sm font-bold text-slate-800 mt-3">
+            Payment Options
+          </p>
+        </div>
+
+        {/* 2-Column Grid: Left Payment Desk (8 cols), Right Order Summary (4 cols) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* LEFT COLUMN: Payment Box with floating green discount pill */}
+          <div className="lg:col-span-8 relative">
+            {/* Floating Top-Right Green Ribbon: "🎉 Hooray! ₹500 Discount Unlocked!" */}
+            <div className="flex justify-end -mb-px relative z-10 mr-6">
+              <div className="bg-[#22C55E] text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-t-2xl inline-flex items-center gap-2 shadow-sm">
+                <span>🎉</span>
+                <span>Hooray! ₹500 Discount Unlocked!</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1 text-slate-400 text-xs">
-              <Lock className="w-4 h-4 text-emerald-600" />
-              <span className="font-medium text-emerald-700">Safe & Secure</span>
-            </div>
-          </div>
 
-          {/* Payment Method Selector Tabs */}
-          <div className="grid grid-cols-4 gap-2 mt-6">
-            <button
-              type="button"
-              onClick={() => setActiveMethod('upi')}
-              className={`py-3 px-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 border transition cursor-pointer ${
-                activeMethod === 'upi'
-                  ? 'border-[#002B49] bg-blue-50/50 text-[#002B49] shadow-2xs'
-                  : 'border-slate-200 text-slate-600 hover:border-slate-300 bg-white'
-              }`}
-            >
-              <Smartphone className="w-4 h-4" />
-              <span>UPI / QR</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveMethod('card')}
-              className={`py-3 px-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 border transition cursor-pointer ${
-                activeMethod === 'card'
-                  ? 'border-[#002B49] bg-blue-50/50 text-[#002B49] shadow-2xs'
-                  : 'border-slate-200 text-slate-600 hover:border-slate-300 bg-white'
-              }`}
-            >
-              <CreditCard className="w-4 h-4" />
-              <span>Cards</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveMethod('netbanking')}
-              className={`py-3 px-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 border transition cursor-pointer ${
-                activeMethod === 'netbanking'
-                  ? 'border-[#002B49] bg-blue-50/50 text-[#002B49] shadow-2xs'
-                  : 'border-slate-200 text-slate-600 hover:border-slate-300 bg-white'
-              }`}
-            >
-              <Landmark className="w-4 h-4" />
-              <span>Net Banking</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveMethod('emi')}
-              className={`py-3 px-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 border transition cursor-pointer ${
-                activeMethod === 'emi'
-                  ? 'border-[#002B49] bg-blue-50/50 text-[#002B49] shadow-2xs'
-                  : 'border-slate-200 text-slate-600 hover:border-slate-300 bg-white'
-              }`}
-            >
-              <Building2 className="w-4 h-4" />
-              <span>EMI</span>
-            </button>
-          </div>
-
-          {/* TAB 1: UPI / QR PAYMENT */}
-          {activeMethod === 'upi' && (
-            <div className="mt-6 space-y-5 animate-in fade-in duration-200">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700">
-                  Select UPI Application
-                </span>
+            {/* Payment Box Container */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-12 min-h-[420px]">
+              {/* Payment Methods Vertical Tab List (Left Column) */}
+              <div className="md:col-span-5 bg-white border-b md:border-b-0 md:border-r border-slate-200">
+                {/* TAB 1: UPI */}
                 <button
                   type="button"
-                  onClick={() => setShowQrCode(!showQrCode)}
-                  className="text-xs text-blue-900 font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  onClick={() => setActiveMethod('upi')}
+                  className={`w-full text-left p-4 sm:p-5 flex items-center justify-between transition cursor-pointer relative border-b border-slate-100 ${
+                    activeMethod === 'upi'
+                      ? 'bg-slate-50/70 text-slate-900'
+                      : 'hover:bg-slate-50/40 text-slate-700'
+                  }`}
                 >
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>{showQrCode ? 'Hide QR Code' : 'Scan via QR Code'}</span>
+                  {/* Active Navy Left Indicator Line */}
+                  {activeMethod === 'upi' && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#002B49]" />
+                  )}
+
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-slate-700">
+                      {/* UPI Logo glyph / Icon */}
+                      <svg
+                        className="w-5 h-5 text-slate-700"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="m5 12 7-7 7 7-7 7Z" />
+                        <path d="m12 5 7 7-7 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">
+                        UPI
+                      </h4>
+                      <p className="text-[11px] text-slate-500 font-medium">
+                        Gpay, PhonePe, Paytm &amp; more
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Forward Chevron indicator when active */}
+                  {activeMethod === 'upi' && (
+                    <div className="text-[#002B49] hidden md:block">
+                      <svg
+                        className="w-4 h-4 fill-current"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+
+                {/* TAB 2: Credit/Debit/ATM Card */}
+                <button
+                  type="button"
+                  onClick={() => setActiveMethod('card')}
+                  className={`w-full text-left p-4 sm:p-5 flex items-center justify-between transition cursor-pointer relative border-b border-slate-100 ${
+                    activeMethod === 'card'
+                      ? 'bg-slate-50/70 text-slate-900'
+                      : 'hover:bg-slate-50/40 text-slate-700'
+                  }`}
+                >
+                  {activeMethod === 'card' && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#002B49]" />
+                  )}
+
+                  <div className="flex items-start gap-3">
+                    <CreditCard className="w-5 h-5 text-slate-500 mt-0.5 shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">
+                        Credit/Debit/ATM Card
+                      </h4>
+                      <p className="text-[11px] text-slate-500 font-medium">
+                        Visa, MasterCard, Rupay &amp; more
+                      </p>
+                    </div>
+                  </div>
+
+                  {activeMethod === 'card' && (
+                    <div className="text-[#002B49] hidden md:block">
+                      <svg
+                        className="w-4 h-4 fill-current"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+
+                {/* TAB 3: Net Banking */}
+                <button
+                  type="button"
+                  onClick={() => setActiveMethod('netbanking')}
+                  className={`w-full text-left p-4 sm:p-5 flex items-center justify-between transition cursor-pointer relative ${
+                    activeMethod === 'netbanking'
+                      ? 'bg-slate-50/70 text-slate-900'
+                      : 'hover:bg-slate-50/40 text-slate-700'
+                  }`}
+                >
+                  {activeMethod === 'netbanking' && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#002B49]" />
+                  )}
+
+                  <div className="flex items-start gap-3">
+                    <Landmark className="w-5 h-5 text-slate-500 mt-0.5 shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">
+                        Net Banking
+                      </h4>
+                      <p className="text-[11px] text-slate-500 font-medium">
+                        Pay using all Indian banks
+                      </p>
+                    </div>
+                  </div>
+
+                  {activeMethod === 'netbanking' && (
+                    <div className="text-[#002B49] hidden md:block">
+                      <svg
+                        className="w-4 h-4 fill-current"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  )}
                 </button>
               </div>
 
-              {showQrCode && (
-                <div className="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300 flex flex-col items-center text-center">
-                  <div className="w-36 h-36 bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-center">
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi://pay?pa=bharatfiling@icici&pn=BharatFiling&am=${totalAmountToPay}&cu=INR`}
-                      alt="UPI QR Code"
-                      className="w-full h-full object-contain"
-                    />
+              {/* Active Tab Content (Right Column) */}
+              <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
+                <div>
+                  {/* Countdown Timer (Red: 1:1 with media_1793612413664_68e48cd4.png) */}
+                  <div className="flex items-center gap-1.5 text-rose-600 text-xs sm:text-sm font-semibold mb-6">
+                    <Clock className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>
+                      ₹500 discount expires in{' '}
+                      <span className="font-mono font-bold text-rose-600">
+                        {formatTimer(secondsLeft)}
+                      </span>{' '}
+                      minutes
+                    </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-2">
-                    Scan with any UPI App (GPay, PhonePe, Paytm, BHIM)
-                  </p>
-                </div>
-              )}
 
-              {/* UPI App selector chips */}
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { id: 'phonepe', name: 'PhonePe', icon: '🟣' },
-                  { id: 'gpay', name: 'Google Pay', icon: '🔵' },
-                  { id: 'paytm', name: 'Paytm', icon: '🟦' },
-                ].map((app) => (
-                  <button
-                    key={app.id}
-                    type="button"
-                    onClick={() => setSelectedUpiApp(app.id)}
-                    className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 transition cursor-pointer ${
-                      selectedUpiApp === app.id
-                        ? 'border-[#002B49] bg-blue-50/30 text-blue-950 font-bold ring-1 ring-[#002B49]'
-                        : 'border-slate-200 hover:border-slate-300 text-slate-700'
-                    }`}
-                  >
-                    <span>{app.icon}</span>
-                    <span>{app.name}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Custom UPI VPA */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Or Enter UPI ID (e.g. mobile@upi)
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={customVpa}
-                    onChange={(e) => setCustomVpa(e.target.value)}
-                    placeholder="name@okaxis / 9876543210@paytm"
-                    className="flex-1 px-3.5 py-2 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (customVpa) handlePayNow();
-                    }}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition cursor-pointer"
-                  >
-                    Verify & Pay
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: CREDIT / DEBIT CARDS */}
-          {activeMethod === 'card' && (
-            <div className="mt-6 space-y-4 animate-in fade-in duration-200">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Card Number
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    maxLength={19}
-                    placeholder="4532 •••• •••• 8892"
-                    value={cardDetails.number}
-                    onChange={(e) =>
-                      setCardDetails({ ...cardDetails, number: e.target.value })
-                    }
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
-                  />
-                  <CreditCard className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Cardholder Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="YASH UPADHYAY"
-                  value={cardDetails.name}
-                  onChange={(e) =>
-                    setCardDetails({ ...cardDetails, name: e.target.value })
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Valid Thru (MM/YY)
-                  </label>
-                  <input
-                    type="text"
-                    maxLength={5}
-                    placeholder="12/28"
-                    value={cardDetails.expiry}
-                    onChange={(e) =>
-                      setCardDetails({ ...cardDetails, expiry: e.target.value })
-                    }
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    CVV
-                  </label>
-                  <input
-                    type="password"
-                    maxLength={4}
-                    placeholder="•••"
-                    value={cardDetails.cvv}
-                    onChange={(e) =>
-                      setCardDetails({ ...cardDetails, cvv: e.target.value })
-                    }
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: NET BANKING */}
-          {activeMethod === 'netbanking' && (
-            <div className="mt-6 space-y-4 animate-in fade-in duration-200">
-              <label className="block text-xs font-bold text-slate-700">
-                Popular Banks
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {POPULAR_BANKS.map((b) => (
-                  <button
-                    key={b.code}
-                    type="button"
-                    onClick={() => setSelectedBank(b.name)}
-                    className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2 transition cursor-pointer ${
-                      selectedBank === b.name
-                        ? 'border-[#002B49] bg-blue-50/40 text-blue-950 font-bold ring-1 ring-[#002B49]'
-                        : 'border-slate-200 hover:border-slate-300 text-slate-700'
-                    }`}
-                  >
-                    <span>{b.icon}</span>
-                    <span className="truncate">{b.name}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="pt-2">
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Or select another bank
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedBank}
-                    onChange={(e) => setSelectedBank(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49] appearance-none pr-10"
-                  >
-                    {ALL_NET_BANKS.map((nb) => (
-                      <option key={nb} value={nb}>
-                        {nb}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-3 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: EMI */}
-          {activeMethod === 'emi' && (
-            <div className="mt-6 space-y-4 animate-in fade-in duration-200">
-              <span className="text-xs font-bold text-slate-700 block">
-                Select No-Cost / Low-Cost EMI Tenure
-              </span>
-              <div className="space-y-2">
-                {[
-                  {
-                    months: 3,
-                    emi: Math.round(totalAmountToPay / 3),
-                    label: 'No Cost EMI',
-                  },
-                  {
-                    months: 6,
-                    emi: Math.round((totalAmountToPay * 1.05) / 6),
-                    label: 'Standard EMI (10% p.a.)',
-                  },
-                ].map((tier) => (
-                  <div
-                    key={tier.months}
-                    onClick={() => setSelectedEmiTenure(tier.months)}
-                    className={`p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition ${
-                      selectedEmiTenure === tier.months
-                        ? 'border-[#002B49] bg-blue-50/40 ring-1 ring-[#002B49]'
-                        : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-slate-900">
-                        ₹{tier.emi.toLocaleString('en-IN')}/month for {tier.months} months
+                  {/* =========================================================
+                      UPI VIEW (Active in screenshot)
+                  ========================================================== */}
+                  {activeMethod === 'upi' && (
+                    <div className="space-y-6 animate-in fade-in duration-150">
+                      <div>
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                          Pay with UPI
+                        </h3>
+                        <div className="h-px bg-slate-200 mt-3" />
                       </div>
-                      <div className="text-[11px] text-slate-500">{tier.label}</div>
+
+                      <div>
+                        <p className="text-xs font-semibold text-slate-700 mb-4">
+                          Select UPI App
+                        </p>
+
+                        {/* 4 UPI Apps row matching screenshot */}
+                        <div className="grid grid-cols-4 gap-3 sm:gap-4">
+                          {/* 1. Google Pay */}
+                          <div
+                            onClick={() => setSelectedUpiApp('gpay')}
+                            className="flex flex-col items-center gap-2 cursor-pointer group"
+                          >
+                            <div
+                              className={`w-14 h-14 rounded-full flex items-center justify-center transition border bg-white shadow-2xs relative ${
+                                selectedUpiApp === 'gpay'
+                                  ? 'border-[#002B49] ring-2 ring-[#002B49]/20'
+                                  : 'border-slate-300 group-hover:border-slate-400'
+                              }`}
+                            >
+                              {/* GPay multi-color logo */}
+                              <svg className="w-7 h-7" viewBox="0 0 48 48">
+                                <path
+                                  fill="#4285F4"
+                                  d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.5 30.3 0 24 0 14.6 0 6.6 5.5 2.6 13.5l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"
+                                />
+                                <path
+                                  fill="#34A853"
+                                  d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.5c-.5 2.8-2.1 5.2-4.5 6.8l7.2 5.6c4.2-3.9 6.9-9.6 6.9-16.9z"
+                                />
+                                <path
+                                  fill="#FBBC05"
+                                  d="M10.5 28.4c-.5-1.5-.8-3.1-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.6 11.1l7.9-6.7z"
+                                />
+                                <path
+                                  fill="#EA4335"
+                                  d="M24 48c6.5 0 12-2.1 16-5.8l-7.2-5.6c-2.2 1.5-5 2.4-8.8 2.4-6.3 0-11.6-4.1-13.5-10.1l-7.9 6.1C6.6 42.5 14.6 48 24 48z"
+                                />
+                              </svg>
+                              {selectedUpiApp === 'gpay' && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#002B49] text-white flex items-center justify-center">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[11px] font-semibold text-slate-800 text-center">
+                              Google pay
+                            </span>
+                          </div>
+
+                          {/* 2. PhonePe (Selected in screenshot) */}
+                          <div
+                            onClick={() => setSelectedUpiApp('phonepe')}
+                            className="flex flex-col items-center gap-2 cursor-pointer group"
+                          >
+                            <div
+                              className={`w-14 h-14 rounded-full flex items-center justify-center transition border bg-[#5F259F] text-white shadow-2xs relative ${
+                                selectedUpiApp === 'phonepe'
+                                  ? 'border-[#002B49] ring-2 ring-[#002B49]/30'
+                                  : 'border-transparent'
+                              }`}
+                            >
+                              <span className="text-xl font-bold font-serif">पे</span>
+                              {/* Selected checkmark badge in screenshot */}
+                              {selectedUpiApp === 'phonepe' && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#002B49] text-white flex items-center justify-center border-2 border-white shadow">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[11px] font-bold text-slate-900 text-center">
+                              PhonePe
+                            </span>
+                          </div>
+
+                          {/* 3. Paytm */}
+                          <div
+                            onClick={() => setSelectedUpiApp('paytm')}
+                            className="flex flex-col items-center gap-2 cursor-pointer group"
+                          >
+                            <div
+                              className={`w-14 h-14 rounded-full flex items-center justify-center transition border bg-white shadow-2xs relative ${
+                                selectedUpiApp === 'paytm'
+                                  ? 'border-[#002B49] ring-2 ring-[#002B49]/20'
+                                  : 'border-slate-300 group-hover:border-slate-400'
+                              }`}
+                            >
+                              <span className="text-[12px] font-black text-[#002E6E] tracking-tight">
+                                Pay<span className="text-[#00BAF2]">tm</span>
+                              </span>
+                              {selectedUpiApp === 'paytm' && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#002B49] text-white flex items-center justify-center">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[11px] font-semibold text-slate-800 text-center">
+                              Paytm
+                            </span>
+                          </div>
+
+                          {/* 4. Other UPI ID */}
+                          <div
+                            onClick={() => setSelectedUpiApp('other')}
+                            className="flex flex-col items-center gap-2 cursor-pointer group"
+                          >
+                            <div
+                              className={`w-14 h-14 rounded-full flex items-center justify-center transition border bg-white shadow-2xs relative ${
+                                selectedUpiApp === 'other'
+                                  ? 'border-[#002B49] ring-2 ring-[#002B49]/20'
+                                  : 'border-slate-300 group-hover:border-slate-400'
+                              }`}
+                            >
+                              <span className="text-[11px] font-bold text-slate-700 tracking-wider">
+                                UPI
+                              </span>
+                              {selectedUpiApp === 'other' && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#002B49] text-white flex items-center justify-center">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[11px] font-semibold text-slate-800 text-center">
+                              Other UPI ID
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Helper text matching screenshot */}
+                        <div className="mt-6">
+                          {selectedUpiApp === 'other' ? (
+                            <div className="space-y-1.5">
+                              <label className="text-xs font-semibold text-slate-700 block">
+                                Enter your Virtual Payment Address (VPA)
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="e.g. mobile@upi or username@okhdfcbank"
+                                value={customVpa}
+                                onChange={(e) => setCustomVpa(e.target.value)}
+                                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
+                              />
+                            </div>
+                          ) : (
+                            <p className="text-xs text-slate-500 font-normal">
+                              Pay through the{' '}
+                              <strong className="text-slate-700 capitalize">
+                                {selectedUpiApp === 'gpay'
+                                  ? 'Google Pay'
+                                  : selectedUpiApp === 'phonepe'
+                                    ? 'PhonePe'
+                                    : 'Paytm'}
+                              </strong>{' '}
+                              pay app on your phone
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-xs font-bold text-emerald-600">
-                      ₹{(tier.emi * tier.months).toLocaleString('en-IN')} Total
-                    </span>
-                  </div>
-                ))}
+                  )}
+
+                  {/* =========================================================
+                      CARD VIEW
+                  ========================================================== */}
+                  {activeMethod === 'card' && (
+                    <div className="space-y-4 animate-in fade-in duration-150">
+                      <div>
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                          Credit / Debit Card
+                        </h3>
+                        <div className="h-px bg-slate-200 mt-3" />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Card Number
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={19}
+                          placeholder="4532 •••• •••• 8892"
+                          value={cardDetails.number}
+                          onChange={(e) =>
+                            setCardDetails({ ...cardDetails, number: e.target.value })
+                          }
+                          className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Cardholder Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="YASH UPADHYAY"
+                          value={cardDetails.name}
+                          onChange={(e) =>
+                            setCardDetails({ ...cardDetails, name: e.target.value })
+                          }
+                          className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            Expiry (MM/YY)
+                          </label>
+                          <input
+                            type="text"
+                            maxLength={5}
+                            placeholder="12/28"
+                            value={cardDetails.expiry}
+                            onChange={(e) =>
+                              setCardDetails({ ...cardDetails, expiry: e.target.value })
+                            }
+                            className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1">
+                            CVV
+                          </label>
+                          <input
+                            type="password"
+                            maxLength={4}
+                            placeholder="•••"
+                            value={cardDetails.cvv}
+                            onChange={(e) =>
+                              setCardDetails({ ...cardDetails, cvv: e.target.value })
+                            }
+                            className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* =========================================================
+                      NET BANKING VIEW
+                  ========================================================== */}
+                  {activeMethod === 'netbanking' && (
+                    <div className="space-y-4 animate-in fade-in duration-150">
+                      <div>
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                          Net Banking
+                        </h3>
+                        <div className="h-px bg-slate-200 mt-3" />
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        {POPULAR_BANKS.map((b) => (
+                          <button
+                            key={b.code}
+                            type="button"
+                            onClick={() => setSelectedBank(b.name)}
+                            className={`p-2 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer truncate ${
+                              selectedBank === b.name
+                                ? 'border-[#002B49] bg-blue-50/50 text-[#002B49] font-bold'
+                                : 'border-slate-200 text-slate-700 hover:border-slate-300'
+                            }`}
+                          >
+                            <span>{b.icon}</span>
+                            <span className="truncate">{b.code}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="pt-2">
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Or select your bank
+                        </label>
+                        <select
+                          value={selectedBank}
+                          onChange={(e) => setSelectedBank(e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49]"
+                        >
+                          {ALL_NET_BANKS.map((bank) => (
+                            <option key={bank} value={bank}>
+                              {bank}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Primary Action Button: "PAY ₹1238" (1:1 with media_1793612413664_68e48cd4.png) */}
+                <div className="pt-6 mt-6">
+                  <button
+                    type="button"
+                    disabled={isProcessing}
+                    onClick={handlePayNow}
+                    className="w-full py-3.5 px-6 rounded-lg bg-[#002B49] hover:bg-[#001D32] text-white text-base font-bold tracking-wide shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>PROCESSING...</span>
+                      </>
+                    ) : (
+                      <span>PAY ₹{totalAmountToPay}</span>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          )}
-
-          {/* Error Message Display */}
-          {errorMessage && (
-            <p className="text-xs text-rose-600 mt-4 bg-rose-50 p-2.5 rounded-lg border border-rose-200">
-              {errorMessage}
-            </p>
-          )}
-
-          {/* Pay Button */}
-          <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
-            <div className="text-xs text-slate-500">
-              Total Amount Payable:
-              <div className="text-lg font-extrabold text-slate-900">
-                ₹{totalAmountToPay.toLocaleString('en-IN')}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              disabled={isProcessing}
-              onClick={handlePayNow}
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-[#002B49] hover:bg-[#001D32] text-white text-sm font-bold shadow-md hover:shadow-lg transition cursor-pointer disabled:opacity-50"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Processing Payment...</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4" />
-                  <span>Pay ₹{totalAmountToPay.toLocaleString('en-IN')}</span>
-                </>
-              )}
-            </button>
           </div>
-        </div>
 
-        {/* RIGHT COLUMN: Order Summary */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Order Details Card */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-7">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-900">
-                Order Summary
+          {/* RIGHT COLUMN: Order Summary Card ("OPC Registration") */}
+          <div className="lg:col-span-4">
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-7">
+              {/* Header Title: OPC Registration */}
+              <h3 className="text-base font-bold text-slate-900 text-center pb-3 border-b border-slate-100">
+                OPC Registration
               </h3>
-              <span className="text-xs font-mono font-medium text-slate-500">
-                {orderId || formData.orderNumber || '#OPC-982144'}
-              </span>
-            </div>
 
-            {/* Selected Plan Details */}
-            <div className="py-4 border-b border-slate-100">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900">
-                    {currentPlan.name}
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    One Person Company (OPC) Registration
-                  </p>
+              {/* Price details section heading */}
+              <div className="pt-4 pb-2 flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full border border-blue-600 text-blue-600 flex items-center justify-center text-[10px] font-bold">
+                  ₹
                 </div>
-                {onChangePlan && (
-                  <button
-                    type="button"
-                    onClick={onChangePlan}
-                    className="text-xs text-blue-900 font-bold hover:underline cursor-pointer"
-                  >
-                    Change
-                  </button>
-                )}
+                <h4 className="text-xs font-bold text-slate-800">
+                  Price details
+                </h4>
               </div>
 
-              {formData.proposedCompanyName && (
-                <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
-                  <span className="text-slate-400">Proposed:</span>{' '}
-                  <span className="font-semibold text-slate-800">
-                    {formData.proposedCompanyName} (OPC) Pvt Ltd
-                  </span>
+              {/* Cost Rows */}
+              <div className="py-2 space-y-3 text-xs">
+                {/* Professional Fees */}
+                <div className="flex items-center justify-between text-slate-700">
+                  <span>Professional Fees</span>
+                  <span className="font-medium">₹{professionalFee}</span>
                 </div>
-              )}
-            </div>
 
-            {/* Coupon Code Section */}
-            <div className="py-4 border-b border-slate-100">
-              {couponApplied ? (
-                <div className="flex items-center justify-between bg-emerald-50/70 border border-emerald-200/80 rounded-xl px-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <Tag className="w-3.5 h-3.5 text-emerald-700" />
-                    <span className="text-xs font-bold text-emerald-800">
-                      {couponCode} (-₹{couponDiscount})
-                    </span>
+                {/* Online Discount (Green) */}
+                <div className="flex items-center justify-between text-emerald-600 font-semibold">
+                  <span>Online Discount</span>
+                  <span>-₹{onlineDiscount}</span>
+                </div>
+
+                {/* Sub Total Amount */}
+                <div className="flex items-center justify-between text-slate-900 font-bold pt-1">
+                  <span>Sub Total Amount</span>
+                  <span>₹{subTotalAmount}</span>
+                </div>
+
+                {/* Taxes & Charges Collapsible Accordion (1:1 with screenshot) */}
+                <div className="pt-2">
+                  <div
+                    onClick={() => setIsTaxesOpen(!isTaxesOpen)}
+                    className="flex items-center justify-between text-slate-800 font-bold cursor-pointer py-1 select-none"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {isTaxesOpen ? (
+                        <ChevronUp className="w-3.5 h-3.5 text-blue-900" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5 text-blue-900" />
+                      )}
+                      <span>Taxes &amp; Charges</span>
+                    </div>
+                    <span>₹{totalTaxes}</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleRemoveCoupon}
-                    className="text-xs text-slate-500 hover:text-rose-600 cursor-pointer font-bold"
-                  >
-                    Remove
-                  </button>
+
+                  {/* Expanded grey breakdown box matching screenshot */}
+                  {isTaxesOpen && (
+                    <div className="mt-2 bg-[#F8FAFC] rounded-lg p-3 space-y-2.5 border border-slate-100 text-[11px] text-slate-600 animate-in fade-in duration-100">
+                      <div className="flex items-center justify-between">
+                        <span>GST on professional fee (18%)</span>
+                        <span className="font-medium text-slate-800">
+                          ₹{gstOnFee}
+                        </span>
+                      </div>
+
+                      {/* Labour Welfare Endowment with [Remove] red button */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span>Labour Welfare Endowment</span>
+                          {includeLabourWelfare ? (
+                            <button
+                              type="button"
+                              onClick={() => setIncludeLabourWelfare(false)}
+                              className="px-2 py-0.5 rounded border border-rose-400 text-rose-500 hover:bg-rose-50 text-[10px] font-medium cursor-pointer transition"
+                            >
+                              Remove
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setIncludeLabourWelfare(true)}
+                              className="px-2 py-0.5 rounded border border-emerald-500 text-emerald-600 hover:bg-emerald-50 text-[10px] font-medium cursor-pointer transition"
+                            >
+                              Add
+                            </button>
+                          )}
+                        </div>
+                        <span className="font-medium text-slate-800">
+                          ₹{labourWelfare}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span>GST on labour welfare (18%)</span>
+                        <span className="font-medium text-slate-800">
+                          ₹{gstOnLabour}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <form onSubmit={handleApplyCoupon} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    placeholder="Enter Coupon (e.g. FESTIVE500)"
-                    className="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#002B49] uppercase font-mono"
-                  />
-                  <button
-                    type="submit"
-                    className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg cursor-pointer transition"
-                  >
-                    Apply
-                  </button>
-                </form>
-              )}
-            </div>
+              </div>
 
-            {/* Price Breakdown */}
-            <div className="py-4 space-y-2 text-xs">
-              <div className="flex justify-between text-slate-600">
-                <span>Professional Fee</span>
-                <span>₹{originalPlanPrice.toLocaleString('en-IN')}</span>
-              </div>
-              {couponApplied && (
-                <div className="flex justify-between text-emerald-600 font-semibold">
-                  <span>Special Discount</span>
-                  <span>-₹{couponDiscount.toLocaleString('en-IN')}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-slate-600">
-                <span>Standard GST (18%)</span>
-                <span>₹{gstAmount.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="pt-2 border-t border-slate-100 flex justify-between text-sm font-extrabold text-slate-900">
-                <span>Grand Total</span>
-                <span>₹{totalAmountToPay.toLocaleString('en-IN')}</span>
+              {/* Final Total Amount (Huge bold 1:1 with media_1793612413664_68e48cd4.png) */}
+              <div className="pt-4 mt-3 border-t border-slate-200 flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-900">
+                  Total Amount
+                </span>
+                <span className="text-2xl font-black text-slate-900 tracking-tight">
+                  ₹{totalAmountToPay}
+                </span>
               </div>
             </div>
 
-            {/* 3 Value bullets */}
-            <div className="pt-4 border-t border-slate-100 space-y-2 text-[11px] text-slate-500">
-              <div className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>MCA SPICe+ Part A & Part B Fast-Track Processing</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Dedicated Chartered Accountant / CS Assigned</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>100% Money-back Assurance on Non-Performance</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Security Banner */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 flex items-center gap-3 shadow-2xs">
-            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div className="text-xs">
-              <span className="font-bold text-slate-800 block">
-                ISO 27001 Certified Security
-              </span>
-              <span className="text-slate-500 leading-relaxed block mt-0.5">
-                Your personal details, DSC keys, and Aadhaar info are encrypted
-                with AES-256 standard.
-              </span>
+            {/* Security assurance */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-slate-400">
+              <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+              <span>256-Bit Bank Grade SSL Encrypted Checkout</span>
             </div>
           </div>
         </div>
