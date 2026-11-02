@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
 
 import PvtLtdLandingPage from './1-PvtLtdLandingPage.jsx';
+import PvtLtdOnboardingPage from './2-PvtLtdOnboardingPage.jsx';
 
-export { PvtLtdLandingPage };
+export { PvtLtdLandingPage, PvtLtdOnboardingPage };
 
 export default function PrivateLimitedCompanyModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,7 +30,8 @@ export default function PrivateLimitedCompanyModule() {
       cityPincode: 'Chennai, 600001',
       language: 'English',
       whatsappUpdates: true,
-      proposedCompanyName: '',
+      proposedCompanyName: 'ttytr',
+      businessAge: 'Less than 1 year',
       numberOfDirectors: 2,
       packageId: 'standard_pvt_ltd',
       packageName: 'Standard Incorporation',
@@ -51,25 +53,40 @@ export default function PrivateLimitedCompanyModule() {
     }
   }, [formData]);
 
-  // Step 1: Lead capture submit -> Prepares for Step 2
+  // Step 1: Lead capture submit -> Advances to Step 2 (Onboarding Questionnaire)
   const handleLeadSubmit = (leadData) => {
     setFormData((prev) => ({
       ...prev,
       ...leadData,
     }));
-    // Will advance to step 2 when next screen is provided
-    setSearchParams({ step: '1' });
+    setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 1: Package chosen from pricing section
+  // Step 1: Package chosen from pricing section -> Advances to Step 2
   const handleSelectPlan = (packageId) => {
     setFormData((prev) => ({
       ...prev,
       packageId,
     }));
+    setSearchParams({ step: '2' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 2: Back to Step 1
+  const handleBackToStep1 = () => {
     setSearchParams({ step: '1' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 2: Onboarding proceed -> Updates draft
+  const handleOnboardingProceed = (onboardingData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...onboardingData,
+    }));
+    // Keeps user on step 2 with draft saved, ready for the next screen
+    setSearchParams({ step: '2' });
   };
 
   return (
@@ -80,6 +97,15 @@ export default function PrivateLimitedCompanyModule() {
           initialData={formData}
           onSubmitLead={handleLeadSubmit}
           onSelectPlan={handleSelectPlan}
+        />
+      )}
+
+      {/* Page 2: Private Limited Company Onboarding Questionnaire (1:1 with media_1793614513651_e181bb47.png & media_1793614525557_32c6a9b9.png) */}
+      {(currentStep === 2 || currentStep >= 3) && (
+        <PvtLtdOnboardingPage
+          formData={formData}
+          onBack={handleBackToStep1}
+          onProceed={handleOnboardingProceed}
         />
       )}
     </main>
