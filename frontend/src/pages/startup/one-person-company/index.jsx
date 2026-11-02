@@ -4,8 +4,15 @@ import { useAuth } from '../../../context/AuthContext.jsx';
 
 import OpcLandingPage from './1-OpcLandingPage.jsx';
 import OpcOnboardingPage from './2-OpcOnboardingPage.jsx';
+import OpcPreBundlePage from './3-OpcPreBundlePage.jsx';
+import OpcPaymentPage from './4-OpcPaymentPage.jsx';
 
-export { OpcLandingPage, OpcOnboardingPage };
+export {
+  OpcLandingPage,
+  OpcOnboardingPage,
+  OpcPreBundlePage,
+  OpcPaymentPage,
+};
 
 export default function OnePersonCompanyModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,11 +39,11 @@ export default function OnePersonCompanyModule() {
       nomineeName: '',
       capitalContribution: '100000',
       whatsappUpdates: true,
-      packageId: 'standard_opc',
-      packageName: 'Standard Incorporation (SPICe+ Part A & B)',
-      professionalFee: 5499,
-      onlineDiscount: 0,
-      totalAmount: 6489, // 5499 + 18% GST (990) = 6489
+      packageId: 'starter_opc',
+      packageName: 'Starter',
+      professionalFee: 999,
+      onlineDiscount: 500,
+      totalAmount: 1179, // 999 + 18% GST (180) = 1179
       orderNumber: `#OPC-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -78,13 +85,49 @@ export default function OnePersonCompanyModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Onboarding proceed -> Updates draft and prepares for Step 3
+  // Step 2: Onboarding proceed -> Advances to Step 3 (Pre-bundle Plan Confirmation)
   const handleOnboardingProceed = (onboardingData) => {
     setFormData((prev) => ({
       ...prev,
       ...onboardingData,
     }));
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 3: Back to Step 2
+  const handleBackToStep2 = () => {
     setSearchParams({ step: '2' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 3: Pre-bundle proceed -> Advances to Step 4 (Payment Desk)
+  const handlePreBundleProceed = (plan) => {
+    setFormData((prev) => ({
+      ...prev,
+      packageId: plan.id,
+      packageName: plan.name,
+      professionalFee: plan.price,
+      onlineDiscount: plan.discountAmount,
+      totalAmount: Math.round(plan.price * 1.18),
+    }));
+    setSearchParams({ step: '4' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 4: Back to Step 3
+  const handleBackToStep3 = () => {
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 4: Payment verified
+  const handlePaymentSuccess = (receiptData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...receiptData,
+      status: 'paid',
+    }));
   };
 
   return (
@@ -104,6 +147,26 @@ export default function OnePersonCompanyModule() {
           formData={formData}
           onBack={handleBackToStep1}
           onProceed={handleOnboardingProceed}
+        />
+      )}
+
+      {/* Page 3: Pre-Bundle Selected Plan Confirmation (1:1 with media_1793611140447_8bb8a387.png) */}
+      {currentStep === 3 && (
+        <OpcPreBundlePage
+          formData={formData}
+          onBack={handleBackToStep2}
+          onProceed={handlePreBundleProceed}
+        />
+      )}
+
+      {/* Page 4: Final Payment Desk (Motivated by GST & Partnership Payment flows) */}
+      {currentStep === 4 && (
+        <OpcPaymentPage
+          formData={formData}
+          orderId={formData.orderNumber}
+          onBack={handleBackToStep3}
+          onChangePlan={handleBackToStep3}
+          onPaymentSuccess={handlePaymentSuccess}
         />
       )}
     </main>
