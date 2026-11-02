@@ -48,7 +48,7 @@ export default function PvtLtdPaymentPage({
   // Active payment method tab: 'upi' | 'card' | 'netbanking'
   const [activeMethod, setActiveMethod] = useState('upi');
 
-  // Selected UPI App (defaults to 'phonepe')
+  // Selected UPI App (defaults to 'phonepe' matching screenshot)
   const [selectedUpiApp, setSelectedUpiApp] = useState('phonepe');
   const [customVpa, setCustomVpa] = useState('');
 
@@ -63,11 +63,11 @@ export default function PvtLtdPaymentPage({
   // Net banking state
   const [selectedBank, setSelectedBank] = useState(POPULAR_BANKS[0].name);
 
-  // Labour Welfare Endowment optional charge (₹50 + ₹9 GST = ₹59)
+  // Labour Welfare Endowment optional charge (₹50 + ₹9 GST = ₹59) matching screenshot
   const [includeLabourWelfare, setIncludeLabourWelfare] = useState(true);
   const [isTaxesOpen, setIsTaxesOpen] = useState(true);
 
-  // 14:58 minute countdown timer
+  // 14:58 minute countdown timer matching screenshot
   const [secondsLeft, setSecondsLeft] = useState(898);
 
   // Payment processing state
@@ -90,7 +90,7 @@ export default function PvtLtdPaymentPage({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Pricing calculations
+  // Pricing calculations (1:1 with media_1793615089346_bec92219.png)
   const professionalFee = 1499;
   const onlineDiscount = 500;
   const subTotalAmount = professionalFee - onlineDiscount; // 999
@@ -98,9 +98,9 @@ export default function PvtLtdPaymentPage({
   const gstOnFee = 180;
   const labourWelfare = includeLabourWelfare ? 50 : 0;
   const gstOnLabour = includeLabourWelfare ? 9 : 0;
-  const totalTaxes = gstOnFee + labourWelfare + gstOnLabour; // 239 or 180
+  const totalTaxes = gstOnFee + labourWelfare + gstOnLabour; // 239 when included, 180 when removed
 
-  const totalAmountToPay = subTotalAmount + totalTaxes; // 1238 or 1179
+  const totalAmountToPay = subTotalAmount + totalTaxes; // 1238 when included, 1179 when removed
 
   // Payment simulation
   const handlePayNow = () => {
@@ -146,7 +146,7 @@ export default function PvtLtdPaymentPage({
           </span>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
-            PVT Ltd Registration Order Placed!
+            Company Registration Order Placed!
           </h2>
           <p className="text-slate-600 text-sm max-w-md mx-auto mb-6">
             Your payment of{' '}
@@ -215,7 +215,7 @@ export default function PvtLtdPaymentPage({
 
   return (
     <div className="min-h-screen bg-[#FDFDFE] relative overflow-hidden font-sans text-slate-800 py-8 px-4 sm:px-6 lg:px-12">
-      {/* Decorative festive confetti ribbons in background */}
+      {/* Decorative festive confetti ribbons in background matching screenshot */}
       <div className="absolute top-12 left-1/4 w-3 h-8 bg-rose-300/40 rotate-45 rounded-sm pointer-events-none" />
       <div className="absolute top-20 right-1/4 w-3 h-8 bg-purple-300/40 -rotate-45 rounded-sm pointer-events-none" />
       <div className="absolute top-48 left-16 w-2 h-6 bg-yellow-400/50 rotate-12 rounded-sm pointer-events-none" />
@@ -225,7 +225,7 @@ export default function PvtLtdPaymentPage({
 
       {/* Top Header Bar */}
       <div className="max-w-6xl mx-auto mb-6 flex items-center justify-between">
-        {/* Brand Logo */}
+        {/* Brand Logo (Matching yellow VAKIL SEARCH pill) */}
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#FFD200] text-slate-950 font-black text-xs tracking-wider uppercase shadow-2xs">
           <span>VAKIL</span>
           <span className="font-semibold text-slate-900">SEARCH</span>
@@ -243,7 +243,7 @@ export default function PvtLtdPaymentPage({
         )}
       </div>
 
-      {/* Main Container */}
+      {/* Main Container (1:1 with media_1793615089346_bec92219.png) */}
       <div className="max-w-6xl mx-auto">
         {/* Heading: Choose Payment Method */}
         <div className="mb-6">
@@ -259,7 +259,7 @@ export default function PvtLtdPaymentPage({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* LEFT COLUMN: Payment Box with floating green discount pill */}
           <div className="lg:col-span-8 relative">
-            {/* Floating Top-Right Green Ribbon */}
+            {/* Floating Top-Right Green Ribbon: "🎉 Hooray! ₹500 Discount Unlocked!" (1:1 with screenshot) */}
             <div className="flex justify-end -mb-px relative z-10 mr-6">
               <div className="bg-[#22C55E] text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-t-2xl inline-flex items-center gap-2 shadow-sm">
                 <span>🎉</span>
@@ -271,7 +271,7 @@ export default function PvtLtdPaymentPage({
             <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-12 min-h-[420px]">
               {/* Payment Methods Vertical Tab List (Left Column) */}
               <div className="md:col-span-5 bg-white border-b md:border-b-0 md:border-r border-slate-200">
-                {/* TAB 1: UPI */}
+                {/* TAB 1: UPI (1:1 with screenshot) */}
                 <button
                   type="button"
                   onClick={() => setActiveMethod('upi')}
@@ -281,6 +281,7 @@ export default function PvtLtdPaymentPage({
                       : 'hover:bg-slate-50/40 text-slate-700'
                   }`}
                 >
+                  {/* Active Navy Left Indicator Line */}
                   {activeMethod === 'upi' && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#002B49]" />
                   )}
@@ -308,6 +309,7 @@ export default function PvtLtdPaymentPage({
                     </div>
                   </div>
 
+                  {/* Forward Chevron indicator when active */}
                   {activeMethod === 'upi' && (
                     <div className="text-[#002B49] hidden md:block">
                       <svg
@@ -400,7 +402,7 @@ export default function PvtLtdPaymentPage({
               {/* Active Tab Content (Right Column) */}
               <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
                 <div>
-                  {/* Countdown Timer */}
+                  {/* Countdown Timer (Red: 1:1 with media_1793615089346_bec92219.png) */}
                   <div className="flex items-center gap-1.5 text-rose-600 text-xs sm:text-sm font-semibold mb-6">
                     <Clock className="w-4 h-4 text-rose-600 shrink-0" />
                     <span>
@@ -412,7 +414,9 @@ export default function PvtLtdPaymentPage({
                     </span>
                   </div>
 
-                  {/* UPI VIEW */}
+                  {/* =========================================================
+                      UPI VIEW (Active in screenshot)
+                  ========================================================== */}
                   {activeMethod === 'upi' && (
                     <div className="space-y-6 animate-in fade-in duration-150">
                       <div>
@@ -427,7 +431,7 @@ export default function PvtLtdPaymentPage({
                           Select UPI App
                         </p>
 
-                        {/* 4 UPI Apps row */}
+                        {/* 4 UPI Apps row matching screenshot */}
                         <div className="grid grid-cols-4 gap-3 sm:gap-4">
                           {/* 1. Google Pay */}
                           <div
@@ -470,7 +474,7 @@ export default function PvtLtdPaymentPage({
                             </span>
                           </div>
 
-                          {/* 2. PhonePe */}
+                          {/* 2. PhonePe (Selected in screenshot) */}
                           <div
                             onClick={() => setSelectedUpiApp('phonepe')}
                             className="flex flex-col items-center gap-2 cursor-pointer group"
@@ -547,7 +551,7 @@ export default function PvtLtdPaymentPage({
                           </div>
                         </div>
 
-                        {/* Helper text */}
+                        {/* Helper text matching screenshot */}
                         <div className="mt-6">
                           {selectedUpiApp === 'other' ? (
                             <div className="space-y-1.5">
@@ -580,7 +584,9 @@ export default function PvtLtdPaymentPage({
                     </div>
                   )}
 
-                  {/* CARD VIEW */}
+                  {/* =========================================================
+                      CARD VIEW
+                  ========================================================== */}
                   {activeMethod === 'card' && (
                     <div className="space-y-4 animate-in fade-in duration-150">
                       <div>
@@ -656,7 +662,9 @@ export default function PvtLtdPaymentPage({
                     </div>
                   )}
 
-                  {/* NET BANKING VIEW */}
+                  {/* =========================================================
+                      NET BANKING VIEW
+                  ========================================================== */}
                   {activeMethod === 'netbanking' && (
                     <div className="space-y-4 animate-in fade-in duration-150">
                       <div>
@@ -704,7 +712,7 @@ export default function PvtLtdPaymentPage({
                   )}
                 </div>
 
-                {/* Primary Action Button: "PAY ₹1238" */}
+                {/* Primary Action Button: "PAY ₹1238" (1:1 with media_1793615089346_bec92219.png) */}
                 <div className="pt-6 mt-6">
                   <button
                     type="button"
@@ -726,12 +734,12 @@ export default function PvtLtdPaymentPage({
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Order Summary Card ("PVT Registration") */}
+          {/* RIGHT COLUMN: Order Summary Card ("Company Registration" - 1:1 with media_1793615089346_bec92219.png) */}
           <div className="lg:col-span-4">
             <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 sm:p-7">
-              {/* Header Title: PVT Registration */}
+              {/* Header Title: "Company Registration" (1:1 with screenshot) */}
               <h3 className="text-base font-bold text-slate-900 text-center pb-3 border-b border-slate-100">
-                PVT Registration
+                Company Registration
               </h3>
 
               {/* Price details section heading */}
@@ -764,7 +772,7 @@ export default function PvtLtdPaymentPage({
                   <span>₹{subTotalAmount}</span>
                 </div>
 
-                {/* Taxes & Charges Collapsible Accordion */}
+                {/* Taxes & Charges Collapsible Accordion (1:1 with screenshot) */}
                 <div className="pt-2">
                   <div
                     onClick={() => setIsTaxesOpen(!isTaxesOpen)}
@@ -781,7 +789,7 @@ export default function PvtLtdPaymentPage({
                     <span>₹{totalTaxes}</span>
                   </div>
 
-                  {/* Expanded grey breakdown box matching screenshot */}
+                  {/* Expanded grey breakdown box matching screenshot 1:1 */}
                   {isTaxesOpen && (
                     <div className="mt-2 bg-[#F8FAFC] rounded-lg p-3 space-y-2.5 border border-slate-100 text-[11px] text-slate-600 animate-in fade-in duration-100">
                       <div className="flex items-center justify-between">
@@ -829,7 +837,7 @@ export default function PvtLtdPaymentPage({
                 </div>
               </div>
 
-              {/* Final Total Amount */}
+              {/* Final Total Amount (Huge bold 1:1 with media_1793615089346_bec92219.png) */}
               <div className="pt-4 mt-3 border-t border-slate-200 flex items-center justify-between">
                 <span className="text-sm font-bold text-slate-900">
                   Total Amount
