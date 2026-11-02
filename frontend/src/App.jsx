@@ -64,6 +64,7 @@ const ProvisionalPatentModule = lazy(() => import('./pages/patent/provisional-pa
 const PartnershipModule = lazy(() => import('./pages/startup/partnership/index.jsx'));
 const OnePersonCompanyModule = lazy(() => import('./pages/startup/one-person-company/index.jsx'));
 const PrivateLimitedCompanyModule = lazy(() => import('./pages/startup/private-limited-company/index.jsx'));
+const PublicCompanyModule = lazy(() => import('./pages/startup/public-limited-company/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
 const NoticeResponseModule = lazy(() => import('./pages/notice-response/index.jsx'));
@@ -216,6 +217,19 @@ export default function App() {
                 <Route path="/apply/private-limited-company" element={<PrivateLimitedCompanyModule />} />
                 <Route path="/apply/private-limited-company-registration" element={<PrivateLimitedCompanyModule />} />
                 <Route path="/apply/pvt-ltd" element={<PrivateLimitedCompanyModule />} />
+                <Route path="/services/public-limited-company" element={<PublicCompanyModule />} />
+                <Route path="/services/public-limited-company-registration" element={<PublicCompanyModule />} />
+                <Route path="/services/public-limited" element={<PublicCompanyModule />} />
+                <Route path="/services/public-company" element={<PublicCompanyModule />} />
+                <Route path="/services/public-company-registration" element={<PublicCompanyModule />} />
+                <Route path="/public-limited-company" element={<PublicCompanyModule />} />
+                <Route path="/public-limited-company-registration" element={<PublicCompanyModule />} />
+                <Route path="/public-limited" element={<PublicCompanyModule />} />
+                <Route path="/public-company" element={<PublicCompanyModule />} />
+                <Route path="/apply/public-limited-company" element={<PublicCompanyModule />} />
+                <Route path="/apply/public-limited-company-registration" element={<PublicCompanyModule />} />
+                <Route path="/apply/public-limited" element={<PublicCompanyModule />} />
+                <Route path="/apply/public-company" element={<PublicCompanyModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

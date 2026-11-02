@@ -84,7 +84,7 @@ export const SERVICES = [
     'Incorporate a public company with three directors and seven members.',
     ['PAN and Aadhaar of directors and subscribers', 'Address proof and photographs', 'Registered office proof with NOC', 'Details of proposed share capital'],
     ['Name approval (RUN)', 'DSC and DIN for three directors', 'MOA, AOA and Certificate of Incorporation'],
-    { govt: GOVT_MCA }),
+    { status: 'live', path: '/services/public-limited-company', govt: GOVT_MCA, priceStatus: 'existing', aliases: ['public-company', 'public-limited', 'public-limited-company-registration', 'public-company-registration'] }),
   s('producer-company', 'Producer Company', 'startup', 19999, 'one-time', '20-30 working days',
     'Incorporate a producer company for farmers, artisans and primary producers.',
     ['PAN and Aadhaar of ten or more producer members', 'Proof of primary-produce activity', 'Address proof of directors', 'Registered office proof'],
