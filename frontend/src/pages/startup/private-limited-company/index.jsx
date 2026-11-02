@@ -4,8 +4,15 @@ import { useAuth } from '../../../context/AuthContext.jsx';
 
 import PvtLtdLandingPage from './1-PvtLtdLandingPage.jsx';
 import PvtLtdOnboardingPage from './2-PvtLtdOnboardingPage.jsx';
+import PvtLtdPreBundlePage from './3-PvtLtdPreBundlePage.jsx';
+import PvtLtdPaymentPage from './4-PvtLtdPaymentPage.jsx';
 
-export { PvtLtdLandingPage, PvtLtdOnboardingPage };
+export {
+  PvtLtdLandingPage,
+  PvtLtdOnboardingPage,
+  PvtLtdPreBundlePage,
+  PvtLtdPaymentPage,
+};
 
 export default function PrivateLimitedCompanyModule() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,11 +40,11 @@ export default function PrivateLimitedCompanyModule() {
       proposedCompanyName: 'ttytr',
       businessAge: 'Less than 1 year',
       numberOfDirectors: 2,
-      packageId: 'standard_pvt_ltd',
-      packageName: 'Standard Incorporation',
-      professionalFee: 4999,
+      packageId: 'starter_pvt_ltd',
+      packageName: 'Starter',
+      professionalFee: 999,
       onlineDiscount: 500,
-      totalAmount: 5899, // 4999 + 18% GST (900) = 5899
+      totalAmount: 1238, // 999 + 239 (taxes) = 1238
       orderNumber: `#PVT-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -79,14 +86,49 @@ export default function PrivateLimitedCompanyModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Onboarding proceed -> Updates draft
+  // Step 2: Onboarding proceed -> Advances to Step 3 (Pre-bundle Plan Confirmation)
   const handleOnboardingProceed = (onboardingData) => {
     setFormData((prev) => ({
       ...prev,
       ...onboardingData,
     }));
-    // Keeps user on step 2 with draft saved, ready for the next screen
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 3: Back to Step 2
+  const handleBackToStep2 = () => {
     setSearchParams({ step: '2' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 3: Pre-bundle proceed -> Advances to Step 4 (Payment Desk)
+  const handlePreBundleProceed = (plan) => {
+    setFormData((prev) => ({
+      ...prev,
+      packageId: plan.id,
+      packageName: plan.name,
+      professionalFee: plan.price,
+      onlineDiscount: plan.discountAmount,
+      totalAmount: 1238,
+    }));
+    setSearchParams({ step: '4' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 4: Back to Step 3
+  const handleBackToStep3 = () => {
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 4: Payment verified
+  const handlePaymentSuccess = (receiptData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...receiptData,
+      status: 'paid',
+    }));
   };
 
   return (
@@ -101,11 +143,31 @@ export default function PrivateLimitedCompanyModule() {
       )}
 
       {/* Page 2: Private Limited Company Onboarding Questionnaire (1:1 with media_1793614513651_e181bb47.png & media_1793614525557_32c6a9b9.png) */}
-      {(currentStep === 2 || currentStep >= 3) && (
+      {currentStep === 2 && (
         <PvtLtdOnboardingPage
           formData={formData}
           onBack={handleBackToStep1}
           onProceed={handleOnboardingProceed}
+        />
+      )}
+
+      {/* Page 3: Pre-Bundle Selected Plan Confirmation (1:1 with media_1793614776593_5a4d37fe.png) */}
+      {currentStep === 3 && (
+        <PvtLtdPreBundlePage
+          formData={formData}
+          onBack={handleBackToStep2}
+          onProceed={handlePreBundleProceed}
+        />
+      )}
+
+      {/* Page 4: Final Payment Desk (Motivated by GST & OPC Payment desks) */}
+      {currentStep === 4 && (
+        <PvtLtdPaymentPage
+          formData={formData}
+          orderId={formData.orderNumber}
+          onBack={handleBackToStep3}
+          onChangePlan={handleBackToStep3}
+          onPaymentSuccess={handlePaymentSuccess}
         />
       )}
     </main>
