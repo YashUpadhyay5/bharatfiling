@@ -69,7 +69,7 @@ export const SERVICES = [
     'Fast-track company formation on the MCA SPICe+ portal with digital signatures and incorporation certificate.',
     ['PAN and Aadhaar of all directors', 'Address proof and photographs of directors', 'Registered office proof with NOC', 'Latest utility bill of the office'],
     ['Name approval (RUN) and reservation', '2 Digital Signatures (Class 3) and DIN', 'MOA and AOA drafting, Certificate of Incorporation with CIN', 'Corporate PAN, TAN and bank account assistance'],
-    { govt: GOVT_MCA, priceStatus: 'existing', aliases: ['company-registration'] }),
+    { status: 'live', path: '/services/private-limited-company', govt: GOVT_MCA, priceStatus: 'existing', aliases: ['company-registration', 'pvt-ltd-company', 'pvt-ltd', 'private-limited-company-registration', 'pvt-ltd-registration'] }),
   s('section-8-company', 'Section 8 Company', 'startup', 14999, 'one-time', '25-35 working days',
     'Incorporate a not-for-profit company with the licence under Section 8 for charitable objects.',
     ['PAN and Aadhaar of all directors', 'Statement of objects and proposed activities', 'Three-year income and expenditure projection', 'Registered office proof with NOC'],
