@@ -1,541 +1,473 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  ArrowLeft,
-  ArrowRight,
   CheckCircle2,
-  Building2,
-  Sparkles,
-  HelpCircle,
+  ArrowRight,
+  ArrowLeft,
   ShieldCheck,
-  Award,
-  Users,
-  HeartHandshake,
-  Landmark,
-  GraduationCap,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
-import { ALL_INDIA_STATES } from './constants.js';
+
+const TRUST_OBJECTIVE_OPTIONS = [
+  'Public Charitable & Poverty Relief',
+  'Education, Schools & Skill Development',
+  'Healthcare, Hospitals & Medical Relief',
+  'Religious, Spiritual & Cultural Heritage',
+  'Environmental, Goshala & Animal Welfare',
+  'Community Welfare & General Public Utility',
+  'Arts, Culture & Heritage Conservation',
+  'Women & Child Development Foundation',
+  'Sports Promotion & Rural Youth Training',
+  'Other Charitable & Non-Profit Purpose',
+];
 
 export default function TrustOnboardingPage({
   formData = {},
   onBack,
   onProceed,
 }) {
+  // Current onboarding sub-step (1: 1/3, 2: 2/3, 3: 3/3)
   const [subStep, setSubStep] = useState(1);
-  const totalSubSteps = 5;
 
-  const [onboardingData, setOnboardingData] = useState({
-    trustName: formData.trustName || '',
-    trustCategory: formData.trustCategory || 'public_charitable',
-    trusteesCount: formData.trusteesCount || '3_to_5',
-    corpusFund: formData.corpusFund || '10000',
-    stateName: formData.stateName || 'Delhi NCR',
-    officeType: formData.officeType || 'rented',
-  });
+  // Form inputs across the 3 sub-steps (minimal customer inputs)
+  const [numberOfTrustees, setNumberOfTrustees] = useState(
+    formData.trusteesCount || '3-5'
+  );
+  const [trustName, setTrustName] = useState(
+    formData.trustName || 'Vidya Jyoti Educational Trust'
+  );
+  const [trustObjective, setTrustObjective] = useState(
+    formData.trustCategory || 'Education, Schools & Skill Development'
+  );
 
-  const [errorMsg, setErrorMsg] = useState('');
+  // Objective dropdown state
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Error states
+  const [errors, setErrors] = useState({});
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const trusteeOptions = [
+    { id: '2', label: '2' },
+    { id: '3-5', label: '3-5' },
+    { id: '6-10', label: '6-10' },
+  ];
+
+  // Filter objective options based on typed text
+  const filteredObjectives = TRUST_OBJECTIVE_OPTIONS.filter((item) =>
+    item.toLowerCase().includes((trustObjective || '').toLowerCase())
+  );
 
   const handleNext = () => {
-    setErrorMsg('');
-
     if (subStep === 1) {
-      if (!onboardingData.trustName.trim()) {
-        setErrorMsg('Please enter your proposed Trust name or click Skip');
+      setSubStep(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (subStep === 2) {
+      if (!trustName || trustName.trim().length === 0) {
+        setErrors({ trustName: 'Please provide a preferred trust name' });
         return;
       }
-    }
-
-    if (subStep < totalSubSteps) {
-      setSubStep((prev) => prev + 1);
-    } else {
+      setErrors({});
+      setSubStep(3);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (subStep === 3) {
+      if (!trustObjective || trustObjective.trim().length === 0) {
+        setErrors({ trustObjective: 'Please select your trust objective' });
+        return;
+      }
+      setErrors({});
       if (onProceed) {
-        onProceed(onboardingData);
+        onProceed({
+          trusteesCount: numberOfTrustees,
+          trustName: trustName.trim(),
+          trustCategory: trustObjective.trim(),
+        });
       }
     }
   };
 
-  const handleSkipName = () => {
-    setOnboardingData((prev) => ({
-      ...prev,
-      trustName: 'Proposed Public Charitable Trust',
-    }));
-    setErrorMsg('');
-    setSubStep(2);
-  };
-
-  const handlePrev = () => {
-    setErrorMsg('');
-    if (subStep > 1) {
-      setSubStep((prev) => prev - 1);
+  const handleBack = () => {
+    if (subStep === 3) {
+      setSubStep(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (subStep === 2) {
+      setSubStep(1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (onBack) {
       onBack();
     }
   };
 
-  const progressPercentage = Math.round((subStep / totalSubSteps) * 100);
-
   return (
-    <div className="min-h-screen bg-[#F8FAFC] py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-800">
-      <div className="max-w-5xl mx-auto">
-        {/* Top Breadcrumb / Back Navigation */}
-        <div className="mb-6 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={handlePrev}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{subStep === 1 ? 'Back to Overview' : 'Previous Question'}</span>
-          </button>
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
+      {/* Decorative Stepped Geometric Corners (1:1 with Partnership UI) */}
+      <div className="absolute top-0 right-0 pointer-events-none opacity-40">
+        <svg width="180" height="180" viewBox="0 0 180 180" fill="none">
+          <path
+            d="M180 0H120V60H60V120H0V180H180V0Z"
+            fill="#E2E8F0"
+            fillOpacity="0.5"
+          />
+        </svg>
+      </div>
+      <div className="absolute bottom-0 left-0 pointer-events-none opacity-40">
+        <svg width="180" height="180" viewBox="0 0 180 180" fill="none">
+          <path
+            d="M0 180H60V120H120V60H180V0H0V180Z"
+            fill="#E2E8F0"
+            fillOpacity="0.5"
+          />
+        </svg>
+      </div>
 
-          <span className="text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">
-            Step 2 of 4: Questionnaire
+      {/* Top back navigation */}
+      <div className="w-full max-w-5xl mb-6 flex items-center justify-between relative z-10">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>
+            {subStep === 1
+              ? 'Back to Service Overview'
+              : 'Back to Previous Question'}
           </span>
+        </button>
+        <div className="text-xs text-slate-400 font-medium">
+          Trust Registration • Step {subStep} of 3
         </div>
+      </div>
 
-        {/* 2-Column Card Grid (1:1 with media_1793614513651_e181bb47.png) */}
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-          {/* Left Column: Trust Assurance Branding */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-[#002244] to-[#00172e] p-8 sm:p-10 text-white flex flex-col justify-between">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-400/30">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Verified Non-Profit Portal</span>
-              </div>
-
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-snug">
-                  We Register Over 10% of All Indian Non-Profits &amp; Trusts
-                </h2>
-                <p className="mt-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  Join thousands of philanthropists, doctors, educators, and social
-                  founders who trust BharatFiling to kickstart their non-profit journey.
-                </p>
-              </div>
-
-              <div className="space-y-4 pt-4 border-t border-slate-700/60 text-xs sm:text-sm">
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">Trust Deed in 48 Hours</h4>
-                    <p className="text-xs text-slate-300 mt-0.5">
-                      Custom drafted by High Court advocates with 12A &amp; 80G compliant objects.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">Sub-Registrar Guidance</h4>
-                    <p className="text-xs text-slate-300 mt-0.5">
-                      Complete support for stamp duty, witnesses, and appointment slot booking.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">12A &amp; 80G Tax Exemption</h4>
-                    <p className="text-xs text-slate-300 mt-0.5">
-                      Assistance for tax-free trust surplus and 50% tax rebate for your donors.
-                    </p>
-                  </div>
-                </div>
-              </div>
+      {/* Main Centered 2-Column Container */}
+      <div className="w-full max-w-5xl bg-white rounded-3xl border border-slate-200/90 shadow-[0_20px_50px_rgba(15,23,42,0.06)] overflow-hidden relative z-10 grid grid-cols-1 lg:grid-cols-12 min-h-[500px]">
+        {/* LEFT COLUMN: Trust Value Propositions (1:1 with Partnership UI) */}
+        <div className="lg:col-span-5 p-8 sm:p-10 lg:p-12 bg-white flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-100">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-2xl sm:text-[28px] font-bold text-slate-700 leading-snug tracking-tight">
+                We Register Nearly 10% of All Indian Businesses
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
+                Join thousands of entrepreneurs who trust BharatFiling to
+                kickstart their journey.
+              </p>
             </div>
 
-            <div className="pt-8 text-[11px] text-slate-400 border-t border-slate-800">
-              BharatFiling Legal &amp; Compliance Hub • ISO 27001 Certified
+            {/* 3 Value bullets matching screenshots */}
+            <div className="space-y-5 pt-3">
+              {/* Bullet 1 */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                    Company Registration done within 7 days
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+                    Get your business officially registered fast, with zero
+                    hassle or delays.
+                  </p>
+                </div>
+              </div>
+
+              {/* Bullet 2 */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                    24×7 Expert Support
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+                    Our professionals are available around the clock to guide
+                    you at every step.
+                  </p>
+                </div>
+              </div>
+
+              {/* Bullet 3 */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                    Post-registration Support Provided
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+                    From compliance to tax filings we&apos;re with you even after
+                    your company is set up.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Right Column: Question Wizard */}
-          <div className="lg:col-span-7 p-7 sm:p-10 flex flex-col justify-between">
-            <div>
-              {/* Progress Bar & Header */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
-                  <span>
-                    {subStep} of {totalSubSteps} complete
-                  </span>
-                  <span>Takes less than 1 min</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-600 rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
+          <div className="pt-8 border-t border-slate-100 flex items-center gap-2 text-slate-400 text-[11px]">
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+            <span>ISO 27001 Certified • Bank-Grade 256-Bit SSL Security</span>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Questionnaire Card (1:1 with Partnership UI) */}
+        <div className="lg:col-span-7 p-8 sm:p-10 lg:p-12 flex flex-col justify-between bg-white">
+          <div className="space-y-8">
+            {/* Logo Badge (Matching VAKIL SEARCH yellow pill style) */}
+            <div className="flex justify-center">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#FFD200] text-slate-950 font-black text-xs tracking-wider uppercase shadow-2xs">
+                <span>BHARAT</span>
+                <span className="font-semibold text-slate-900">FILING</span>
+              </div>
+            </div>
+
+            {/* Segmented Progress Tracker */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-slate-900 font-bold">
+                  {subStep}/3 complete
+                </span>
+                <span className="text-slate-400 font-normal">
+                  Takes less than 1 min
+                </span>
               </div>
 
-              {/* Sub-step 1: Trust Name */}
-              {subStep === 1 && (
-                <div className="space-y-5 animate-in fade-in duration-200">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-[#0B1528] tracking-tight">
-                      Enter your desired trust name
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Include keywords like Foundation, Trust, Seva Sansthan, or Mission.
-                    </p>
-                  </div>
+              {/* 3-Segment Progress Bar */}
+              <div className="flex gap-2">
+                <div
+                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                    subStep >= 1 ? 'bg-[#10B981]' : 'bg-slate-200'
+                  }`}
+                />
+                <div
+                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                    subStep >= 2 ? 'bg-[#10B981]' : 'bg-slate-200'
+                  }`}
+                />
+                <div
+                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                    subStep >= 3 ? 'bg-[#10B981]' : 'bg-slate-200'
+                  }`}
+                />
+              </div>
+            </div>
 
-                  <div>
-                    <input
-                      type="text"
-                      value={onboardingData.trustName}
-                      onChange={(e) => {
-                        setOnboardingData((prev) => ({
-                          ...prev,
-                          trustName: e.target.value,
-                        }));
-                        setErrorMsg('');
-                      }}
-                      placeholder="e.g. Vidya Jyoti Educational & Charitable Trust"
-                      className="w-full px-4 py-3.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition shadow-2xs"
-                    />
-
-                    {errorMsg && (
-                      <p className="text-xs text-rose-500 mt-2 font-medium">
-                        {errorMsg}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="p-4 bg-blue-50/70 rounded-xl border border-blue-200/60 flex items-start gap-3">
-                    <Sparkles className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-900 leading-relaxed">
-                      Yet to finalize your trust name? Don't worry, our legal experts
-                      can help you check availability.{' '}
-                      <button
-                        type="button"
-                        onClick={handleSkipName}
-                        className="font-bold underline cursor-pointer hover:text-blue-700 ml-1"
-                      >
-                        Skip it for now
-                      </button>
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Sub-step 2: Primary Trust Category / Purpose */}
-              {subStep === 2 && (
-                <div className="space-y-4 animate-in fade-in duration-200">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-[#0B1528] tracking-tight">
-                      What is the primary category/objective of your trust?
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      This determines the specific legal covenants drafted in your Trust Deed.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {[
-                      {
-                        id: 'public_charitable',
-                        title: 'Public Charitable & Social Welfare',
-                        desc: 'Poverty relief, community welfare, clothing, food distribution & general public utility',
-                        icon: '🤝',
-                      },
-                      {
-                        id: 'educational',
-                        title: 'Education, Schools & Skill Development',
-                        desc: 'Setting up schools, colleges, research libraries, coaching & vocational training',
-                        icon: '🎓',
-                      },
-                      {
-                        id: 'healthcare',
-                        title: 'Healthcare, Hospitals & Medical Relief',
-                        desc: 'Clinics, hospitals, diagnostic labs, free ambulance services & medicine camps',
-                        icon: '🏥',
-                      },
-                      {
-                        id: 'religious_spiritual',
-                        title: 'Religious, Spiritual & Cultural Preservation',
-                        desc: 'Temple, shrine or mutt maintenance, religious education & heritage conservation',
-                        icon: '🛕',
-                      },
-                      {
-                        id: 'environmental_animal',
-                        title: 'Environmental & Animal Welfare (Goshala)',
-                        desc: 'Tree plantation, water bodies revival, goshala, stray animal care & rescue shelter',
-                        icon: '🌱',
-                      },
-                    ].map((cat) => (
-                      <label
-                        key={cat.id}
-                        className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition ${
-                          onboardingData.trustCategory === cat.id
-                            ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-600'
-                            : 'border-slate-200 hover:border-slate-300 bg-white'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="trustCategory"
-                          checked={onboardingData.trustCategory === cat.id}
-                          onChange={() =>
-                            setOnboardingData((prev) => ({
-                              ...prev,
-                              trustCategory: cat.id,
-                            }))
-                          }
-                          className="mt-1 w-4 h-4 accent-blue-600"
-                        />
-                        <div>
-                          <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-slate-900">
-                            <span>{cat.icon}</span>
-                            <span>{cat.title}</span>
-                          </div>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {cat.desc}
-                          </p>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Sub-step 3: Number of Trustees */}
-              {subStep === 3 && (
-                <div className="space-y-5 animate-in fade-in duration-200">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-[#0B1528] tracking-tight">
-                      How many trustees will govern the trust?
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Includes 1 Settlor (author/founder) plus managing trustees.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {[
-                      {
-                        id: '2_trustees',
-                        title: '2 Trustees',
-                        desc: 'Minimum statutory requirement (1 Settlor + 1 Trustee)',
-                      },
-                      {
-                        id: '3_to_5',
-                        title: '3 to 5 Trustees',
-                        badge: 'Recommended',
-                        desc: 'Optimal for Section 12A/80G approvals & CSR grants',
-                      },
-                      {
-                        id: '6_to_10',
-                        title: '6 to 10 Trustees',
-                        desc: 'Ideal for regional associations & institutional trusts',
-                      },
-                      {
-                        id: 'more_than_10',
-                        title: 'More than 10 Trustees',
-                        desc: 'Large national foundations & community bodies',
-                      },
-                    ].map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() =>
-                          setOnboardingData((prev) => ({
-                            ...prev,
-                            trusteesCount: opt.id,
-                          }))
-                        }
-                        className={`p-4 rounded-xl border text-left cursor-pointer transition relative ${
-                          onboardingData.trusteesCount === opt.id
-                            ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-600'
-                            : 'border-slate-200 hover:border-slate-300 bg-white'
-                        }`}
-                      >
-                        {opt.badge && (
-                          <span className="absolute top-3 right-3 text-[10px] font-bold bg-amber-400 text-slate-900 px-2 py-0.5 rounded-full">
-                            {opt.badge}
-                          </span>
-                        )}
-                        <h4 className="font-bold text-sm text-slate-900">
-                          {opt.title}
-                        </h4>
-                        <p className="text-xs text-slate-500 mt-1">
-                          {opt.desc}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-200">
-                    💡 <strong>Pro Tip:</strong> Having at least 3 trustees (Managing
-                    Trustee, Secretary &amp; Treasurer) helps establish proper quorum
-                    under Income Tax Section 11/12 audits.
-                  </div>
-                </div>
-              )}
-
-              {/* Sub-step 4: Proposed Initial Corpus Fund */}
-              {subStep === 4 && (
-                <div className="space-y-5 animate-in fade-in duration-200">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-[#0B1528] tracking-tight">
-                      Proposed Initial Corpus Fund
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      The initial initial monetary settlement transferred by the Settlor
-                      to establish the trust.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      {
-                        id: '5000',
-                        label: '₹5,000',
-                        desc: 'Popular starting fund',
-                      },
-                      {
-                        id: '10000',
-                        label: '₹10,000',
-                        desc: 'Recommended by CAs',
-                      },
-                      {
-                        id: '25000',
-                        label: '₹25,000',
-                        desc: 'For active programs',
-                      },
-                      {
-                        id: '50000_plus',
-                        label: '₹50,000+',
-                        desc: 'Institutional scale',
-                      },
-                    ].map((fund) => (
-                      <button
-                        key={fund.id}
-                        type="button"
-                        onClick={() =>
-                          setOnboardingData((prev) => ({
-                            ...prev,
-                            corpusFund: fund.id,
-                          }))
-                        }
-                        className={`p-4 rounded-xl border text-center cursor-pointer transition ${
-                          onboardingData.corpusFund === fund.id
-                            ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-600'
-                            : 'border-slate-200 hover:border-slate-300 bg-white'
-                        }`}
-                      >
-                        <span className="text-xl font-extrabold text-[#0B1528] block">
-                          {fund.label}
-                        </span>
-                        <span className="text-xs text-slate-500 mt-1 block">
-                          {fund.desc}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Note: The initial corpus fund can be deposited into the trust’s
-                    bank account once the Trust PAN card is allotted.
+            {/* -------------------------------------------------------------
+                SUB-STEP 1 of 3: How many trustees are you planning to start with?
+            ------------------------------------------------------------- */}
+            {subStep === 1 && (
+              <div className="space-y-5 pt-2 animate-in fade-in duration-200">
+                <div className="space-y-1">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                    How many trustees are you planning to start with?
+                  </h3>
+                  <p className="text-xs text-slate-400 font-normal">
+                    Includes 1 Settlor (author/founder) plus managing trustees.
                   </p>
                 </div>
-              )}
 
-              {/* Sub-step 5: Registered Office State */}
-              {subStep === 5 && (
-                <div className="space-y-5 animate-in fade-in duration-200">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-[#0B1528] tracking-tight">
-                      Select State for Registered Office
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Stamp duty and Sub-Registrar jurisdiction are based on the state
-                      where the registered address is located.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Registered Office State
-                    </label>
-                    <select
-                      value={onboardingData.stateName}
-                      onChange={(e) =>
-                        setOnboardingData((prev) => ({
-                          ...prev,
-                          stateName: e.target.value,
-                        }))
-                      }
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-2">
+                  {trusteeOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setNumberOfTrustees(opt.id)}
+                      className={`h-14 sm:h-16 rounded-xl border-2 font-bold text-base sm:text-lg flex items-center justify-center transition-all cursor-pointer ${
+                        numberOfTrustees === opt.id
+                          ? 'border-[#002B49] bg-blue-50/40 text-[#002B49] shadow-sm'
+                          : 'border-slate-200 text-slate-700 hover:border-slate-300 bg-white'
+                      }`}
                     >
-                      {ALL_INDIA_STATES.map((st) => (
-                        <option key={st.code} value={st.name}>
-                          {st.name} — {st.authority}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-slate-700">
-                      Premises Ownership Type
-                    </label>
-                    <div className="grid grid-cols-3 gap-2.5">
-                      {[
-                        { id: 'owned', label: 'Owned by Trustee' },
-                        { id: 'rented', label: 'Rented Premises' },
-                        { id: 'family', label: 'Parent / Family Owned' },
-                      ].map((premise) => (
-                        <button
-                          key={premise.id}
-                          type="button"
-                          onClick={() =>
-                            setOnboardingData((prev) => ({
-                              ...prev,
-                              officeType: premise.id,
-                            }))
-                          }
-                          className={`p-3 rounded-xl border text-xs font-bold transition cursor-pointer text-center ${
-                            onboardingData.officeType === premise.id
-                              ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-1 ring-blue-600'
-                              : 'border-slate-200 hover:border-slate-300 bg-white text-slate-600'
-                          }`}
-                        >
-                          {premise.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Bottom Navigation Buttons */}
-            <div className="pt-8 mt-6 border-t border-slate-100 flex items-center justify-between gap-4">
+            {/* -------------------------------------------------------------
+                SUB-STEP 2 of 3: Enter your desired trust name
+            ------------------------------------------------------------- */}
+            {subStep === 2 && (
+              <div className="space-y-5 pt-2 animate-in fade-in duration-200">
+                <div className="space-y-1">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                    Enter your desired trust name
+                  </h3>
+                  <p className="text-xs text-slate-400 font-normal">
+                    This will be printed on your Trust Deed and registration certificate.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={trustName}
+                    onChange={(e) => {
+                      setTrustName(e.target.value);
+                      if (errors.trustName) setErrors({});
+                    }}
+                    placeholder="e.g. Vidya Jyoti Educational Trust"
+                    className={`w-full px-4 py-3 rounded-xl border text-sm font-medium transition-all focus:outline-none ${
+                      errors.trustName
+                        ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
+                        : 'border-slate-300 focus:border-[#002B49] focus:ring-2 focus:ring-blue-100'
+                    }`}
+                  />
+                  {errors.trustName && (
+                    <p className="text-xs text-rose-500 font-medium">
+                      {errors.trustName}
+                    </p>
+                  )}
+                </div>
+
+                {/* Helper / Skip Hint with Lightbulb */}
+                <div className="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200/60 flex items-start gap-2.5 text-xs text-amber-900">
+                  <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>
+                    Yet to finalize your brand name? Don&apos;t worry, you can always
+                    do this step later!{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTrustName('Vidya Jyoti Educational Trust');
+                        handleNext();
+                      }}
+                      className="font-bold underline cursor-pointer hover:text-amber-950"
+                    >
+                      Skip it for now
+                    </button>
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* -------------------------------------------------------------
+                SUB-STEP 3 of 3: What industry does your business belong to?
+            ------------------------------------------------------------- */}
+            {subStep === 3 && (
+              <div className="space-y-5 pt-2 animate-in fade-in duration-200">
+                <div className="space-y-1">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                    What primary objective does your trust focus on?
+                  </h3>
+                  <p className="text-xs text-slate-400 font-normal">
+                    Helps us customize the legal clauses for 12A/80G tax exemptions.
+                  </p>
+                </div>
+
+                <div className="relative" ref={dropdownRef}>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={trustObjective}
+                      onChange={(e) => {
+                        setTrustObjective(e.target.value);
+                        setIsDropdownOpen(true);
+                        if (errors.trustObjective) setErrors({});
+                      }}
+                      onFocus={() => setIsDropdownOpen(true)}
+                      placeholder="Type or select primary objective..."
+                      className={`w-full px-4 py-3 rounded-xl border text-sm font-medium pr-10 transition-all focus:outline-none ${
+                        errors.trustObjective
+                          ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
+                          : 'border-slate-300 focus:border-[#002B49] focus:ring-2 focus:ring-blue-100'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsDropdownOpen((prev) => !prev)}
+                      className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600"
+                    >
+                      {isDropdownOpen ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+
+                  {errors.trustObjective && (
+                    <p className="text-xs text-rose-500 font-medium mt-1">
+                      {errors.trustObjective}
+                    </p>
+                  )}
+
+                  {/* Dropdown Menu */}
+                  {isDropdownOpen && (
+                    <div className="absolute z-20 left-0 right-0 mt-1 max-h-52 overflow-y-auto bg-white rounded-xl border border-slate-200 shadow-xl py-1 text-xs sm:text-sm">
+                      {filteredObjectives.length > 0 ? (
+                        filteredObjectives.map((item, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setTrustObjective(item);
+                              setIsDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 hover:bg-slate-50 transition cursor-pointer flex items-center justify-between ${
+                              trustObjective === item
+                                ? 'bg-blue-50/70 text-[#002B49] font-bold'
+                                : 'text-slate-700 font-normal'
+                            }`}
+                          >
+                            <span>{item}</span>
+                            {trustObjective === item && (
+                              <CheckCircle2 className="w-4 h-4 text-blue-800" />
+                            )}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-4 py-3 text-xs text-slate-400 text-center">
+                          No matching category found. You can type custom.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action Button Bar */}
+          <div className="pt-8 border-t border-slate-100 flex items-center justify-between gap-3">
+            {subStep > 1 ? (
               <button
                 type="button"
-                onClick={handlePrev}
-                className="py-3 px-5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-50 transition cursor-pointer"
+                onClick={handleBack}
+                className="py-3 px-5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
               >
-                {subStep === 1 ? 'Back' : 'Back'}
+                Back
               </button>
+            ) : (
+              <div />
+            )}
 
-              <button
-                type="button"
-                onClick={handleNext}
-                className="py-3.5 px-8 rounded-xl bg-[#002244] hover:bg-[#00172e] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
-              >
-                <span>{subStep === totalSubSteps ? 'View Pricing Plans' : 'Next'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="py-3.5 px-8 rounded-xl bg-[#002B49] hover:bg-[#001D32] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer ml-auto"
+            >
+              <span>{subStep === 3 ? 'Next' : 'Next'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>

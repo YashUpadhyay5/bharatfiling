@@ -44,10 +44,10 @@ export default function TrustRegistrationModule() {
       stateName: 'Delhi NCR',
       officeType: 'rented',
       packageId: 'standard',
-      packageName: 'Standard (Trust Formation + Sub-Registrar Filing)',
-      professionalFee: 9999,
-      onlineDiscount: 500,
-      totalAmount: 11268, // (9999 - 500) = 9499 + 18% GST (1710) + Labour Welfare (59) = 11268
+      packageName: 'Standard',
+      professionalFee: 4999,
+      onlineDiscount: 2500,
+      totalAmount: 3008, // 2499 + 18% GST (450) + Labour Welfare (59) = 3008
       orderNumber: `#TRST-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -63,7 +63,7 @@ export default function TrustRegistrationModule() {
     }
   }, [formData]);
 
-  // Step 1: Lead capture submit -> Advances to Step 2 (Questionnaire)
+  // Step 1: Lead capture submit -> Advances to Step 2 (Onboarding Questionnaire)
   const handleLeadSubmit = (leadData) => {
     setFormData((prev) => ({
       ...prev,
@@ -73,13 +73,13 @@ export default function TrustRegistrationModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 1: Package chosen from pricing section -> Advances to Step 3 (Plans)
+  // Step 1: Package chosen from pricing section -> Advances to Step 2 (Onboarding Questionnaire)
   const handleSelectPlan = (packageId) => {
     setFormData((prev) => ({
       ...prev,
       packageId,
     }));
-    setSearchParams({ step: '3' });
+    setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -89,7 +89,7 @@ export default function TrustRegistrationModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 2: Onboarding proceed -> Advances to Step 3 (Plan Selection)
+  // Step 2: Onboarding proceed -> Advances to Step 3 (Plan Confirmation - Image 1)
   const handleOnboardingProceed = (onboardingData) => {
     setFormData((prev) => ({
       ...prev,
@@ -105,19 +105,20 @@ export default function TrustRegistrationModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 3: Plan chosen -> Advances to Step 4 (Checkout Desk)
+  // Step 3: Plan chosen -> Advances to Step 4 (Payment Desk - Image 2)
   const handleProceedToPayment = (plan) => {
-    const discountedBase = plan.price - 500;
-    const gstOnFee = Math.round(discountedBase * 0.18);
+    const originalFee = plan.originalPrice || (plan.price === 999 ? 1499 : plan.price * 2);
+    const subTotal = plan.price;
+    const gstOnFee = Math.round(subTotal * 0.18);
     const labourWelfareCharge = 59; // 50 + 9
-    const total = discountedBase + gstOnFee + labourWelfareCharge;
+    const total = subTotal + gstOnFee + labourWelfareCharge;
 
     setFormData((prev) => ({
       ...prev,
       packageId: plan.id,
       packageName: plan.name,
-      professionalFee: plan.price,
-      onlineDiscount: 500,
+      professionalFee: originalFee,
+      onlineDiscount: plan.discountAmount || (originalFee - subTotal),
       totalAmount: total,
     }));
     setSearchParams({ step: '4' });
@@ -150,7 +151,7 @@ export default function TrustRegistrationModule() {
         />
       )}
 
-      {/* Page 2: Trust Onboarding & Deed Particulars Questionnaire */}
+      {/* Page 2: Trust Onboarding & Deed Particulars Questionnaire (3 Quick Questions) */}
       {currentStep === 2 && (
         <TrustOnboardingPage
           formData={formData}
@@ -159,7 +160,7 @@ export default function TrustRegistrationModule() {
         />
       )}
 
-      {/* Page 3: Trust Bundled Plans & Direct Buy Cards */}
+      {/* Page 3: Trust Selected Plan Confirmation & Switcher (1:1 with media_1793688222341_af4052cb.png) */}
       {currentStep === 3 && (
         <TrustPlansPage
           formData={formData}
@@ -169,7 +170,7 @@ export default function TrustRegistrationModule() {
         />
       )}
 
-      {/* Page 4: Checkout & Payment Desk */}
+      {/* Page 4: Checkout & Payment Desk (1:1 with media_1793688203157_972f522c.png) */}
       {currentStep === 4 && (
         <TrustPaymentPage
           formData={formData}

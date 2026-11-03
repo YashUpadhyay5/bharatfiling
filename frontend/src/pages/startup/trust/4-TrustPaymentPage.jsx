@@ -53,7 +53,7 @@ export default function TrustPaymentPage({
 }) {
   const navigate = useNavigate();
 
-  // Resolve active plan based on formData.packageId or default to 'standard' (₹9,999) or 'starter' (₹4,999)
+  // Resolve active plan based on formData.packageId or default to 'standard' (₹9,999)
   const activePlanId = formData.packageId || 'standard';
   const currentPlan = useMemo(() => {
     return (
@@ -62,7 +62,7 @@ export default function TrustPaymentPage({
   }, [activePlanId]);
 
   // Payment method state
-  const [activeMethod, setActiveMethod] = useState('upi'); // 'upi' | 'card' | 'netbanking'
+  const [activeMethod, setActiveMethod] = useState('upi'); // 'upi' | 'card' | 'netbanking' | 'emi'
   const [selectedUpiApp, setSelectedUpiApp] = useState('phonepe');
   const [customVpa, setCustomVpa] = useState('');
   const [showQrCode, setShowQrCode] = useState(false);
@@ -75,52 +75,91 @@ export default function TrustPaymentPage({
     cvv: '',
   });
 
-  // Net banking state
+  // Bank selection state
   const [selectedBank, setSelectedBank] = useState(POPULAR_BANKS[0].name);
+
+  // EMI tenure state
+  const [selectedEmiTenure, setSelectedEmiTenure] = useState(3);
+
+  // Coupon state matching Partnership module
+  const [couponCode, setCouponCode] = useState('FESTIVE500');
+  const [couponApplied, setCouponApplied] = useState(true);
+  const [couponDiscount, setCouponDiscount] = useState(500);
 
   // Labour Welfare Endowment optional charge (₹50 + ₹9 GST = ₹59)
   const [includeLabourWelfare, setIncludeLabourWelfare] = useState(true);
   const [isTaxesOpen, setIsTaxesOpen] = useState(true);
 
   // 15-minute countdown timer
-  const [secondsLeft, setSecondsLeft] = useState(898);
+  const [secondsLeft, setSecondsLeft] = useState(900);
 
-  // Payment processing state
+  // Processing & Success State
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [transactionId, setTransactionId] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // 15-min countdown timer
   useEffect(() => {
     if (secondsLeft <= 0 || isSuccess) return;
     const timer = setInterval(() => {
-      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
   }, [secondsLeft, isSuccess]);
 
-  const minutes = Math.floor(secondsLeft / 60);
-  const seconds = secondsLeft % 60;
-  const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  const formatTimer = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
 
-  // Price Calculation Math
-  const professionalFee = currentPlan.price;
-  const onlineDiscount = 500;
-  const subTotalAmount = professionalFee - onlineDiscount;
-
-  const gstOnFee = Math.round(subTotalAmount * 0.18);
+  // Pricing calculations matching Image 2 (media_1793688203157_972f522c.png)
+  const originalFee = currentPlan.originalPrice || (currentPlan.price === 999 ? 1499 : currentPlan.price * 2);
+  const planDiscount = currentPlan.discountAmount || (originalFee - currentPlan.price) || (couponApplied ? couponDiscount : 0);
+  const subTotalAmount = currentPlan.price || 999;
+  const statutoryGst = Math.round(subTotalAmount * 0.18);
   const labourWelfare = includeLabourWelfare ? 50 : 0;
   const gstOnLabour = includeLabourWelfare ? 9 : 0;
-  const totalTaxes = gstOnFee + labourWelfare + gstOnLabour;
-  const totalAmount = subTotalAmount + totalTaxes;
+  const totalAmountPayable = subTotalAmount + statutoryGst + labourWelfare + gstOnLabour;
 
   const resolvedOrderId =
     orderId ||
     formData.orderNumber ||
     `#TRST-${Math.floor(100000 + Math.random() * 900000)}`;
 
-  const handlePayNow = () => {
-    setIsProcessing(true);
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    if (!couponCode || couponCode.trim().length === 0) return;
+    if (
+      couponCode.toUpperCase() === 'FESTIVE500' ||
+      couponCode.toUpperCase() === 'BHARAT500'
+    ) {
+      setCouponApplied(true);
+      setCouponDiscount(500);
+      setErrorMessage('');
+    } else {
+      setCouponApplied(false);
+      setErrorMessage('Invalid coupon code. Try FESTIVE500');
+    }
+  };
 
+  const handlePay = () => {
+    setErrorMessage('');
+    if (activeMethod === 'card') {
+      const cleanNum = cardDetails.number.replace(/\s/g, '');
+      if (cleanNum.length < 12 || !cardDetails.expiry || cardDetails.cvv.length < 3) {
+        setErrorMessage('Please enter complete and valid card details');
+        return;
+      }
+    } else if (activeMethod === 'upi' && selectedUpiApp === 'other') {
+      if (!customVpa || !customVpa.includes('@')) {
+        setErrorMessage('Please enter a valid UPI ID (e.g., yourname@okhdfcbank)');
+        return;
+      }
+    }
+
+    setIsProcessing(true);
     setTimeout(() => {
       const generatedTxnId = `BFP-TRST-${Date.now().toString().slice(-8)}`;
       setTransactionId(generatedTxnId);
@@ -137,11 +176,11 @@ export default function TrustPaymentPage({
         onPaymentSuccess({
           transactionId: generatedTxnId,
           orderId: resolvedOrderId,
-          amountPaid: totalAmount,
+          amountPaid: totalAmountPayable,
           method: activeMethod,
           date: new Date().toISOString(),
           trustName:
-            formData.trustName || 'Proposed Public Charitable Trust',
+            formData.trustName || 'Vidya Jyoti Educational Trust',
         });
       }
     }, 1800);
@@ -150,7 +189,7 @@ export default function TrustPaymentPage({
   return (
     <div className="min-h-screen bg-[#F4F6F9] font-sans text-slate-800 antialiased">
       {/* -------------------------------------------------------------
-          TOP BRANDED NAVBAR
+          TOP BRANDED NAVBAR (1:1 with Partnership UI)
       ------------------------------------------------------------- */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-2xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -195,7 +234,7 @@ export default function TrustPaymentPage({
       </header>
 
       {/* -------------------------------------------------------------
-          MAIN CHECKOUT DESK
+          MAIN CHECKOUT DESK (1:1 with Partnership UI)
       ------------------------------------------------------------- */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-6">
@@ -212,13 +251,12 @@ export default function TrustPaymentPage({
               LEFT COLUMN: PAYMENT OPTIONS & SELECTION TABS
           ========================================================= */}
           <div className="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden">
-            {/* Payment Options Header & Festive Offer Ribbon */}
+            {/* Header & Ribbon */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 px-6 py-4 gap-2">
               <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700">
                 Payment Options
               </span>
 
-              {/* Green Promotional Pill */}
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200/60">
                 <span>🎉</span>
                 <span>Hooray! ₹500 Discount Unlocked!</span>
@@ -311,10 +349,16 @@ export default function TrustPaymentPage({
                     <Clock className="w-4 h-4 animate-pulse" />
                     <span>
                       ₹500 discount expires in{' '}
-                      <span className="font-mono text-sm">{formattedTime}</span>{' '}
+                      <span className="font-mono text-sm">{formatTimer(secondsLeft)}</span>{' '}
                       minutes
                     </span>
                   </div>
+
+                  {errorMessage && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-600 font-medium mb-4">
+                      {errorMessage}
+                    </div>
+                  )}
 
                   {/* -------------------- 1. UPI METHOD -------------------- */}
                   {activeMethod === 'upi' && (
@@ -593,7 +637,7 @@ export default function TrustPaymentPage({
                   <button
                     type="button"
                     disabled={isProcessing}
-                    onClick={handlePayNow}
+                    onClick={handlePay}
                     className="w-full py-4 px-6 rounded-xl bg-[#002244] hover:bg-[#00172e] text-white font-black text-base shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 transform active:scale-[0.99]"
                   >
                     {isProcessing ? (
@@ -604,7 +648,7 @@ export default function TrustPaymentPage({
                     ) : (
                       <>
                         <Lock className="w-4 h-4" />
-                        <span>PAY ₹{totalAmount.toLocaleString('en-IN')}</span>
+                        <span>PAY ₹{totalAmountPayable.toLocaleString('en-IN')}</span>
                       </>
                     )}
                   </button>
@@ -623,7 +667,7 @@ export default function TrustPaymentPage({
           </div>
 
           {/* =========================================================
-              RIGHT COLUMN: ORDER SUMMARY SIDEBAR (1:1 VAKILSEARCH)
+              RIGHT COLUMN: ORDER SUMMARY SIDEBAR (1:1 with Partnership UI)
           ========================================================= */}
           <div className="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200/90 p-6 space-y-6">
             <div className="border-b border-slate-100 pb-4">
@@ -657,13 +701,13 @@ export default function TrustPaymentPage({
               <div className="flex items-center justify-between text-slate-600">
                 <span>Professional Fees</span>
                 <span className="font-semibold text-slate-900">
-                  ₹{professionalFee.toLocaleString('en-IN')}
+                  ₹{originalFee.toLocaleString('en-IN')}
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-emerald-600 font-semibold">
                 <span>Online Discount</span>
-                <span>-₹{onlineDiscount}</span>
+                <span>-₹{planDiscount.toLocaleString('en-IN')}</span>
               </div>
 
               <div className="flex items-center justify-between text-slate-800 font-bold pt-2 border-t border-slate-100">
@@ -687,7 +731,7 @@ export default function TrustPaymentPage({
                     <span>Taxes &amp; Charges</span>
                   </span>
                   <span className="font-bold text-slate-900">
-                    ₹{totalTaxes.toLocaleString('en-IN')}
+                    ₹{(statutoryGst + labourWelfare + gstOnLabour).toLocaleString('en-IN')}
                   </span>
                 </button>
 
@@ -696,7 +740,7 @@ export default function TrustPaymentPage({
                     <div className="flex items-center justify-between">
                       <span>GST on professional fee (18%)</span>
                       <span className="font-semibold text-slate-800">
-                        ₹{gstOnFee.toLocaleString('en-IN')}
+                        ₹{statutoryGst.toLocaleString('en-IN')}
                       </span>
                     </div>
 
@@ -734,10 +778,38 @@ export default function TrustPaymentPage({
               <div className="pt-3 border-t-2 border-slate-200 flex items-center justify-between text-sm sm:text-base font-black text-slate-900">
                 <span>Total Amount</span>
                 <span className="text-xl font-extrabold text-[#002244]">
-                  ₹{totalAmount.toLocaleString('en-IN')}
+                  ₹{totalAmountPayable.toLocaleString('en-IN')}
                 </span>
               </div>
             </div>
+
+            {/* Coupon Application Box matching Partnership */}
+            <form onSubmit={handleApplyCoupon} className="pt-2 border-t border-slate-100 space-y-2">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                Apply Promo Code
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="e.g. FESTIVE500"
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase focus:outline-none focus:border-[#002B49]"
+                />
+                <button
+                  type="submit"
+                  className="px-3.5 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition cursor-pointer"
+                >
+                  Apply
+                </button>
+              </div>
+              {couponApplied && (
+                <p className="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Coupon FESTIVE500 applied: ₹500 saved!</span>
+                </p>
+              )}
+            </form>
 
             {/* Quick Guarantees Box */}
             <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-200/60 space-y-2 text-xs">
@@ -801,7 +873,7 @@ export default function TrustPaymentPage({
               <div className="flex justify-between">
                 <span className="text-slate-500">Proposed Trust:</span>
                 <span className="font-semibold text-slate-900">
-                  {formData.trustName || 'Proposed Public Charitable Trust'}
+                  {formData.trustName || 'Vidya Jyoti Educational Trust'}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -813,7 +885,7 @@ export default function TrustPaymentPage({
               <div className="flex justify-between pt-1 border-t border-slate-200 text-sm font-bold text-slate-900">
                 <span>Amount Paid (incl. Taxes):</span>
                 <span className="text-[#002244]">
-                  ₹{totalAmount.toLocaleString('en-IN')}
+                  ₹{totalAmountPayable.toLocaleString('en-IN')}
                 </span>
               </div>
             </div>

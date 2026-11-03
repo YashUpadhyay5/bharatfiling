@@ -42,6 +42,7 @@ import {
   DOCUMENTS_REQUIRED,
   REGISTRATION_PROCESS_STEPS,
   PRICING_PACKAGES,
+  BUNDLED_PLANS,
   FAQS,
 } from './constants.js';
 
@@ -703,65 +704,147 @@ export default function ProprietorshipLandingPage({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-            {PRICING_PACKAGES.map((pkg) => (
-              <div
-                key={pkg.id}
-                className={`rounded-2xl p-7 flex flex-col justify-between transition-all relative ${
-                  pkg.popular
-                    ? 'border-2 border-blue-600 bg-white shadow-xl shadow-blue-600/10'
-                    : 'border border-slate-200 bg-white hover:border-slate-300 shadow-sm'
-                }`}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                    {pkg.badge}
-                  </div>
-                )}
+            {BUNDLED_PLANS.map((pkg) => {
+              const isDark = pkg.theme === 'dark';
 
-                <div>
-                  <div className="mb-4">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      {pkg.name}
-                    </span>
-                    <p className="text-xs text-slate-500 mt-1">{pkg.desc}</p>
-                  </div>
-
-                  <div className="flex items-baseline gap-2 mb-6">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-[#0B1528]">
-                      ₹{pkg.price.toLocaleString('en-IN')}
-                    </span>
-                    <span className="text-sm text-slate-400 line-through">
-                      ₹{pkg.originalPrice.toLocaleString('en-IN')}
-                    </span>
-                    <span className="text-xs font-semibold text-slate-500">
-                      + Govt. Fee
-                    </span>
-                  </div>
-
-                  <div className="space-y-3 pt-2 border-t border-slate-100 mb-8">
-                    {pkg.features.map((feature, fIdx) => (
-                      <div key={fIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700">
-                        <Check className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5 stroke-[2.5]" />
-                        <span className="leading-snug">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => onSelectPlan && onSelectPlan(pkg.id)}
-                  className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                    pkg.popular
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+              return (
+                <div
+                  key={pkg.id}
+                  className={`rounded-2xl p-7 flex flex-col justify-between transition-all relative ${
+                    isDark
+                      ? 'bg-[#0B2545] text-white border-2 border-[#0B2545] shadow-xl md:-translate-y-2'
+                      : 'bg-white text-slate-800 border border-slate-200/90 shadow-xs hover:border-slate-300'
                   }`}
                 >
-                  <span>{pkg.ctaText}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+                  {pkg.recommended && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#FFD200] text-slate-950 font-black text-[11px] px-3.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                      {pkg.badge || 'Recommended'}
+                    </div>
+                  )}
+
+                  <div>
+                    <div className="mb-4">
+                      <span
+                        className={`text-xs font-bold uppercase tracking-wider ${
+                          isDark ? 'text-slate-300' : 'text-slate-500'
+                        }`}
+                      >
+                        {pkg.name}
+                      </span>
+                      <p
+                        className={`text-xs mt-1 leading-relaxed ${
+                          isDark ? 'text-slate-300' : 'text-slate-500'
+                        }`}
+                      >
+                        {pkg.subtitle}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        className={`text-xs line-through ${
+                          isDark ? 'text-slate-400' : 'text-rose-500'
+                        }`}
+                      >
+                        ₹{pkg.originalPrice.toLocaleString('en-IN')}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          isDark
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        }`}
+                      >
+                        {pkg.discount}
+                      </span>
+                    </div>
+
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span
+                        className={`text-3xl sm:text-4xl font-extrabold ${
+                          isDark ? 'text-white' : 'text-[#0B1528]'
+                        }`}
+                      >
+                        ₹{pkg.price.toLocaleString('en-IN')}
+                      </span>
+                      <span
+                        className={`text-xs font-semibold ${
+                          isDark ? 'text-slate-300' : 'text-slate-500'
+                        }`}
+                      >
+                        + Govt. Fee
+                      </span>
+                    </div>
+
+                    <div className="text-[11px] font-medium text-slate-400 mb-6">
+                      {pkg.emiText}
+                    </div>
+
+                    <div
+                      className={`space-y-3 pt-4 border-t mb-8 ${
+                        isDark ? 'border-white/10' : 'border-slate-100'
+                      }`}
+                    >
+                      <span
+                        className={`text-[11px] font-bold uppercase tracking-wider block mb-2 ${
+                          isDark ? 'text-slate-300' : 'text-slate-500'
+                        }`}
+                      >
+                        What&apos;s Included:
+                      </span>
+                      {pkg.features.map((feature, fIdx) => (
+                        <div
+                          key={fIdx}
+                          className="flex items-start gap-2.5 text-xs sm:text-sm"
+                        >
+                          <Check
+                            className={`w-4 h-4 shrink-0 mt-0.5 stroke-[2.5] ${
+                              isDark ? 'text-[#FFD200]' : 'text-blue-600'
+                            }`}
+                          />
+                          <span
+                            className={`leading-snug ${
+                              isDark ? 'text-slate-200' : 'text-slate-700'
+                            }`}
+                          >
+                            {feature}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => onSelectPlan && onSelectPlan(pkg.id)}
+                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                      isDark
+                        ? 'bg-[#FFD200] hover:bg-[#FACC15] text-slate-950 shadow-md hover:shadow-lg'
+                        : 'bg-[#002B49] hover:bg-[#001D32] text-white shadow-md hover:shadow-lg'
+                    }`}
+                  >
+                    <span>Get Started</span>
+                    <Sparkles className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Guarantee Banner (1:1 with media_1793438026631_c42a93b3.png) */}
+          <div className="mt-8 bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-slate-700">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>100% Money-Back Guarantee if rejected on technical grounds</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4 text-blue-600" />
+              <span>Secure 256-bit Encrypted Checkout</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-purple-600" />
+              <span>UPI, Debit/Credit Cards &amp; Net Banking Accepted</span>
+            </div>
           </div>
         </div>
       </section>

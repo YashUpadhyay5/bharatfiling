@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
-import confetti from 'canvas-confetti';
 import {
-  Check,
-  CreditCard,
-  Star,
+  CheckCircle2,
+  ArrowRight,
   ArrowLeft,
   ShieldCheck,
-  Lock,
-  Loader2,
-  CheckCircle2,
+  Edit3,
   X,
+  Check,
+  Tag,
   Sparkles,
-  Printer,
-  Calendar,
-  Building2,
-  Users,
+  Lock,
+  Star,
 } from 'lucide-react';
 import { BUNDLED_PLANS } from './constants.js';
 
@@ -24,467 +20,362 @@ export default function TrustPlansPage({
   onProceedToPayment,
   onPaymentSuccess,
 }) {
-  const [selectedPlan, setSelectedPlan] = useState(
-    BUNDLED_PLANS.find((p) => p.recommended) || BUNDLED_PLANS[1]
-  );
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('upi');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isPaid, setIsPaid] = useState(false);
-  const [orderReceipt, setOrderReceipt] = useState(null);
+  // Determine initially selected plan (defaults to starter or from formData)
+  const initialPlanId = formData.packageId || 'starter';
+  const initialPlan =
+    BUNDLED_PLANS.find((p) => p.id === initialPlanId) || BUNDLED_PLANS[0];
 
-  const handleSelectPlanAndProceed = (plan) => {
+  const [selectedPlan, setSelectedPlan] = useState(initialPlan);
+  const [isChangeModalOpen, setIsChangeModalOpen] = useState(false);
+
+  const handleSelectPlanOption = (plan) => {
     setSelectedPlan(plan);
+    setIsChangeModalOpen(false);
+  };
+
+  const handleNext = () => {
     if (onProceedToPayment) {
-      onProceedToPayment(plan);
-    } else {
-      setIsPaymentModalOpen(true);
+      onProceedToPayment(selectedPlan);
     }
   };
 
-  const handleQuickBuyModal = (plan) => {
-    setSelectedPlan(plan);
-    setIsPaymentModalOpen(true);
-  };
-
-  // Pricing math
-  const baseFee = selectedPlan.price;
-  const gstAmount = Math.round(baseFee * 0.18);
-  const totalPayable = baseFee + gstAmount;
-
-  const handlePayNow = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsPaid(true);
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 },
-      });
-
-      const receiptData = {
-        orderId:
-          formData.orderNumber ||
-          `#TRST-${Math.floor(100000 + Math.random() * 900000)}`,
-        planName: selectedPlan.name,
-        trustName:
-          formData.trustName || 'My Proposed Public Charitable Trust',
-        trustCategory: formData.trustCategory || 'Public Charitable',
-        state: formData.stateName || 'Delhi NCR',
-        baseFee,
-        gstAmount,
-        totalPayable,
-        date: new Date().toLocaleDateString('en-IN', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        }),
-      };
-      setOrderReceipt(receiptData);
-
-      if (onPaymentSuccess) {
-        onPaymentSuccess(receiptData);
-      }
-    }, 1800);
-  };
-
   return (
-    <div className="min-h-screen bg-[#F8FAFC] py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-800">
-      <div className="max-w-6xl mx-auto">
-        {/* Top Header */}
-        <div className="mb-8">
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition mb-4 cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Questionnaire</span>
-            </button>
-          )}
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans text-slate-800">
+      {/* Decorative Stepped Geometric Corners (1:1 with media_1793614776593_5a4d37fe.png & media_1793688222341_af4052cb.png) */}
+      <div className="absolute top-0 right-0 pointer-events-none opacity-40">
+        <svg width="180" height="180" viewBox="0 0 180 180" fill="none">
+          <path
+            d="M180 0H120V60H60V120H0V180H180V0Z"
+            fill="#E2E8F0"
+            fillOpacity="0.5"
+          />
+        </svg>
+      </div>
+      <div className="absolute bottom-0 left-0 pointer-events-none opacity-40">
+        <svg width="180" height="180" viewBox="0 0 180 180" fill="none">
+          <path
+            d="M0 180H60V120H120V60H180V0H0V180Z"
+            fill="#E2E8F0"
+            fillOpacity="0.5"
+          />
+        </svg>
+      </div>
 
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="inline-block text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-3 py-1 rounded-full mb-2">
-              Step 3 of 4: Select Your Plan
-            </span>
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0B1528] tracking-tight">
-              Transparent Trust Registration Plans
-            </h1>
-            <p className="mt-2 text-sm text-slate-600">
-              No hidden costs. Choose the legal deed and tax exemption tier that best
-              fits your non-profit foundation.
-            </p>
-          </div>
+      {/* Top back navigation */}
+      <div className="w-full max-w-5xl mb-6 flex items-center justify-between relative z-10">
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Questionnaire</span>
+        </button>
+        <div className="text-xs text-slate-400 font-medium">
+          Trust Registration • Plan Confirmation
         </div>
+      </div>
 
-        {/* 3-Card Grid Matching Zolvit / Vakilsearch Partnership Design */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-4">
-          {BUNDLED_PLANS.map((plan) => {
-            const isDark = plan.theme === 'dark';
+      {/* Main Centered 2-Column Container (1:1 with media_1793688222341_af4052cb.png) */}
+      <div className="w-full max-w-5xl bg-white rounded-3xl border border-slate-200/90 shadow-[0_20px_50px_rgba(15,23,42,0.06)] overflow-hidden relative z-10 grid grid-cols-1 lg:grid-cols-12 min-h-[480px]">
+        {/* LEFT COLUMN: Trust Value Propositions (1:1 with media_1793688222341_af4052cb.png) */}
+        <div className="lg:col-span-5 p-8 sm:p-10 lg:p-12 bg-white flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-100">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-2xl sm:text-[28px] font-bold text-slate-800 leading-snug tracking-tight">
+                <span className="text-slate-900 font-extrabold">5 Lakh+</span> Businesses Registered
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
+                10% of all Indian businesses register with us
+              </p>
+            </div>
 
-            return (
-              <div
-                key={plan.id}
-                className={`rounded-2xl transition-all duration-200 relative flex flex-col justify-between ${
-                  isDark
-                    ? 'bg-[#002244] text-white shadow-2xl scale-102 border-2 border-amber-400/80 md:-translate-y-2'
-                    : 'bg-white text-slate-800 shadow-lg border border-slate-200/90 hover:shadow-xl'
-                }`}
-              >
-                {/* Recommended Badge */}
-                {plan.badge && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-400 text-[#002244] text-xs font-black uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
-                    {plan.badge}
-                  </div>
-                )}
-
-                <div className="p-7 sm:p-8">
-                  {/* Plan Title & Subtitle */}
-                  <div className="mb-6">
-                    <h3
-                      className={`text-2xl font-black tracking-tight ${
-                        isDark ? 'text-white' : 'text-slate-900'
-                      }`}
-                    >
-                      {plan.name}
-                    </h3>
-                    <p
-                      className={`text-xs mt-1 leading-relaxed ${
-                        isDark ? 'text-slate-300' : 'text-slate-500'
-                      }`}
-                    >
-                      {plan.subtitle}
-                    </p>
-                  </div>
-
-                  {/* Pricing Box */}
-                  <div className="mb-6 pb-6 border-b border-slate-200/20">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className={`text-xs line-through ${
-                          isDark ? 'text-slate-400' : 'text-slate-400'
-                        }`}
-                      >
-                        ₹{plan.originalPrice.toLocaleString('en-IN')}
-                      </span>
-                      <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">
-                        {plan.discount}
-                      </span>
-                    </div>
-
-                    <div className="flex items-baseline gap-2">
-                      <span
-                        className={`text-4xl font-extrabold ${
-                          isDark ? 'text-white' : 'text-slate-900'
-                        }`}
-                      >
-                        ₹{plan.price.toLocaleString('en-IN')}
-                      </span>
-                      <span
-                        className={`text-xs ${
-                          isDark ? 'text-slate-300' : 'text-slate-500'
-                        }`}
-                      >
-                        + Govt. Fee
-                      </span>
-                    </div>
-
-                    <span
-                      className={`text-[11px] block mt-1 ${
-                        isDark ? 'text-slate-400' : 'text-slate-500'
-                      }`}
-                    >
-                      {plan.emiText}
-                    </span>
-                  </div>
-
-                  {/* Features List */}
-                  <div className="space-y-3 mb-8">
-                    <span
-                      className={`text-[11px] font-bold uppercase tracking-wider block mb-2 ${
-                        isDark ? 'text-slate-400' : 'text-slate-400'
-                      }`}
-                    >
-                      What's Included:
-                    </span>
-                    {plan.features.map((feat, fIdx) => (
-                      <div
-                        key={fIdx}
-                        className="flex items-start gap-2.5 text-xs sm:text-sm"
-                      >
-                        <Check
-                          className={`w-4 h-4 flex-shrink-0 mt-0.5 stroke-[2.5] ${
-                            isDark ? 'text-amber-400' : 'text-blue-600'
-                          }`}
-                        />
-                        <span
-                          className={`leading-snug ${
-                            isDark ? 'text-slate-200' : 'text-slate-700'
-                          }`}
-                        >
-                          {feat}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+            {/* 3 Value bullets matching screenshot 1:1 */}
+            <div className="space-y-5 pt-3">
+              {/* Bullet 1 */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
                 </div>
-
-                {/* Direct Buy Option Button */}
-                <div className="p-7 sm:p-8 pt-0 space-y-2.5">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectPlanAndProceed(plan)}
-                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer transform active:scale-[0.99] ${
-                      isDark
-                        ? 'bg-amber-400 hover:bg-amber-300 text-[#002244] focus:ring-2 focus:ring-amber-300'
-                        : 'bg-[#002244] hover:bg-[#00172e] text-white focus:ring-2 focus:ring-[#002244]'
-                    }`}
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    <span>Buy Now • ₹{plan.price.toLocaleString('en-IN')}</span>
-                    <Sparkles className="w-4 h-4 ml-0.5" />
-                  </button>
-
-                  <div className="flex items-center justify-center gap-1.5 text-[11px] font-medium">
-                    <Lock className="w-3 h-3 text-emerald-500" />
-                    <span className={isDark ? 'text-slate-300' : 'text-slate-500'}>
-                      Direct Checkout • Instant UPI &amp; Cards
-                    </span>
-                  </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                    Trust Registration in under 7 days
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+                    Expand your initiative without having to wait
+                  </p>
                 </div>
               </div>
-            );
-          })}
+
+              {/* Bullet 2 */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                    24x7 expert support
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+                    Minimize challenges &amp; maximize productivity
+                  </p>
+                </div>
+              </div>
+
+              {/* Bullet 3 */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                    100% online process
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+                    Start trust registration from the comfort of your home
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-slate-100 flex items-center gap-2 text-slate-400 text-[11px]">
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+            <span>ISO 27001 Certified • Bank-Grade 256-Bit SSL Security</span>
+          </div>
         </div>
 
-        {/* Security / Trust Assurance Footer */}
-        <div className="mt-12 bg-white rounded-2xl border border-slate-200/90 p-6 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-600 shadow-2xs">
-          <div className="flex items-center gap-2 font-semibold text-slate-800">
-            <ShieldCheck className="w-5 h-5 text-emerald-600" />
-            <span>100% Money-Back Guarantee if rejected on technical grounds</span>
+        {/* RIGHT COLUMN: Selected Plan Confirmation (1:1 with media_1793688222341_af4052cb.png) */}
+        <div className="lg:col-span-7 p-8 sm:p-10 lg:p-12 flex flex-col justify-between bg-white">
+          <div className="space-y-7">
+            {/* Logo Badge (Matching VAKIL SEARCH / BHARAT FILING yellow pill style in screenshot) */}
+            <div className="flex justify-center">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#FFD200] text-slate-950 font-black text-xs tracking-wider uppercase shadow-2xs">
+                <span>BHARAT</span>
+                <span className="font-semibold text-slate-900">FILING</span>
+              </div>
+            </div>
+
+            {/* Title: Selected plan for Trust Registration (1:1 with screenshot) */}
+            <div className="text-center">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+                Selected plan for Trust Registration
+              </h3>
+            </div>
+
+            {/* Selected Plan Box (1:1 with screenshot card) */}
+            <div className="rounded-xl border border-slate-400 p-6 sm:p-7 bg-white relative shadow-2xs hover:border-slate-500 transition">
+              {/* Header row: Plan Name & Change plan button */}
+              <div className="flex items-center justify-between gap-4">
+                <h4 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                  {selectedPlan.name}
+                </h4>
+
+                <button
+                  type="button"
+                  onClick={() => setIsChangeModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-400 hover:border-slate-700 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white shadow-2xs transition cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Change plan</span>
+                </button>
+              </div>
+
+              {/* Tagline / Description */}
+              <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed mt-2.5 max-w-md">
+                {selectedPlan.tagline || selectedPlan.subtitle}
+              </p>
+
+              {/* Price Details matching screenshot: ₹1499 ₹500 off, ₹999 + Govt. Fee */}
+              <div className="mt-5 space-y-1.5">
+                {/* Crossed original price & discount tag */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs sm:text-sm text-rose-500 line-through font-medium">
+                    ₹{selectedPlan.originalPrice}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                    <Tag className="w-3 h-3 text-emerald-600" />
+                    <span>₹{selectedPlan.discountAmount || 500} off</span>
+                  </span>
+                </div>
+
+                {/* Main Price */}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    ₹{selectedPlan.price.toLocaleString('en-IN')}
+                  </span>
+                  <span className="text-xs font-medium text-slate-500">
+                    {selectedPlan.govtFeeNote || '+ Govt. Fee'}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2 font-semibold text-slate-800">
-            <Lock className="w-4 h-4 text-blue-600" />
-            <span>Secure 256-bit Encrypted Checkout</span>
-          </div>
-          <div className="flex items-center gap-2 font-semibold text-slate-800">
-            <CreditCard className="w-4 h-4 text-indigo-600" />
-            <span>UPI, Debit/Credit Cards &amp; Net Banking Accepted</span>
+
+          {/* Bottom Right: Next Action Button (1:1 with media_1793688222341_af4052cb.png) */}
+          <div className="pt-8 flex justify-end">
+            <button
+              type="button"
+              onClick={handleNext}
+              className="px-8 py-3.5 rounded-xl bg-[#002B49] hover:bg-[#001D32] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer transform active:scale-[0.99]"
+            >
+              <span>Next</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
 
       {/* =========================================================================
-          IN-PAGE QUICK CHECKOUT & PAYMENT MODAL
+          MODAL: CHANGE PLAN (Shows all 3 plans with dark center card)
       ========================================================================= */}
-      {isPaymentModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-7 shadow-2xl relative border border-slate-200 max-h-[90vh] overflow-y-auto">
+      {isChangeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto">
+            {/* Modal close button */}
             <button
               type="button"
-              onClick={() => {
-                setIsPaymentModalOpen(false);
-                setIsPaid(false);
-              }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition cursor-pointer"
+              onClick={() => setIsChangeModalOpen(false)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            {!isPaid ? (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-900 flex items-center justify-center font-bold">
-                    <ShieldCheck className="w-5 h-5 text-blue-700" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[#002244]">
-                      Checkout: {selectedPlan.name} Plan
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Official Trust Registration Application Desk
-                    </p>
-                  </div>
-                </div>
+            <div className="text-center mb-8">
+              <span className="text-xs font-bold text-blue-900 uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-full">
+                Choose Registration Plan
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-2">
+                Available Trust Registration Plans
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Select the legal tier that best matches your organization&apos;s charitable mission
+              </p>
+            </div>
 
-                {/* Order Summary Breakdown */}
-                <div className="bg-slate-50 rounded-xl p-4 space-y-2.5 text-xs text-slate-600 border border-slate-200/80">
-                  <div className="flex justify-between">
-                    <span>Proposed Trust Name:</span>
-                    <strong className="text-slate-900 font-semibold">
-                      {formData.trustName || 'Proposed Public Charitable Trust'}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Trust Category:</span>
-                    <strong className="text-slate-900 font-semibold">
-                      {formData.trustCategory || 'Public Charitable'}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Registered Office State:</span>
-                    <strong className="text-slate-900 font-semibold">
-                      {formData.stateName || 'Delhi NCR'}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Professional Legal Fee:</span>
-                    <span className="font-semibold text-slate-900">
-                      ₹{baseFee.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>GST (18% Statutory):</span>
-                    <span className="font-semibold text-slate-900">
-                      ₹{gstAmount.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                  <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-bold text-slate-900">
-                    <span>Total Amount Payable:</span>
-                    <span className="text-base font-extrabold text-[#002244]">
-                      ₹{totalPayable.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                </div>
+            {/* 3 Plans Grid (matches Image 4 & 5) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+              {BUNDLED_PLANS.map((plan) => {
+                const isSelected = selectedPlan.id === plan.id;
+                const isDark = plan.theme === 'dark';
 
-                {/* Payment Method Selector */}
-                <div className="space-y-3">
-                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Select Payment Method
-                  </span>
-                  <div className="grid grid-cols-3 gap-2.5">
-                    {[
-                      { id: 'upi', label: 'UPI / QR', icon: '⚡' },
-                      { id: 'card', label: 'Debit / Card', icon: '💳' },
-                      { id: 'netbanking', label: 'Net Banking', icon: '🏦' },
-                    ].map((m) => (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => setPaymentMethod(m.id)}
-                        className={`p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex flex-col items-center gap-1 ${
-                          paymentMethod === m.id
-                            ? 'border-[#002244] bg-blue-50/50 text-[#002244] ring-1 ring-[#002244]'
-                            : 'border-slate-200 hover:border-slate-300 bg-white text-slate-600'
+                return (
+                  <div
+                    key={plan.id}
+                    onClick={() => handleSelectPlanOption(plan)}
+                    className={`rounded-2xl p-6 flex flex-col justify-between cursor-pointer transition-all relative ${
+                      isDark
+                        ? 'bg-[#0B2545] text-white border-2 border-[#0B2545] shadow-xl md:-translate-y-1'
+                        : isSelected
+                        ? 'border-2 border-[#002B49] bg-white shadow-lg ring-2 ring-blue-100'
+                        : 'border border-slate-200 bg-white hover:border-slate-300 shadow-xs'
+                    }`}
+                  >
+                    {plan.recommended && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FFD200] text-slate-950 font-black text-[10px] px-3 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                        {plan.badge || 'Recommended'}
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span
+                          className={`text-base font-bold ${
+                            isDark ? 'text-white' : 'text-slate-900'
+                          }`}
+                        >
+                          {plan.name}
+                        </span>
+                        {isSelected && (
+                          <div className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                        )}
+                      </div>
+
+                      <p
+                        className={`text-xs min-h-[32px] leading-relaxed ${
+                          isDark ? 'text-slate-300' : 'text-slate-500'
                         }`}
                       >
-                        <span className="text-base">{m.icon}</span>
-                        <span>{m.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                        {plan.subtitle}
+                      </p>
 
-                {/* Simulated UPI / Instant Pay Screen */}
-                {paymentMethod === 'upi' && (
-                  <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-200 text-center space-y-2">
-                    <p className="text-xs font-bold text-emerald-900">
-                      Instant UPI Payment via Google Pay, PhonePe, Paytm or BHIM
-                    </p>
-                    <p className="text-[11px] text-emerald-700">
-                      UPI ID: <code className="font-bold">bharatfiling@icici</code>
-                    </p>
-                  </div>
-                )}
+                      <div className="mt-4 pt-3 border-t border-slate-100/20">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className={`text-xs line-through ${
+                              isDark ? 'text-slate-400' : 'text-slate-400'
+                            }`}
+                          >
+                            ₹{plan.originalPrice}
+                          </span>
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                              isDark
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-emerald-50 text-emerald-700'
+                            }`}
+                          >
+                            {plan.discount}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                          <span
+                            className={`text-2xl font-black ${
+                              isDark ? 'text-white' : 'text-slate-900'
+                            }`}
+                          >
+                            ₹{plan.price.toLocaleString('en-IN')}
+                          </span>
+                          <span
+                            className={`text-[11px] ${
+                              isDark ? 'text-slate-300' : 'text-slate-500'
+                            }`}
+                          >
+                            {plan.govtFeeNote || '+ Govt. Fee'}
+                          </span>
+                        </div>
+                      </div>
 
-                {/* Pay Action Button */}
-                <div className="pt-2 space-y-2">
-                  <button
-                    type="button"
-                    disabled={isProcessing}
-                    onClick={handlePayNow}
-                    className="w-full py-3.5 rounded-xl bg-[#002244] hover:bg-[#00172e] text-white font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Verifying &amp; Initializing Trust Deed Filing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-4 h-4" />
-                        <span>
-                          Pay ₹{totalPayable.toLocaleString('en-IN')} &amp; Complete Registration
-                        </span>
-                      </>
-                    )}
-                  </button>
+                      <ul className="mt-4 space-y-2 text-xs">
+                        {plan.features.slice(0, 4).map((f, fIdx) => (
+                          <li key={fIdx} className="flex items-start gap-2">
+                            <Check
+                              className={`w-3.5 h-3.5 shrink-0 mt-0.5 stroke-[2.5] ${
+                                isDark ? 'text-[#FFD200]' : 'text-emerald-600'
+                              }`}
+                            />
+                            <span
+                              className={`text-[11px] leading-tight ${
+                                isDark ? 'text-slate-200' : 'text-slate-600'
+                              }`}
+                            >
+                              {f}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                  <div className="text-center text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>256-Bit Bank-Grade Encryption • Instant Order Slip</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectPlanOption(plan);
+                      }}
+                      className={`w-full mt-5 py-2.5 px-3 rounded-xl font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                        isDark
+                          ? 'bg-[#FFD200] hover:bg-[#FACC15] text-slate-950'
+                          : 'bg-[#002B49] hover:bg-[#001D32] text-white'
+                      }`}
+                    >
+                      <span>{isSelected ? 'Selected' : 'Select Plan'}</span>
+                    </button>
                   </div>
-                </div>
-              </div>
-            ) : (
-              /* Success & Receipt Screen */
-              <div className="space-y-6 text-center py-2 animate-in fade-in duration-300">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-sm">
-                  <CheckCircle2 className="w-9 h-9 stroke-[2.5]" />
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="text-xl font-extrabold text-slate-900">
-                    Payment Successful!
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Your Trust registration file has been opened with our senior High Court legal workbench.
-                  </p>
-                </div>
-
-                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 text-left space-y-3 text-xs">
-                  <div className="flex justify-between border-b border-slate-200 pb-2">
-                    <span className="text-slate-500">Order Reference:</span>
-                    <strong className="font-mono text-slate-900 font-bold">
-                      {orderReceipt?.orderId}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Proposed Trust:</span>
-                    <span className="font-semibold text-slate-900">
-                      {orderReceipt?.trustName}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Selected Plan:</span>
-                    <span className="font-semibold text-emerald-700">
-                      {orderReceipt?.planName}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Total Paid (incl. GST):</span>
-                    <span className="font-bold text-slate-900">
-                      ₹{orderReceipt?.totalPayable?.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => window.print()}
-                    className="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Printer className="w-3.5 h-3.5" />
-                    <span>Print Receipt</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsPaymentModalOpen(false);
-                      if (onPaymentSuccess) {
-                        onPaymentSuccess(orderReceipt);
-                      }
-                    }}
-                    className="flex-1 py-2.5 rounded-xl bg-[#002244] text-white text-xs font-bold hover:bg-[#00172e] transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <span>Go to Dashboard</span>
-                  </button>
-                </div>
-              </div>
-            )}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
