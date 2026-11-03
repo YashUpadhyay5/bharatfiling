@@ -68,6 +68,7 @@ const PrivateLimitedCompanyModule = lazy(() => import('./pages/startup/private-l
 const PublicCompanyModule = lazy(() => import('./pages/startup/public-limited-company/index.jsx'));
 const ProducerCompanyModule = lazy(() => import('./pages/startup/producer-company/index.jsx'));
 const ProprietorshipModule = lazy(() => import('./pages/startup/proprietorship/index.jsx'));
+const TrustRegistrationModule = lazy(() => import('./pages/startup/trust/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -256,6 +257,17 @@ export default function App() {
                 <Route path="/sole-proprietorship-registration" element={<ProprietorshipModule />} />
                 <Route path="/apply/proprietorship" element={<ProprietorshipModule />} />
                 <Route path="/apply/sole-proprietorship" element={<ProprietorshipModule />} />
+                <Route path="/services/trust-registration" element={<TrustRegistrationModule />} />
+                <Route path="/services/trust" element={<TrustRegistrationModule />} />
+                <Route path="/services/public-trust-registration" element={<TrustRegistrationModule />} />
+                <Route path="/services/charitable-trust-registration" element={<TrustRegistrationModule />} />
+                <Route path="/services/ngo-trust-registration" element={<TrustRegistrationModule />} />
+                <Route path="/trust-registration" element={<TrustRegistrationModule />} />
+                <Route path="/trust" element={<TrustRegistrationModule />} />
+                <Route path="/public-trust" element={<TrustRegistrationModule />} />
+                <Route path="/charitable-trust" element={<TrustRegistrationModule />} />
+                <Route path="/apply/trust-registration" element={<TrustRegistrationModule />} />
+                <Route path="/apply/trust" element={<TrustRegistrationModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)
