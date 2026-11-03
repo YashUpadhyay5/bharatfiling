@@ -70,6 +70,7 @@ const ProducerCompanyModule = lazy(() => import('./pages/startup/producer-compan
 const ProprietorshipModule = lazy(() => import('./pages/startup/proprietorship/index.jsx'));
 const TrustRegistrationModule = lazy(() => import('./pages/startup/trust/index.jsx'));
 const LLPRegistrationModule = lazy(() => import('./pages/startup/llp/index.jsx'));
+const IndianSubsidiaryModule = lazy(() => import('./pages/startup/indian-subsidiary/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -278,6 +279,16 @@ export default function App() {
                 <Route path="/apply/llp-registration" element={<LLPRegistrationModule />} />
                 <Route path="/apply/llp" element={<LLPRegistrationModule />} />
                 <Route path="/apply/limited-liability-partnership" element={<LLPRegistrationModule />} />
+
+                {/* Indian Subsidiary Registration */}
+                <Route path="/services/indian-subsidiary" element={<IndianSubsidiaryModule />} />
+                <Route path="/services/foreign-subsidiary" element={<IndianSubsidiaryModule />} />
+                <Route path="/services/subsidiary" element={<IndianSubsidiaryModule />} />
+                <Route path="/services/wholly-owned-subsidiary" element={<IndianSubsidiaryModule />} />
+                <Route path="/indian-subsidiary" element={<IndianSubsidiaryModule />} />
+                <Route path="/foreign-subsidiary" element={<IndianSubsidiaryModule />} />
+                <Route path="/apply/indian-subsidiary" element={<IndianSubsidiaryModule />} />
+                <Route path="/apply/foreign-subsidiary" element={<IndianSubsidiaryModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

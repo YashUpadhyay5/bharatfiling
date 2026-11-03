@@ -91,11 +91,11 @@ export const SERVICES = [
     ['PAN and Aadhaar of ten or more producer members', 'Proof of primary-produce activity', 'Address proof of directors', 'Registered office proof'],
     ['Name approval (RUN)', 'MOA and AOA for producer objects', 'Certificate of Incorporation with CIN'],
     { status: 'live', path: '/services/producer-company', govt: GOVT_MCA, priceStatus: 'existing', aliases: ['producer-company-registration', 'fpo-registration', 'farmer-producer-company', 'kisan-producer-company'] }),
-  s('indian-subsidiary', 'Indian Subsidiary', 'startup', 9999, 'one-time', '15-25 working days',
-    'Set up an Indian subsidiary of a foreign company, including FEMA and foreign-investment reporting.',
+  s('indian-subsidiary', 'Indian Subsidiary', 'startup', 999, 'one-time', '10-14 working days',
+    'Set up an Indian subsidiary of a foreign company under 100% FDI Automatic Route with FEMA/RBI and resident director support.',
     ['Apostilled incorporation documents of the parent', 'Passport and address proof of foreign directors', 'Board resolution of the parent', 'Registered office proof in India'],
     ['Incorporation with resident director arrangement', 'FC-GPR filing guidance', 'Bank account and PAN support'],
-    { govt: GOVT_MCA }),
+    { status: 'live', path: '/services/indian-subsidiary', govt: GOVT_MCA, priceStatus: 'existing', aliases: ['foreign-subsidiary', 'wholly-owned-subsidiary', 'subsidiary-registration'] }),
 
   /* ------------------------------------------------------------ Registrations */
   s('gst-registration', 'GST Registration', 'registrations', 1499, 'one-time', '3-7 working days',
