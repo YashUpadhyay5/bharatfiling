@@ -225,7 +225,7 @@ export const PRICING_PACKAGES = [
       'Priority assistance for Zero-Balance Current Account opening',
       'Dedicated legal manager & WhatsApp support',
     ],
-    ctaText: 'Select Starter Plan',
+    ctaText: 'Buy Starter Plan (₹999)',
   },
   {
     id: 'standard',
@@ -244,7 +244,7 @@ export const PRICING_PACKAGES = [
       'Input Tax Credit (ITC) optimization advisory',
       'Priority phone & WhatsApp customer support',
     ],
-    ctaText: 'Select Standard Plan',
+    ctaText: 'Buy Standard Plan (₹2,499)',
   },
   {
     id: 'premium',
@@ -263,7 +263,7 @@ export const PRICING_PACKAGES = [
       '1 Year Dedicated Chartered Accountant (CA) tax helpline',
       'Annual Income Tax Return (ITR-3 / ITR-4) filing consultation',
     ],
-    ctaText: 'Select Complete Launchpad',
+    ctaText: 'Buy Complete Launchpad (₹4,999)',
   },
 ];
 
