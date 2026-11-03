@@ -71,6 +71,7 @@ const ProprietorshipModule = lazy(() => import('./pages/startup/proprietorship/i
 const TrustRegistrationModule = lazy(() => import('./pages/startup/trust/index.jsx'));
 const LLPRegistrationModule = lazy(() => import('./pages/startup/llp/index.jsx'));
 const IndianSubsidiaryModule = lazy(() => import('./pages/startup/indian-subsidiary/index.jsx'));
+const Section8Module = lazy(() => import('./pages/startup/section-8/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -289,6 +290,21 @@ export default function App() {
                 <Route path="/foreign-subsidiary" element={<IndianSubsidiaryModule />} />
                 <Route path="/apply/indian-subsidiary" element={<IndianSubsidiaryModule />} />
                 <Route path="/apply/foreign-subsidiary" element={<IndianSubsidiaryModule />} />
+
+                {/* Section 8 Company Registration (Non-Profit NGO) */}
+                <Route path="/services/section-8-company" element={<Section8Module />} />
+                <Route path="/services/section-8" element={<Section8Module />} />
+                <Route path="/services/section8" element={<Section8Module />} />
+                <Route path="/services/section-8-company-registration" element={<Section8Module />} />
+                <Route path="/services/ngo-registration" element={<Section8Module />} />
+                <Route path="/section-8-company" element={<Section8Module />} />
+                <Route path="/section-8" element={<Section8Module />} />
+                <Route path="/section8" element={<Section8Module />} />
+                <Route path="/ngo-registration" element={<Section8Module />} />
+                <Route path="/apply/section-8-company" element={<Section8Module />} />
+                <Route path="/apply/section-8" element={<Section8Module />} />
+                <Route path="/apply/section8" element={<Section8Module />} />
+                <Route path="/apply/ngo-registration" element={<Section8Module />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

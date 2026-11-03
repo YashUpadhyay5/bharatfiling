@@ -29,6 +29,7 @@ import proprietorshipRoutes from './routes/registrations/proprietorship/index.js
 import trustRoutes from './routes/registrations/trust/index.js';
 import llpRoutes from './routes/registrations/llp/index.js';
 import indianSubsidiaryRoutes from './routes/registrations/indian-subsidiary/index.js';
+import section8Routes from './routes/registrations/section8/index.js';
 import trademarkRoutes from './routes/trademark/index.js';
 import copyrightRoutes from './routes/copyright/index.js';
 import patentRoutes from './routes/patent/index.js';
@@ -168,6 +169,10 @@ app.use('/api/v1/limited-liability-partnership', llpRoutes);
 app.use('/api/v1/indian-subsidiary', indianSubsidiaryRoutes);
 app.use('/api/v1/foreign-subsidiary', indianSubsidiaryRoutes);
 app.use('/api/v1/subsidiary', indianSubsidiaryRoutes);
+app.use('/api/v1/section8', section8Routes);
+app.use('/api/v1/section-8', section8Routes);
+app.use('/api/v1/section-8-company', section8Routes);
+app.use('/api/v1/ngo-registration', section8Routes);
 app.use('/api/v1/trademark', trademarkRoutes);
 app.use('/api/v1/trademark-registration', trademarkRoutes);
 app.use('/api/v1/trademark-renewal', trademarkRoutes);
