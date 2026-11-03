@@ -195,6 +195,9 @@ router.post('/cases/:id/action', (req, res) => {
         if (moduleType === 'COMPANY') {
           step1Title = 'Step 1: CA Verified Director KYC & SPICe+ Dossier';
           step1Desc = `PAN, Aadhaar, DIN details, registered office address proof and MOA/AOA drafted and certified by ${req.user.full_name}.`;
+        } else if (moduleType === 'MCA') {
+          step1Title = 'Step 1: Company Law Expert Verified Records & Resolutions';
+          step1Desc = `Company documents, resolutions and digital signatures for this filing verified by ${req.user.full_name}.`;
         } else if (moduleType === 'ITR') {
           step1Title = 'Step 1: CA Verified Financial Statements & 26AS/AIS Tax Credits';
           step1Desc = `Form 16, balance sheets, capital gains schedules, and TDS credits verified by ${req.user.full_name}.`;
@@ -241,6 +244,9 @@ router.post('/cases/:id/action', (req, res) => {
         if (moduleType === 'COMPANY') {
           step2Title = `Step 2: SPICe+ Dossier Filed on MCA Portal (SRN: ${cleanArn})`;
           step2Desc = `Incorporation dossier submitted to Ministry of Corporate Affairs. Service Request Number (SRN) generated. Transferred to Registrar of Companies.`;
+        } else if (moduleType === 'MCA') {
+          step2Title = `Step 2: Form Filed on MCA Portal (SRN: ${cleanArn})`;
+          step2Desc = `Filing submitted to the Ministry of Corporate Affairs. Service Request Number (SRN) generated.`;
         } else if (moduleType === 'ITR') {
           step2Title = `Step 2: Return Filed on Income Tax E-filing Portal (Ack: ${cleanArn})`;
           step2Desc = `Statutory tax return transmitted to ITD portal. Centralized Acknowledgement Number generated.`;
@@ -288,6 +294,9 @@ router.post('/cases/:id/action', (req, res) => {
         if (moduleType === 'COMPANY') {
           step3Title = `Step 3: ROC Approval Granted (CIN: ${cleanGstin})`;
           step3Desc = `Company incorporation approved by Registrar of Companies (ROC). Corporate Identity Number (CIN) allotted.`;
+        } else if (moduleType === 'MCA') {
+          step3Title = `Step 3: ROC Approval Recorded (Ref: ${cleanGstin})`;
+          step3Desc = `Filing approved or taken on record by the Registrar of Companies.`;
         } else if (moduleType === 'ITR') {
           step3Title = `Step 3: CPC Intimation u/s 143(1) Approved`;
           step3Desc = `Return successfully processed by Centralized Processing Centre (CPC Bangalore). Refund / Nil liability determined.`;
@@ -338,6 +347,10 @@ router.post('/cases/:id/action', (req, res) => {
           defaultCertUrl = '/sample_gst_certificate.pdf'; // Will download with COI naming
           step4Title = 'Step 4: Certificate of Incorporation (COI) Dispatched to Customer';
           step4Desc = 'Official MCA Certificate of Incorporation along with corporate PAN and TAN letters dispatched to customer dashboard.';
+        } else if (moduleType === 'MCA') {
+          defaultCertUrl = '/sample_gst_certificate.pdf';
+          step4Title = 'Step 4: MCA Filing Approval Dispatched';
+          step4Desc = 'The filing acknowledgement and approval documents have been delivered to the customer dashboard.';
         } else if (moduleType === 'ITR') {
           defaultCertUrl = '/sample_gst_certificate.pdf';
           step4Title = 'Step 4: ITR-V Verification & CPC Assessment Order Dispatched';

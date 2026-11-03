@@ -473,6 +473,25 @@ export const api = {
     return handleResponse(res);
   },
 
+  // MCA service flows (annual filings, director and company changes, strike off)
+  createMcaOrder: async (service, payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/mca-services/${service}/checkout/draft`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  payMcaOrder: async (service, orderId, payload) => {
+    const res = await fetchWithRetry(`${API_BASE}/mca-services/${service}/checkout/${orderId}/pay`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
   // TDS return filing flow
   createTdsOrder: async (payload) => {
     const res = await fetchWithRetry(`${API_BASE}/tds-return-filing/checkout/draft`, {

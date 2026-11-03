@@ -213,6 +213,8 @@ export default function CustomerDashboard() {
     switch (moduleType) {
       case 'COMPANY':
         return { title: '2. Docs Verified by CA', desc: 'SPICe+ Dossier Prepared' };
+      case 'MCA':
+        return { title: '2. Verified by Company Law Expert', desc: 'Forms & Resolutions Prepared' };
       case 'ITR':
         return { title: '2. Financials Verified by CA', desc: 'Tax Computation Prepared' };
       case 'TRADEMARK':
@@ -232,6 +234,11 @@ export default function CustomerDashboard() {
       case 'COMPANY':
         return {
           title: '3. Submitted to MCA',
+          desc: activeApp?.arn ? `SRN: ${activeApp.arn}` : 'Registrar of Companies Verification',
+        };
+      case 'MCA':
+        return {
+          title: '3. Filed on MCA Portal',
           desc: activeApp?.arn ? `SRN: ${activeApp.arn}` : 'Registrar of Companies Verification',
         };
       case 'ITR':
@@ -269,6 +276,11 @@ export default function CustomerDashboard() {
         return {
           title: '4. Certificate Ready',
           desc: activeApp?.gstin ? `CIN: ${activeApp.gstin}` : 'COI Allotment Pending',
+        };
+      case 'MCA':
+        return {
+          title: '4. Filing Approved',
+          desc: activeApp?.gstin ? `Ref: ${activeApp.gstin}` : 'Approval Delivery Pending',
         };
       case 'ITR':
         return {
@@ -353,6 +365,8 @@ export default function CustomerDashboard() {
     const prefix =
       moduleType === 'COMPANY'
         ? 'MCA_COI'
+        : moduleType === 'MCA'
+        ? 'MCA_FILING'
         : moduleType === 'ITR'
         ? 'ITR_V_ACK'
         : moduleType === 'TRADEMARK'
@@ -602,6 +616,8 @@ export default function CustomerDashboard() {
                     <div className="text-slate-400 font-bold uppercase text-[10px] tracking-wider">
                       {moduleType === 'COMPANY'
                         ? 'Corporate SRN'
+                        : moduleType === 'MCA'
+                        ? 'MCA SRN'
                         : moduleType === 'ITR'
                         ? 'ITD Ack No'
                         : moduleType === 'TRADEMARK'
@@ -625,6 +641,8 @@ export default function CustomerDashboard() {
                     <div className="text-slate-400 font-bold uppercase text-[10px] tracking-wider">
                       {moduleType === 'COMPANY'
                         ? 'Corporate CIN'
+                        : moduleType === 'MCA'
+                        ? 'Approval Reference'
                         : moduleType === 'ITR'
                         ? 'Assessment Ref'
                         : moduleType === 'TRADEMARK'
@@ -658,6 +676,8 @@ export default function CustomerDashboard() {
                       <span>
                         {moduleType === 'COMPANY'
                           ? 'Download Certificate (COI)'
+                          : moduleType === 'MCA'
+                          ? 'Download Filing Approval'
                           : moduleType === 'ITR'
                           ? 'Download ITR-V Ack'
                           : moduleType === 'TRADEMARK'

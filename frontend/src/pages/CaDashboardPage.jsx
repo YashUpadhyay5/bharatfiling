@@ -28,6 +28,8 @@ import {
   Lock,
 } from 'lucide-react';
 import NotificationBell from '../components/common/NotificationBell.jsx';
+import { answerSummary, selectedOptions } from './gst-services/answers.js';
+import { getMcaServiceConfig } from './mca-services/configs/index.js';
 
 export default function CaDashboardPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -529,6 +531,37 @@ export default function CaDashboardPage() {
                     <span className="font-bold text-emerald-400">₹{selectedCase.amount_paid || 1769} INR (Paid)</span>
                   </div>
 
+                  {/* MCA order: what the customer told us, and the filings it leads to */}
+                  {(() => {
+                    const mcaConfig = selectedCase.module_type === 'MCA' && getMcaServiceConfig(selectedCase.service_id);
+                    if (!mcaConfig) return null;
+                    const { questions } = mcaConfig.questionnaire;
+                    const fields = selectedCase.fields_data || {};
+                    const filings = [
+                      ...(mcaConfig.payment.filings || []),
+                      ...selectedOptions(questions, fields).flatMap((o) => o.filing || []),
+                    ];
+                    return (
+                      <div className="col-span-2 md:col-span-4 bg-purple-950/30 p-3.5 rounded-xl border border-purple-800/50 space-y-1.5 mt-2">
+                        <span className="text-purple-300 font-bold uppercase text-[10px] tracking-wider block">
+                          Customer's Answers:
+                        </span>
+                        <div className="text-slate-300 text-[11px] grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                          {answerSummary(questions, fields).map((a) => (
+                            <div key={a.label}>
+                              {a.label}: <strong className="text-white">{a.value}</strong>
+                            </div>
+                          ))}
+                        </div>
+                        {filings.length > 0 && (
+                          <div className="text-slate-300 text-[11px] pt-1">
+                            Filings: <span className="text-white">{filings.join(' • ')}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   {/* Udyam NIC & Plant Details if available */}
                   {(selectedCase.fields_data?.nic_division || selectedCase.nic_division) && (
                     <div className="col-span-2 md:col-span-4 bg-purple-950/30 p-3.5 rounded-xl border border-purple-800/50 space-y-1.5 mt-2">
@@ -675,6 +708,8 @@ export default function CaDashboardPage() {
                           const step1Title =
                             caseModule === 'COMPANY'
                               ? 'CA Verify Director KYC'
+                              : caseModule === 'MCA'
+                              ? 'Verify Company Records'
                               : caseModule === 'ITR'
                               ? 'CA Verify Financials'
                               : caseModule === 'TRADEMARK'
@@ -688,6 +723,8 @@ export default function CaDashboardPage() {
                           const step1Desc =
                             caseModule === 'COMPANY'
                               ? 'Inspect Director identity, DIN, registered office proof, and MOA/AOA drafts.'
+                              : caseModule === 'MCA'
+                              ? 'Review the answers above, then the company documents, resolutions and DSC for this filing.'
                               : caseModule === 'ITR'
                               ? 'Inspect Form 16, balance sheets, capital gains schedules, and 26AS tax credits.'
                               : caseModule === 'TRADEMARK'
@@ -765,6 +802,8 @@ export default function CaDashboardPage() {
                           const step2Title =
                             caseModule === 'COMPANY'
                               ? 'Submit SPICe+ to MCA'
+                              : caseModule === 'MCA'
+                              ? 'File on MCA Portal'
                               : caseModule === 'ITR'
                               ? 'E-file on IT Portal'
                               : caseModule === 'TRADEMARK'
@@ -777,6 +816,8 @@ export default function CaDashboardPage() {
 
                           const step2Placeholder =
                             caseModule === 'COMPANY'
+                              ? 'MCA SRN (e.g. MCA-SRN-T12345678)'
+                              : caseModule === 'MCA'
                               ? 'MCA SRN (e.g. MCA-SRN-T12345678)'
                               : caseModule === 'ITR'
                               ? 'ITD Ack (e.g. ITR-ACK-1234567890)'
@@ -791,6 +832,8 @@ export default function CaDashboardPage() {
                           const step2BtnText =
                             caseModule === 'COMPANY'
                               ? 'Transmit & Record SRN'
+                              : caseModule === 'MCA'
+                              ? 'File & Record SRN'
                               : caseModule === 'ITR'
                               ? 'File & Record Ack No'
                               : caseModule === 'TRADEMARK'
@@ -885,6 +928,8 @@ export default function CaDashboardPage() {
                           const step3Title =
                             caseModule === 'COMPANY'
                               ? 'Record ROC Approval (CIN)'
+                              : caseModule === 'MCA'
+                              ? 'Record ROC Approval'
                               : caseModule === 'ITR'
                               ? 'Record CPC Approval'
                               : caseModule === 'TRADEMARK'
@@ -898,6 +943,8 @@ export default function CaDashboardPage() {
                           const step3Placeholder =
                             caseModule === 'COMPANY'
                               ? 'CIN (e.g. U72200KA2026PTC123456)'
+                              : caseModule === 'MCA'
+                              ? 'Approval Ref (e.g. MCA-SRN-T12345678)'
                               : caseModule === 'ITR'
                               ? 'CPC Intimation (e.g. CPC/2026/INT/12345)'
                               : caseModule === 'TRADEMARK'
@@ -987,6 +1034,8 @@ export default function CaDashboardPage() {
                           const step4Title =
                             caseModule === 'COMPANY'
                               ? 'Send COI to Customer'
+                              : caseModule === 'MCA'
+                              ? 'Send Filing Approval'
                               : caseModule === 'ITR'
                               ? 'Send ITR-V Ack & Order'
                               : caseModule === 'TRADEMARK'
@@ -1000,6 +1049,8 @@ export default function CaDashboardPage() {
                           const step4BtnText =
                             caseModule === 'COMPANY'
                               ? 'Dispatch COI Certificate'
+                              : caseModule === 'MCA'
+                              ? 'Dispatch Filing Approval'
                               : caseModule === 'ITR'
                               ? 'Dispatch ITR-V Ack'
                               : caseModule === 'TRADEMARK'
@@ -1081,6 +1132,8 @@ export default function CaDashboardPage() {
                         <div className="font-extrabold text-sm text-white">
                           {selectedCase.module_type === 'COMPANY'
                             ? 'Official Certificate of Incorporation (COI)'
+                            : selectedCase.module_type === 'MCA'
+                            ? 'Official MCA Filing Approval'
                             : selectedCase.module_type === 'ITR'
                             ? 'Official ITR-V Verification & Assessment Order'
                             : selectedCase.module_type === 'TRADEMARK'
@@ -1092,6 +1145,8 @@ export default function CaDashboardPage() {
                         <div className="text-[11px] text-emerald-400 font-mono">
                           {selectedCase.module_type === 'COMPANY'
                             ? 'CIN: '
+                            : selectedCase.module_type === 'MCA'
+                            ? 'ROC Ref: '
                             : selectedCase.module_type === 'ITR'
                             ? 'CPC Ref: '
                             : selectedCase.module_type === 'TRADEMARK'

@@ -16,14 +16,19 @@ export const LANGUAGE_OPTIONS = [
   { value: 'tamil', label: 'Tamil' },
 ];
 
-// Payment screen: identical for every ITR service.
+// Financial-year choices for services that are not a return, so the [ITR] / [ITR-U] tag is left out.
+export const financialYearOptions = years.map(({ value, fy }) => ({ value, label: `FY ${fy}` }));
+
+export const FORM_NOTE = '🔒 SSL Encrypted • 100% Confidential • ISO 27001 Certified';
+
+// Payment screen of the two ITR consultation services. The other services set their own.
 export const payment = {
   title: 'Consult an ITR return filing expert',
   feeLabel: 'Consultation Fee',
   note: 'Consultation fee will be adjusted against the final service fee',
 };
 
-// The two questions (screens 2 and 3) are identical for every ITR service.
+// The two questions (screens 2 and 3) of the ITR consultation services.
 export const questionnaire = {
   headline: ['', 'Expert Assisted ITR Filing'],
   tagline: 'Team of Senior CAs and Tax Specialists for ITR filing',

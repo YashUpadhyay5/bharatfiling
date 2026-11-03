@@ -6,6 +6,7 @@ import { ENV } from '../config/env.js';
 import { generateToken } from '../middleware/auth.js';
 import itrServicesRoutes from '../routes/registrations/itr-services/index.js';
 import {
+  FORM_16_BATCHES,
   ITR_CONSULTATION_FEE,
   ITR_SERVICES,
   LANGUAGES,
@@ -19,12 +20,23 @@ import {
   ITR_CONSULTATION_FEE as FRONTEND_FEE,
   LANGUAGE_OPTIONS,
 } from '../../../frontend/src/pages/itr-services/common.js';
+import { FORM_16_BATCHES as FRONTEND_FORM_16_BATCHES } from '../../../frontend/src/pages/itr-services/configs/form-16-generation.js';
 import { filingYears as frontendFilingYears } from '../../../frontend/src/pages/itr-services/years.js';
 import { computeQuote as computeFrontendQuote } from '../../../frontend/src/pages/itr-services/quote.js';
 import { SERVICES } from '../../../frontend/src/data/serviceCatalog.js';
 
 const SLUGS = Object.keys(ITR_SERVICES);
-const [SERVICE, SOLE_PROPRIETORSHIP] = ['itr-filing', 'itr-sole-proprietorship'];
+const [SERVICE, SOLE_PROPRIETORSHIP, FORM_16] = ['itr-filing', 'itr-sole-proprietorship', 'form-16-generation'];
+const CONSULTATION_SERVICES = [SERVICE, SOLE_PROPRIETORSHIP];
+
+// A valid answer to every question of a service: the first option, the latest financial year.
+const validAnswers = (slug) =>
+  Object.fromEntries(
+    Object.entries(ITR_SERVICES[slug].fields).map(([key, spec]) => [
+      key,
+      spec.type === 'year' ? filingYears()[0].value : spec.values[0],
+    ])
+  );
 
 const tokenFor = (id, role = 'CUSTOMER') =>
   generateToken({ id, email: `${id}@example.com`, phone: '9876543210', role, full_name: id });
@@ -35,14 +47,15 @@ describe('ITR service flows - config consistency', () => {
     assert.deepEqual(ITR_SERVICE_CONFIGS.map((c) => c.slug).sort(), backend);
     assert.deepEqual(ITR_SERVICE_ROUTES.map((r) => r.slug).sort(), backend);
     assert.equal(FRONTEND_FEE, ITR_CONSULTATION_FEE);
+    for (const slug of CONSULTATION_SERVICES) assert.equal(ITR_SERVICES[slug].fee, ITR_CONSULTATION_FEE, slug);
     for (const config of ITR_SERVICE_CONFIGS) {
-      assert.equal(config.fee, ITR_CONSULTATION_FEE, `${config.slug} fee`);
+      assert.equal(config.fee, ITR_SERVICES[config.slug].fee, `${config.slug} fee`);
       assert.equal(config.name, ITR_SERVICES[config.slug].name, `${config.slug} name`);
       const entry = SERVICES.find((s) => s.slug === config.slug);
       assert.ok(entry, `${config.slug} missing from the service catalog`);
       assert.equal(entry.status, 'live', `${config.slug} should be live`);
       assert.equal(entry.path, `/services/${config.slug}`);
-      assert.equal(entry.fee, ITR_CONSULTATION_FEE, `${config.slug} catalog price`);
+      assert.equal(entry.fee, config.fee, `${config.slug} catalog price`);
     }
   });
 
@@ -57,12 +70,32 @@ describe('ITR service flows - config consistency', () => {
 
   test('questionnaire options match what the backend accepts', () => {
     for (const config of ITR_SERVICE_CONFIGS) {
-      const [income, year] = config.questionnaire.questions;
-      assert.equal(income.id, 'sourceOfIncome');
-      assert.deepEqual(income.options.map((o) => o.value), SOURCES_OF_INCOME, config.slug);
-      assert.equal(year.id, 'financialYear');
-      assert.deepEqual(year.options.map((o) => o.value), filingYears().map((y) => y.value), config.slug);
+      const fields = ITR_SERVICES[config.slug].fields;
+      const questions = config.questionnaire.questions;
+      assert.deepEqual(questions.map((q) => q.id).sort(), Object.keys(fields).sort(), config.slug);
+      for (const question of questions) {
+        const spec = fields[question.id];
+        const expected = spec.type === 'year' ? filingYears().map((y) => y.value) : spec.values;
+        assert.deepEqual(question.options.map((o) => o.value), expected, `${config.slug} ${question.id}`);
+      }
     }
+    // The two ITR consultation pages keep the original questions.
+    for (const slug of CONSULTATION_SERVICES) {
+      assert.deepEqual(ITR_SERVICES[slug].fields.sourceOfIncome.values, SOURCES_OF_INCOME);
+    }
+  });
+
+  test('Form 16 is priced per batch of up to 10 employees on both sides', () => {
+    assert.deepEqual(FRONTEND_FORM_16_BATCHES, FORM_16_BATCHES);
+    const frontend = ITR_SERVICE_CONFIGS.find((c) => c.slug === FORM_16);
+    for (const [band, batches] of Object.entries(FORM_16_BATCHES)) {
+      assert.equal(frontend.unitsOf({ employees: band }), batches, band);
+      assert.equal(ITR_SERVICES[FORM_16].unitsOf({ employees: band }), batches, band);
+      // A band is never billed for more batches than its largest employee count needs.
+      const top = band === 'upto-10' ? 10 : Number(band.split('-')[1]);
+      assert.equal(batches, Math.ceil(top / 10), band);
+    }
+    assert.match(SERVICES.find((s) => s.slug === FORM_16).unit, /up to 10 employees/);
   });
 
   test('language options match what the backend accepts', () => {
@@ -182,11 +215,14 @@ describe('ITR service flows - checkout API', () => {
 
   test('every service: draft creates a pending order for the quoted amount, payment hands it to the CA desk', async () => {
     for (const slug of SLUGS) {
-      const { res, data } = await createDraft(slug, { sourceOfIncome: 'capital-gains' });
+      const answers = validAnswers(slug);
+      if (answers.sourceOfIncome) answers.sourceOfIncome = 'capital-gains';
+      const { res, data } = await createDraft(slug, answers);
       assert.equal(res.status, 201, slug);
-      assert.equal(data.order.amount, 2949);
+      const expected = computeQuote(ITR_SERVICES[slug].fee);
+      assert.equal(data.order.amount, expected.totalAmount, slug);
       assert.equal(data.order.status, 'PENDING');
-      assert.deepEqual(data.quote, { consultationFee: 2499, gst: 450, totalAmount: 2949 });
+      assert.deepEqual(data.quote, expected);
       assert.match(data.applicationNumber, /^ITR\d{6}$/);
 
       const draftApp = db.getApplications().find((a) => a.id === data.order.application_id);
@@ -194,22 +230,74 @@ describe('ITR service flows - checkout API', () => {
       assert.equal(draftApp.service_id, slug);
       assert.equal(draftApp.module_type, 'ITR');
       assert.ok(draftApp.service_name.startsWith(ITR_SERVICES[slug].name));
-      assert.equal(draftApp.fields_data.sourceOfIncome, 'capital-gains');
-      assert.equal(draftApp.fields_data.financialYear, latestYear.value);
-      assert.equal(draftApp.fields_data.returnType, latestYear.returnType);
+      for (const [key, value] of Object.entries(answers)) assert.equal(draftApp.fields_data[key], value, `${slug} ${key}`);
+      if (ITR_SERVICES[slug].fields.financialYear?.returnType) {
+        assert.equal(draftApp.fields_data.returnType, latestYear.returnType);
+      } else {
+        assert.equal(draftApp.fields_data.returnType, undefined, slug);
+      }
 
       const payRes = await pay(slug, data.order.id);
       assert.equal(payRes.status, 200, `${slug} pay`);
       const paid = await payRes.json();
       assert.equal(paid.order.status, 'PAID');
       assert.equal(paid.order.payment_status, 'COMPLETED');
-      assert.equal(paid.order.paid_amount, 2949);
+      assert.equal(paid.order.paid_amount, expected.totalAmount);
       assert.equal(paid.application.status, 'SUBMITTED');
       assert.equal(paid.application.internal_status, 'CA_REVIEW');
       assert.equal(paid.application.customer_status, 'CA Processing');
       assert.equal(paid.application.payment_completed, true);
       assert.ok(db.getCaseEvents().some((e) => e.application_id === data.order.application_id));
       assert.ok(db.getNotifications().some((n) => n.dedup_key === `NEW_PAID_CASE_${data.order.id}`));
+    }
+  });
+
+  test('known totals of the fixed-fee services', async () => {
+    const totals = {
+      'business-itr': { consultationFee: 5999, gst: 1080, totalAmount: 7079 },
+      'form-15ca-15cb': { consultationFee: 2499, gst: 450, totalAmount: 2949 },
+      'capital-gains-advisory': { consultationFee: 1999, gst: 360, totalAmount: 2359 },
+      'advance-tax-computation': { consultationFee: 999, gst: 180, totalAmount: 1179 },
+    };
+    for (const [slug, quote] of Object.entries(totals)) {
+      const { res, data } = await createDraft(slug, validAnswers(slug));
+      assert.equal(res.status, 201, slug);
+      assert.deepEqual(data.quote, quote, slug);
+    }
+    const { data } = await createDraft('form-15ca-15cb', validAnswers('form-15ca-15cb'));
+    assert.equal(data.order.service_name, 'Form 15CA / 15CB Certification');
+  });
+
+  test('Form 16 charges one fee per batch of employees', async () => {
+    for (const [employees, batches] of Object.entries(FORM_16_BATCHES)) {
+      const { res, data } = await createDraft(FORM_16, { ...validAnswers(FORM_16), employees });
+      assert.equal(res.status, 201, employees);
+      assert.deepEqual(data.quote, computeQuote(999 * batches), employees);
+      const app = db.getApplications().find((a) => a.id === data.order.application_id);
+      assert.equal(app.fields_data.units, batches);
+      assert.equal(app.fields_data.employees, employees);
+    }
+    // 5 batches: 4,995 + 899 GST
+    const { data } = await createDraft(FORM_16, { ...validAnswers(FORM_16), employees: '41-50' });
+    assert.equal(data.order.amount, 5894);
+    assert.equal((await createDraft(FORM_16, { ...validAnswers(FORM_16), employees: '51-100' })).res.status, 400);
+  });
+
+  test('every answer of the newer services is validated', async () => {
+    for (const [slug, service] of Object.entries(ITR_SERVICES)) {
+      if (CONSULTATION_SERVICES.includes(slug)) continue;
+      for (const [key, spec] of Object.entries(service.fields)) {
+        const bad = spec.type === 'year' ? ['2010-11', 'FY 2025-2026'] : ['nonsense', spec.values[0].toUpperCase()];
+        for (const value of [...bad, undefined, '', '__proto__', ['x']]) {
+          const { res } = await createDraft(slug, { ...validAnswers(slug), [key]: value });
+          assert.equal(res.status, 400, `${slug} ${key}=${JSON.stringify(value)}`);
+        }
+        if (spec.type === 'year') continue;
+        for (const value of spec.values) {
+          const { res } = await createDraft(slug, { ...validAnswers(slug), [key]: value });
+          assert.equal(res.status, 201, `${slug} ${key}=${value}`);
+        }
+      }
     }
   });
 
@@ -258,6 +346,10 @@ describe('ITR service flows - checkout API', () => {
 
   test('draft validation', async () => {
     for (const slug of SLUGS) {
+      assert.equal((await createDraft(slug, { ...validAnswers(slug), email: 'not-an-email' })).res.status, 400);
+      assert.equal((await createDraft(slug, { ...validAnswers(slug), cityPincode: '   ' })).res.status, 400);
+    }
+    for (const slug of CONSULTATION_SERVICES) {
       assert.equal((await createDraft(slug, { email: 'not-an-email' })).res.status, 400);
       assert.equal((await createDraft(slug, { phone: '12345' })).res.status, 400);
       assert.equal((await createDraft(slug, { phone: '5876543210' })).res.status, 400);

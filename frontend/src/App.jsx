@@ -6,6 +6,7 @@ import { SocketProvider } from './context/SocketContext.jsx';
 import { MainLayout, BareLayout, ScrollToTop } from './layouts';
 import { GST_SERVICE_ROUTES } from './pages/gst-services/routes.js';
 import { ITR_SERVICE_ROUTES } from './pages/itr-services/routes.js';
+import { MCA_SERVICE_ROUTES } from './pages/mca-services/routes.js';
 import { TDS_ROUTE } from './pages/tds-return-filing/routes.js';
 import { NOTICE_ROUTE } from './pages/notice-response/routes.js';
 
@@ -67,6 +68,7 @@ const PrivateLimitedCompanyModule = lazy(() => import('./pages/startup/private-l
 const PublicCompanyModule = lazy(() => import('./pages/startup/public-limited-company/index.jsx'));
 const ProducerCompanyModule = lazy(() => import('./pages/startup/producer-company/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
+const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
 const NoticeResponseModule = lazy(() => import('./pages/notice-response/index.jsx'));
 const CaDashboardPage = lazy(() => import('./pages/CaDashboardPage.jsx'));
@@ -246,6 +248,10 @@ export default function App() {
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)
+                )}
+                {/* MCA service flows: the same 3 steps, configured in pages/mca-services */}
+                {MCA_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
+                  flowRoutes(slug, aliases, <McaServiceModule key={slug} slug={slug} />)
                 )}
                 {/* TDS return filing flow: the same 3 steps with its own checkout */}
                 {flowRoutes(TDS_ROUTE.slug, TDS_ROUTE.aliases, <TdsReturnFilingModule />)}

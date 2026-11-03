@@ -50,7 +50,7 @@ export default function PaymentMethods({ methods, totalAmount, isProcessing, err
       disabled={isProcessing}
       className="w-full bg-[#002B49] hover:bg-[#001D38] disabled:opacity-60 text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition cursor-pointer text-base"
     >
-      {isProcessing ? 'Processing...' : `PAY ₹${totalAmount}`}
+      {isProcessing ? 'Processing...' : `PAY ₹${totalAmount.toLocaleString('en-IN')}`}
     </button>
   );
 

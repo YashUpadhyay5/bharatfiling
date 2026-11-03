@@ -2,9 +2,9 @@
 
 Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then run `npm run catalog:export` in `frontend/`.
 
-- **78 services** in 8 header menus. **30 live** end-to-end, **48 catalogue** (detail page + request via the contact desk).
+- **78 services** in 8 header menus. **55 live** end-to-end, **23 catalogue** (detail page + request via the contact desk).
 - Prices are the professional fee in INR **before 18% GST and government fees**.
-- **20** prices are already used on the live site; **56** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
+- **29** prices are already used on the live site; **47** are DRAFT market-benchmark prices waiting for confirmation (marked `draft`).
 
 ## Startup
 
@@ -13,14 +13,14 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 | Service | Fee (ex GST) | With GST | Unit | Timeline | Govt fee | Status | Price | URL |
 |---|---:|---:|---|---|---|---|---|---|
 | Proprietorship | ₹999 | ₹1,179 | one-time | 2-3 working days | No government fee | catalog | draft | `/services/proprietorship` |
-| Partnership | ₹2,499 | ₹2,949 | one-time | 5-7 working days | Stamp duty on the deed at actuals (state-wise) | catalog | draft | `/services/partnership-firm` |
-| One Person Company | ₹5,499 | ₹6,489 | one-time | 10-14 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/one-person-company` |
+| Partnership | ₹2,499 | ₹2,949 | one-time | 5-7 working days | Stamp duty on the deed at actuals (state-wise) | live | existing | `/services/partnership-firm` |
+| One Person Company | ₹5,499 | ₹6,489 | one-time | 10-14 working days | MCA fees and stamp duty at actuals (vary by state and capital) | live | existing | `/services/one-person-company` |
 | Limited Liability Partnership | ₹4,499 | ₹5,309 | one-time | 10-14 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/llp-registration` |
-| Private Limited Company | ₹4,999 | ₹5,899 | one-time | 10-15 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | existing | `/services/private-limited-company` |
+| Private Limited Company | ₹4,999 | ₹5,899 | one-time | 10-15 working days | MCA fees and stamp duty at actuals (vary by state and capital) | live | existing | `/services/private-limited-company` |
 | Section 8 Company | ₹14,999 | ₹17,699 | one-time | 25-35 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/section-8-company` |
 | Trust Registration | ₹6,999 | ₹8,259 | one-time | 7-10 working days | Stamp duty and registration fee at actuals (state-wise) | catalog | draft | `/services/trust-registration` |
-| Public Limited Company | ₹24,999 | ₹29,499 | one-time | 15-20 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/public-limited-company` |
-| Producer Company | ₹19,999 | ₹23,599 | one-time | 20-30 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/producer-company` |
+| Public Limited Company | ₹24,999 | ₹29,499 | one-time | 15-20 working days | MCA fees and stamp duty at actuals (vary by state and capital) | live | existing | `/services/public-limited-company` |
+| Producer Company | ₹19,999 | ₹23,599 | one-time | 20-30 working days | MCA fees and stamp duty at actuals (vary by state and capital) | live | existing | `/services/producer-company` |
 | Indian Subsidiary | ₹9,999 | ₹11,799 | one-time | 15-25 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/indian-subsidiary` |
 
 ## Registrations
@@ -31,7 +31,7 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 |---|---:|---:|---|---|---|---|---|---|
 | GST Registration | ₹1,499 | ₹1,769 | one-time | 3-7 working days | No government fee | live | existing | `/services/gst-registration` |
 | MSME / Udyam Registration | ₹2,899 | ₹3,421 | one-time | 1-2 working days | No government fee | live | existing | `/services/udyam-registration` |
-| Import Export Code (IEC) | ₹1,499 | ₹1,769 | one-time | 2-4 working days | No government fee | catalog | draft | `/services/import-export-code` |
+| Import Export Code (IEC) | ₹1,499 | ₹1,769 | one-time | 2-4 working days | No government fee | live | existing | `/services/import-export-code` |
 | FSSAI Food License | ₹1,999 | ₹2,359 | one-time | 5-10 working days | FSSAI fee at actuals (depends on licence type and turnover) | live | existing | `/services/fssai-registration` |
 | Professional Tax (PT) | ₹1,499 | ₹1,769 | one-time | 3-5 working days | State PT fee at actuals | live | existing | `/services/professional-tax` |
 | Shop & Establishment | ₹1,999 | ₹2,359 | one-time | 3-7 working days | State fee at actuals | live | existing | `/services/shop-and-establishment-license` |
@@ -54,11 +54,11 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 | Trademark Objection Reply | ₹2,999 | ₹3,539 | per reply | 3-5 working days | No Registry fee for examination reply; hearing fees at actuals if scheduled | live | existing | `/services/trademark-objection` |
 | Trademark Opposition | ₹5,999 | ₹7,079 | per stage | 5-7 working days per stage | Registry fee at actuals | catalog | draft | `/services/trademark-opposition` |
 | Trademark Renewal | ₹1,999 | ₹2,359 | per class | 1-2 working days | Govt fee Rs 9,000 per class via Form TM-R at actuals | live | existing | `/services/trademark-renewal` |
-| Copyright Registration | ₹2,999 | ₹3,539 | per work | 7-10 working days to file | Copyright Office fee at actuals | catalog | draft | `/services/copyright-registration` |
-| Patent Registration | ₹14,999 | ₹17,699 | per application | 10-15 working days to file | Patent Office fee at actuals | catalog | draft | `/services/patent-registration` |
+| Copyright Registration | ₹2,999 | ₹3,539 | per work | 7-10 working days to file | Copyright Office fee at actuals | live | existing | `/services/copyright-registration` |
+| Patent Registration | ₹14,999 | ₹17,699 | per application | 10-15 working days to file | Patent Office fee at actuals | live | existing | `/services/patent-registration` |
 | Logo Design & IP Protection | ₹2,999 | ₹3,539 | one-time | 4-6 working days | No government fee | catalog | draft | `/services/logo-design-ip` |
-| Provisional Patent | ₹7,999 | ₹9,439 | per application | 7-10 working days to file | Patent Office fee at actuals | catalog | draft | `/services/provisional-patent` |
-| Trademark Assignment | ₹2,999 | ₹3,539 | per mark | 5-7 working days | Registry fee at actuals | catalog | draft | `/services/trademark-assignment` |
+| Provisional Patent | ₹7,999 | ₹9,439 | per application | 7-10 working days to file | Patent Office fee at actuals | live | existing | `/services/provisional-patent` |
+| Trademark Assignment | ₹2,999 | ₹3,539 | per mark | 5-7 working days | Registry fee at actuals | live | existing | `/services/trademark-assignment` |
 
 ## GST
 
@@ -87,13 +87,13 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 | HRA Tax Calculator (Sec 10(13A)) | Free | - | free tool | Instant | No government fee | live | existing | `/tools/hra-calculator` |
 | Income Tax Return (ITR 1-4) | from ₹2,499 | ₹2,949 | per filing | 1-3 working days | No government fee | live | draft | `/services/itr-filing` |
 | ITR Filing for Sole Proprietorship | from ₹2,499 | ₹2,949 | per filing | 1-3 working days | No government fee | live | draft | `/services/itr-sole-proprietorship` |
-| Business Tax Return (ITR 5-7) | ₹5,999 | ₹7,079 | per filing | 5-7 working days | No government fee | catalog | draft | `/services/business-itr` |
+| Business Tax Return (ITR 5-7) | ₹5,999 | ₹7,079 | per filing | 5-7 working days | No government fee | live | draft | `/services/business-itr` |
 | TDS Return Filing (24Q / 26Q) | ₹1,499 | ₹1,769 | per quarter | By the quarterly due date | No government fee | live | draft | `/services/tds-return-filing` |
-| 15CA / 15CB Certification | ₹2,499 | ₹2,949 | per certificate | 1-2 working days | No government fee | catalog | draft | `/services/form-15ca-15cb` |
+| 15CA / 15CB Certification | ₹2,499 | ₹2,949 | per certificate | 1-2 working days | No government fee | live | draft | `/services/form-15ca-15cb` |
 | Income Tax Notice Response | ₹2,999 | ₹3,539 | per notice | 3-7 working days | No government fee | live | draft | `/services/income-tax-notice-response` |
-| Capital Gains Advisory | ₹1,999 | ₹2,359 | per session | 2-3 working days | No government fee | catalog | draft | `/services/capital-gains-advisory` |
-| Advance Tax Computation | ₹999 | ₹1,179 | per quarter | 1-2 working days | No government fee | catalog | draft | `/services/advance-tax-computation` |
-| Form 16 Generation | ₹999 | ₹1,179 | per batch (up to 10 employees) | 2-3 working days | No government fee | catalog | draft | `/services/form-16-generation` |
+| Capital Gains Advisory | ₹1,999 | ₹2,359 | per session | 2-3 working days | No government fee | live | draft | `/services/capital-gains-advisory` |
+| Advance Tax Computation | ₹999 | ₹1,179 | per quarter | 1-2 working days | No government fee | live | draft | `/services/advance-tax-computation` |
+| Form 16 Generation | ₹999 | ₹1,179 | per batch (up to 10 employees) | 2-3 working days | No government fee | live | draft | `/services/form-16-generation` |
 
 ## MCA
 
@@ -101,16 +101,16 @@ Generated from `frontend/src/data/serviceCatalog.js` - edit prices there, then r
 
 | Service | Fee (ex GST) | With GST | Unit | Timeline | Govt fee | Status | Price | URL |
 |---|---:|---:|---|---|---|---|---|---|
-| Company Annual ROC Filing | ₹3,499 | ₹4,129 | per year | 7-10 working days | MCA filing fees at actuals (based on capital) | catalog | existing | `/services/company-annual-roc-filing` |
-| LLP Form 11 & Form 8 | ₹2,999 | ₹3,539 | per year | 5-7 working days | MCA fees at actuals | catalog | draft | `/services/llp-form-11-form-8` |
-| Director KYC (DIR-3 KYC) | ₹499 | ₹589 | per director | 1-2 working days | No government fee | catalog | draft | `/services/director-kyc-dir-3` |
-| Add / Remove Director | ₹2,499 | ₹2,949 | per change | 5-7 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/add-remove-director` |
-| Increase Authorized Capital | ₹2,999 | ₹3,539 | per change | 5-7 working days | MCA fee and stamp duty on the increase at actuals | catalog | draft | `/services/increase-authorized-capital` |
-| Change Registered Office | ₹3,499 | ₹4,129 | per change | 7-12 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/change-registered-office` |
-| MOA / AOA Amendment | ₹3,999 | ₹4,719 | per amendment | 7-10 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/moa-aoa-amendment` |
-| Strike Off Company | ₹7,999 | ₹9,439 | one-time | 45-60 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/strike-off-company` |
-| Strike Off LLP | ₹5,999 | ₹7,079 | one-time | 30-45 working days | MCA fees and stamp duty at actuals (vary by state and capital) | catalog | draft | `/services/strike-off-llp` |
-| Charge Satisfaction (CHG-1) | ₹2,999 | ₹3,539 | per charge | 5-7 working days | MCA fee at actuals | catalog | draft | `/services/charge-satisfaction-chg-1` |
+| Company Annual ROC Filing | ₹3,499 | ₹4,129 | per year | 7-10 working days | MCA filing fees at actuals (based on capital) | live | existing | `/services/company-annual-roc-filing` |
+| LLP Form 11 & Form 8 | ₹2,999 | ₹3,539 | per year | 5-7 working days | MCA fees at actuals | live | draft | `/services/llp-form-11-form-8` |
+| Director KYC (DIR-3 KYC) | ₹499 | ₹589 | per director | 1-2 working days | Nil on time; ₹5,000 if late or to reactivate a DIN; ₹500 to update details | live | draft | `/services/director-kyc-dir-3` |
+| Add / Remove Director | ₹2,499 | ₹2,949 | per director | 5-7 working days | MCA fees and stamp duty at actuals (vary by state and capital) | live | draft | `/services/add-remove-director` |
+| Increase Authorized Capital | ₹2,999 | ₹3,539 | per change | 5-7 working days | MCA fee and stamp duty on the increase at actuals | live | draft | `/services/increase-authorized-capital` |
+| Change Registered Office | from ₹3,499 | ₹4,129 | per change | 7-12 working days under the same Registrar; 2-6 months otherwise | MCA fees and stamp duty at actuals (vary by state and capital) | live | draft | `/services/change-registered-office` |
+| MOA / AOA Amendment | ₹3,999 | ₹4,719 | per amendment | 7-10 working days | MCA fees and stamp duty at actuals (vary by state and capital) | live | draft | `/services/moa-aoa-amendment` |
+| Strike Off Company | ₹7,999 | ₹9,439 | one-time | 45-60 working days | ₹10,000 STK-2 fee and stamp duty at actuals | live | draft | `/services/strike-off-company` |
+| Strike Off LLP | ₹5,999 | ₹7,079 | one-time | 30-45 working days | ₹500 to ₹1,000 Form 24 fee at actuals | live | draft | `/services/strike-off-llp` |
+| Charge Registration & Satisfaction | ₹2,999 | ₹3,539 | per charge | 5-7 working days | MCA fee at actuals, higher when filed late | live | draft | `/services/charge-satisfaction-chg-1` |
 
 ## Compliance
 
