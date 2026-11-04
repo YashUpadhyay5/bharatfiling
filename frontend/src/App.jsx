@@ -73,6 +73,8 @@ const LLPRegistrationModule = lazy(() => import('./pages/startup/llp/index.jsx')
 const IndianSubsidiaryModule = lazy(() => import('./pages/startup/indian-subsidiary/index.jsx'));
 const Section8Module = lazy(() => import('./pages/startup/section-8/index.jsx'));
 const CAConsultationModule = lazy(() => import('./pages/ca-consultation/index.jsx'));
+const LegalConsultationModule = lazy(() => import('./pages/legal-consultation/index.jsx'));
+const StartupStructuringModule = lazy(() => import('./pages/startup-structuring-advisory/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -320,6 +322,26 @@ export default function App() {
                 <Route path="/talk-to-ca" element={<CAConsultationModule />} />
                 <Route path="/apply/ca-consultation" element={<CAConsultationModule />} />
                 <Route path="/apply/chartered-accountant-services" element={<CAConsultationModule />} />
+
+                {/* Online Legal Consultation / Talk to a Lawyer */}
+                <Route path="/services/legal-consultation" element={<LegalConsultationModule />} />
+                <Route path="/services/talk-to-a-lawyer" element={<LegalConsultationModule />} />
+                <Route path="/services/talk-to-lawyer" element={<LegalConsultationModule />} />
+                <Route path="/services/lawyer-consultation" element={<LegalConsultationModule />} />
+                <Route path="/legal-consultation" element={<LegalConsultationModule />} />
+                <Route path="/talk-to-a-lawyer" element={<LegalConsultationModule />} />
+                <Route path="/talk-to-lawyer" element={<LegalConsultationModule />} />
+                <Route path="/apply/legal-consultation" element={<LegalConsultationModule />} />
+                <Route path="/apply/talk-to-a-lawyer" element={<LegalConsultationModule />} />
+
+                {/* Startup Structuring Advisory */}
+                <Route path="/services/startup-structuring-advisory" element={<StartupStructuringModule />} />
+                <Route path="/services/startup-structuring" element={<StartupStructuringModule />} />
+                <Route path="/services/startup-advisory" element={<StartupStructuringModule />} />
+                <Route path="/startup-structuring-advisory" element={<StartupStructuringModule />} />
+                <Route path="/startup-structuring" element={<StartupStructuringModule />} />
+                <Route path="/apply/startup-structuring-advisory" element={<StartupStructuringModule />} />
+                <Route path="/apply/startup-structuring" element={<StartupStructuringModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)
