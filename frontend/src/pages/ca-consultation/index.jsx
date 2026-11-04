@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
-import CAConsultationLandingPage from './1-CAConsultationLandingPage.jsx';
 
-export { CAConsultationLandingPage };
+import CAConsultationLandingPage from './1-CAConsultationLandingPage.jsx';
+import CAConsultationSchedulePage from './2-CAConsultationSchedulePage.jsx';
+import CAConsultationPaymentPage from './3-CAConsultationPaymentPage.jsx';
+
+export {
+  CAConsultationLandingPage,
+  CAConsultationSchedulePage,
+  CAConsultationPaymentPage,
+};
 
 export default function CAConsultationModule() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { user } = useAuth();
+
+  const stepParam = searchParams.get('step');
+  const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
+  const currentStep = [1, 2, 3].includes(initialStep) ? initialStep : 1;
 
   const getInitialDraft = () => {
     try {
@@ -20,12 +30,17 @@ export default function CAConsultationModule() {
       // Ignore parse errors
     }
     return {
-      email: user?.email || '',
-      phone: user?.phone || '',
+      email: user?.email || 'yashupadhyay@example.com',
+      phone: user?.phone || '9876543210',
       language: 'English',
       problemType: 'Business Structure Consultation',
       whatsappUpdates: true,
-      selectedPlanId: 'starter',
+      scheduledDate: '4 November 2026',
+      scheduledDay: 4,
+      scheduledMonth: 'November',
+      scheduledYear: 2026,
+      scheduledTimeSlot: '1:30 PM',
+      totalAmount: 499,
       orderNumber: `#CA-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -44,7 +59,7 @@ export default function CAConsultationModule() {
     }
   }, [formData]);
 
-  // Lead submit handler
+  // Step 1: Submit lead or book call -> Advance to Step 2 (Schedule Date & Time)
   const handleLeadSubmit = async (leadData) => {
     const updated = {
       ...formData,
@@ -53,37 +68,91 @@ export default function CAConsultationModule() {
     setFormData(updated);
 
     try {
-      // Send lead to backend API
-      await fetch('/api/v1/ca/consultation/lead', {
+      // Record lead in backend API
+      await fetch('/api/v1/ca-consultation/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(leadData),
       });
     } catch {
-      // Continue gracefully even if network is offline
+      // Fallback continues smoothly
     }
 
-    alert(
-      `Thank you! A verified Chartered Accountant specialized in "${leadData.problemType}" has been notified. You will receive an instant callback at ${leadData.phone}.`
-    );
+    setSearchParams({ step: '2' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Select Plan handler
+  // Step 1: Select Plan -> Advance to Step 2
   const handleSelectPlan = (planId) => {
     setFormData((prev) => ({
       ...prev,
       selectedPlanId: planId,
     }));
+    setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 2: Back to Step 1
+  const handleBackToStep1 = () => {
+    setSearchParams({ step: '1' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 2: Schedule proceed -> Advance to Step 3 (Payment Desk)
+  const handleScheduleProceed = (scheduleData) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...scheduleData,
+    }));
+    setSearchParams({ step: '3' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 3: Back to Step 2
+  const handleBackToStep2 = () => {
+    setSearchParams({ step: '2' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 3: Payment completed callback
+  const handlePaymentSuccess = (receiptData) => {
+    setFormData((prev) => ({
+      ...prev,
+      paymentCompleted: true,
+      transactionId: receiptData.transactionId,
+      paidAt: receiptData.date,
+    }));
   };
 
   return (
     <main className="min-h-screen bg-white">
-      <CAConsultationLandingPage
-        initialData={formData}
-        onSubmitLead={handleLeadSubmit}
-        onSelectPlan={handleSelectPlan}
-      />
+      {/* Page 1: CA Consultation Landing Page */}
+      {currentStep === 1 && (
+        <CAConsultationLandingPage
+          initialData={formData}
+          onSubmitLead={handleLeadSubmit}
+          onSelectPlan={handleSelectPlan}
+        />
+      )}
+
+      {/* Page 2: Date & Time Schedule Page (1:1 with media_1793774635144_045925d5.png) */}
+      {currentStep === 2 && (
+        <CAConsultationSchedulePage
+          formData={formData}
+          onBack={handleBackToStep1}
+          onProceed={handleScheduleProceed}
+        />
+      )}
+
+      {/* Page 3: Payment Desk Page (1:1 with media_1793774683308_03149141.png) */}
+      {currentStep === 3 && (
+        <CAConsultationPaymentPage
+          formData={formData}
+          orderId={formData.orderNumber}
+          onBack={handleBackToStep2}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      )}
     </main>
   );
 }

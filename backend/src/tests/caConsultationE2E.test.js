@@ -121,4 +121,53 @@ describe('Online CA Consultation Module - End-to-End & Database Verification', (
     assert.strictEqual(appInDb.fields_data.phone, '9876543210');
     assert.strictEqual(appInDb.fields_data.problem_type, 'Business Structure Consultation');
   });
+
+  test('5. Slot Scheduling API (POST /schedule) - Updates slot in database', async () => {
+    assert.ok(createdLeadId, 'Need created lead ID');
+
+    const res = await fetch(`${baseUrl}/schedule`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        leadId: createdLeadId,
+        scheduledDate: '4 November 2026',
+        scheduledTimeSlot: '1:30 PM',
+      }),
+    });
+
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, true);
+    assert.strictEqual(data.scheduledDate, '4 November 2026');
+    assert.strictEqual(data.scheduledTimeSlot, '1:30 PM');
+
+    const appInDb = db.getApplications().find((a) => a.id === createdLeadId);
+    assert.strictEqual(appInDb.status, 'SCHEDULED');
+    assert.strictEqual(appInDb.scheduled_date, '4 November 2026');
+    assert.strictEqual(appInDb.scheduled_time_slot, '1:30 PM');
+  });
+
+  test('6. Payment Settlement API (POST /payment) - Confirms ₹499 appointment & creates transaction', async () => {
+    const res = await fetch(`${baseUrl}/payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId: `#CA-${Math.floor(100000 + Math.random() * 900000)}`,
+        method: 'UPI',
+        subMethod: 'PhonePe',
+        amount: 499,
+        scheduledDate: '4 November 2026',
+        scheduledTimeSlot: '1:30 PM',
+        problemType: 'Business Structure Consultation',
+      }),
+    });
+
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, true);
+    assert.strictEqual(data.amount, 499);
+    assert.ok(data.transactionId.startsWith('BFP-CA-'));
+    assert.ok(data.assignedCA.includes('CA Rajesh Narang'));
+    assert.ok(data.callNotice.includes('80448'));
+  });
 });

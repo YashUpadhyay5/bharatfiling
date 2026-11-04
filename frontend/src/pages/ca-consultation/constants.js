@@ -338,6 +338,45 @@ export const CONSULTATION_PLANS = [
   },
 ];
 
+export const SCHEDULE_TIME_SLOTS = {
+  Afternoon: [
+    { id: '1:30 PM', label: '1:30 PM' },
+    { id: '2:00 PM', label: '2:00 PM' },
+    { id: '2:30 PM', label: '2:30 PM' },
+    { id: '3:00 PM', label: '3:00 PM' },
+    { id: '3:30 PM', label: '3:30 PM' },
+  ],
+  Evening: [
+    { id: '4:00 PM', label: '4:00 PM' },
+    { id: '4:30 PM', label: '4:30 PM' },
+    { id: '5:00 PM', label: '5:00 PM' },
+    { id: '5:30 PM', label: '5:30 PM' },
+    { id: '6:00 PM', label: '6:00 PM' },
+  ],
+};
+
+export const POPULAR_BANKS = [
+  { name: 'State Bank of India', code: 'SBI', icon: '🏛️' },
+  { name: 'HDFC Bank', code: 'HDFC', icon: '🏦' },
+  { name: 'ICICI Bank', code: 'ICICI', icon: '🏦' },
+  { name: 'Axis Bank', code: 'AXIS', icon: '🏦' },
+  { name: 'Kotak Mahindra Bank', code: 'KOTAK', icon: '🏛️' },
+  { name: 'Punjab National Bank', code: 'PNB', icon: '🏦' },
+];
+
+export const ALL_NET_BANKS = [
+  'Bank of Baroda',
+  'Canara Bank',
+  'Union Bank of India',
+  'Bank of India',
+  'IndusInd Bank',
+  'Federal Bank',
+  'Yes Bank',
+  'IDFC FIRST Bank',
+  'Central Bank of India',
+  'Indian Overseas Bank',
+];
+
 export const FAQS = [
   {
     question: 'What are online CA services?',

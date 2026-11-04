@@ -120,4 +120,143 @@ router.post('/quote', (req, res) => {
   }
 });
 
+/**
+ * POST /schedule
+ * Saves scheduled date and time slot for CA consultation.
+ */
+router.post('/schedule', optionalAuth, (req, res) => {
+  try {
+    const {
+      leadId,
+      applicationId,
+      scheduledDate = '4 November 2026',
+      scheduledTimeSlot = '1:30 PM',
+    } = req.body;
+
+    const targetId = leadId || applicationId;
+    const apps = db.getApplications();
+    const app = apps.find((a) => a.id === targetId || a.application_number === targetId);
+
+    if (app) {
+      app.scheduled_date = scheduledDate;
+      app.scheduled_time_slot = scheduledTimeSlot;
+      app.status = 'SCHEDULED';
+      app.updated_at = new Date().toISOString();
+      db.saveApplications(apps);
+    }
+
+    res.json({
+      success: true,
+      message: 'Consultation slot successfully scheduled.',
+      scheduledDate,
+      scheduledTimeSlot,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to schedule consultation slot.',
+      error: err.message,
+    });
+  }
+});
+
+/**
+ * POST /payment
+ * Settles payment for Online CA Consultation (₹499) and confirms appointment.
+ */
+router.post('/payment', optionalAuth, (req, res) => {
+  try {
+    const {
+      orderId,
+      method = 'UPI',
+      subMethod = 'PhonePe',
+      amount = 499,
+      scheduledDate = '4 November 2026',
+      scheduledTimeSlot = '1:30 PM',
+      problemType = 'Business Structure Consultation',
+      applicantEmail = 'client@bharatfiling.com',
+      applicantPhone = '9876543210',
+    } = req.body;
+
+    const generatedTxnId = `BFP-CA-${Date.now().toString().slice(-8)}`;
+    const resolvedOrderId = orderId || `#CA-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const orders = db.getOrders();
+    let order = orders.find((o) => o.id === orderId || o.order_number === orderId);
+
+    if (order) {
+      order.status = 'PAID';
+      order.payment_status = 'PAID';
+      order.payment_method = method;
+      order.transaction_id = generatedTxnId;
+      order.updated_at = new Date().toISOString();
+    } else {
+      order = {
+        id: uuidv4(),
+        order_number: resolvedOrderId,
+        user_id: req.user ? req.user.id : GUEST_USER_ID,
+        service_id: 'ca-consultation',
+        service_name: 'Online CA Consultation (30 Mins)',
+        amount,
+        currency: 'INR',
+        status: 'PAID',
+        payment_status: 'PAID',
+        payment_method: method,
+        transaction_id: generatedTxnId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      orders.push(order);
+    }
+    db.saveOrders(orders);
+
+    const apps = db.getApplications();
+    let app = apps.find((a) => a.id === orderId || a.id === order.application_id);
+    if (app) {
+      app.status = 'CONFIRMED';
+      app.payment_completed = true;
+      app.scheduled_date = scheduledDate;
+      app.scheduled_time_slot = scheduledTimeSlot;
+      app.assigned_officer = 'CA Rajesh Narang (Fellow Chartered Accountant, ICAI)';
+      app.updated_at = new Date().toISOString();
+      db.saveApplications(apps);
+    }
+
+    // Save transaction
+    if (typeof db.getTransactions === 'function' && typeof db.saveTransactions === 'function') {
+      const txns = db.getTransactions();
+      txns.push({
+        id: uuidv4(),
+        order_id: order.id,
+        transaction_id: generatedTxnId,
+        amount,
+        currency: 'INR',
+        status: 'SUCCESS',
+        payment_method: method,
+        gateway: 'BHARATFILING_MOCK_GATEWAY',
+        created_at: new Date().toISOString(),
+      });
+      db.saveTransactions(txns);
+    }
+
+    res.json({
+      success: true,
+      message: 'Payment verified and CA consultation appointment confirmed.',
+      transactionId: generatedTxnId,
+      orderNumber: resolvedOrderId,
+      amount,
+      scheduledDate,
+      scheduledTimeSlot,
+      assignedCA: 'CA Rajesh Narang (Fellow Chartered Accountant, ICAI)',
+      callNotice: 'Our legal & tax expert will call you shortly from 80448 ***** at your scheduled time slot.',
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to settle CA consultation payment.',
+      error: err.message,
+    });
+  }
+});
+
 export default router;
