@@ -75,6 +75,9 @@ const Section8Module = lazy(() => import('./pages/startup/section-8/index.jsx'))
 const CAConsultationModule = lazy(() => import('./pages/ca-consultation/index.jsx'));
 const LegalConsultationModule = lazy(() => import('./pages/legal-consultation/index.jsx'));
 const StartupStructuringModule = lazy(() => import('./pages/startup-structuring-advisory/index.jsx'));
+const GstNoticeHearingModule = lazy(() => import('./pages/gst-notice-hearing/index.jsx'));
+const IncomeTaxDisputeModule = lazy(() => import('./pages/income-tax-dispute-appeals/index.jsx'));
+const TrademarkHearingModule = lazy(() => import('./pages/trademark-hearing-support/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -342,6 +345,34 @@ export default function App() {
                 <Route path="/startup-structuring" element={<StartupStructuringModule />} />
                 <Route path="/apply/startup-structuring-advisory" element={<StartupStructuringModule />} />
                 <Route path="/apply/startup-structuring" element={<StartupStructuringModule />} />
+
+                {/* GST Notice Hearing Representation */}
+                <Route path="/services/gst-notice-hearing" element={<GstNoticeHearingModule />} />
+                <Route path="/services/gst-notice-hearing-representation" element={<GstNoticeHearingModule />} />
+                <Route path="/services/gst-hearing" element={<GstNoticeHearingModule />} />
+                <Route path="/gst-notice-hearing" element={<GstNoticeHearingModule />} />
+                <Route path="/gst-notice-hearing-representation" element={<GstNoticeHearingModule />} />
+                <Route path="/apply/gst-notice-hearing" element={<GstNoticeHearingModule />} />
+                <Route path="/apply/gst-notice-hearing-representation" element={<GstNoticeHearingModule />} />
+
+                {/* Income Tax Dispute & Appeals */}
+                <Route path="/services/income-tax-dispute-appeals" element={<IncomeTaxDisputeModule />} />
+                <Route path="/services/income-tax-dispute" element={<IncomeTaxDisputeModule />} />
+                <Route path="/services/income-tax-appeals" element={<IncomeTaxDisputeModule />} />
+                <Route path="/income-tax-dispute-appeals" element={<IncomeTaxDisputeModule />} />
+                <Route path="/income-tax-dispute" element={<IncomeTaxDisputeModule />} />
+                <Route path="/income-tax-appeals" element={<IncomeTaxDisputeModule />} />
+                <Route path="/apply/income-tax-dispute-appeals" element={<IncomeTaxDisputeModule />} />
+                <Route path="/apply/income-tax-dispute" element={<IncomeTaxDisputeModule />} />
+
+                {/* Trademark Hearing Support */}
+                <Route path="/services/trademark-hearing-support" element={<TrademarkHearingModule />} />
+                <Route path="/services/trademark-hearing" element={<TrademarkHearingModule />} />
+                <Route path="/services/tm-hearing" element={<TrademarkHearingModule />} />
+                <Route path="/trademark-hearing-support" element={<TrademarkHearingModule />} />
+                <Route path="/trademark-hearing" element={<TrademarkHearingModule />} />
+                <Route path="/apply/trademark-hearing-support" element={<TrademarkHearingModule />} />
+                <Route path="/apply/trademark-hearing" element={<TrademarkHearingModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

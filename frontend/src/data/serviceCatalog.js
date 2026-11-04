@@ -428,16 +428,18 @@ export const SERVICES = [
   s('gst-notice-hearing', 'GST Notice Hearing Representation', 'consultation', 3999, 'per hearing', 'As per hearing date',
     'Representation before the GST officer on notices and show-cause proceedings.',
     ['Notice and order copies', 'Replies already filed', 'Authorisation letter'],
-    ['Preparation of submissions', 'Appearance by a professional', 'Hearing note']),
+    ['Preparation of submissions', 'Appearance by a professional', 'Hearing note'],
+    { status: 'live', path: '/services/gst-notice-hearing', priceStatus: 'existing', aliases: ['gst-notice-hearing-representation', 'gst-hearing'] }),
   s('income-tax-dispute-appeals', 'Income Tax Dispute & Appeals', 'consultation', 7999, 'starting from', 'Case dependent',
     'Appeals before CIT(A) and ITAT and representation in assessments.',
     ['Assessment order', 'Return and computation', 'Past correspondence'],
     ['Case assessment', 'Appeal drafting and filing', 'Representation'],
-    { from: true }),
+    { status: 'live', path: '/services/income-tax-dispute-appeals', from: true, priceStatus: 'existing', aliases: ['income-tax-dispute', 'income-tax-appeals'] }),
   s('trademark-hearing-support', 'Trademark Hearing Support', 'consultation', 3499, 'per hearing', 'As per hearing date',
     'Advocate representation in Trade Marks Registry hearings.',
     ['Examination report or notice', 'Application details', 'Evidence of use'],
-    ['Written submissions', 'Appearance at the hearing', 'Order tracking']),
+    ['Written submissions', 'Appearance at the hearing', 'Order tracking'],
+    { status: 'live', path: '/services/trademark-hearing-support', priceStatus: 'existing', aliases: ['trademark-hearing', 'tm-hearing'] }),
 ];
 
 /* -------------------------------------------------------------------- helpers */
