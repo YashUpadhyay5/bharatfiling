@@ -72,6 +72,7 @@ const TrustRegistrationModule = lazy(() => import('./pages/startup/trust/index.j
 const LLPRegistrationModule = lazy(() => import('./pages/startup/llp/index.jsx'));
 const IndianSubsidiaryModule = lazy(() => import('./pages/startup/indian-subsidiary/index.jsx'));
 const Section8Module = lazy(() => import('./pages/startup/section-8/index.jsx'));
+const CAConsultationModule = lazy(() => import('./pages/ca-consultation/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -305,6 +306,20 @@ export default function App() {
                 <Route path="/apply/section-8" element={<Section8Module />} />
                 <Route path="/apply/section8" element={<Section8Module />} />
                 <Route path="/apply/ngo-registration" element={<Section8Module />} />
+
+                {/* Online CA Consultation & Chartered Accountant Services */}
+                <Route path="/services/ca-consultation" element={<CAConsultationModule />} />
+                <Route path="/services/chartered-accountant-services" element={<CAConsultationModule />} />
+                <Route path="/services/chartered-accountant" element={<CAConsultationModule />} />
+                <Route path="/services/talk-to-ca" element={<CAConsultationModule />} />
+                <Route path="/services/talk-to-a-chartered-accountant" element={<CAConsultationModule />} />
+                <Route path="/chartered-accountant-services" element={<CAConsultationModule />} />
+                <Route path="/chartered-accountant" element={<CAConsultationModule />} />
+                <Route path="/ca-consultation" element={<CAConsultationModule />} />
+                <Route path="/talk-to-a-chartered-accountant" element={<CAConsultationModule />} />
+                <Route path="/talk-to-ca" element={<CAConsultationModule />} />
+                <Route path="/apply/ca-consultation" element={<CAConsultationModule />} />
+                <Route path="/apply/chartered-accountant-services" element={<CAConsultationModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

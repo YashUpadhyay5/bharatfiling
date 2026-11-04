@@ -415,7 +415,8 @@ export const SERVICES = [
   /* ------------------------------------------------------------ Consultation */
   s('ca-consultation', 'CA Consultation', 'consultation', 499, '30 minutes', 'Within 24 hours',
     'One-to-one call with a Chartered Accountant on tax, GST and accounts.',
-    ['Short note of your query', 'Relevant documents (optional)'], ['30-minute call', 'Summary of advice by email']),
+    ['Short note of your query', 'Relevant documents (optional)'], ['30-minute call', 'Summary of advice by email'],
+    { status: 'live', path: '/services/ca-consultation', priceStatus: 'existing', aliases: ['chartered-accountant-services', 'chartered-accountant', 'talk-to-ca', 'talk-to-a-chartered-accountant'] }),
   s('legal-consultation', 'Legal Consultation', 'consultation', 799, '30 minutes', 'Within 24 hours',
     'Speak to an advocate on contracts, company law and disputes.',
     ['Short note of your query', 'Relevant documents (optional)'], ['30-minute call', 'Summary of advice by email'],
