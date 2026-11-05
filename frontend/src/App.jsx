@@ -79,6 +79,7 @@ const GstNoticeHearingModule = lazy(() => import('./pages/gst-notice-hearing/ind
 const IncomeTaxDisputeModule = lazy(() => import('./pages/income-tax-dispute-appeals/index.jsx'));
 const TrademarkHearingModule = lazy(() => import('./pages/trademark-hearing-support/index.jsx'));
 const MonthlyPayrollModule = lazy(() => import('./pages/monthly-payroll/index.jsx'));
+const StatutoryTdsModule = lazy(() => import('./pages/statutory-tds-compliance/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -386,6 +387,18 @@ export default function App() {
                 <Route path="/payroll" element={<MonthlyPayrollModule />} />
                 <Route path="/apply/monthly-payroll" element={<MonthlyPayrollModule />} />
                 <Route path="/apply/online-payroll-management" element={<MonthlyPayrollModule />} />
+
+                {/* Statutory TDS Compliance & Return Filing */}
+                <Route path="/services/statutory-tds-compliance" element={<StatutoryTdsModule />} />
+                <Route path="/services/statutory-tds" element={<StatutoryTdsModule />} />
+                <Route path="/services/tds-compliance" element={<StatutoryTdsModule />} />
+                <Route path="/services/tds-compliance-filing" element={<StatutoryTdsModule />} />
+                <Route path="/statutory-tds-compliance" element={<StatutoryTdsModule />} />
+                <Route path="/statutory-tds" element={<StatutoryTdsModule />} />
+                <Route path="/tds-compliance" element={<StatutoryTdsModule />} />
+                <Route path="/apply/statutory-tds-compliance" element={<StatutoryTdsModule />} />
+                <Route path="/apply/statutory-tds" element={<StatutoryTdsModule />} />
+                <Route path="/apply/tds-compliance" element={<StatutoryTdsModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)
