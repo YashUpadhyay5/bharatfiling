@@ -42,6 +42,7 @@ import pfEsiRoutes from './routes/registrations/pf-esi-monthly-returns/index.js'
 import virtualCfoRoutes from './routes/registrations/virtual-cfo/index.js';
 import secretarialAuditRoutes from './routes/registrations/secretarial-audit-registers/index.js';
 import shopActRenewalRoutes from './routes/registrations/shop-act-renewal/index.js';
+import factoryLicenseRoutes from './routes/registrations/factory-license-compliance/index.js';
 import trademarkRoutes from './routes/trademark/index.js';
 import copyrightRoutes from './routes/copyright/index.js';
 import patentRoutes from './routes/patent/index.js';
@@ -217,6 +218,9 @@ app.use('/api/v1/statutory-registers', secretarialAuditRoutes);
 app.use('/api/v1/shop-act-renewal', shopActRenewalRoutes);
 app.use('/api/v1/shop-establishment-renewal', shopActRenewalRoutes);
 app.use('/api/v1/gumasta-renewal', shopActRenewalRoutes);
+app.use('/api/v1/factory-license-compliance', factoryLicenseRoutes);
+app.use('/api/v1/factory-license', factoryLicenseRoutes);
+app.use('/api/v1/dish-compliance', factoryLicenseRoutes);
 app.use('/api/v1/trademark', trademarkRoutes);
 app.use('/api/v1/trademark-registration', trademarkRoutes);
 app.use('/api/v1/trademark-renewal', trademarkRoutes);

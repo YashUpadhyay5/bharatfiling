@@ -404,7 +404,7 @@ export const SERVICES = [
     'Factory licence, returns and inspection readiness.',
     ['Factory plan approval', 'Machinery and worker details', 'Fire and safety certificates'],
     ['Licence application or renewal', 'Annual returns', 'Inspection checklist'],
-    { govt: 'State factory fees at actuals' }),
+    { status: 'live', path: '/services/factory-license-compliance', priceStatus: 'existing', aliases: ['factory-license', 'dish-compliance'], govt: 'State factory fees at actuals' }),
   s('environmental-consent-pcb', 'Environmental Consent (PCB)', 'compliance', 14999, 'per consent', '20-45 working days',
     'Consent to Establish or Operate from the State Pollution Control Board.',
     ['Site layout and process flow', 'Raw material and waste details', 'Land documents', 'Water and power details'],
