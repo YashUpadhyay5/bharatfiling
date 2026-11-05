@@ -414,7 +414,7 @@ export const SERVICES = [
     'Founder, employment, vendor and non-disclosure agreements drafted by an advocate.',
     ['Names and addresses of the parties', 'Key commercial terms', 'Any existing draft'],
     ['Custom draft', 'One round of revisions', 'Execution guidance'],
-    { govt: 'Stamp duty at actuals' }),
+    { status: 'live', path: '/services/contract-drafting-ndas', priceStatus: 'existing', aliases: ['contract-drafting', 'nda-drafting'], govt: 'Stamp duty at actuals' }),
 
   /* ------------------------------------------------------------ Consultation */
   s('ca-consultation', 'CA Consultation', 'consultation', 499, '30 minutes', 'Within 24 hours',

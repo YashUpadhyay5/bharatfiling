@@ -44,6 +44,7 @@ import secretarialAuditRoutes from './routes/registrations/secretarial-audit-reg
 import shopActRenewalRoutes from './routes/registrations/shop-act-renewal/index.js';
 import factoryLicenseRoutes from './routes/registrations/factory-license-compliance/index.js';
 import environmentalConsentRoutes from './routes/registrations/environmental-consent-pcb/index.js';
+import contractDraftingRoutes from './routes/registrations/contract-drafting-ndas/index.js';
 import trademarkRoutes from './routes/trademark/index.js';
 import copyrightRoutes from './routes/copyright/index.js';
 import patentRoutes from './routes/patent/index.js';
@@ -225,6 +226,9 @@ app.use('/api/v1/dish-compliance', factoryLicenseRoutes);
 app.use('/api/v1/environmental-consent-pcb', environmentalConsentRoutes);
 app.use('/api/v1/environmental-consent', environmentalConsentRoutes);
 app.use('/api/v1/pcb-consent', environmentalConsentRoutes);
+app.use('/api/v1/contract-drafting-ndas', contractDraftingRoutes);
+app.use('/api/v1/contract-drafting', contractDraftingRoutes);
+app.use('/api/v1/nda-drafting', contractDraftingRoutes);
 app.use('/api/v1/trademark', trademarkRoutes);
 app.use('/api/v1/trademark-registration', trademarkRoutes);
 app.use('/api/v1/trademark-renewal', trademarkRoutes);
