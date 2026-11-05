@@ -31,7 +31,7 @@ export default function CAConsultationModule() {
     }
     return {
       email: user?.email || 'yashupadhyay@example.com',
-      phone: user?.phone || '9876543210',
+      phone: user?.phone || '',
       language: 'English',
       problemType: 'Business Structure Consultation',
       whatsappUpdates: true,

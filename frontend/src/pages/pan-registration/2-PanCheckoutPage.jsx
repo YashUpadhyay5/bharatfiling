@@ -25,7 +25,7 @@ export default function PanCheckoutPage({
   const [addonAffidavit, setAddonAffidavit] = useState(Boolean(formData.addonAffidavit));
 
   const applicantName = formData.name || 'Yash Upadhyay';
-  const applicantPhone = formData.phone || '+91 7668976193';
+  const applicantPhone = formData.phone || '';
   const entityType = (formData.entityType || 'individual').toUpperCase();
   const deliveryState = formData.state || 'Karnataka';
 

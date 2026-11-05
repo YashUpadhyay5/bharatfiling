@@ -33,7 +33,7 @@ export default function ProducerCompanyModule() {
     }
     return {
       email: user?.email || 'kisan.agro@gmail.com',
-      phone: user?.phone || '+91 9822019482',
+      phone: user?.phone || '',
       cityPincode: 'Nagpur, 440001',
       language: 'English',
       whatsappUpdates: true,

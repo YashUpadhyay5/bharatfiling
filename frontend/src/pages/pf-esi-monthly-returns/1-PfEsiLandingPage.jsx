@@ -334,7 +334,7 @@ export default function PfEsiLandingPage({
                         onChange={(e) =>
                           setPhone(e.target.value.replace(/\D/g, ''))
                         }
-                        placeholder="9876543210"
+                        placeholder="Enter your mobile number"
                         className={`w-full text-xs pl-12 pr-3.5 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#002B49] transition ${
                           errors.phone
                             ? 'border-rose-400 bg-rose-50/30'

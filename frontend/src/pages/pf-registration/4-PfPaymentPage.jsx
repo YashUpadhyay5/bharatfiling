@@ -81,7 +81,7 @@ export default function PfPaymentPage({
   const customerEmail =
     formData.email || 'ya*****************@com';
   const customerPhone =
-    formData.phone || '+91-*******193';
+    formData.phone || '';
 
   // GSTIN / Business Name editing state (from IndiaFilings Image 1)
   const [gstinOrBusinessName, setGstinOrBusinessName] = useState(

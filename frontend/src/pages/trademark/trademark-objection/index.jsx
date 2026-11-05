@@ -33,7 +33,7 @@ export default function TrademarkObjectionModule() {
     }
     return {
       email: user?.email || 'yashupadhyay@example.com',
-      phone: user?.phone || '+91 7668976193',
+      phone: user?.phone || '',
       cityPincode: 'Bengaluru, 560001',
       whatsappUpdates: true,
       applicationNumber: 'i7q3r7325',

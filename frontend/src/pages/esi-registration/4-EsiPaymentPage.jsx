@@ -81,7 +81,7 @@ export default function EsiPaymentPage({
   const customerEmail =
     formData.email || 'ya*****************@com';
   const customerPhone =
-    formData.phone || '+91-*******193';
+    formData.phone || '';
 
   // GSTIN / Business Name editing state (from IndiaFilings Image 2)
   const [gstinOrBusinessName, setGstinOrBusinessName] = useState(

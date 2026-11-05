@@ -33,7 +33,7 @@ export default function OnePersonCompanyModule() {
     }
     return {
       email: user?.email || 'yashupadhyay@example.com',
-      phone: user?.phone || '+91 7668976193',
+      phone: user?.phone || '',
       proposedCompanyName: 'yash',
       businessAge: 'Less than 1 year',
       nomineeName: '',

@@ -71,7 +71,7 @@ export default function CopyrightPaymentPage({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email || 'yashupadhyay@example.com',
-          phone: formData.phone || '+91 7668976193',
+          phone: formData.phone || '',
           cityPincode: formData.cityPincode || 'Bengaluru, 560001',
           whatsappUpdates: formData.whatsappUpdates ?? true,
           workTitle: formData.workTitle || 'Software Application Source Code',

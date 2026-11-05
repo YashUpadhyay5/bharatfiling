@@ -18,7 +18,7 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const fetchWithRetry = async (url, options = {}, retries = 2, delay = 800) => {
   const method = (options.method || 'GET').toUpperCase();
-  const isRetryable = method === 'GET' || method === 'HEAD' || url.includes('/auth/login') || url.includes('/auth/me') || url.includes('/tools/');
+  const isRetryable = method === 'GET' || method === 'HEAD' || url.includes('/auth/login') || url.includes('/auth/me') || url.includes('/tools/') || url.includes('/phone-verification/');
 
   try {
     const res = await fetch(url, options);
@@ -163,6 +163,34 @@ export const api = {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ current_password, new_password }),
+    });
+    return handleResponse(res);
+  },
+
+  // Mobile number verification on service forms (components/common/PhoneVerificationGate.jsx)
+  startPhoneVerification: async (phone) => {
+    const res = await fetchWithRetry(`${API_BASE}/phone-verification/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    });
+    return handleResponse(res);
+  },
+
+  verifyPhoneWithFirebase: async (idToken) => {
+    const res = await fetchWithRetry(`${API_BASE}/phone-verification/verify-firebase`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+    return handleResponse(res);
+  },
+
+  verifyPhoneCode: async ({ phone, otp, txn_id }) => {
+    const res = await fetchWithRetry(`${API_BASE}/phone-verification/verify-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, otp, txn_id }),
     });
     return handleResponse(res);
   },

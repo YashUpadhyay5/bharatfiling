@@ -29,7 +29,6 @@ export default function TanRegistrationModule() {
           parsed.orderNumber = parsed.orderNumber || '#est179126201735020268592t';
           parsed.name = parsed.name || 'Yash Upadhyay';
           parsed.email = parsed.email || 'ya*****************@com';
-          parsed.phone = parsed.phone || '+91-*******193';
         }
         return parsed;
       }
@@ -39,7 +38,7 @@ export default function TanRegistrationModule() {
     return {
       name: potentialIdParam ? 'Yash Upadhyay' : (user?.name || user?.full_name || 'Yash Upadhyay'),
       email: potentialIdParam ? 'ya*****************@com' : (user?.email || 'ya*****************@com'),
-      phone: potentialIdParam ? '+91-*******193' : (user?.phone || '+91 7668976193'),
+      phone: user?.phone || '',
       orderNumber: potentialIdParam ? '#est179126201735020268592t' : '',
       entityType: 'company',
       appType: 'new',

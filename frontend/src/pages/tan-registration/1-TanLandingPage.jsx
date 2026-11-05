@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CreditCard,
@@ -54,7 +54,7 @@ export default function TanLandingPage({
   // Lead form state
   const [name, setName] = useState(initialData.name || 'Yash Upadhyay');
   const [phone, setPhone] = useState(
-    initialData.phone ? String(initialData.phone).replace('+91', '').trim() : '7668976193'
+    initialData.phone ? String(initialData.phone).replace('+91', '').trim() : ''
   );
   const [entityType, setEntityType] = useState(initialData.entityType || 'company');
   const [appType, setAppType] = useState(initialData.appType || 'new');
@@ -79,7 +79,9 @@ export default function TanLandingPage({
   const [faqSearch, setFaqSearch] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
-  // Quick form error validation
+  // The buttons outside the form submit it, so they pass the mobile OTP check too
+  const leadFormRef = useRef(null);
+    // Quick form error validation
   const [formError, setFormError] = useState('');
 
   const handleLeadSubmit = (e) => {
@@ -159,7 +161,7 @@ export default function TanLandingPage({
             </span>
             <button
               type="button"
-              onClick={handleLeadSubmit}
+              onClick={() => leadFormRef.current?.requestSubmit()}
               className="text-[#FFCC00] font-bold hover:underline ml-1 cursor-pointer"
             >
               View Packages →
@@ -258,7 +260,7 @@ export default function TanLandingPage({
                 </div>
               )}
 
-              <form onSubmit={handleLeadSubmit} className="space-y-4">
+              <form ref={leadFormRef} onSubmit={handleLeadSubmit} className="space-y-4">
                 
                 {/* Full Name / Authorised Signatory */}
                 <div>
@@ -769,7 +771,7 @@ export default function TanLandingPage({
 
           <button
             type="button"
-            onClick={handleLeadSubmit}
+            onClick={() => leadFormRef.current?.requestSubmit()}
             className="bg-[#FFCC00] hover:bg-amber-400 text-slate-950 font-extrabold px-6 py-3.5 rounded-xl text-sm transition shadow-lg shrink-0 cursor-pointer flex items-center gap-2"
           >
             <span>Proceed to Plan Selection</span>

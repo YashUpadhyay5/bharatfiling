@@ -25,7 +25,7 @@ export default function TanCheckoutPage({
   const [addonExpress, setAddonExpress] = useState(Boolean(formData.addonExpress));
 
   const applicantName = formData.name || 'Yash Upadhyay';
-  const applicantPhone = formData.phone || '+91 7668976193';
+  const applicantPhone = formData.phone || '';
   const entityType = (formData.entityType || 'company').toUpperCase();
   const deliveryState = formData.state || 'Karnataka';
 

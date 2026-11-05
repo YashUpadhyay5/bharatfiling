@@ -44,16 +44,6 @@ export default function LandingPage() {
   };
 
 
-  // "Explore Solutions" follows the same sign-in rule as the service cards on this page.
-  const handleExploreIndustry = (industry) =>
-    handleSelectService({
-      title: industry.title,
-      path: industry.path,
-      category: industry.category,
-      price: 'Transparent Pricing',
-      period: 'CA Audited Filing',
-    });
-
   const popularServices = [
     {
       title: 'Private Limited Company Incorporation',
@@ -232,7 +222,7 @@ export default function LandingPage() {
       {/* 3b. INDUSTRY SOLUTIONS CAROUSEL */}
       {/* On laptops the industry solutions live in the hero deck; smaller screens get the full section here */}
       <div className="lg:hidden">
-        <IndustrySolutionsCarousel onExplore={handleExploreIndustry} />
+        <IndustrySolutionsCarousel />
       </div>
 
       {/* 4. HOW IT WORKS */}

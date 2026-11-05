@@ -31,7 +31,7 @@ export default function IncomeTaxDisputeModule() {
     }
     return {
       email: user?.email || 'taxpayer@mycompany.com',
-      phone: user?.phone || '9876543210',
+      phone: user?.phone || '',
       language: 'English',
       problemType: 'Section 148A(b) Show Cause Notice Defense',
       whatsappUpdates: true,

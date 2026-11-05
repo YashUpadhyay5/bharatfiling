@@ -27,8 +27,8 @@ export default function GstLandingPage() {
   const [selectedEntity, setSelectedEntity] = useState('Proprietorship');
   const [openFaq, setOpenFaq] = useState(0);
   const [pendingPlan, setPendingPlan] = useState(null);
-  // A single field: either a 10-digit mobile number or an email address.
-  // We don't ask for PAN here — that (and OTP / sign-in) happens right after.
+  // A single field: the 10-digit mobile number, verified by OTP when the form is submitted.
+  // We don't ask for PAN here — that (and sign-in) happens right after.
   const [heroContact, setHeroContact] = useState('');
   const [heroWhatsappOptIn, setHeroWhatsappOptIn] = useState(true);
   const [heroErrors, setHeroErrors] = useState({});
@@ -36,7 +36,7 @@ export default function GstLandingPage() {
   // Pre-fill the lead-capture field from the signed-in account, if any
   useEffect(() => {
     if (user) {
-      setHeroContact((prev) => prev || user.phone || user.email || '');
+      setHeroContact((prev) => prev || user.phone || '');
     }
   }, [user]);
 
@@ -64,18 +64,13 @@ export default function GstLandingPage() {
     scrollToHeroForm();
   };
 
-  const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  const isPhone = (v) => /^\d{10}$/.test(v.replace(/\D/g, ''));
-
   const saveHeroDraftAndGo = (planId) => {
-    const contact = heroContact.trim();
-    const cleanPhone = isPhone(contact) ? contact.replace(/\D/g, '') : (user?.phone || '');
-    const email = isEmail(contact) ? contact : '';
+    const cleanPhone = heroContact.replace(/\D/g, '').slice(-10);
     const draft = {
       name: user?.full_name || '',
       phone: cleanPhone,
       pan: '',
-      email,
+      email: user?.email || '',
       state: 'Karnataka',
       businessType: BUSINESS_NATURES[0],
       propertyType: '',
@@ -92,10 +87,8 @@ export default function GstLandingPage() {
 
   const handleHeroGetStarted = (e) => {
     e.preventDefault();
-    const contact = heroContact.trim();
-
-    if (!contact || !(isPhone(contact) || isEmail(contact))) {
-      setHeroErrors({ contact: 'Please enter a valid 10-digit mobile number or email address' });
+    if (heroContact.replace(/\D/g, '').length < 10) {
+      setHeroErrors({ contact: 'Please enter a valid 10-digit mobile number' });
       return;
     }
     setHeroErrors({});
@@ -268,14 +261,15 @@ export default function GstLandingPage() {
                     </div>
                     <input
                       id="hero-contact-input"
-                      type="text"
-                      inputMode="email"
+                      type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel-national"
                       value={heroContact}
                       onChange={(e) => {
                         setHeroContact(e.target.value);
                         setHeroErrors({});
                       }}
-                      placeholder="Mobile Number or Email"
+                      placeholder="Mobile Number"
                       className="w-full px-4 py-3 text-slate-900 text-sm font-medium focus:outline-none"
                     />
                   </div>
