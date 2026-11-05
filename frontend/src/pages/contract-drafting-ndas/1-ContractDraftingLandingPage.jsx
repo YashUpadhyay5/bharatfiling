@@ -276,7 +276,7 @@ export default function ContractDraftingLandingPage({
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
                         }
-                        placeholder="9876543210"
+                        placeholder="Enter your mobile number"
                         className={`w-full px-3.5 py-2.5 rounded-r-lg border text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#002B49] ${
                           formErrors.phone ? 'border-rose-400 bg-rose-50/50' : 'border-slate-300'
                         }`}

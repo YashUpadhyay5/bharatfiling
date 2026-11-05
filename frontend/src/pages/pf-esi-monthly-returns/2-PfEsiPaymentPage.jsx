@@ -282,7 +282,7 @@ export default function PfEsiPaymentPage({
               <div className="flex justify-between pb-2 border-b border-slate-200">
                 <span className="text-slate-500">Registered Email & Phone</span>
                 <span className="font-medium text-slate-700">
-                  {formData.email || 'employer@mycompany.com'} ({formData.phone || '9876543210'})
+                  {formData.email || 'employer@mycompany.com'} {formData.phone ? `(${formData.phone})` : ''}
                 </span>
               </div>
               <div className="flex justify-between pt-1">
