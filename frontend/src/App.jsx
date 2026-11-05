@@ -80,6 +80,7 @@ const IncomeTaxDisputeModule = lazy(() => import('./pages/income-tax-dispute-app
 const TrademarkHearingModule = lazy(() => import('./pages/trademark-hearing-support/index.jsx'));
 const MonthlyPayrollModule = lazy(() => import('./pages/monthly-payroll/index.jsx'));
 const StatutoryTdsModule = lazy(() => import('./pages/statutory-tds-compliance/index.jsx'));
+const PfEsiModule = lazy(() => import('./pages/pf-esi-monthly-returns/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -399,6 +400,16 @@ export default function App() {
                 <Route path="/apply/statutory-tds-compliance" element={<StatutoryTdsModule />} />
                 <Route path="/apply/statutory-tds" element={<StatutoryTdsModule />} />
                 <Route path="/apply/tds-compliance" element={<StatutoryTdsModule />} />
+
+                {/* PF & ESI Monthly Returns & Compliance */}
+                <Route path="/services/pf-esi-monthly-returns" element={<PfEsiModule />} />
+                <Route path="/services/pf-esi" element={<PfEsiModule />} />
+                <Route path="/services/pf-esi-returns" element={<PfEsiModule />} />
+                <Route path="/services/epf-esic-filing" element={<PfEsiModule />} />
+                <Route path="/pf-esi-monthly-returns" element={<PfEsiModule />} />
+                <Route path="/pf-esi" element={<PfEsiModule />} />
+                <Route path="/apply/pf-esi-monthly-returns" element={<PfEsiModule />} />
+                <Route path="/apply/pf-esi" element={<PfEsiModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)
