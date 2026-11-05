@@ -31,7 +31,6 @@ export default function EsiRegistrationModule() {
           parsed.orderNumber = parsed.orderNumber || '#est1791262017350202695937';
           parsed.name = parsed.name || 'Yash Upadhyay';
           parsed.email = parsed.email || 'ya*****************@com';
-          parsed.phone = parsed.phone || '+91-*******193';
         }
         return parsed;
       }
@@ -41,7 +40,7 @@ export default function EsiRegistrationModule() {
     return {
       name: potentialIdParam ? 'Yash Upadhyay' : (user?.name || user?.full_name || ''),
       email: potentialIdParam ? 'ya*****************@com' : (user?.email || ''),
-      phone: potentialIdParam ? '+91-*******193' : (user?.phone || ''),
+      phone: user?.phone || '',
       orderNumber: potentialIdParam ? '#est1791262017350202695937' : '',
       whatsappOptIn: true,
       businessName: '',

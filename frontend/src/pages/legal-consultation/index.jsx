@@ -31,7 +31,7 @@ export default function LegalConsultationModule() {
     }
     return {
       email: user?.email || 'yashupadhyay@example.com',
-      phone: user?.phone || '9876543210',
+      phone: user?.phone || '',
       language: 'English',
       problemType: 'Drafting a Legal Notice',
       whatsappUpdates: true,

@@ -27,7 +27,7 @@ export default function TrademarkRegistrationModule() {
     }
     return {
       email: user?.email || 'yashupadhyay@example.com',
-      phone: user?.phone || '+91 7668976193',
+      phone: user?.phone || '',
       whatsappUpdates: true,
       selectedClassId: 25, // default apparel/clothing
       applicantType: 'individual',

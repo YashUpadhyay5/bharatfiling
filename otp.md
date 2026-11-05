@@ -22,6 +22,7 @@
 11. [Frontend State Machine & UX Flow](#11-frontend-state-machine--ux-flow)
 12. [Security & OWASP ASVS Compliance Checklist](#12-security--owasp-asvs-compliance-checklist)
 13. [Production Email Dispatching Guide: Why, Where & Step-by-Step Execution](#13-production-email-dispatching-guide-why-where--step-by-step-execution)
+14. [Mobile Number Verification on Service Forms](#14-mobile-number-verification-on-service-forms)
 
 ---
 
@@ -739,3 +740,45 @@ To send emails directly from `support@bharatfiling.com` to **any user in the wor
 ---
 
 *Document finalized and verified against active BharatFiling codebase.*
+
+
+---
+
+## 14. Mobile Number Verification on Service Forms
+
+Every service page that asks for a mobile number verifies it by OTP before the customer moves to the next step.
+
+### Adding a new service page
+
+Nothing to wire up. Use a normal `<form>` with an `<input type="tel">`, and move on from the form's `onSubmit`:
+
+```jsx
+<form onSubmit={handleLeadSubmit}>
+  <input type="tel" value={phone} onChange={...} />
+  <button type="submit">Get Started</button>
+</form>
+```
+
+Rules that keep this working:
+
+* **Move on through the form's submit.** A second button outside the form should call `formRef.current.requestSubmit()` or scroll to the form. A plan card may jump to `?step=2`, but a browser with no verified number is sent back to step 1. Every flow needs its mobile field on step 1 and must carry the step in the URL as `?step=N`.
+* **Start the field empty for guests.** Never prefill it with a sample number: pressing the button would text a real OTP to whoever owns that number. The same goes for fallbacks like `phone || '9876543210'` in a request.
+
+To leave a form out (it has its own OTP, or must work when OTP does not), put `data-phone-otp="off"` on the form or a parent. Login, registration and the support callback form do this.
+
+### How it works
+
+| Piece | File | Job |
+| :--- | :--- | :--- |
+| Gate | `frontend/src/components/common/PhoneVerificationGate.jsx` | Catches the submit of any form with a `tel` input, at document level, before the page sees it. If the number is unverified it opens the dialog, then submits the form again |
+| Dialog | `frontend/src/components/common/PhoneOtpDialog.jsx` | Sends the code and checks it |
+| Proof | `frontend/src/services/phoneProof.js` | Stores the proof in `localStorage` and adds it to every API write as `X-Phone-Proof`, including pages that call `fetch` directly. On a 428 it opens the dialog and retries the request |
+| Server rule | `backend/src/middleware/phoneProof.js` | Answers 428 to any write under `/api/v1` that carries an unproven number (`phone`, `customerPhone`, `applicantPhone`, ...). A new flow is covered as soon as it is mounted. Exempt areas are listed in the file |
+| API | `backend/src/routes/phoneVerification.routes.js` | `POST /api/v1/phone-verification/start`, `/verify-firebase`, `/verify-code` |
+
+A proof is valid for 24 hours for one number (`PROOF_TTL_SECONDS` in `backend/src/services/phoneProof.service.js`), so the same number is not texted again on every page. A different number needs its own OTP. In production `/start` refuses the sample numbers older pages prefilled (`SAMPLE_NUMBERS` in `phoneVerification.routes.js`), and a test fails if a page hardcodes a mobile number again. The proof is signed with `OTP_PEPPER`, so it can never be used as a login token.
+
+### Where the SMS comes from
+
+* **Production:** Firebase Phone Auth, sent from the browser. It needs `FIREBASE_API_KEY` on the backend, Phone sign-in enabled, the Blaze billing plan, and the site's domain under Authentication > Settings > Authorized domains. Without `FIREBASE_API_KEY`, production answers 503 and **no customer can pass the form**. The frontend config in `frontend/src/config/firebase.js` and this key must belong to the same Firebase project. Do not restrict the key by website: the backend calls Google with it directly and would be refused.
+* **Local development:** with `FIREBASE_API_KEY` empty, no SMS is sent. The code appears in the dialog and in the backend console.

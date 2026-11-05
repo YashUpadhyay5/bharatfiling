@@ -49,7 +49,7 @@ export default function TrademarkObjectionLandingPage({
   // Lead Form State matching Screenshot media_1793253405946_1d5cb863.png
   const [email, setEmail] = useState(initialData.email || 'yashupadhyay@example.com');
   const [phone, setPhone] = useState(
-    initialData.phone ? String(initialData.phone).replace('+91', '').trim() : '7668976193'
+    initialData.phone ? String(initialData.phone).replace('+91', '').trim() : ''
   );
   const [cityPincode, setCityPincode] = useState(
     initialData.cityPincode || 'Bengaluru, 560001'

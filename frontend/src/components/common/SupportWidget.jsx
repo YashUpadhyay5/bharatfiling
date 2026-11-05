@@ -359,7 +359,7 @@ export default function SupportWidget({ currentStep, businessType, applicationId
             )}
 
             {activeTab === 'callback' && (
-              <form onSubmit={handleCallbackSubmit} className="p-4 bg-white rounded-2xl border border-slate-200 space-y-3.5">
+              <form onSubmit={handleCallbackSubmit} data-phone-otp="off" className="p-4 bg-white rounded-2xl border border-slate-200 space-y-3.5">
                 <div className="text-left">
                   <h4 className="font-bold text-slate-900 text-sm">Schedule a CA Callback</h4>
                   <p className="text-xs text-slate-500">

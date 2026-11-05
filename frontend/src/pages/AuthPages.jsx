@@ -47,7 +47,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
 
   // Forgot password state
   const [fpMethod, setFpMethod] = useState('phone'); // 'phone' | 'email'
-  const [forgotPhone, setForgotPhone] = useState('7668976193');
+  const [forgotPhone, setForgotPhone] = useState('');
   const [fpPhoneConfirmation, setFpPhoneConfirmation] = useState(null);
   const [forgotEmail, setForgotEmail] = useState('');
   const [fpStep, setFpStep] = useState(1); // 1: email/phone, 2: OTP/reset
@@ -641,7 +641,7 @@ export default function AuthPages({ defaultMode = 'login' }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-3 sm:p-4 py-6 sm:py-12">
+    <div data-phone-otp="off" className="min-h-screen bg-slate-50 flex items-center justify-center p-3 sm:p-4 py-6 sm:py-12">
       <div className="max-w-md w-full bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
         {/* Header */}
         <div className="bg-slate-900 text-white p-5 sm:p-6 text-center space-y-2 border-b border-slate-800">

@@ -31,7 +31,7 @@ export default function TrademarkHearingModule() {
     }
     return {
       email: user?.email || 'brand@mycompany.com',
-      phone: user?.phone || '9876543210',
+      phone: user?.phone || '',
       language: 'English',
       problemType: 'Section 9 Absolute Grounds of Refusal',
       whatsappUpdates: true,

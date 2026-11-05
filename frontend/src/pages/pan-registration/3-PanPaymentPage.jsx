@@ -78,7 +78,7 @@ export default function PanPaymentPage({
   const customerEmail =
     formData.email || 'ya*****************@com';
   const customerPhone =
-    formData.phone || '+91-*******193';
+    formData.phone || '';
 
   // GSTIN / Business Name editing state
   const [gstinOrBusinessName, setGstinOrBusinessName] = useState(

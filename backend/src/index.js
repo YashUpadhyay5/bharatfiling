@@ -8,7 +8,9 @@ import path from 'path';
 import fs from 'fs';
 import { ENV } from './config/env.js';
 import { initSocketServer } from './services/socket.service.js';
+import { requirePhoneProof } from './middleware/phoneProof.js';
 import authRoutes from './routes/auth.routes.js';
+import phoneVerificationRoutes from './routes/phoneVerification.routes.js';
 import profileRoutes from './routes/profile.routes.js';
 import businessRoutes from './routes/business.routes.js';
 import fieldRoutes from './routes/field.routes.js';
@@ -137,6 +139,9 @@ app.use('/api/v1/auth/register/phone-verify', otpVerifyLimiter);
 app.use('/api/v1/auth/forgot-password/verify-otp', otpVerifyLimiter);
 app.use('/api/v1/auth/forgot-password/reset-password', otpVerifyLimiter);
 app.use('/api/v1/auth/forgot-password/phone-reset', otpVerifyLimiter);
+// Higher than otpSendLimiter: every lead form uses this, and many customers share one mobile-carrier IP.
+// Firebase has its own per-number SMS limits, and a wrong code only spends that code's attempts.
+app.use('/api/v1/phone-verification', makeLimiter(15, 30, 'Too many verification requests. Please try again in 15 minutes.'));
 app.use('/api/v1/support/chat', makeLimiter(15, 60, 'Too many questions. Please try again shortly.'));
 
 // NOTE: uploaded KYC documents are NOT served statically. They are only available through
@@ -153,7 +158,9 @@ app.get('/api/health', (req, res) => {
 });
 
 // Mount Modular API Routes
+app.use('/api/v1', requirePhoneProof);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/phone-verification', phoneVerificationRoutes);
 app.use('/api/v1/profile', profileRoutes);
 app.use('/api/v1/businesses', businessRoutes);
 app.use('/api/v1/fields', fieldRoutes);

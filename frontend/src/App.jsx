@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import { SocketProvider } from './context/SocketContext.jsx';
 import { MainLayout, BareLayout, ScrollToTop } from './layouts';
+import PhoneVerificationGate from './components/common/PhoneVerificationGate.jsx';
 import { GST_SERVICE_ROUTES } from './pages/gst-services/routes.js';
 import { ITR_SERVICE_ROUTES } from './pages/itr-services/routes.js';
 import { MCA_SERVICE_ROUTES } from './pages/mca-services/routes.js';
@@ -126,6 +127,7 @@ export default function App() {
         <SocketProvider>
           <Router>
             <ScrollToTop />
+            <PhoneVerificationGate />
             <Routes>
               {/* ---------- Header + Footer ---------- */}
               <Route element={<MainLayout />}>

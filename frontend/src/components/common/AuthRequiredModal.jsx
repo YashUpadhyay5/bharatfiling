@@ -260,7 +260,7 @@ export default function AuthRequiredModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div data-phone-otp="off" className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
       {/* Click outside backdrop */}
       <div className="fixed inset-0" onClick={onClose} />
 

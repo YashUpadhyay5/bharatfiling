@@ -48,7 +48,7 @@ export default function ApedaLandingPage({
 }) {
   // Lead form state matching screenshot
   const [email, setEmail] = useState(initialData.email || 'yashupadhyay@example.com');
-  const [phone, setPhone] = useState(initialData.phone ? String(initialData.phone).replace('+91', '').trim() : '7668976193');
+  const [phone, setPhone] = useState(initialData.phone ? String(initialData.phone).replace('+91', '').trim() : '');
   const [cityPincode, setCityPincode] = useState(initialData.cityPincode || 'Bengaluru, 560001');
   const [language, setLanguage] = useState(initialData.language || 'English');
   const [whatsappUpdates, setWhatsappUpdates] = useState(

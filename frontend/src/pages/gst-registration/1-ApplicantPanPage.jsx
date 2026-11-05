@@ -90,7 +90,7 @@ export default function ApplicantPanPage({
             maxLength={10}
             value={formData.phone}
             onChange={(e) => onInputChange('phone', e.target.value.replace(/\D/g, ''))}
-            placeholder="7668976193"
+            placeholder="10-digit mobile number"
             className="w-full px-4 py-3 text-slate-900 text-sm font-medium focus:outline-none"
           />
         </div>

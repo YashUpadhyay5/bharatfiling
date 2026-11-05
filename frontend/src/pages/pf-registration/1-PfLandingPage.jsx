@@ -129,9 +129,9 @@ export default function PfLandingPage({ initialData = {}, isEsi = false, onGetSt
   const handleSelectPlan = (planId) => {
     if (onGetStarted) {
       onGetStarted({
-        name: name.trim() || 'Valued Business Owner',
-        email: email.trim() || 'applicant@example.com',
-        phone: phone.replace(/\D/g, '') || '9876543210',
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.replace(/\D/g, ''),
         plan: planId,
       });
     } else {

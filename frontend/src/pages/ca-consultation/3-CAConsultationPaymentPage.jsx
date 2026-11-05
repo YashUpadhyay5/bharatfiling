@@ -116,7 +116,7 @@ export default function CAConsultationPaymentPage({
         scheduledTimeSlot: formData.scheduledTimeSlot || '1:30 PM',
         problemType: formData.problemType || 'Business Structure Consultation',
         applicantEmail: formData.email || 'client@bharatfiling.com',
-        applicantPhone: formData.phone || '+91 9876543210',
+        applicantPhone: formData.phone || '',
       };
 
       // Call backend payment settlement
@@ -686,7 +686,7 @@ export default function CAConsultationPaymentPage({
               <span>
                 Our CA will call you at{' '}
                 <strong className="text-slate-900 font-bold">
-                  {formData.phone || '+91 9876543210'}
+                  {formData.phone || ''}
                 </strong>{' '}
                 from <strong>80448 *****</strong> at your chosen time slot.
               </span>

@@ -48,7 +48,7 @@ export default function PanLandingPage({
   // Lead form state
   const [name, setName] = useState(initialData.name || 'Yash Upadhyay');
   const [phone, setPhone] = useState(
-    initialData.phone ? String(initialData.phone).replace('+91', '').trim() : '7668976193'
+    initialData.phone ? String(initialData.phone).replace('+91', '').trim() : ''
   );
   const [entityType, setEntityType] = useState(initialData.entityType || 'individual');
   const [appType, setAppType] = useState(initialData.appType || 'new');
@@ -334,7 +334,7 @@ export default function PanLandingPage({
                         maxLength={10}
                         value={phone}
                         onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        placeholder="7668976193"
+                        placeholder="10-digit mobile number"
                         className="w-full px-3 py-2 text-xs sm:text-sm focus:outline-none bg-white text-slate-900"
                         required
                       />

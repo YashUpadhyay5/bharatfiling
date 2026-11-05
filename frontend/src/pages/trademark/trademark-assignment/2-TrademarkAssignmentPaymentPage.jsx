@@ -61,7 +61,7 @@ export default function TrademarkAssignmentPaymentPage({
   // Customer & order references
   const orderRef = orderId || formData.orderNumber || `#TMA-${Math.floor(100000 + Math.random() * 900000)}`;
   const customerEmail = formData.email || 'yashupadhyay@example.com';
-  const customerPhone = formData.phone || '+91 7668976193';
+  const customerPhone = formData.phone || '';
   const customerCity = formData.cityPincode || 'Bengaluru, 560001';
 
   // Taxes dropdown toggle (expanded by default in screenshot)

@@ -49,7 +49,7 @@ export default function TrademarkLandingPage({
   // Lead form state matching screenshot
   const [email, setEmail] = useState(initialData.email || 'yashupadhyay@example.com');
   const [phone, setPhone] = useState(
-    initialData.phone ? String(initialData.phone).replace('+91', '').trim() : '7668976193'
+    initialData.phone ? String(initialData.phone).replace('+91', '').trim() : ''
   );
   const [whatsappUpdates, setWhatsappUpdates] = useState(
     initialData.whatsappUpdates !== undefined ? initialData.whatsappUpdates : true

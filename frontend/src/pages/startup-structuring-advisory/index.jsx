@@ -31,7 +31,7 @@ export default function StartupStructuringModule() {
     }
     return {
       email: user?.email || 'founder@mystartup.com',
-      phone: user?.phone || '9876543210',
+      phone: user?.phone || '',
       language: 'English',
       problemType: 'Co-Founder Equity Split & Reverse Vesting (4-Yr / 1-Yr Cliff)',
       whatsappUpdates: true,

@@ -112,7 +112,7 @@ export default function DscPaymentPage({
         labourWelfare,
         gstOnLabour,
         email: formData.email || 'customer@example.com',
-        phone: formData.phone || '+91 98765 43210',
+        phone: formData.phone || '',
         date: new Date().toLocaleDateString('en-IN', {
           day: 'numeric',
           month: 'short',

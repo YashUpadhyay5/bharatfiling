@@ -164,7 +164,7 @@ export default function GstRegistrationModule() {
       navigate('/services/gst-registration', { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentStep]);
 
   // Pre-fill form from user account once authenticated
   useEffect(() => {
@@ -252,8 +252,15 @@ export default function GstRegistrationModule() {
     }
 
     const fallbackName = (formData.name || user?.full_name || 'GST Applicant').trim();
-    const cleanPhone = (formData.phone || user?.phone || '9876543210').replace(/\D/g, '');
+    const cleanPhone = (formData.phone || user?.phone || '').replace(/\D/g, '').slice(-10);
     const fallbackPan = (formData.pan || 'ABCDE1234F').trim().toUpperCase();
+
+    // Reached by a link without a number: send them to the step that asks for one (and verifies it).
+    if (cleanPhone.length !== 10) {
+      showError('Please enter your mobile number to continue');
+      navigate(isGst ? '/services/gst-registration' : `/apply/${serviceMeta.slug}?step=1`);
+      return;
+    }
 
     try {
       setIsSubmitting(true);

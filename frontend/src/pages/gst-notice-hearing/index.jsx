@@ -31,7 +31,7 @@ export default function GstNoticeHearingModule() {
     }
     return {
       email: user?.email || 'accounts@mycompany.com',
-      phone: user?.phone || '9876543210',
+      phone: user?.phone || '',
       language: 'English',
       problemType: 'DRC-01 Show Cause Notice under Section 73 (Non-fraud)',
       whatsappUpdates: true,

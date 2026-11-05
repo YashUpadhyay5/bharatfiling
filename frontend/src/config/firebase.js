@@ -4,13 +4,13 @@ import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth
 const firebaseConfig = {
   apiKey:
     import.meta.env.VITE_FIREBASE_API_KEY ||
-    ['AIzaSyAijHqWvXz', 'FKATX_zCQgsNNJoHU9I9Xpe4'].join(''),
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'bharatfiling-prod.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'bharatfiling-prod',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'bharatfiling-prod.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '756692079693',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:756692079693:web:0e984378aee57e2797f804',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-3M2KEV9N86',
+    ['AIzaSyAj0Ouj_Yk0f', 'MVFAmOe7biTRF62LuonbJk'].join(''),
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'bharatfiling-759f7.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'bharatfiling-759f7',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'bharatfiling-759f7.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '574230038306',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:574230038306:web:eee716e5837e5e6b00477b',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-MB2888D9HJ',
 };
 
 export const app = initializeApp(firebaseConfig);
@@ -76,7 +76,7 @@ export const setupRecaptcha = getRecaptchaVerifier;
 
 /**
  * Dispatches a 6-digit SMS OTP via Firebase to any Indian mobile number (+91)
- * 10,000 completely free SMS verifications per month with zero DLT requirement
+ * Real SMS needs the Blaze plan and is billed per message; numbers under "Phone numbers for testing" send no SMS
  */
 export const sendPhoneOtp = async (phoneNumber, containerId = 'recaptcha-container') => {
   try {

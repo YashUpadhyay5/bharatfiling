@@ -196,7 +196,7 @@ export default function Section8PaymentPage({
         entityName: formData.proposedFoundationName || 'Section 8 Foundation',
         applicantName: formData.fullName || 'Authorized Promoter',
         applicantEmail: formData.email || 'applicant@bharatfiling.com',
-        applicantPhone: formData.phone || '+91 7668976193',
+        applicantPhone: formData.phone || '',
       };
 
       // Call backend API (or fallback smoothly for standalone UI)

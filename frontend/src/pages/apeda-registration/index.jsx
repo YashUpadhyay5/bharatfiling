@@ -28,7 +28,7 @@ export default function ApedaRegistrationModule() {
     }
     return {
       email: user?.email || 'yashupadhyay@example.com',
-      phone: user?.phone || '+91 7668976193',
+      phone: user?.phone || '',
       cityPincode: 'Bengaluru, 560001',
       language: 'English',
       whatsappUpdates: true,

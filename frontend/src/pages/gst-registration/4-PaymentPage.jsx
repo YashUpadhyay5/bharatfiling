@@ -104,7 +104,7 @@ export default function GstPaymentPage() {
           plan: queryPlan || draft.plan || 'standard',
           service_name: 'GST Registration',
           amount: queryPlan === 'premium' ? 1999 : queryPlan === 'elite' ? 4999 : 399,
-          customer_phone: draft.phone || '9876543210',
+          customer_phone: draft.phone || '',
         });
       } catch (err) {
         // Fallback
@@ -146,7 +146,7 @@ export default function GstPaymentPage() {
       upi_id =
         selectedApp === 'other'
           ? customVpa
-          : `${order?.customer_phone || '9876543210'}@${selectedApp === 'phonepe' ? 'ybl' : selectedApp === 'gpay' ? 'okaxis' : 'paytm'}`;
+          : `${order?.customer_phone || ''}@${selectedApp === 'phonepe' ? 'ybl' : selectedApp === 'gpay' ? 'okaxis' : 'paytm'}`;
       if (selectedApp === 'other' && (!upi_id || !upi_id.includes('@'))) {
         showError('Please enter a valid UPI ID (e.g. yourname@okhdfcbank)');
         return;

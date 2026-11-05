@@ -108,7 +108,7 @@ export default function OrderCheckoutPage() {
           gst_amount: 61,
           amount: 399,
           customer_name: draft.name || user?.full_name || 'GST Applicant',
-          customer_phone: draft.phone || user?.phone || '9876543210',
+          customer_phone: draft.phone || user?.phone || '',
           customer_email: user?.email || 'applicant@gmail.com',
           created_at: new Date().toISOString(),
         });
