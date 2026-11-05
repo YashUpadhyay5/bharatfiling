@@ -117,4 +117,39 @@ describe('Monthly Payroll Management Module - End-to-End & Database Verification
     assert.strictEqual(saved.fields_data.email, 'hr@zenithtech.in');
     assert.strictEqual(saved.fields_data.city_pincode, 'Bengaluru / 560001');
   });
+
+  test('5. Payment Settlement API (POST /payment) - Settles ₹525 expert consultation fee and confirms appointment', async () => {
+    const orderNum = `#PAY-TEST-${Date.now().toString().slice(-4)}`;
+    const payload = {
+      orderId: orderNum,
+      method: 'UPI',
+      subMethod: 'PhonePe',
+      amount: 525,
+      includeLabourWelfare: true,
+      applicantEmail: 'hr@zenithtech.in',
+      applicantPhone: '9876543210',
+      cityPincode: 'Bengaluru / 560001',
+    };
+
+    const res = await fetch(`${baseUrl}/payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, true);
+    assert.ok(data.transactionId.startsWith('BFP-PAY-'));
+    assert.strictEqual(data.amount, 525);
+    assert.ok(data.callNotice.includes('80448 *****'));
+
+    // Verify orders collection in db
+    const orders = db.getOrders();
+    const savedOrder = orders.find((o) => o.order_number === orderNum);
+    assert.ok(savedOrder, 'Saved order must exist in DB');
+    assert.strictEqual(savedOrder.status, 'PAID');
+    assert.strictEqual(savedOrder.amount, 525);
+    assert.strictEqual(savedOrder.service_id, 'monthly-payroll');
+  });
 });

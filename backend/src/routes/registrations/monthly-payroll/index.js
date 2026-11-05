@@ -117,4 +117,98 @@ router.post('/quote', (req, res) => {
   }
 });
 
+/**
+ * POST /payment
+ * Settles payment for Payroll Expert Consultation / Management and confirms appointment.
+ */
+router.post('/payment', optionalAuth, (req, res) => {
+  try {
+    const {
+      orderId,
+      method = 'UPI',
+      subMethod = 'PhonePe',
+      amount = 525,
+      includeLabourWelfare = true,
+      applicantEmail = 'employer@bharatfiling.com',
+      applicantPhone = '9876543210',
+      cityPincode = '',
+    } = req.body;
+
+    const generatedTxnId = `BFP-PAY-${Date.now().toString().slice(-8)}`;
+    const resolvedOrderId = orderId || `#PAY-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const orders = db.getOrders();
+    let order = orders.find((o) => o.id === orderId || o.order_number === orderId);
+
+    if (order) {
+      order.status = 'PAID';
+      order.payment_status = 'PAID';
+      order.payment_method = method;
+      order.transaction_id = generatedTxnId;
+      order.updated_at = new Date().toISOString();
+    } else {
+      order = {
+        id: uuidv4(),
+        order_number: resolvedOrderId,
+        user_id: req.user ? req.user.id : GUEST_USER_ID,
+        service_id: 'monthly-payroll',
+        service_name: 'Monthly Payroll Management System',
+        amount,
+        currency: 'INR',
+        status: 'PAID',
+        payment_status: 'PAID',
+        payment_method: method,
+        transaction_id: generatedTxnId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      orders.push(order);
+    }
+    db.saveOrders(orders);
+
+    const apps = db.getApplications();
+    let app = apps.find((a) => a.id === orderId || a.id === order.application_id);
+    if (app) {
+      app.status = 'CONFIRMED';
+      app.payment_completed = true;
+      app.assigned_officer = 'Senior Payroll & Labor Law Compliance Specialist';
+      app.updated_at = new Date().toISOString();
+      db.saveApplications(apps);
+    }
+
+    // Save transaction
+    if (typeof db.getTransactions === 'function' && typeof db.saveTransactions === 'function') {
+      const txns = db.getTransactions();
+      txns.push({
+        id: uuidv4(),
+        order_id: order.id,
+        transaction_id: generatedTxnId,
+        amount,
+        currency: 'INR',
+        status: 'SUCCESS',
+        payment_method: method,
+        gateway: 'BHARATFILING_MOCK_GATEWAY',
+        created_at: new Date().toISOString(),
+      });
+      db.saveTransactions(txns);
+    }
+
+    res.json({
+      success: true,
+      message: 'Payment verified and payroll expert consultation confirmed.',
+      transactionId: generatedTxnId,
+      orderNumber: resolvedOrderId,
+      amount,
+      assignedSpecialist: 'Senior Payroll & Labor Law Compliance Specialist',
+      callNotice: 'Our senior payroll specialist will call you shortly from 80448 *****.',
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to settle payroll payment.',
+      error: err.message,
+    });
+  }
+});
+
 export default router;

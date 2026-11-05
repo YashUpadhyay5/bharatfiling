@@ -342,3 +342,42 @@ export const FAQS = [
       'Our payroll engine is equipped with state-wise Professional Tax (PT) rules for all 28 states and union territories (e.g., Maharashtra, Karnataka, Telangana, Tamil Nadu, West Bengal, Gujarat). The system automatically applies the correct state slabs based on the employee’s work location.',
   },
 ];
+
+
+export const PAYROLL_CHECKOUT = {
+  expertTitle: 'Consult an expert',
+  expertBullets: [
+    '1. 15-minute call with an expert.',
+    '2. Get guidance on the next steps for your requirements.',
+  ],
+  fee: 999,
+  coupon: {
+    code: 'MAKEININDIA',
+    discount: 500,
+    expiresText: 'expires in 2 days',
+  },
+  labourWelfare: 22,
+  labourWelfareGst: 4,
+};
+
+export const POPULAR_BANKS = [
+  { name: 'State Bank of India', code: 'SBI', icon: '🏛️' },
+  { name: 'HDFC Bank', code: 'HDFC', icon: '🏦' },
+  { name: 'ICICI Bank', code: 'ICICI', icon: '🏦' },
+  { name: 'Axis Bank', code: 'AXIS', icon: '🏦' },
+  { name: 'Kotak Mahindra Bank', code: 'KOTAK', icon: '🏛️' },
+  { name: 'Punjab National Bank', code: 'PNB', icon: '🏦' },
+];
+
+export const ALL_NET_BANKS = [
+  'Bank of Baroda',
+  'Canara Bank',
+  'Union Bank of India',
+  'Bank of India',
+  'IndusInd Bank',
+  'Federal Bank',
+  'Yes Bank',
+  'IDFC FIRST Bank',
+  'Central Bank of India',
+  'Indian Overseas Bank',
+];

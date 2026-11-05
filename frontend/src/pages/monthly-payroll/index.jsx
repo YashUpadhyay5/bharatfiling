@@ -3,9 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 import MonthlyPayrollLandingPage from './1-MonthlyPayrollLandingPage.jsx';
+import MonthlyPayrollPaymentPage from './2-MonthlyPayrollPaymentPage.jsx';
 
 export {
   MonthlyPayrollLandingPage,
+  MonthlyPayrollPaymentPage,
 };
 
 export default function MonthlyPayrollModule() {
@@ -14,7 +16,7 @@ export default function MonthlyPayrollModule() {
 
   const stepParam = searchParams.get('step');
   const initialStep = stepParam ? parseInt(stepParam, 10) : 1;
-  const currentStep = initialStep || 1;
+  const currentStep = initialStep === 2 ? 2 : 1;
 
   const getInitialDraft = () => {
     try {
@@ -32,7 +34,7 @@ export default function MonthlyPayrollModule() {
       whatsappUpdates: true,
       selectedPlanId: 'starter',
       selectedPlanPrice: 1999,
-      totalAmount: 1999,
+      totalAmount: 525,
       orderNumber: `#PAY-${Math.floor(100000 + Math.random() * 900000)}`,
     };
   };
@@ -51,7 +53,7 @@ export default function MonthlyPayrollModule() {
     }
   }, [formData]);
 
-  // Step 1: Submit lead or click "Get Started"
+  // Step 1: Submit lead or click "Get Started" -> Advance to Step 2 (Checkout)
   const handleLeadSubmit = async (leadData) => {
     const updated = {
       ...formData,
@@ -70,12 +72,11 @@ export default function MonthlyPayrollModule() {
       // Continue gracefully
     }
 
-    // Set step 2 in searchParams for when page 2 is introduced
     setSearchParams({ step: '2' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step 1: Select Plan from pricing section
+  // Step 1: Select Plan from pricing section -> Advance to Step 2
   const handleSelectPlan = (planId) => {
     let price = 1999;
     if (planId === 'growth') price = 3999;
@@ -91,6 +92,22 @@ export default function MonthlyPayrollModule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Step 2: Back to Step 1
+  const handleBackToStep1 = () => {
+    setSearchParams({ step: '1' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Step 2: Payment completed callback
+  const handlePaymentSuccess = (receiptData) => {
+    setFormData((prev) => ({
+      ...prev,
+      paymentCompleted: true,
+      transactionId: receiptData.transactionId,
+      paidAt: receiptData.date,
+    }));
+  };
+
   return (
     <main className="min-h-screen bg-white">
       {/* Page 1: Online Payroll Management Landing Page */}
@@ -102,26 +119,14 @@ export default function MonthlyPayrollModule() {
         />
       )}
 
-      {/* Placeholder for Page 2 (waiting for user's screenshot) */}
-      {currentStep > 1 && (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-blue-50 text-[#002B49] flex items-center justify-center text-2xl font-black">
-            2
-          </div>
-          <h2 className="text-2xl font-black text-[#002B49]">
-            Payroll Details & Onboarding Step
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-md">
-            Step 1 lead submitted for <strong>{formData.email || 'your business'}</strong> ({formData.cityPincode || 'Pincode provided'}). Ready for Step 2.
-          </p>
-          <button
-            type="button"
-            onClick={() => setSearchParams({ step: '1' })}
-            className="px-6 py-2.5 rounded-lg bg-[#002B49] text-white text-xs font-bold transition hover:bg-[#001f35] cursor-pointer"
-          >
-            ← Back to Landing Page
-          </button>
-        </div>
+      {/* Page 2: Checkout / Payment Method Selection (from screenshot media_1793854344708_66ad8e6e.png) */}
+      {currentStep === 2 && (
+        <MonthlyPayrollPaymentPage
+          formData={formData}
+          orderId={formData.orderNumber}
+          onBack={handleBackToStep1}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
       )}
     </main>
   );
