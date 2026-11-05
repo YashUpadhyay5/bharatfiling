@@ -389,7 +389,7 @@ export const SERVICES = [
     'Bookkeeping, monthly financial statements and ongoing payroll and tax management by a senior CA.',
     ['Bank statements and invoices', 'Access to your accounting software', 'Previous financial statements'],
     ['Tally or Zoho Books ledger maintenance', 'Monthly P&L, balance sheet and cash flow', 'Vendor bill processing and invoicing', 'Monthly review with a senior CA'],
-    { priceStatus: 'existing', aliases: ['virtual-cfo-accounting'] }),
+    { status: 'live', path: '/services/virtual-cfo', priceStatus: 'existing', aliases: ['virtual-cfo-accounting', 'cfo-services'] }),
   s('secretarial-audit-registers', 'Secretarial Audit & Registers', 'compliance', 6999, 'per year', '10-15 working days',
     'Statutory registers and a secretarial compliance review by a company secretary.',
     ['MOA and AOA', 'Minutes and resolutions', 'Shareholding and director details'],

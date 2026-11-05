@@ -39,6 +39,7 @@ import trademarkHearingRoutes from './routes/registrations/trademark-hearing-sup
 import monthlyPayrollRoutes from './routes/registrations/monthly-payroll/index.js';
 import statutoryTdsRoutes from './routes/registrations/statutory-tds-compliance/index.js';
 import pfEsiRoutes from './routes/registrations/pf-esi-monthly-returns/index.js';
+import virtualCfoRoutes from './routes/registrations/virtual-cfo/index.js';
 import trademarkRoutes from './routes/trademark/index.js';
 import copyrightRoutes from './routes/copyright/index.js';
 import patentRoutes from './routes/patent/index.js';
@@ -205,6 +206,9 @@ app.use('/api/v1/tds-compliance', statutoryTdsRoutes);
 app.use('/api/v1/pf-esi-monthly-returns', pfEsiRoutes);
 app.use('/api/v1/pf-esi', pfEsiRoutes);
 app.use('/api/v1/epf-esic', pfEsiRoutes);
+app.use('/api/v1/virtual-cfo', virtualCfoRoutes);
+app.use('/api/v1/virtual-cfo-accounting', virtualCfoRoutes);
+app.use('/api/v1/cfo-services', virtualCfoRoutes);
 app.use('/api/v1/trademark', trademarkRoutes);
 app.use('/api/v1/trademark-registration', trademarkRoutes);
 app.use('/api/v1/trademark-renewal', trademarkRoutes);

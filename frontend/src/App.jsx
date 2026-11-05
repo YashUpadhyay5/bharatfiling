@@ -81,6 +81,7 @@ const TrademarkHearingModule = lazy(() => import('./pages/trademark-hearing-supp
 const MonthlyPayrollModule = lazy(() => import('./pages/monthly-payroll/index.jsx'));
 const StatutoryTdsModule = lazy(() => import('./pages/statutory-tds-compliance/index.jsx'));
 const PfEsiModule = lazy(() => import('./pages/pf-esi-monthly-returns/index.jsx'));
+const VirtualCfoModule = lazy(() => import('./pages/virtual-cfo/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -410,6 +411,15 @@ export default function App() {
                 <Route path="/pf-esi" element={<PfEsiModule />} />
                 <Route path="/apply/pf-esi-monthly-returns" element={<PfEsiModule />} />
                 <Route path="/apply/pf-esi" element={<PfEsiModule />} />
+
+                {/* Virtual CFO & Accounting */}
+                <Route path="/services/virtual-cfo" element={<VirtualCfoModule />} />
+                <Route path="/services/virtual-cfo-accounting" element={<VirtualCfoModule />} />
+                <Route path="/services/cfo-services" element={<VirtualCfoModule />} />
+                <Route path="/virtual-cfo" element={<VirtualCfoModule />} />
+                <Route path="/virtual-cfo-accounting" element={<VirtualCfoModule />} />
+                <Route path="/apply/virtual-cfo" element={<VirtualCfoModule />} />
+                <Route path="/apply/virtual-cfo-accounting" element={<VirtualCfoModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)
