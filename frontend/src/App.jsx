@@ -85,6 +85,7 @@ const VirtualCfoModule = lazy(() => import('./pages/virtual-cfo/index.jsx'));
 const SecretarialAuditModule = lazy(() => import('./pages/secretarial-audit-registers/index.jsx'));
 const ShopActRenewalModule = lazy(() => import('./pages/shop-act-renewal/index.jsx'));
 const FactoryLicenseModule = lazy(() => import('./pages/factory-license-compliance/index.jsx'));
+const EnvironmentalConsentModule = lazy(() => import('./pages/environmental-consent-pcb/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -448,6 +449,14 @@ export default function App() {
                 <Route path="/factory-license" element={<FactoryLicenseModule />} />
                 <Route path="/apply/factory-license-compliance" element={<FactoryLicenseModule />} />
                 <Route path="/apply/factory-license" element={<FactoryLicenseModule />} />
+                {/* Environmental Consent (PCB) */}
+                <Route path="/services/environmental-consent-pcb" element={<EnvironmentalConsentModule />} />
+                <Route path="/services/environmental-consent" element={<EnvironmentalConsentModule />} />
+                <Route path="/services/pcb-consent" element={<EnvironmentalConsentModule />} />
+                <Route path="/environmental-consent-pcb" element={<EnvironmentalConsentModule />} />
+                <Route path="/environmental-consent" element={<EnvironmentalConsentModule />} />
+                <Route path="/apply/environmental-consent-pcb" element={<EnvironmentalConsentModule />} />
+                <Route path="/apply/environmental-consent" element={<EnvironmentalConsentModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

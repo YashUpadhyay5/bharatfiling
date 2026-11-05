@@ -409,7 +409,7 @@ export const SERVICES = [
     'Consent to Establish or Operate from the State Pollution Control Board.',
     ['Site layout and process flow', 'Raw material and waste details', 'Land documents', 'Water and power details'],
     ['Category check', 'Application drafting and filing', 'Board follow-up'],
-    { govt: 'Board fees at actuals' }),
+    { status: 'live', path: '/services/environmental-consent-pcb', priceStatus: 'existing', aliases: ['environmental-consent', 'pcb-consent'], govt: 'Board fees at actuals' }),
   s('contract-drafting-ndas', 'Contract Drafting & NDAs', 'compliance', 1499, 'per document', '2-3 working days',
     'Founder, employment, vendor and non-disclosure agreements drafted by an advocate.',
     ['Names and addresses of the parties', 'Key commercial terms', 'Any existing draft'],
