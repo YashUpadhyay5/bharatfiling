@@ -45,6 +45,7 @@ import shopActRenewalRoutes from './routes/registrations/shop-act-renewal/index.
 import factoryLicenseRoutes from './routes/registrations/factory-license-compliance/index.js';
 import environmentalConsentRoutes from './routes/registrations/environmental-consent-pcb/index.js';
 import contractDraftingRoutes from './routes/registrations/contract-drafting-ndas/index.js';
+import logoDesignIpRoutes from './routes/registrations/logo-design-ip/index.js';
 import trademarkRoutes from './routes/trademark/index.js';
 import copyrightRoutes from './routes/copyright/index.js';
 import patentRoutes from './routes/patent/index.js';
@@ -229,6 +230,9 @@ app.use('/api/v1/pcb-consent', environmentalConsentRoutes);
 app.use('/api/v1/contract-drafting-ndas', contractDraftingRoutes);
 app.use('/api/v1/contract-drafting', contractDraftingRoutes);
 app.use('/api/v1/nda-drafting', contractDraftingRoutes);
+app.use('/api/v1/logo-design-ip', logoDesignIpRoutes);
+app.use('/api/v1/logo-design', logoDesignIpRoutes);
+app.use('/api/v1/logo-ip-protection', logoDesignIpRoutes);
 app.use('/api/v1/trademark', trademarkRoutes);
 app.use('/api/v1/trademark-registration', trademarkRoutes);
 app.use('/api/v1/trademark-renewal', trademarkRoutes);

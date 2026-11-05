@@ -87,6 +87,7 @@ const ShopActRenewalModule = lazy(() => import('./pages/shop-act-renewal/index.j
 const FactoryLicenseModule = lazy(() => import('./pages/factory-license-compliance/index.jsx'));
 const EnvironmentalConsentModule = lazy(() => import('./pages/environmental-consent-pcb/index.jsx'));
 const ContractDraftingModule = lazy(() => import('./pages/contract-drafting-ndas/index.jsx'));
+const LogoDesignModule = lazy(() => import('./pages/logo-design-ip/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -466,6 +467,15 @@ export default function App() {
                 <Route path="/contract-drafting" element={<ContractDraftingModule />} />
                 <Route path="/apply/contract-drafting-ndas" element={<ContractDraftingModule />} />
                 <Route path="/apply/contract-drafting" element={<ContractDraftingModule />} />
+                {/* Logo Design & IP Protection */}
+                <Route path="/services/logo-design-ip" element={<LogoDesignModule />} />
+                <Route path="/services/logo-design" element={<LogoDesignModule />} />
+                <Route path="/services/logo-design-ip-protection" element={<LogoDesignModule />} />
+                <Route path="/services/logo-protection" element={<LogoDesignModule />} />
+                <Route path="/logo-design-ip" element={<LogoDesignModule />} />
+                <Route path="/logo-design" element={<LogoDesignModule />} />
+                <Route path="/apply/logo-design-ip" element={<LogoDesignModule />} />
+                <Route path="/apply/logo-design" element={<LogoDesignModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)
