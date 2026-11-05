@@ -83,6 +83,7 @@ const StatutoryTdsModule = lazy(() => import('./pages/statutory-tds-compliance/i
 const PfEsiModule = lazy(() => import('./pages/pf-esi-monthly-returns/index.jsx'));
 const VirtualCfoModule = lazy(() => import('./pages/virtual-cfo/index.jsx'));
 const SecretarialAuditModule = lazy(() => import('./pages/secretarial-audit-registers/index.jsx'));
+const ShopActRenewalModule = lazy(() => import('./pages/shop-act-renewal/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -430,6 +431,14 @@ export default function App() {
                 <Route path="/secretarial-audit" element={<SecretarialAuditModule />} />
                 <Route path="/apply/secretarial-audit-registers" element={<SecretarialAuditModule />} />
                 <Route path="/apply/secretarial-audit" element={<SecretarialAuditModule />} />
+                {/* Shop & Establishment Act Renewal */}
+                <Route path="/services/shop-act-renewal" element={<ShopActRenewalModule />} />
+                <Route path="/services/shop-establishment-renewal" element={<ShopActRenewalModule />} />
+                <Route path="/services/gumasta-renewal" element={<ShopActRenewalModule />} />
+                <Route path="/shop-act-renewal" element={<ShopActRenewalModule />} />
+                <Route path="/gumasta-renewal" element={<ShopActRenewalModule />} />
+                <Route path="/apply/shop-act-renewal" element={<ShopActRenewalModule />} />
+                <Route path="/apply/gumasta-renewal" element={<ShopActRenewalModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

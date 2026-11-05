@@ -399,7 +399,7 @@ export const SERVICES = [
     'Renew the Shop and Establishment licence before expiry.',
     ['Existing licence', 'Employee count', 'Address proof'],
     ['Renewal application', 'Updated certificate', 'Next-renewal reminder'],
-    { govt: 'State fee at actuals' }),
+    { status: 'live', path: '/services/shop-act-renewal', priceStatus: 'existing', aliases: ['shop-establishment-renewal', 'gumasta-renewal'], govt: 'State fee at actuals' }),
   s('factory-license-compliance', 'Factory License Compliance', 'compliance', 9999, 'per year', '10-20 working days',
     'Factory licence, returns and inspection readiness.',
     ['Factory plan approval', 'Machinery and worker details', 'Fire and safety certificates'],
