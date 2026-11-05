@@ -11,7 +11,7 @@ const DEV_CODE_MAX_ATTEMPTS = 5;
 
 // Numbers service pages used to prefill. They can still sit in a returning visitor's saved draft,
 // and pressing the button must not text a stranger.
-const SAMPLE_NUMBERS = new Set(['7668976193', '9822019482', '9876543210']);
+const SAMPLE_NUMBERS = new Set(['9822019482', '9876543210']);
 
 // Local development only: no SMS goes out, so the code is shown in the dialog and logged here.
 const devCodes = new Map();
