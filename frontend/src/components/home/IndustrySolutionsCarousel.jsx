@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play, Sparkles } from 'lucide-react';
-import { INDUSTRY_SOLUTIONS } from './industrySolutions.js';
+import { INDUSTRY_SOLUTIONS, industryPath } from './industrySolutions.js';
 import { mod, useInfiniteCarousel, usePrefersReducedMotion } from './useInfiniteCarousel.js';
 
 const EASE = 'cubic-bezier(0.22, 0.8, 0.24, 1)';
@@ -31,7 +31,6 @@ const IndustryCard = memo(function IndustryCard({
   animate,
   duration,
   onFocusIndex,
-  onExplore,
 }) {
   const Icon = item.icon;
   const isActive = distance === 0;
@@ -99,16 +98,10 @@ const IndustryCard = memo(function IndustryCard({
 
         <div className="mt-6 border-t border-slate-200/80 pt-4">
           <Link
-            to={item.path}
+            to={industryPath(item)}
             tabIndex={isClone ? -1 : undefined}
             draggable={false}
             onFocus={() => onFocusIndex(index)}
-            onClick={(e) => {
-              if (onExplore) {
-                e.preventDefault();
-                onExplore(item);
-              }
-            }}
             className={`group/link inline-flex items-center gap-1.5 rounded-md text-[14px] font-semibold text-blue-700 transition-colors hover:text-blue-800 ${FOCUS_RING}`}
           >
             Explore Solutions
@@ -131,12 +124,10 @@ const IndustryCard = memo(function IndustryCard({
  * Props
  *  - items:             card data (defaults to the seven industry solutions)
  *  - autoplayInterval:  ms between automatic steps (default 1000)
- *  - onExplore(item):   optional; when given it replaces the default <Link> navigation
  */
 export default function IndustrySolutionsCarousel({
   items = INDUSTRY_SOLUTIONS,
   autoplayInterval = 1000,
-  onExplore,
 }) {
   const reducedMotion = usePrefersReducedMotion();
   const count = items.length;
@@ -243,7 +234,6 @@ export default function IndustrySolutionsCarousel({
                   animate={c.animate && !c.dragging}
                   duration={duration}
                   onFocusIndex={c.goToIndex}
-                  onExplore={onExplore}
                 />
               );
             })}

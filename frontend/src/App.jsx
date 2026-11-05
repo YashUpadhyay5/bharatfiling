@@ -17,6 +17,7 @@ import LandingPage from './pages/LandingPage.jsx';
 const GstLandingPage = lazy(() => import('./pages/GstLandingPage.jsx'));
 const ServicesDirectory = lazy(() => import('./pages/ServicesDirectory.jsx'));
 const ServiceDetailPage = lazy(() => import('./pages/ServiceDetailPage.jsx'));
+const IndustryPage = lazy(() => import('./pages/IndustryPage.jsx'));
 const PricingPage = lazy(() => import('./pages/PricingPage.jsx'));
 const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
 const ContactPage = lazy(() => import('./pages/ContactPage.jsx'));
@@ -479,6 +480,7 @@ export default function App() {
                 {/* Income tax notice response: landing page, date and time booking, payment dialog */}
                 {flowRoutes(NOTICE_ROUTE.slug, NOTICE_ROUTE.aliases, <NoticeResponseModule />)}
                 <Route path="/services/:slug" element={<ServiceDetailPage />} />
+                <Route path="/industries/:industryId" element={<IndustryPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />

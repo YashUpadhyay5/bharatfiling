@@ -11,8 +11,7 @@ import {
 /**
  * Industry Solutions carousel content.
  *
- * `path` points at routes that already exist in App.jsx. Pass `onExplore` to the carousel to
- * override navigation (e.g. to open a sign-in dialog first).
+ * Each slide opens its own page, pages/IndustryPage.jsx, with content in data/industryContent.js.
  *
  * Accent classes are written out in full so Tailwind can see them at build time.
  */
@@ -26,7 +25,6 @@ export const INDUSTRY_SOLUTIONS = [
     description:
       'Trust, Society & Section 8 registration, 12A, 80G, FCRA and annual compliance.',
     icon: HeartHandshake,
-    path: '/services/company-registration',
     accent: {
       tile: 'bg-rose-50 text-rose-600 ring-rose-100',
       label: 'text-rose-700',
@@ -43,7 +41,6 @@ export const INDUSTRY_SOLUTIONS = [
     description:
       'GST, tenders, government vendor compliance, contractor taxation and project accounting.',
     icon: HardHat,
-    path: '/services/gst-registration',
     accent: {
       tile: 'bg-amber-50 text-amber-600 ring-amber-100',
       label: 'text-amber-700',
@@ -60,7 +57,6 @@ export const INDUSTRY_SOLUTIONS = [
     description:
       'Marketplace GST, e-commerce reconciliation, inventory accounting and taxation.',
     icon: ShoppingBag,
-    path: '/services/gst-return',
     accent: {
       tile: 'bg-violet-50 text-violet-600 ring-violet-100',
       label: 'text-violet-700',
@@ -77,7 +73,6 @@ export const INDUSTRY_SOLUTIONS = [
     description:
       'Professional income taxation, GST, foreign income, invoicing and contracts.',
     icon: Clapperboard,
-    path: '/services/income-tax',
     accent: {
       tile: 'bg-pink-50 text-pink-600 ring-pink-100',
       label: 'text-pink-700',
@@ -94,7 +89,6 @@ export const INDUSTRY_SOLUTIONS = [
     description:
       'Startup incorporation, DPIIT, ESOP, funding documentation, ROC and compliance.',
     icon: Rocket,
-    path: '/services/company-registration',
     accent: {
       tile: 'bg-indigo-50 text-indigo-600 ring-indigo-100',
       label: 'text-indigo-700',
@@ -111,7 +105,6 @@ export const INDUSTRY_SOLUTIONS = [
     description:
       'RERA compliance, GST, TDS, property taxation and business accounting.',
     icon: Building2,
-    path: '/services/legal',
     accent: {
       tile: 'bg-teal-50 text-teal-600 ring-teal-100',
       label: 'text-teal-700',
@@ -128,7 +121,6 @@ export const INDUSTRY_SOLUTIONS = [
     description:
       'Clinic registration guidance, professional taxation, GST, capitalization, payroll, accounting and healthcare business.',
     icon: Stethoscope,
-    path: '/services/income-tax',
     accent: {
       tile: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
       label: 'text-emerald-700',
@@ -137,3 +129,5 @@ export const INDUSTRY_SOLUTIONS = [
     },
   },
 ];
+
+export const industryPath = (item) => `/industries/${item.id}`;
