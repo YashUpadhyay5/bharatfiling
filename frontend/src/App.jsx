@@ -82,6 +82,7 @@ const MonthlyPayrollModule = lazy(() => import('./pages/monthly-payroll/index.js
 const StatutoryTdsModule = lazy(() => import('./pages/statutory-tds-compliance/index.jsx'));
 const PfEsiModule = lazy(() => import('./pages/pf-esi-monthly-returns/index.jsx'));
 const VirtualCfoModule = lazy(() => import('./pages/virtual-cfo/index.jsx'));
+const SecretarialAuditModule = lazy(() => import('./pages/secretarial-audit-registers/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -420,6 +421,15 @@ export default function App() {
                 <Route path="/virtual-cfo-accounting" element={<VirtualCfoModule />} />
                 <Route path="/apply/virtual-cfo" element={<VirtualCfoModule />} />
                 <Route path="/apply/virtual-cfo-accounting" element={<VirtualCfoModule />} />
+
+                {/* Secretarial Audit & Statutory Registers */}
+                <Route path="/services/secretarial-audit-registers" element={<SecretarialAuditModule />} />
+                <Route path="/services/secretarial-audit" element={<SecretarialAuditModule />} />
+                <Route path="/services/statutory-registers" element={<SecretarialAuditModule />} />
+                <Route path="/secretarial-audit-registers" element={<SecretarialAuditModule />} />
+                <Route path="/secretarial-audit" element={<SecretarialAuditModule />} />
+                <Route path="/apply/secretarial-audit-registers" element={<SecretarialAuditModule />} />
+                <Route path="/apply/secretarial-audit" element={<SecretarialAuditModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)
