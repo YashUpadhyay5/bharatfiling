@@ -103,12 +103,20 @@ describe('Sample numbers', () => {
   test('production never starts an OTP for a number pages used to prefill', async () => {
     ENV.FIREBASE_API_KEY = 'test-key';
     ENV.IS_PRODUCTION = true;
-    for (const phone of ['7668976193', '+91 9822019482', '9876543210']) {
+    for (const phone of ['+91 9822019482', '9876543210']) {
       const { status, data } = await post('/api/v1/phone-verification/start', { phone });
       assert.equal(status, 400, phone);
       assert.equal(data.channel, undefined);
     }
     assert.equal((await post('/api/v1/phone-verification/start', { phone: OTHER_PHONE })).data.channel, 'firebase');
+  });
+
+  test('production accepts the business number, which is a real phone', async () => {
+    ENV.FIREBASE_API_KEY = 'test-key';
+    ENV.IS_PRODUCTION = true;
+    const { status, data } = await post('/api/v1/phone-verification/start', { phone: '7668976193' });
+    assert.equal(status, 200);
+    assert.equal(data.channel, 'firebase');
   });
 
   test('no page prefills or falls back to a hardcoded mobile number', () => {
