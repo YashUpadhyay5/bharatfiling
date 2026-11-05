@@ -36,6 +36,7 @@ import startupStructuringRoutes from './routes/registrations/startup-structuring
 import gstNoticeHearingRoutes from './routes/registrations/gst-notice-hearing/index.js';
 import incomeTaxDisputeRoutes from './routes/registrations/income-tax-dispute-appeals/index.js';
 import trademarkHearingRoutes from './routes/registrations/trademark-hearing-support/index.js';
+import monthlyPayrollRoutes from './routes/registrations/monthly-payroll/index.js';
 import trademarkRoutes from './routes/trademark/index.js';
 import copyrightRoutes from './routes/copyright/index.js';
 import patentRoutes from './routes/patent/index.js';
@@ -193,6 +194,9 @@ app.use('/api/v1/income-tax-dispute-appeals', incomeTaxDisputeRoutes);
 app.use('/api/v1/income-tax-dispute', incomeTaxDisputeRoutes);
 app.use('/api/v1/trademark-hearing-support', trademarkHearingRoutes);
 app.use('/api/v1/trademark-hearing', trademarkHearingRoutes);
+app.use('/api/v1/monthly-payroll', monthlyPayrollRoutes);
+app.use('/api/v1/payroll', monthlyPayrollRoutes);
+app.use('/api/v1/online-payroll-management', monthlyPayrollRoutes);
 app.use('/api/v1/trademark', trademarkRoutes);
 app.use('/api/v1/trademark-registration', trademarkRoutes);
 app.use('/api/v1/trademark-renewal', trademarkRoutes);
