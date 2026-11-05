@@ -90,6 +90,7 @@ const FactoryLicenseModule = lazy(() => import('./pages/factory-license-complian
 const EnvironmentalConsentModule = lazy(() => import('./pages/environmental-consent-pcb/index.jsx'));
 const ContractDraftingModule = lazy(() => import('./pages/contract-drafting-ndas/index.jsx'));
 const LogoDesignModule = lazy(() => import('./pages/logo-design-ip/index.jsx'));
+const LoansModule = lazy(() => import('./pages/loans/index.jsx'));
 const ItrServiceModule = lazy(() => import('./pages/itr-services/index.jsx'));
 const McaServiceModule = lazy(() => import('./pages/mca-services/index.jsx'));
 const TdsReturnFilingModule = lazy(() => import('./pages/tds-return-filing/index.jsx'));
@@ -479,6 +480,19 @@ export default function App() {
                 <Route path="/logo-design" element={<LogoDesignModule />} />
                 <Route path="/apply/logo-design-ip" element={<LogoDesignModule />} />
                 <Route path="/apply/logo-design" element={<LogoDesignModule />} />
+                {/* Business & MSME Loans */}
+                <Route path="/loans" element={<LoansModule />} />
+                <Route path="/loans/apply" element={<LoansModule forcedStep={2} />} />
+                <Route path="/loans/checkout" element={<LoansModule forcedStep={3} />} />
+                <Route path="/loans/business-loan" element={<LoansModule defaultSchemeId="unsecured-business" />} />
+                <Route path="/loans/msme-loan" element={<LoansModule defaultSchemeId="unsecured-business" />} />
+                <Route path="/loans/mudra-loan" element={<LoansModule defaultSchemeId="mudra-pmmy" />} />
+                <Route path="/loans/working-capital" element={<LoansModule defaultSchemeId="working-capital-cgtmse" />} />
+                <Route path="/loans/machinery-loan" element={<LoansModule defaultSchemeId="machinery-equipment" />} />
+                <Route path="/loans/loan-against-property" element={<LoansModule defaultSchemeId="loan-against-property" />} />
+                <Route path="/loans/cma-project-report" element={<LoansModule defaultSchemeId="cma-project-report" />} />
+                <Route path="/services/loans" element={<LoansModule />} />
+                <Route path="/services/business-loans" element={<LoansModule />} />
                 {/* ITR service flows: 3 steps (details, questionnaire, payment), configured in pages/itr-services */}
                 {ITR_SERVICE_ROUTES.flatMap(({ slug, aliases = [] }) =>
                   flowRoutes(slug, aliases, <ItrServiceModule key={slug} slug={slug} />)

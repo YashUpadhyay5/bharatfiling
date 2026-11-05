@@ -445,6 +445,11 @@ export const SERVICES = [
     ['Examination report or notice', 'Application details', 'Evidence of use'],
     ['Written submissions', 'Appearance at the hearing', 'Order tracking'],
     { status: 'live', path: '/services/trademark-hearing-support', priceStatus: 'existing', aliases: ['trademark-hearing', 'tm-hearing'] }),
+  s('business-loans', 'Business & MSME Loans', 'consultation', 499, 'per consultation & matchmaking', '24-48 hours',
+    'Collateral-free business loans, MUDRA loans, CGTMSE working capital and machinery loans up to ₹5 Cr.',
+    ['KYC documents (PAN & Aadhaar)', 'Last 6 months bank statement', 'GST returns / 2-year ITR'],
+    ['Credit score & eligibility analysis', 'Matchmaking across 35+ partner banks & NBFCs', 'CA dossier & CMA preparation assistance'],
+    { status: 'live', path: '/loans', priceStatus: 'existing', aliases: ['loans', 'msme-loans', 'mudra-loan', 'business-loan', 'working-capital-loan', 'cma-data-project-report'] }),
 ];
 
 /* -------------------------------------------------------------------- helpers */
