@@ -483,7 +483,9 @@ export default function App() {
                 {/* Business & MSME Loans */}
                 <Route path="/loans" element={<LoansModule />} />
                 <Route path="/loans/apply" element={<LoansModule forcedStep={2} />} />
-                <Route path="/loans/checkout" element={<LoansModule forcedStep={3} />} />
+                <Route path="/loans/schemes" element={<LoansModule forcedStep={2} />} />
+                <Route path="/loans/profile" element={<LoansModule forcedStep={3} />} />
+                <Route path="/loans/checkout" element={<LoansModule forcedStep={4} />} />
                 <Route path="/loans/business-loan" element={<LoansModule defaultSchemeId="unsecured-business" />} />
                 <Route path="/loans/msme-loan" element={<LoansModule defaultSchemeId="unsecured-business" />} />
                 <Route path="/loans/mudra-loan" element={<LoansModule defaultSchemeId="mudra-pmmy" />} />
