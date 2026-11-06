@@ -1,20 +1,11 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AuthRequiredModal from '../common/AuthRequiredModal.jsx';
-import { PUBLIC_INFO_PATHS, findService, searchServices } from '../search/serviceSearch.js';
+import { PUBLIC_INFO_PATHS, searchServices } from '../search/serviceSearch.js';
 
-// Rotating placeholder examples ("Try 'GST Registration'")
-const EXAMPLES = ['GST Registration', 'Private Limited Company', 'Trademark Registration', 'Income Tax Return', 'MSME / Udyam Registration'];
-
-// Quick picks under the bar
-const QUICK_PICKS = [
-  { id: 'gst-apply', label: 'GST Registration' },
-  { id: 'pvt-ltd', label: 'Company Registration' },
-  { id: 'tm-reg', label: 'Trademark Registration' },
-  { id: 'itr-filing', label: 'ITR Filing' },
-];
+const PLACEHOLDER = "Try 'Income Tax Return', 'GST Registration', 'Company Registration'...";
 
 const MAX_RESULTS = 6;
 
@@ -45,20 +36,10 @@ export default function HeroSearch() {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const [focused, setFocused] = useState(false);
-  const [example, setExample] = useState(0);
   const [authService, setAuthService] = useState(null);
 
   const results = useMemo(() => searchServices(query).slice(0, MAX_RESULTS), [query]);
   const showList = open && query.trim().length > 0;
-
-  // Rotate the placeholder while the field is idle (not for reduced-motion users)
-  useEffect(() => {
-    if (focused || query) return undefined;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-    const id = setInterval(() => setExample((i) => (i + 1) % EXAMPLES.length), 2600);
-    return () => clearInterval(id);
-  }, [focused, query]);
 
   // On short screens, bring the suggestions into view when they open (search bar stays below the header)
   useEffect(() => {
@@ -133,7 +114,7 @@ export default function HeroSearch() {
   const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#062A4D]';
 
   return (
-    <div className="w-full max-w-3xl 3xl:max-w-[860px]">
+    <div className="w-full max-w-[60rem] 3xl:max-w-[68rem]">
       <div ref={boxRef} className="group/search relative">
         {/* focus glow - a separate layer behind the bar */}
         <div
@@ -143,8 +124,9 @@ export default function HeroSearch() {
         <form
           role="search"
           onSubmit={submit}
-          className="bf-ring bf-ring--focus-spin flex h-14 items-center rounded-full bg-white/85 pl-5 pr-1.5 shadow-[0_22px_50px_-26px_rgba(6,42,77,0.55),inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-slate-200/90 backdrop-blur-xl backdrop-saturate-150 transition-shadow duration-300 [--bf-ring-opacity:0] [--bf-ring-width:2px] focus-within:bg-white focus-within:ring-transparent focus-within:[--bf-ring-opacity:1] hover:shadow-[0_26px_60px_-26px_rgba(6,42,77,0.65),inset_0_1px_0_rgba(255,255,255,0.9)] sm:h-16 sm:pl-7 sm:pr-2 3xl:h-[72px] 3xl:pl-8"
+          className="bf-ring bf-ring--focus-spin flex h-14 items-center gap-3 rounded-full bg-white/85 pl-5 pr-1.5 shadow-[0_22px_50px_-26px_rgba(6,42,77,0.55),inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-slate-200/90 backdrop-blur-xl backdrop-saturate-150 transition-shadow duration-300 [--bf-ring-opacity:0] [--bf-ring-width:2px] focus-within:bg-white focus-within:ring-transparent focus-within:[--bf-ring-opacity:1] hover:shadow-[0_26px_60px_-26px_rgba(6,42,77,0.65),inset_0_1px_0_rgba(255,255,255,0.9)] sm:h-[66px] sm:gap-4 sm:pl-8 sm:pr-2 short:h-14 3xl:h-[76px] 3xl:pl-9"
         >
+          <Search className="h-5 w-5 shrink-0 text-slate-500 sm:h-6 sm:w-6" aria-hidden="true" />
           <label htmlFor={`${listId}-input`} className="sr-only">
             Search services
           </label>
@@ -164,21 +146,18 @@ export default function HeroSearch() {
               setActive(0);
               setOpen(true);
             }}
-            onFocus={() => {
-              setFocused(true);
-              setOpen(true);
-            }}
-            onBlur={() => setFocused(false)}
+            onFocus={() => setOpen(true)}
             onKeyDown={onKeyDown}
-            placeholder={`Try '${EXAMPLES[example]}'`}
-            className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-[17px] 3xl:text-[19px]"
+            placeholder={PLACEHOLDER}
+            className="h-full min-w-0 flex-1 text-ellipsis bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-[16.5px] 3xl:text-[19px]"
           />
           <button
             type="submit"
             aria-label="Search"
-            className={`group/btn flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_25%,#1E5A96,#062A4D_70%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_18px_-8px_rgba(6,42,77,0.8)] transition duration-300 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_12px_26px_-8px_rgba(6,42,77,0.9)] active:scale-95 sm:h-12 sm:w-12 ${focusRing}`}
+            className={`group/btn flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[15px] font-semibold sm:w-auto sm:px-9 sm:text-[17px] 3xl:h-[60px] 3xl:px-11 3xl:text-[19px] bg-[radial-gradient(circle_at_30%_25%,#1E5A96,#062A4D_70%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_18px_-8px_rgba(6,42,77,0.8)] transition duration-300 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_12px_26px_-8px_rgba(6,42,77,0.9)] active:scale-95 sm:h-[52px] short:h-11 ${focusRing}`}
           >
-            <Search className="h-5 w-5 transition-transform duration-300 group-hover/btn:scale-110" aria-hidden="true" />
+            <Search className="h-5 w-5 sm:hidden" aria-hidden="true" />
+            <span className="hidden sm:inline">Search</span>
           </button>
         </form>
 
@@ -222,28 +201,6 @@ export default function HeroSearch() {
             )}
           </div>
         )}
-      </div>
-
-      {/* quick picks */}
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 lg:justify-start lg:gap-1.5">
-        {QUICK_PICKS.map(({ id, label }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => select(findService(id))}
-            className={`bf-sheen rounded-full border border-slate-300 bg-white/70 px-4 py-1.5 text-[13px] text-slate-700 backdrop-blur transition duration-200 lg:px-2.5 lg:text-[13px] 3xl:px-5 3xl:py-2 3xl:text-[15px] hover:-translate-y-0.5 hover:border-[#062A4D] hover:bg-white hover:text-[#062A4D] hover:shadow-[0_8px_18px_-10px_rgba(6,42,77,0.5)] sm:text-sm ${focusRing}`}
-          >
-            {label}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => navigate('/services')}
-          className={`group inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-semibold lg:pl-2 lg:pr-0.5 text-[#062A4D] transition hover:text-[#F26522] sm:text-sm ${focusRing}`}
-        >
-          All services
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-        </button>
       </div>
 
       <AuthRequiredModal
