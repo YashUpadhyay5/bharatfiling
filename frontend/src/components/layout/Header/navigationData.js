@@ -27,7 +27,7 @@ export const PRIMARY_NAV = [
     mega: true,
     isActive: (p) => p.startsWith('/services') || p.startsWith('/apply'),
   },
-  { key: 'pricing', label: 'Pricing', to: '/pricing', isActive: (p) => p.startsWith('/pricing') },
+  { key: 'loans', label: 'Loans', to: '/loans', isActive: (p) => p.startsWith('/loans') },
   { key: 'about', label: 'About Us', to: '/about', isActive: (p) => p.startsWith('/about') },
   { key: 'contact', label: 'Contact', to: '/contact', isActive: (p) => p.startsWith('/contact') },
 ];

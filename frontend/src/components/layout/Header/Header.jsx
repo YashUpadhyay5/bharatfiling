@@ -13,7 +13,7 @@ import { SERVICE_CATEGORIES, getDashboardPath } from './navigationData.js';
 import { FOCUS_RING } from './shared.js';
 
 // Public information pages never require an account (same rule the search palette uses).
-const PUBLIC_INFO_PATHS = ['/', '/about', '/faq', '/pricing', '/contact', '/services', '/services/udyam-registration', '/services/msme-registration', '/apply/udyam', '/apply/msme'];
+const PUBLIC_INFO_PATHS = ['/', '/about', '/faq', '/pricing', '/loans', '/contact', '/services', '/services/udyam-registration', '/services/msme-registration', '/apply/udyam', '/apply/msme'];
 
 // The full tab row needs ~1280px; below that the compact header + drawer is used.
 const DESKTOP_MEDIA_QUERY = '(min-width: 1280px)';
@@ -143,7 +143,7 @@ export default function Header() {
     setOpenKey(null);
     setMobileOpen(false);
 
-    if (isAuthenticated || PUBLIC_INFO_PATHS.includes(item.path) || item.path.startsWith('/services/') || item.path.includes('udyam') || item.path.includes('msme')) return;
+    if (isAuthenticated || PUBLIC_INFO_PATHS.includes(item.path) || item.path.startsWith('/services/') || item.path.startsWith('/loans') || item.path.includes('udyam') || item.path.includes('msme')) return;
 
     e.preventDefault();
     setSelectedServiceForAuth({
@@ -184,7 +184,7 @@ export default function Header() {
     ].join(' ');
 
   const isHome = pathname === '/';
-  const isPricing = pathname.startsWith('/pricing');
+  const isLoans = pathname.startsWith('/loans');
 
   return (
     <>
@@ -266,8 +266,8 @@ export default function Header() {
               })}
 
               <li className="flex">
-                <Link to="/pricing" aria-current={isPricing ? 'page' : undefined} className={tabClass(isPricing)}>
-                  Pricing
+                <Link to="/loans" aria-current={isLoans ? 'page' : undefined} className={tabClass(isLoans)}>
+                  Loans
                 </Link>
               </li>
             </ul>
