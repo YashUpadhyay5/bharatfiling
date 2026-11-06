@@ -16,6 +16,7 @@ import {
   Landmark,
   Search,
   HelpCircle,
+  X,
 } from 'lucide-react';
 
 import {
@@ -47,30 +48,36 @@ export default function LoanSchemesPage({
   }, [selectedSchemeId]);
 
   const filteredSchemes = useMemo(() => {
-    let list = LOAN_SCHEMES;
-    if (activeCategory === 'unsecured') {
-      list = LOAN_SCHEMES.filter((s) => s.id === 'unsecured-business');
-    } else if (activeCategory === 'govt') {
-      list = LOAN_SCHEMES.filter((s) => s.id === 'mudra-pmmy' || s.id === 'working-capital-cgtmse');
-    } else if (activeCategory === 'asset') {
-      list = LOAN_SCHEMES.filter((s) => s.id === 'machinery-equipment' || s.id === 'loan-against-property');
-    } else if (activeCategory === 'cma') {
-      list = LOAN_SCHEMES.filter((s) => s.id === 'cma-project-report');
-    } else if (activeCategory === 'custom') {
-      list = LOAN_SCHEMES.filter((s) => s.id === 'custom-loan-advisory');
-    }
-
+    // If user is actively typing in search, search across all schemes for instant match
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      list = list.filter(
+      return LOAN_SCHEMES.filter(
         (s) =>
           s.name.toLowerCase().includes(q) ||
           s.description.toLowerCase().includes(q) ||
           (s.popularFor && s.popularFor.toLowerCase().includes(q)) ||
-          s.category.toLowerCase().includes(q)
+          s.category.toLowerCase().includes(q) ||
+          s.badge.toLowerCase().includes(q)
       );
     }
-    return list;
+
+    if (activeCategory === 'unsecured') {
+      return LOAN_SCHEMES.filter((s) => s.id === 'unsecured-business');
+    } else if (activeCategory === 'govt') {
+      return LOAN_SCHEMES.filter(
+        (s) => s.id === 'mudra-pmmy' || s.id === 'working-capital-cgtmse'
+      );
+    } else if (activeCategory === 'asset') {
+      return LOAN_SCHEMES.filter(
+        (s) => s.id === 'machinery-equipment' || s.id === 'loan-against-property'
+      );
+    } else if (activeCategory === 'cma') {
+      return LOAN_SCHEMES.filter((s) => s.id === 'cma-project-report');
+    } else if (activeCategory === 'custom') {
+      return LOAN_SCHEMES.filter((s) => s.id === 'custom-loan-advisory');
+    }
+
+    return LOAN_SCHEMES;
   }, [activeCategory, searchQuery]);
 
   const handleCardSelect = (schemeId) => {
@@ -161,14 +168,14 @@ export default function LoanSchemesPage({
           </p>
 
           {/* Filter Pills matching screenshot */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 mt-6">
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
             {[
               { id: 'all', label: 'All Schemes' },
               { id: 'unsecured', label: 'Unsecured Business' },
               { id: 'govt', label: 'Govt & MUDRA' },
               { id: 'asset', label: 'Machinery & Property' },
               { id: 'cma', label: 'Bank Project Reports' },
-              { id: 'custom', label: 'Loan Not Listed / Custom Advisory' },
+              { id: 'custom', label: 'Custom Advisory' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -178,7 +185,7 @@ export default function LoanSchemesPage({
                   setSearchQuery('');
                 }}
                 className={`py-2 px-4 rounded-full text-xs font-bold transition cursor-pointer shadow-xs ${
-                  activeCategory === tab.id
+                  activeCategory === tab.id && !searchQuery
                     ? 'bg-[#002B49] text-white ring-2 ring-[#002B49] ring-offset-1'
                     : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
                 }`}
@@ -195,69 +202,65 @@ export default function LoanSchemesPage({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search loan type (e.g. Export, Hospital, Solar, Builder, Startup...)"
-              className="w-full pl-9 pr-8 py-2 text-xs rounded-full border border-slate-200 bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700 shadow-2xs placeholder:text-slate-400"
+              placeholder="Search loan type (e.g. mudra, working capital, machinery...)"
+              className="w-full pl-9 pr-8 py-2.5 text-xs rounded-full border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#002B49]/20 focus:border-[#002B49] text-slate-800 shadow-2xs placeholder:text-slate-400 transition"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-700 font-bold p-1"
+                title="Clear search"
               >
-                ×
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
-        </div>
 
-        {/* Loan Not Available or Not Listed Callout Banner */}
-        <div className="bg-gradient-to-r from-[#001f35] via-[#002B49] to-indigo-950 rounded-2xl p-5 sm:p-6 text-white shadow-md mb-8 border border-blue-900/50 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
-          <div className="space-y-1.5 text-center md:text-left z-10">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Loan Not Available or Not Listed?</span>
+          {/* Search Result Feedback */}
+          {searchQuery && (
+            <div className="mt-3 flex items-center justify-center gap-2 text-xs text-slate-500 animate-in fade-in duration-150">
+              <span>
+                Found <strong className="text-slate-900">{filteredSchemes.length}</strong>{' '}
+                {filteredSchemes.length === 1 ? 'scheme' : 'schemes'} matching &ldquo;
+                <span className="text-blue-700 font-bold">{searchQuery}</span>&rdquo;
+              </span>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="text-blue-600 hover:underline font-bold cursor-pointer"
+              >
+                Clear Search
+              </button>
             </div>
-            <h3 className="text-base sm:text-lg font-black text-white">
-              Can’t find your specific loan scheme? Take 1-on-1 Advisory
-            </h3>
-            <p className="text-xs text-blue-100/90 leading-relaxed max-w-2xl">
-              If the financing scheme you need (Export Credit, Healthcare/Hospital, Solar Plant, Invoice Discounting, Builder Debt, or Stressed Asset Refinancing) is not available here, proceed directly to our Advisory Desk. Our Ex-Bank Credit Appraisal Committee will structure a customized financing facility directly for your company.
-            </p>
-          </div>
-          <div className="shrink-0 z-10 w-full md:w-auto">
-            <button
-              type="button"
-              onClick={handleProceedForCustomAdvisory}
-              className="w-full md:w-auto px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer group"
-            >
-              <span>Take Custom Advisory</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
+          )}
         </div>
 
-        {/* If no schemes match search filter */}
+        {/* -------------------------------------------------------------
+            SCHEMES GRID OR ZERO-MATCH STATE (Directly below search!)
+        ------------------------------------------------------------- */}
         {filteredSchemes.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-8 sm:p-12 text-center max-w-2xl mx-auto my-8 shadow-sm">
+          <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-8 sm:p-12 text-center max-w-2xl mx-auto my-8 shadow-sm animate-in fade-in duration-200">
             <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto mb-4">
               <Sparkles className="w-7 h-7" />
             </div>
             <span className="text-[11px] font-black uppercase text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-              Loan Scheme Not Listed
+              Loan Scheme Not Listed in Catalog
             </span>
             <h3 className="text-xl sm:text-2xl font-black text-[#002B49] mt-3">
-              No standard scheme matches "{searchQuery}"?
+              No standard scheme matches "{searchQuery}"
             </h3>
-            <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-              Don't worry! If your specific loan requirement is not in the standard list, our Senior CA & Ex-Banker Credit Committee will structure a bespoke bank facility for you.
+            <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed max-w-md mx-auto">
+              Don't worry! Specialized facilities (Export Credit, Hospital Equipment, Solar Plant, Invoice Discounting, or Custom Debt) are structured directly by our Senior CA & Ex-Bank Credit Appraisal Committee.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={handleProceedForCustomAdvisory}
-                className="py-3 px-6 rounded-xl bg-[#002B49] hover:bg-[#001f35] text-white font-bold text-xs tracking-wide shadow-md transition flex items-center gap-2 cursor-pointer"
+                className="py-3 px-6 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold text-xs tracking-wide shadow-md hover:shadow-lg transition flex items-center gap-2 cursor-pointer"
               >
-                <span>Proceed for Take Advisory</span>
+                <span>Take Custom Advisory for "{searchQuery}"</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
@@ -268,12 +271,12 @@ export default function LoanSchemesPage({
                 }}
                 className="py-3 px-5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
               >
-                Clear Search
+                View All Schemes
               </button>
             </div>
           </div>
         ) : (
-          /* All Schemes Grid */
+          /* All Schemes Grid - Immediately visible without obstructing banner */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             {filteredSchemes.map((scheme) => {
               const isSelected = selectedSchemeId === scheme.id;
@@ -414,6 +417,34 @@ export default function LoanSchemesPage({
             })}
           </div>
         )}
+
+        {/* -------------------------------------------------------------
+            UNLISTED LOAN CALLOUT BANNER (Placed AFTER cards grid)
+        ------------------------------------------------------------- */}
+        <div className="bg-gradient-to-r from-[#001f35] via-[#002B49] to-indigo-950 rounded-2xl p-5 sm:p-6 text-white shadow-md mb-8 border border-blue-900/50 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+          <div className="space-y-1.5 text-center md:text-left z-10">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider">
+              <Sparkles className="w-3 h-3 text-amber-300" />
+              <span>Loan Not Available or Not Listed?</span>
+            </div>
+            <h3 className="text-base sm:text-lg font-black text-white">
+              Can’t find your specific loan scheme? Take 1-on-1 Advisory
+            </h3>
+            <p className="text-xs text-blue-100/90 leading-relaxed max-w-2xl">
+              If the financing scheme you need (Export Credit, Healthcare/Hospital, Solar Plant, Invoice Discounting, Builder Debt, or Stressed Asset Refinancing) is not available above, proceed directly to our Advisory Desk. Our Ex-Bank Credit Appraisal Committee will structure a customized financing facility directly for your company.
+            </p>
+          </div>
+          <div className="shrink-0 z-10 w-full md:w-auto">
+            <button
+              type="button"
+              onClick={handleProceedForCustomAdvisory}
+              className="w-full md:w-auto px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer group"
+            >
+              <span>Take Custom Advisory</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
 
         {/* Selected Scheme Confirmation & Amount Adjustment Bar */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xl">
