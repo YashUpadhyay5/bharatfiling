@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthRequiredModal from '../components/common/AuthRequiredModal.jsx';
-import IndustrySolutionsCarousel from '../components/home/IndustrySolutionsCarousel.jsx';
 import HomeHero from '../components/home/HomeHero.jsx';
 import FrontpageTaxTools from '../components/tools/FrontpageTaxTools.jsx';
 
@@ -218,12 +217,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* 3b. INDUSTRY SOLUTIONS CAROUSEL */}
-      {/* On laptops the industry solutions live in the hero deck; smaller screens get the full section here */}
-      <div className="lg:hidden">
-        <IndustrySolutionsCarousel />
-      </div>
 
       {/* 4. HOW IT WORKS */}
       <section className="py-12 sm:py-16 md:py-20 bg-slate-50/60 border-b border-slate-200/80">
