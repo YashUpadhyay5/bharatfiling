@@ -16,6 +16,7 @@ import {
   Phone,
   Sparkles,
   Check,
+  Coins,
 } from 'lucide-react';
 
 import {
