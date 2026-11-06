@@ -237,8 +237,36 @@ export default function LoanSchemesPage({
           )}
         </div>
 
+        {/* Loan Not Available or Not Listed Callout Banner - Shows when opening page */}
+        {!searchQuery && (
+          <div className="bg-gradient-to-r from-[#001f35] via-[#002B49] to-indigo-950 rounded-2xl p-5 sm:p-6 text-white shadow-md mb-8 border border-blue-900/50 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden animate-in fade-in duration-200">
+            <div className="space-y-1.5 text-center md:text-left z-10">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider">
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                <span>LOAN NOT AVAILABLE OR NOT LISTED?</span>
+              </div>
+              <h3 className="text-base sm:text-lg font-black text-white">
+                Can’t find your specific loan scheme? Take 1-on-1 Advisory
+              </h3>
+              <p className="text-xs text-blue-100/90 leading-relaxed max-w-2xl">
+                If the financing scheme you need (Export Credit, Healthcare/Hospital, Solar Plant, Invoice Discounting, Builder Debt, or Stressed Asset Refinancing) is not available above, proceed directly to our Advisory Desk. Our Ex-Bank Credit Appraisal Committee will structure a customized financing facility directly for your company.
+              </p>
+            </div>
+            <div className="shrink-0 z-10 w-full md:w-auto">
+              <button
+                type="button"
+                onClick={handleProceedForCustomAdvisory}
+                className="w-full md:w-auto px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer group"
+              >
+                <span>Take Custom Advisory</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* -------------------------------------------------------------
-            SCHEMES GRID OR ZERO-MATCH STATE (Directly below search!)
+            SCHEMES GRID OR ZERO-MATCH STATE
         ------------------------------------------------------------- */}
         {filteredSchemes.length === 0 ? (
           <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-8 sm:p-12 text-center max-w-2xl mx-auto my-8 shadow-sm animate-in fade-in duration-200">
@@ -418,33 +446,7 @@ export default function LoanSchemesPage({
           </div>
         )}
 
-        {/* -------------------------------------------------------------
-            UNLISTED LOAN CALLOUT BANNER (Placed AFTER cards grid)
-        ------------------------------------------------------------- */}
-        <div className="bg-gradient-to-r from-[#001f35] via-[#002B49] to-indigo-950 rounded-2xl p-5 sm:p-6 text-white shadow-md mb-8 border border-blue-900/50 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
-          <div className="space-y-1.5 text-center md:text-left z-10">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider">
-              <Sparkles className="w-3 h-3 text-amber-300" />
-              <span>Loan Not Available or Not Listed?</span>
-            </div>
-            <h3 className="text-base sm:text-lg font-black text-white">
-              Can’t find your specific loan scheme? Take 1-on-1 Advisory
-            </h3>
-            <p className="text-xs text-blue-100/90 leading-relaxed max-w-2xl">
-              If the financing scheme you need (Export Credit, Healthcare/Hospital, Solar Plant, Invoice Discounting, Builder Debt, or Stressed Asset Refinancing) is not available above, proceed directly to our Advisory Desk. Our Ex-Bank Credit Appraisal Committee will structure a customized financing facility directly for your company.
-            </p>
-          </div>
-          <div className="shrink-0 z-10 w-full md:w-auto">
-            <button
-              type="button"
-              onClick={handleProceedForCustomAdvisory}
-              className="w-full md:w-auto px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer group"
-            >
-              <span>Take Custom Advisory</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-        </div>
+
 
         {/* Selected Scheme Confirmation & Amount Adjustment Bar */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xl">
