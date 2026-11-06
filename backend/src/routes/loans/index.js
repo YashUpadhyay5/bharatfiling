@@ -121,6 +121,10 @@ router.post('/eligibility', (req, res) => {
     } else if (schemeId === 'working-capital-cgtmse') {
       recommendedBanks[0] = 'SIDBI';
       recommendedBanks[1] = 'State Bank of India';
+    } else if (schemeId === 'custom-loan-advisory') {
+      recommendedBanks[0] = 'State Bank of India (MSME Desk)';
+      recommendedBanks[1] = 'SIDBI & Specialized Funds';
+      recommendedBanks[2] = 'HDFC Corporate Banking';
     }
 
     res.json({
@@ -165,6 +169,8 @@ router.post('/profile', optionalAuth, (req, res) => {
       gstin,
       cibilRange,
       matchScore,
+      customLoanType = '',
+      isCustomAdvisory = false,
     } = req.body;
 
     const apps = db.getApplications();
@@ -183,6 +189,8 @@ router.post('/profile', optionalAuth, (req, res) => {
         scheme_name: schemeName || app.fields_data.scheme_name,
         loan_amount: loanAmount || app.fields_data.desired_amount,
         loan_purpose: loanPurpose,
+        custom_loan_type: customLoanType,
+        is_custom_advisory: isCustomAdvisory,
         entity_type: entityType,
         business_vintage: businessVintage,
         annual_turnover: annualTurnover,
@@ -230,6 +238,8 @@ router.post('/payment', optionalAuth, (req, res) => {
       schemeName = 'Unsecured Business Loan',
       loanAmount = 1500000,
       bookedSlot = '4 November 2026 at 2:00 PM',
+      customLoanType = '',
+      isCustomAdvisory = false,
     } = req.body;
 
     const generatedTxnId = `BFP-LN-${Date.now().toString().slice(-8)}`;
@@ -262,6 +272,8 @@ router.post('/payment', optionalAuth, (req, res) => {
           scheme_id: schemeId,
           scheme_name: schemeName,
           loan_amount: loanAmount,
+          custom_loan_type: customLoanType,
+          is_custom_advisory: isCustomAdvisory,
           booked_slot: bookedSlot,
           include_labour_welfare: includeLabourWelfare,
         },

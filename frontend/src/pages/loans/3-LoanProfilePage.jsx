@@ -33,7 +33,8 @@ export default function LoanProfilePage({
   const [profile, setProfile] = useState({
     schemeId: initialData.selectedSchemeId || 'unsecured-business',
     loanAmount: initialData.desiredAmount || initialData.loanAmount || 1500000,
-    loanPurpose: initialData.loanPurpose || LOAN_PURPOSES[0],
+    loanPurpose: initialData.loanPurpose || (initialData.isCustomAdvisory || initialData.selectedSchemeId === 'custom-loan-advisory' ? 'Specialized / Custom Loan Advisory (Loan Not Listed)' : LOAN_PURPOSES[0]),
+    customLoanType: initialData.customLoanType || '',
     entityType: initialData.entityType || 'pvt_ltd',
     businessVintage: initialData.businessVintage || '3_to_5_years',
     annualTurnover: initialData.annualTurnover || '50l_to_1cr',
@@ -107,6 +108,8 @@ export default function LoanProfilePage({
         ...profile,
         selectedSchemeId: selectedScheme.id,
         selectedSchemeName: selectedScheme.name,
+        customLoanType: profile.customLoanType,
+        isCustomAdvisory: profile.schemeId === 'custom-loan-advisory' || initialData.isCustomAdvisory,
         matchScore: matchResult.score,
       });
     }
@@ -141,7 +144,7 @@ export default function LoanProfilePage({
               <span className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-xs">
                 ✓
               </span>
-              <span>2. Scheme: {selectedScheme.name.split(' ')[0]}</span>
+              <span>2. Scheme: {selectedScheme.id === 'custom-loan-advisory' ? 'Custom Advisory' : selectedScheme.name.split(' ')[0]}</span>
             </div>
             <div className="w-10 sm:w-16 h-0.5 bg-emerald-500"></div>
             <div className="flex items-center gap-2 text-[#002B49]">
@@ -184,6 +187,21 @@ export default function LoanProfilePage({
                   Accurate details help our CA appraisal desk secure maximum credit limits at the lowest interest rates.
                 </p>
               </div>
+
+              {/* Custom Loan Advisory Notice Banner */}
+              {(profile.schemeId === 'custom-loan-advisory' || initialData.isCustomAdvisory) && (
+                <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-300 flex items-start gap-3 shadow-2xs">
+                  <Sparkles className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+                  <div>
+                    <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wide">
+                      Custom Loan & Specialized Advisory Mode
+                    </h4>
+                    <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+                      You selected specialized advisory because your desired loan is not in the standard catalog. Our Senior CA & Ex-Bank Credit Appraisal Committee will structure a bespoke proposal and tender it across 35+ partner institutions.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Selected Scheme Badge Card */}
               <div className="mb-6 p-4 rounded-xl bg-blue-50/70 border border-blue-200 flex items-center justify-between">
@@ -242,6 +260,26 @@ export default function LoanProfilePage({
                     </select>
                   </div>
                 </div>
+
+                {/* Specific unlisted loan requirement input */}
+                {(profile.schemeId === 'custom-loan-advisory' || initialData.isCustomAdvisory) && (
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Specify Desired Financing / Unlisted Loan Type *
+                    </label>
+                    <input
+                      type="text"
+                      name="customLoanType"
+                      value={profile.customLoanType || ''}
+                      onChange={handleChange}
+                      placeholder="e.g. Hospital equipment, Solar energy plant, Export LC & packing credit, Builder project finance..."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:border-blue-500 outline-none"
+                    />
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Mention your industry, asset to be financed, or target lenders so our specialists prepare before the consultation call.
+                    </p>
+                  </div>
+                )}
 
                 {/* 2. Business Entity Type */}
                 <div>

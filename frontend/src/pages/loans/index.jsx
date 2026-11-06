@@ -32,6 +32,8 @@ export default function LoansModule({ defaultSchemeId = null, forcedStep = null 
     '/loans/machinery-loan': 'machinery-equipment',
     '/loans/loan-against-property': 'loan-against-property',
     '/loans/cma-project-report': 'cma-project-report',
+    '/loans/custom-loan-advisory': 'custom-loan-advisory',
+    '/loans/advisory': 'custom-loan-advisory',
   };
 
   const detectedSchemeId = defaultSchemeId || pathSchemeMap[location.pathname] || null;

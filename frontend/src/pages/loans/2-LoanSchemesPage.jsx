@@ -14,6 +14,8 @@ import {
   Percent,
   Sliders,
   Landmark,
+  Search,
+  HelpCircle,
 } from 'lucide-react';
 
 import {
@@ -31,6 +33,7 @@ export default function LoanSchemesPage({
   );
 
   const [activeCategory, setActiveCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [loanAmount, setLoanAmount] = useState(
     initialData.desiredAmount || initialData.loanAmount || 1500000
@@ -44,13 +47,31 @@ export default function LoanSchemesPage({
   }, [selectedSchemeId]);
 
   const filteredSchemes = useMemo(() => {
-    if (activeCategory === 'all') return LOAN_SCHEMES;
-    if (activeCategory === 'unsecured') return LOAN_SCHEMES.filter((s) => s.id === 'unsecured-business');
-    if (activeCategory === 'govt') return LOAN_SCHEMES.filter((s) => s.id === 'mudra-pmmy' || s.id === 'working-capital-cgtmse');
-    if (activeCategory === 'asset') return LOAN_SCHEMES.filter((s) => s.id === 'machinery-equipment' || s.id === 'loan-against-property');
-    if (activeCategory === 'cma') return LOAN_SCHEMES.filter((s) => s.id === 'cma-project-report');
-    return LOAN_SCHEMES;
-  }, [activeCategory]);
+    let list = LOAN_SCHEMES;
+    if (activeCategory === 'unsecured') {
+      list = LOAN_SCHEMES.filter((s) => s.id === 'unsecured-business');
+    } else if (activeCategory === 'govt') {
+      list = LOAN_SCHEMES.filter((s) => s.id === 'mudra-pmmy' || s.id === 'working-capital-cgtmse');
+    } else if (activeCategory === 'asset') {
+      list = LOAN_SCHEMES.filter((s) => s.id === 'machinery-equipment' || s.id === 'loan-against-property');
+    } else if (activeCategory === 'cma') {
+      list = LOAN_SCHEMES.filter((s) => s.id === 'cma-project-report');
+    } else if (activeCategory === 'custom') {
+      list = LOAN_SCHEMES.filter((s) => s.id === 'custom-loan-advisory');
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.description.toLowerCase().includes(q) ||
+          (s.popularFor && s.popularFor.toLowerCase().includes(q)) ||
+          s.category.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [activeCategory, searchQuery]);
 
   const handleCardSelect = (schemeId) => {
     setSelectedSchemeId(schemeId);
@@ -63,6 +84,21 @@ export default function LoanSchemesPage({
         selectedSchemeName: selectedScheme.name,
         desiredAmount: loanAmount,
         loanAmount: loanAmount,
+        isCustomAdvisory: selectedScheme.id === 'custom-loan-advisory',
+      });
+    }
+  };
+
+  // Direct trigger when any desired loan is not available
+  const handleProceedForCustomAdvisory = () => {
+    setSelectedSchemeId('custom-loan-advisory');
+    if (onProceedToProfile) {
+      onProceedToProfile({
+        selectedSchemeId: 'custom-loan-advisory',
+        selectedSchemeName: 'Custom Loan & Debt Advisory',
+        desiredAmount: loanAmount,
+        loanAmount: loanAmount,
+        isCustomAdvisory: true,
       });
     }
   };
@@ -132,11 +168,15 @@ export default function LoanSchemesPage({
               { id: 'govt', label: 'Govt & MUDRA' },
               { id: 'asset', label: 'Machinery & Property' },
               { id: 'cma', label: 'Bank Project Reports' },
+              { id: 'custom', label: 'Loan Not Listed / Custom Advisory' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setActiveCategory(tab.id)}
+                onClick={() => {
+                  setActiveCategory(tab.id);
+                  setSearchQuery('');
+                }}
                 className={`py-2 px-4 rounded-full text-xs font-bold transition cursor-pointer shadow-xs ${
                   activeCategory === tab.id
                     ? 'bg-[#002B49] text-white ring-2 ring-[#002B49] ring-offset-1'
@@ -147,118 +187,233 @@ export default function LoanSchemesPage({
               </button>
             ))}
           </div>
-        </div>
 
-        {/* All Schemes Grid matching screenshot */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-          {filteredSchemes.map((scheme) => {
-            const isSelected = selectedSchemeId === scheme.id;
-            return (
-              <div
-                key={scheme.id}
-                onClick={() => handleCardSelect(scheme.id)}
-                className={`bg-white rounded-2xl border transition-all duration-200 p-6 flex flex-col justify-between cursor-pointer relative ${
-                  isSelected
-                    ? 'border-blue-600 ring-2 ring-blue-600/30 shadow-xl bg-blue-50/10'
-                    : 'border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300'
-                }`}
+          {/* Quick Search Input */}
+          <div className="max-w-md mx-auto mt-4 relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search loan type (e.g. Export, Hospital, Solar, Builder, Startup...)"
+              className="w-full pl-9 pr-8 py-2 text-xs rounded-full border border-slate-200 bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700 shadow-2xs placeholder:text-slate-400"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
               >
-                {/* Active Checkmark Pill on Top Right if selected */}
-                {isSelected && (
-                  <div className="absolute -top-3 right-6 bg-[#002B49] text-white text-[10px] font-black uppercase tracking-wider py-1 px-3 rounded-full shadow-md flex items-center gap-1">
-                    <Check className="w-3 h-3 text-emerald-400" />
-                    <span>Selected Scheme</span>
-                  </div>
-                )}
-
-                <div>
-                  {/* Top Header Row with Badges */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="text-[11px] font-black uppercase px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 tracking-wide">
-                      {scheme.badge}
-                    </span>
-                    <span className="text-xs text-slate-400 font-semibold">
-                      {scheme.category}
-                    </span>
-                  </div>
-
-                  {/* Scheme Title */}
-                  <h3
-                    className={`text-xl font-black tracking-tight transition-colors ${
-                      isSelected ? 'text-blue-700' : 'text-[#002B49]'
-                    }`}
-                  >
-                    {scheme.name}
-                  </h3>
-
-                  {/* Gray Stats Box matching screenshot */}
-                  <div className="mt-3.5 py-3 px-3.5 rounded-xl bg-slate-50 border border-slate-100 grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
-                        FUNDING LIMIT
-                      </span>
-                      <span className="font-extrabold text-[#002B49] text-sm mt-0.5 block">
-                        {scheme.amount}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
-                        INTEREST RATE
-                      </span>
-                      <span className="font-extrabold text-emerald-600 text-sm mt-0.5 block">
-                        {scheme.interestRate}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-xs text-slate-600 leading-relaxed mt-3.5">
-                    {scheme.description}
-                  </p>
-
-                  {/* Bullet Points with Checkmark Circles matching screenshot */}
-                  <div className="mt-4 space-y-2">
-                    {scheme.keyFeatures.slice(0, 3).map((f, idx) => (
-                      <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-700">
-                        <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                        <span className="leading-snug">{f}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Bottom Disbursal & Collateral Bar */}
-                  <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
-                    <span className="flex items-center gap-1">
-                      ⚡ <span>Disbursal: {scheme.disbursal}</span>
-                    </span>
-                    <span className="flex items-center gap-1 text-slate-600">
-                      🛡️ <span>{scheme.collateral}</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Action Button */}
-                <div className="mt-6 pt-4 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCardSelect(scheme.id);
-                    }}
-                    className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs tracking-wide transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#002B49] text-white shadow-md'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    <span>{isSelected ? 'Scheme Selected ✓' : 'Select This Scheme'}</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                ×
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Loan Not Available or Not Listed Callout Banner */}
+        <div className="bg-gradient-to-r from-[#001f35] via-[#002B49] to-indigo-950 rounded-2xl p-5 sm:p-6 text-white shadow-md mb-8 border border-blue-900/50 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+          <div className="space-y-1.5 text-center md:text-left z-10">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Loan Not Available or Not Listed?</span>
+            </div>
+            <h3 className="text-base sm:text-lg font-black text-white">
+              Can’t find your specific loan scheme? Take 1-on-1 Advisory
+            </h3>
+            <p className="text-xs text-blue-100/90 leading-relaxed max-w-2xl">
+              If the financing scheme you need (Export Credit, Healthcare/Hospital, Solar Plant, Invoice Discounting, Builder Debt, or Stressed Asset Refinancing) is not available here, proceed directly to our Advisory Desk. Our Ex-Bank Credit Appraisal Committee will structure a customized financing facility directly for your company.
+            </p>
+          </div>
+          <div className="shrink-0 z-10 w-full md:w-auto">
+            <button
+              type="button"
+              onClick={handleProceedForCustomAdvisory}
+              className="w-full md:w-auto px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer group"
+            >
+              <span>Take Custom Advisory</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+
+        {/* If no schemes match search filter */}
+        {filteredSchemes.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-8 sm:p-12 text-center max-w-2xl mx-auto my-8 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-7 h-7" />
+            </div>
+            <span className="text-[11px] font-black uppercase text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+              Loan Scheme Not Listed
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black text-[#002B49] mt-3">
+              No standard scheme matches "{searchQuery}"?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+              Don't worry! If your specific loan requirement is not in the standard list, our Senior CA & Ex-Banker Credit Committee will structure a bespoke bank facility for you.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={handleProceedForCustomAdvisory}
+                className="py-3 px-6 rounded-xl bg-[#002B49] hover:bg-[#001f35] text-white font-bold text-xs tracking-wide shadow-md transition flex items-center gap-2 cursor-pointer"
+              >
+                <span>Proceed for Take Advisory</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setActiveCategory('all');
+                }}
+                className="py-3 px-5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+              >
+                Clear Search
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* All Schemes Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            {filteredSchemes.map((scheme) => {
+              const isSelected = selectedSchemeId === scheme.id;
+              const isCustom = scheme.id === 'custom-loan-advisory';
+
+              return (
+                <div
+                  key={scheme.id}
+                  onClick={() => handleCardSelect(scheme.id)}
+                  className={`rounded-2xl border transition-all duration-200 p-6 flex flex-col justify-between cursor-pointer relative ${
+                    isSelected
+                      ? 'border-blue-600 ring-2 ring-blue-600/30 shadow-xl bg-blue-50/10'
+                      : isCustom
+                      ? 'bg-gradient-to-br from-amber-50/30 via-white to-blue-50/20 border-amber-300 shadow-sm hover:shadow-md'
+                      : 'bg-white border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300'
+                  }`}
+                >
+                  {/* Active Checkmark Pill on Top Right if selected */}
+                  {isSelected && (
+                    <div className="absolute -top-3 right-6 bg-[#002B49] text-white text-[10px] font-black uppercase tracking-wider py-1 px-3 rounded-full shadow-md flex items-center gap-1">
+                      <Check className="w-3 h-3 text-emerald-400" />
+                      <span>Selected Scheme</span>
+                    </div>
+                  )}
+
+                  <div>
+                    {/* Top Header Row with Badges */}
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span
+                        className={`text-[11px] font-black uppercase px-3 py-1 rounded-full border tracking-wide ${
+                          isCustom
+                            ? 'bg-amber-100 text-amber-900 border-amber-300'
+                            : 'bg-blue-50 text-blue-700 border-blue-200'
+                        }`}
+                      >
+                        {scheme.badge}
+                      </span>
+                      <span className="text-xs text-slate-400 font-semibold">
+                        {scheme.category}
+                      </span>
+                    </div>
+
+                    {/* Scheme Title */}
+                    <h3
+                      className={`text-xl font-black tracking-tight transition-colors ${
+                        isSelected
+                          ? 'text-blue-700'
+                          : isCustom
+                          ? 'text-amber-900'
+                          : 'text-[#002B49]'
+                      }`}
+                    >
+                      {scheme.name}
+                    </h3>
+
+                    {/* Stats Box */}
+                    <div className="mt-3.5 py-3 px-3.5 rounded-xl bg-slate-50 border border-slate-100 grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                          FUNDING LIMIT
+                        </span>
+                        <span className="font-extrabold text-[#002B49] text-sm mt-0.5 block">
+                          {scheme.amount}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                          INTEREST RATE
+                        </span>
+                        <span className="font-extrabold text-emerald-600 text-sm mt-0.5 block">
+                          {scheme.interestRate}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-xs text-slate-600 leading-relaxed mt-3.5">
+                      {scheme.description}
+                    </p>
+
+                    {/* Bullet Points with Checkmark Circles */}
+                    <div className="mt-4 space-y-2">
+                      {scheme.keyFeatures.slice(0, 3).map((f, idx) => (
+                        <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-700">
+                          <CheckCircle2
+                            className={`w-4 h-4 mt-0.5 shrink-0 ${
+                              isCustom ? 'text-amber-600' : 'text-blue-600'
+                            }`}
+                          />
+                          <span className="leading-snug">{f}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Bottom Disbursal & Collateral Bar */}
+                    <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+                      <span className="flex items-center gap-1">
+                        ⚡ <span>Disbursal: {scheme.disbursal}</span>
+                      </span>
+                      <span className="flex items-center gap-1 text-slate-600">
+                        🛡️ <span>{scheme.collateral}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Action Button */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isCustom) {
+                          handleProceedForCustomAdvisory();
+                        } else {
+                          handleCardSelect(scheme.id);
+                        }
+                      }}
+                      className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs tracking-wide transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#002B49] text-white shadow-md'
+                          : isCustom
+                          ? 'bg-amber-400 hover:bg-amber-300 text-slate-900 font-black shadow-sm'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      <span>
+                        {isCustom
+                          ? 'Proceed for Take Advisory →'
+                          : isSelected
+                          ? 'Scheme Selected ✓'
+                          : 'Select This Scheme'}
+                      </span>
+                      {!isCustom && <ChevronRight className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Selected Scheme Confirmation & Amount Adjustment Bar */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xl">
@@ -312,7 +467,11 @@ export default function LoanSchemesPage({
                 onClick={handleContinue}
                 className="w-full sm:w-auto py-3.5 px-8 rounded-xl bg-[#002B49] hover:bg-[#001f35] text-white font-black text-sm tracking-wide shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer group"
               >
-                <span>Continue to Business Profile</span>
+                <span>
+                  {selectedScheme.id === 'custom-loan-advisory'
+                    ? 'Proceed to Take Advisory'
+                    : 'Continue to Business Profile'}
+                </span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>

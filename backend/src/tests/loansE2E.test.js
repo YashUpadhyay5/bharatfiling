@@ -186,4 +186,55 @@ describe('Business & MSME Loans Module - End-to-End & Database Verification', ()
     assert.strictEqual(savedOrder.amount, 525);
     assert.strictEqual(savedOrder.service_id, 'loans');
   });
+  test('7. Custom Loan & Advisory Flow - Handles unlisted loan request, custom requirement & specialized banks', async () => {
+    // 1. Check eligibility with custom-loan-advisory
+    const eligRes = await fetch(`${baseUrl}/eligibility`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: 5000000,
+        rate: 10.5,
+        tenureYears: 5,
+        cibilRange: '750_plus',
+        isGstRegistered: true,
+        schemeId: 'custom-loan-advisory',
+      }),
+    });
+    assert.strictEqual(eligRes.status, 200);
+    const eligData = await eligRes.json();
+    assert.strictEqual(eligData.success, true);
+    assert.ok(eligData.recommendedBanks.some(b => b.includes('SIDBI') || b.includes('SBI')));
+
+    // 2. Submit payment with custom unlisted requirement
+    const customOrderNum = `#LN-CUSTOM-${Date.now().toString().slice(-4)}`;
+    const payRes = await fetch(`${baseUrl}/payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId: customOrderNum,
+        method: 'UPI',
+        subMethod: 'PhonePe',
+        amount: 525,
+        includeLabourWelfare: true,
+        applicantName: 'Dr. Anita Roy',
+        applicantEmail: 'anita@royhospital.com',
+        applicantPhone: '9876543210',
+        schemeId: 'custom-loan-advisory',
+        schemeName: 'Custom Loan & Debt Advisory',
+        customLoanType: 'Multi-specialty Hospital Diagnostic Equipment Loan',
+        isCustomAdvisory: true,
+        loanAmount: 5000000,
+        bookedSlot: '5 November 2026 at 3:00 PM',
+      }),
+    });
+    assert.strictEqual(payRes.status, 200);
+    const payData = await payRes.json();
+    assert.strictEqual(payData.success, true);
+
+    const orders = db.getOrders();
+    const saved = orders.find(o => o.order_number === customOrderNum);
+    assert.ok(saved, 'Custom order must exist in DB');
+    assert.strictEqual(saved.metadata.custom_loan_type, 'Multi-specialty Hospital Diagnostic Equipment Loan');
+    assert.strictEqual(saved.metadata.is_custom_advisory, true);
+  });
 });

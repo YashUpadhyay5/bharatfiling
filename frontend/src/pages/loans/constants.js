@@ -191,6 +191,33 @@ export const LOAN_SCHEMES = [
     },
     popularFor: 'Entrepreneurs presenting dossiers to Nationalized & Private Bank Credit Committees',
   },
+  {
+    id: 'custom-loan-advisory',
+    name: 'Custom Loan & Debt Advisory',
+    slug: 'custom-loan-advisory',
+    badge: 'Tailored Solution',
+    category: 'Expert Advisory',
+    amount: 'Custom (₹10 Lakhs to ₹50+ Cr)',
+    interestRate: 'Bank Negotiated / Subsidized',
+    tenure: 'Flexible (12 to 180 Months)',
+    collateral: 'Collateral-free or Asset-backed options',
+    disbursal: 'Fast-Track 1-on-1 Consultation',
+    description:
+      'Looking for a loan scheme not listed in the standard catalog (e.g. Export Credit, Healthcare, Educational Institute, Green Energy/Solar, Builder Finance, Venture Debt, or Stressed Asset Refinancing)? Our Senior CA & Ex-Banker Credit Committee structures customized proposals across 35+ partner institutions.',
+    keyFeatures: [
+      'Dedicated Senior Credit Appraisal Manager & CA assigned to your case',
+      'Multi-bank syndication across 35+ PSU, Private & NBFC credit committees',
+      'Custom debt structuring for unlisted industries & non-standard cash flows',
+      'Assistance with credit bureau dispute resolution & collateral substitution',
+    ],
+    eligibility: {
+      minVintage: 'All stages (Startups, Growing MSMEs & Corporates)',
+      minTurnover: 'Custom evaluation based on contracts & banking transactions',
+      minCibil: 'All credit profiles reviewed by advisory panel',
+      entities: ['Any registered business, firm, LLP, company or promoter'],
+    },
+    popularFor: 'Startups, Specialized Sectors, Non-Standard Collateral & Custom Debt Restructuring',
+  },
 ];
 
 export const LOAN_STEPS = [
@@ -254,6 +281,7 @@ export const LOAN_PURPOSES = [
   'Paying High-Cost Vendor Dues / Debt Consolidation',
   'Office Renovation or Infrastructure Upgrade',
   'Marketing, Brand Promotion & Hiring',
+  'Specialized / Custom Loan Advisory (Loan Not Listed)',
 ];
 
 export const LOAN_CHECKOUT = {

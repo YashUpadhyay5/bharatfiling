@@ -118,6 +118,8 @@ export default function LoanCheckoutPage({
           applicantPhone: formData.phone,
           schemeId: formData.selectedSchemeId || 'unsecured-business',
           schemeName: formData.selectedSchemeName || 'Unsecured Business Loan',
+          customLoanType: formData.customLoanType || '',
+          isCustomAdvisory: formData.isCustomAdvisory || formData.selectedSchemeId === 'custom-loan-advisory',
           loanAmount: formData.loanAmount || formData.desiredAmount || 1500000,
           bookedSlot: `${selectedDay} November 2026 at ${selectedTimeSlot}`,
         }),
@@ -656,7 +658,9 @@ export default function LoanCheckoutPage({
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
               <div>
                 <h3 className="text-base font-black text-[#002B49]">
-                  Consult a Senior Credit Advisor & Bank Loan Specialist
+                  {formData.isCustomAdvisory || formData.selectedSchemeId === 'custom-loan-advisory'
+                    ? 'Consult Senior Credit Advisor & Custom Loan Specialist'
+                    : 'Consult a Senior Credit Advisor & Bank Loan Specialist'}
                 </h3>
                 <div className="space-y-1.5 mt-2.5 text-xs text-slate-600">
                   <div className="flex items-start gap-2">
@@ -665,7 +669,11 @@ export default function LoanCheckoutPage({
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-slate-400 font-bold">2.</span>
-                    <span>Get eligibility guidance on MUDRA, CGTMSE & Unsecured Business Loans.</span>
+                    <span>
+                      {formData.isCustomAdvisory || formData.selectedSchemeId === 'custom-loan-advisory'
+                        ? 'Bespoke loan structuring for your specific unlisted requirement.'
+                        : 'Get eligibility guidance on MUDRA, CGTMSE & Unsecured Business Loans.'}
+                    </span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-slate-400 font-bold">3.</span>

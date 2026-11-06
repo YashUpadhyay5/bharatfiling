@@ -134,6 +134,7 @@ export default function LoansLandingPage({
     if (activeCategory === 'govt') return LOAN_SCHEMES.filter((s) => s.id === 'mudra-pmmy' || s.id === 'working-capital-cgtmse');
     if (activeCategory === 'asset') return LOAN_SCHEMES.filter((s) => s.id === 'machinery-equipment' || s.id === 'loan-against-property');
     if (activeCategory === 'cma') return LOAN_SCHEMES.filter((s) => s.id === 'cma-project-report');
+    if (activeCategory === 'custom') return LOAN_SCHEMES.filter((s) => s.id === 'custom-loan-advisory');
     return LOAN_SCHEMES;
   }, [activeCategory]);
 
@@ -409,6 +410,33 @@ export default function LoansLandingPage({
               </div>
             ))}
           </div>
+
+          {/* Unlisted Loan Callout Banner */}
+          <div className="mt-10 bg-gradient-to-r from-[#001f35] via-[#002B49] to-indigo-950 rounded-2xl p-6 text-white shadow-md border border-blue-900/50 flex flex-col md:flex-row items-center justify-between gap-5">
+            <div className="space-y-1 text-center md:text-left">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider">
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                <span>Loan Not Listed or Not Available?</span>
+              </div>
+              <h3 className="text-base sm:text-lg font-black text-white">
+                Looking for another loan scheme? Take 1-on-1 Advisory
+              </h3>
+              <p className="text-xs text-blue-100/90 leading-relaxed max-w-2xl">
+                If the financing instrument you need (such as Export Credit, Healthcare, Solar Project, Invoice Discounting, Builder Debt, or Stressed Asset Refinancing) is not listed here, take advisory with our Senior CA & Ex-Bank Credit Appraisal Committee.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const customScheme = LOAN_SCHEMES.find((s) => s.id === 'custom-loan-advisory');
+                if (customScheme) handleSchemeClick(customScheme);
+              }}
+              className="shrink-0 px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer group"
+            >
+              <span>Take Custom Advisory</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </div>
       </section>
 
@@ -605,6 +633,7 @@ export default function LoansLandingPage({
                 { id: 'govt', label: 'Govt & MUDRA' },
                 { id: 'asset', label: 'Machinery & Property' },
                 { id: 'cma', label: 'Bank Project Reports' },
+                { id: 'custom', label: 'Loan Not Listed / Custom Advisory' },
               ].map((tab) => (
                 <button
                   key={tab.id}
